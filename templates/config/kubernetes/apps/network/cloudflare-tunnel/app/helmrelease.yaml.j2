@@ -69,11 +69,13 @@ spec:
         data:
           config.yaml: |-
             ingress:
-              - hostname: "*.${SECRET_DOMAIN}"
+#% for domain in cloudflare_domains %#
+              - hostname: "*.#{ domain }#"
                 originRequest:
                   http2Origin: true
-                  originServerName: external.${SECRET_DOMAIN}
+                  originServerName: external.#{ primary_domain }#
                 service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
+#% endfor %#
               - service: http_status:404
     persistence:
       config-file:

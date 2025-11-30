@@ -28,7 +28,10 @@ spec:
     sources: ["crd", "gateway-httproute"]
     txtPrefix: k8s.
     txtOwnerId: default
-    domainFilters: ["${SECRET_DOMAIN}"]
+    domainFilters:
+#% for domain in cloudflare_domains %#
+      - "#{ domain }#"
+#% endfor %#
     serviceMonitor:
       enabled: true
     podAnnotations:

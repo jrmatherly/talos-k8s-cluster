@@ -128,6 +128,21 @@ class Plugin(makejinja.plugin.Plugin):
     def data(self) -> makejinja.plugin.Data:
         data = self._data
 
+        # Handle multi-domain configuration with backward compatibility
+        # Convert old cloudflare_domain (string) to new cloudflare_domains (array) format
+        if 'cloudflare_domain' in data and data['cloudflare_domain']:
+            if 'cloudflare_domains' not in data or not data['cloudflare_domains']:
+                data['cloudflare_domains'] = [data['cloudflare_domain']]
+
+        # Ensure cloudflare_domains is a list
+        domains = data.get('cloudflare_domains', [])
+        if isinstance(domains, str):
+            domains = [domains]
+        data['cloudflare_domains'] = domains
+
+        # Set primary_domain for convenience (first domain in list)
+        data['primary_domain'] = domains[0] if domains else ''
+
         # Set default values for optional fields
         data.setdefault('node_default_gateway', nthhost(data.get('node_cidr'), 1))
         data.setdefault('node_dns_servers', ['1.1.1.1', '1.0.0.1'])

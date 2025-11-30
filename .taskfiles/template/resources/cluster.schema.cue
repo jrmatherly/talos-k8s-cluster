@@ -19,7 +19,7 @@ import (
 	repository_name: string
 	repository_branch?: string & !=""
 	repository_visibility?: *"public" | "private"
-	cloudflare_domain: net.FQDN
+	cloudflare_domains: [...net.FQDN] & [_, ...]  // At least one domain required
 	cloudflare_token: string
 	cloudflare_gateway_addr: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr
 	cilium_bgp_router_addr?: net.IPv4 & !=""

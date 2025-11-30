@@ -13,7 +13,7 @@ cluster_dns_gateway_addr: "10.10.10.253"
 repository_name: "onedr0p/cluster-template"
 repository_branch: "main"
 repository_visibility: "public"
-cloudflare_domain: "example.com"
+cloudflare_domains: ["example.com", "example.org"]
 cloudflare_token: "fake"
 cloudflare_gateway_addr: "10.10.10.251"
 cilium_loadbalancer_mode: "dsr"

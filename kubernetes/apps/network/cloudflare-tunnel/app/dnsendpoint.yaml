@@ -1,0 +1,13 @@
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: cloudflare-tunnel
+spec:
+  endpoints:
+    - dnsName: "external.matherly.net"
+      recordType: CNAME
+      targets: ["52263a60-37cc-4688-b29a-1ae7bc18a9f8.cfargotunnel.com"]
+    - dnsName: "external.spoonsofsalt.org"
+      recordType: CNAME
+      targets: ["52263a60-37cc-4688-b29a-1ae7bc18a9f8.cfargotunnel.com"]

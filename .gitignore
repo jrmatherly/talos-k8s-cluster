@@ -1,5 +1,7 @@
 # Secrets
 *.pub
+*.pem
+*.crt
 *.key
 *.decrypted~*.yaml
 /age.key
@@ -19,3 +21,6 @@ talosconfig
 .venv/
 .DS_Store
 Thumbs.db
+.serena
+.claude
+__pycache__/

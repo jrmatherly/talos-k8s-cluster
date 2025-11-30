@@ -1,0 +1,24 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "matherly-net-production"
+spec:
+  secretName: "matherly-net-production-tls"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "matherly.net"
+  dnsNames: ["matherly.net", "*.matherly.net"]
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "spoonsofsalt-org-production"
+spec:
+  secretName: "spoonsofsalt-org-production-tls"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "spoonsofsalt.org"
+  dnsNames: ["spoonsofsalt.org", "*.spoonsofsalt.org"]
