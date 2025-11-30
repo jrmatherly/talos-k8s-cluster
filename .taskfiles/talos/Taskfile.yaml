@@ -10,22 +10,26 @@ tasks:
         echo ""
         echo "=== Kubernetes Nodes ==="
         echo ""
-      - kubectl get nodes -o wide 2>/dev/null || echo "Unable to reach Kubernetes API"
+      - kubectl get nodes -o wide || echo "Unable to reach Kubernetes API"
       - |
         echo ""
         echo "=== Talos Node Versions ==="
         echo ""
-      - talosctl version --nodes {{.ALL_NODES}} --short 2>/dev/null || echo "Unable to reach Talos API"
+      - talosctl version --nodes {{.ALL_NODES}} --short || echo "Unable to reach Talos API"
       - |
         echo ""
         echo "=== Cluster Health ==="
         echo ""
-      - talosctl health --nodes {{.CONTROL_PLANE_NODES}} 2>/dev/null || echo "Health check unavailable"
+      - talosctl health --control-plane-nodes {{.CONTROL_PLANE_NODES}} --worker-nodes {{.WORKER_NODES}} --server {{.FIRST_CP_NODE}} || true
     vars:
       ALL_NODES:
         sh: yq -r '.nodes[].ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
       CONTROL_PLANE_NODES:
         sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
+      WORKER_NODES:
+        sh: yq -r '.nodes[] | select(.controlPlane == false) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//' | grep . || echo ""
+      FIRST_CP_NODE:
+        sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | head -1
     preconditions:
       - test -f {{.TALOSCONFIG}}
       - which kubectl talosctl yq
