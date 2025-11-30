@@ -20,14 +20,14 @@ tasks:
         echo ""
         echo "=== Cluster Health ==="
         echo ""
-      - talosctl health --control-plane-nodes {{.CONTROL_PLANE_NODES}} --worker-nodes {{.WORKER_NODES}} --server {{.FIRST_CP_NODE}} || true
+      - talosctl health -n {{.FIRST_CP_NODE}} --control-plane-nodes {{.CONTROL_PLANE_NODES}} --worker-nodes {{.WORKER_NODES}} --wait-timeout 60s || true
     vars:
       ALL_NODES:
         sh: yq -r '.nodes[].ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
       CONTROL_PLANE_NODES:
         sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
       WORKER_NODES:
-        sh: yq -r '.nodes[] | select(.controlPlane == false) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//' | grep . || echo ""
+        sh: yq -r '.nodes[] | select(.controlPlane == false) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
       FIRST_CP_NODE:
         sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | head -1
     preconditions:
