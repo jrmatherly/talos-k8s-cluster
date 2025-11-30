@@ -28,7 +28,14 @@ tasks:
 
   reconcile:
     desc: Force Flux to pull in changes from your Git repository
-    cmd: flux --namespace flux-system reconcile kustomization flux-system --with-source
+    cmds:
+      - echo ""; echo "=== Reconciling Flux with Git repository ==="; echo ""
+      - flux --namespace flux-system reconcile kustomization flux-system --with-source
+      - |
+        echo ""
+        echo "Reconciliation triggered. Monitor with:"
+        echo "  flux get kustomizations -w"
+        echo ""
     preconditions:
       - test -f {{.KUBECONFIG}}
       - which flux

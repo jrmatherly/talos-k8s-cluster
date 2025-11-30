@@ -20,8 +20,7 @@ cniConfig:
 nodes:
   - hostname: "talos-cp-001"
     ipAddress: "192.168.22.101"
-    installDiskSelector:
-      serial: "sda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515
@@ -40,8 +39,7 @@ nodes:
           ip: "192.168.22.100"
   - hostname: "talos-cp-002"
     ipAddress: "192.168.22.102"
-    installDiskSelector:
-      serial: "sda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515
@@ -60,8 +58,7 @@ nodes:
           ip: "192.168.22.100"
   - hostname: "talos-cp-003"
     ipAddress: "192.168.22.103"
-    installDiskSelector:
-      serial: "sda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515
@@ -80,8 +77,7 @@ nodes:
           ip: "192.168.22.100"
   - hostname: "talos-wrkr-001"
     ipAddress: "192.168.22.111"
-    installDiskSelector:
-      serial: "sda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515
@@ -98,8 +94,7 @@ nodes:
         mtu: 1500
   - hostname: "talos-wrkr-002"
     ipAddress: "192.168.22.112"
-    installDiskSelector:
-      serial: "sda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515
@@ -116,8 +111,7 @@ nodes:
         mtu: 1500
   - hostname: "talos-wrkr-003"
     ipAddress: "192.168.22.113"
-    installDiskSelector:
-      serial: "sda"
+    installDisk: "/dev/sda"
     machineSpec:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515

@@ -7,20 +7,90 @@ tasks:
     desc: Bootstrap the Talos cluster
     dir: '{{.TALOS_DIR}}'
     cmds:
+      - task: :bootstrap:check-stale-state
+      - echo ""; echo "=== Generating cluster secrets ==="; echo ""
       - '[ -f talsecret.sops.yaml ] || talhelper gensecret | sops --filename-override talos/talsecret.sops.yaml --encrypt /dev/stdin > talsecret.sops.yaml'
+      - echo ""; echo "=== Generating node configurations ==="; echo ""
       - talhelper genconfig
+      - echo ""; echo "=== Applying configurations to nodes ==="; echo ""
       - talhelper gencommand apply --extra-flags="--insecure" | bash
-      - until talhelper gencommand bootstrap | bash; do sleep 10; done
-      - until talhelper gencommand kubeconfig --extra-flags="{{.ROOT_DIR}} --force" | bash; do sleep 10; done
+      - echo ""; echo "=== Waiting for nodes to install and bootstrap cluster ==="; echo "(this may take a few minutes, retries are expected)"; echo ""
+      - until talhelper gencommand bootstrap 2>/dev/null | bash 2>&1; do sleep 10; done
+      - echo ""; echo "=== Generating kubeconfig ==="; echo ""
+      - until talhelper gencommand kubeconfig --extra-flags="{{.ROOT_DIR}} --force" 2>/dev/null | bash 2>&1; do sleep 10; done
+      - task: :bootstrap:talos-complete
     preconditions:
       - test -f {{.ROOT_DIR}}/.sops.yaml
       - test -f {{.SOPS_AGE_KEY_FILE}}
       - test -f {{.TALOS_DIR}}/talconfig.yaml
       - which talhelper talosctl sops
 
+  talos-complete:
+    desc: Display completion message for Talos bootstrap
+    internal: true
+    silent: true
+    cmds:
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Talos cluster bootstrap complete!"
+        echo "=============================================="
+        echo ""
+        echo "Cluster is now running. Next steps:"
+        echo ""
+        echo "  1. Verify cluster health:"
+        echo "     kubectl get nodes"
+        echo "     talosctl health"
+        echo ""
+        echo "  2. Bootstrap applications (Flux, Cilium, etc.):"
+        echo "     task bootstrap:apps"
+        echo ""
+
+  check-stale-state:
+    desc: Check for stale bootstrap state and prompt for cleanup
+    internal: true
+    dir: '{{.TALOS_DIR}}'
+    silent: true
+    cmds:
+      - |
+        if [ -f talsecret.sops.yaml ] || [ -d clusterconfig ]; then
+          echo ""
+          echo "⚠️  WARNING: Existing bootstrap state detected!"
+          echo ""
+          echo "Found:"
+          [ -f talsecret.sops.yaml ] && echo "  - talsecret.sops.yaml (cluster secrets)"
+          [ -d clusterconfig ] && echo "  - clusterconfig/ (node configurations)"
+          [ -f "{{.ROOT_DIR}}/kubeconfig" ] && echo "  - kubeconfig (cluster access)"
+          echo ""
+          echo "If you have recreated your VMs or want a fresh cluster, these files"
+          echo "must be removed to avoid certificate/state mismatches."
+          echo ""
+          read -p "Remove stale state and continue with fresh bootstrap? [y/N] " -n 1 -r
+          echo ""
+          if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "Removing stale bootstrap state..."
+            [ -f talsecret.sops.yaml ] && rm -f talsecret.sops.yaml && echo "  ✓ Removed talsecret.sops.yaml"
+            [ -d clusterconfig ] && rm -rf clusterconfig/ && echo "  ✓ Removed clusterconfig/"
+            [ -f "{{.ROOT_DIR}}/kubeconfig" ] && rm -f "{{.ROOT_DIR}}/kubeconfig" && echo "  ✓ Removed kubeconfig"
+            echo ""
+            echo "Stale state removed. Proceeding with fresh bootstrap..."
+          else
+            echo ""
+            echo "To keep existing state and re-apply to nodes, use: task talos:apply-node IP=<node-ip>"
+            echo "To reset running nodes to maintenance mode, use: task talos:reset"
+            echo ""
+            exit 1
+          fi
+        fi
+
   apps:
     desc: Bootstrap apps into the Talos cluster
-    cmd: bash {{.SCRIPTS_DIR}}/bootstrap-apps.sh
+    cmds:
+      - echo ""; echo "=== Bootstrapping cluster applications ==="; echo ""
+      - echo "This will install Flux, Cilium, and other core components..."
+      - echo ""
+      - bash {{.SCRIPTS_DIR}}/bootstrap-apps.sh
+      - task: :bootstrap:apps-complete
     preconditions:
       - msg: Unsupported bash version, run `brew install bash` to upgrade
         sh: '{{if eq OS "darwin"}}test -f /opt/homebrew/bin/bash || test -f /usr/local/bin/bash{{end}}'
@@ -28,3 +98,23 @@ tasks:
       - test -f {{.ROOT_DIR}}/.sops.yaml
       - test -f {{.SCRIPTS_DIR}}/bootstrap-apps.sh
       - test -f {{.SOPS_AGE_KEY_FILE}}
+
+  apps-complete:
+    internal: true
+    silent: true
+    cmds:
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Application bootstrap complete!"
+        echo "=============================================="
+        echo ""
+        echo "Core applications have been deployed via Flux."
+        echo ""
+        echo "Monitor deployment progress:"
+        echo "  kubectl get pods -A"
+        echo "  flux get kustomizations"
+        echo ""
+        echo "Check cluster status:"
+        echo "  task talos:status"
+        echo ""

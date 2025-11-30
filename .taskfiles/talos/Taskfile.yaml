@@ -3,6 +3,33 @@ version: '3'
 
 tasks:
 
+  status:
+    desc: Show cluster and node status
+    cmds:
+      - |
+        echo ""
+        echo "=== Kubernetes Nodes ==="
+        echo ""
+      - kubectl get nodes -o wide 2>/dev/null || echo "Unable to reach Kubernetes API"
+      - |
+        echo ""
+        echo "=== Talos Node Versions ==="
+        echo ""
+      - talosctl version --nodes {{.ALL_NODES}} --short 2>/dev/null || echo "Unable to reach Talos API"
+      - |
+        echo ""
+        echo "=== Cluster Health ==="
+        echo ""
+      - talosctl health --nodes {{.CONTROL_PLANE_NODES}} 2>/dev/null || echo "Health check unavailable"
+    vars:
+      ALL_NODES:
+        sh: yq -r '.nodes[].ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
+      CONTROL_PLANE_NODES:
+        sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
+    preconditions:
+      - test -f {{.TALOSCONFIG}}
+      - which kubectl talosctl yq
+
   generate-config:
     desc: Generate Talos configuration
     dir: '{{.TALOS_DIR}}'
@@ -30,7 +57,27 @@ tasks:
   upgrade-node:
     desc: Upgrade Talos on a single node [IP=required]
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper gencommand upgrade --node {{.IP}} --extra-flags "--image='{{.TALOS_IMAGE}}:{{.TALOS_VERSION}}' --timeout=10m" | bash
+    prompt: This will upgrade Talos on node {{.IP}} to version {{.TALOS_VERSION}}. The node will reboot... continue?
+    cmds:
+      - echo ""; echo "=== Upgrading Talos on node {{.IP}} ==="; echo ""
+      - echo "Target version:" {{.TALOS_VERSION}}
+      - echo "Image:" {{.TALOS_IMAGE}}
+      - echo ""
+      - talhelper gencommand upgrade --node {{.IP}} --extra-flags "--image='{{.TALOS_IMAGE}}:{{.TALOS_VERSION}}' --timeout=10m" | bash
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Node upgrade initiated!"
+        echo "=============================================="
+        echo ""
+        echo "Node {{.IP}} is upgrading and will reboot."
+        echo ""
+        echo "Monitor progress with:"
+        echo "  talosctl -n {{.IP}} dmesg --follow"
+        echo ""
+        echo "After reboot, verify with:"
+        echo "  talosctl -n {{.IP}} version"
+        echo ""
     vars:
       TALOS_IMAGE:
         sh: yq '.nodes[] | select(.ipAddress == "{{.IP}}") | .talosImageURL' {{.TALOS_DIR}}/talconfig.yaml
@@ -47,7 +94,23 @@ tasks:
   upgrade-k8s:
     desc: Upgrade Kubernetes
     dir: '{{.TALOS_DIR}}'
-    cmd: talhelper gencommand upgrade-k8s --extra-flags "--to '{{.KUBERNETES_VERSION}}'" | bash
+    prompt: This will upgrade Kubernetes to version {{.KUBERNETES_VERSION}}. This may take several minutes... continue?
+    cmds:
+      - echo ""; echo "=== Upgrading Kubernetes to {{.KUBERNETES_VERSION}} ==="; echo ""
+      - echo "Current cluster version:"
+      - kubectl version --short 2>/dev/null || kubectl version
+      - echo ""
+      - talhelper gencommand upgrade-k8s --extra-flags "--to '{{.KUBERNETES_VERSION}}'" | bash
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Kubernetes upgrade complete!"
+        echo "=============================================="
+        echo ""
+        echo "Verify with:"
+        echo "  kubectl get nodes"
+        echo "  kubectl version"
+        echo ""
     vars:
       KUBERNETES_VERSION:
         sh: yq '.kubernetesVersion' {{.TALOS_DIR}}/talenv.yaml
@@ -57,9 +120,47 @@ tasks:
       - which talhelper talosctl yq
 
   reset:
-    desc: Resets nodes back to maintenance mode
+    desc: Resets nodes back to maintenance mode and cleans up local state
     dir: '{{.TALOS_DIR}}'
-    prompt: This will destroy your cluster and reset the nodes back to maintenance mode... continue?
-    cmd: talhelper gencommand reset --extra-flags="--reboot {{- if eq .CLI_FORCE false }} --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL{{ end }} --graceful=false --wait=false" | bash
+    prompt: This will destroy your cluster, reset nodes to maintenance mode, and remove local bootstrap state... continue?
+    cmds:
+      - echo ""; echo "=== Resetting cluster nodes ==="; echo ""
+      - echo "Sending reset command to all nodes..."
+      - talhelper gencommand reset --extra-flags="--reboot {{- if eq .CLI_FORCE false }} --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL{{ end }} --graceful=false --wait=false" | bash
+      - task: :talos:cleanup-state
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Cluster reset initiated!"
+        echo "=============================================="
+        echo ""
+        echo "Nodes are resetting to maintenance mode."
+        echo "This may take a few minutes."
+        echo ""
+        echo "When ready, bootstrap a fresh cluster with:"
+        echo "  task bootstrap:talos"
+        echo ""
+    preconditions:
+      - which talhelper
+
+  cleanup-state:
+    desc: Remove local bootstrap state files (talsecret, clusterconfig, kubeconfig)
+    internal: true
+    dir: '{{.TALOS_DIR}}'
+    cmds:
+      - |
+        echo ""
+        echo "Cleaning up local bootstrap state..."
+        if [ -f talsecret.sops.yaml ]; then
+          rm -f talsecret.sops.yaml && echo "  ✓ Removed talsecret.sops.yaml"
+        fi
+        if [ -d clusterconfig ]; then
+          rm -rf clusterconfig/ && echo "  ✓ Removed clusterconfig/"
+        fi
+        if [ -f "{{.ROOT_DIR}}/kubeconfig" ]; then
+          rm -f "{{.ROOT_DIR}}/kubeconfig" && echo "  ✓ Removed kubeconfig"
+        fi
+        echo ""
+        echo "Local state cleaned. Ready for fresh bootstrap with: task bootstrap:talos"
     preconditions:
       - which talhelper

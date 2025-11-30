@@ -13,10 +13,36 @@ tasks:
   :init:
     desc: Initialize configuration files
     cmds:
+      - echo ""; echo "=== Initializing project configuration ==="; echo ""
       - task: generate-template-config
       - task: generate-age-key
       - task: generate-deploy-key
       - task: generate-push-token
+      - task: init-complete
+
+  init-complete:
+    internal: true
+    silent: true
+    cmds:
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Initialization complete!"
+        echo "=============================================="
+        echo ""
+        echo "Generated files:"
+        echo "  - cluster.yaml      (cluster configuration)"
+        echo "  - nodes.yaml        (node definitions)"
+        echo "  - age.key           (SOPS encryption key)"
+        echo "  - github-deploy.key (Git deploy key)"
+        echo ""
+        echo "Next steps:"
+        echo ""
+        echo "  1. Edit cluster.yaml with your cluster settings"
+        echo "  2. Edit nodes.yaml with your node information"
+        echo "  3. Create cloudflare-tunnel.json (see README)"
+        echo "  4. Run: task configure"
+        echo ""
 
   generate-template-config:
     internal: true
@@ -53,11 +79,17 @@ tasks:
     desc: Render and validate configuration files
     prompt: Any conflicting files in the kubernetes directory will be overwritten... continue?
     cmds:
+      - echo ""; echo "=== Validating configuration schemas ==="; echo ""
       - task: validate-schemas
+      - echo ""; echo "=== Rendering configuration templates ==="; echo ""
       - task: render-configs
+      - echo ""; echo "=== Encrypting secrets ==="; echo ""
       - task: encrypt-secrets
+      - echo ""; echo "=== Validating Kubernetes manifests ==="; echo ""
       - task: validate-kubernetes-config
+      - echo ""; echo "=== Validating Talos configuration ==="; echo ""
       - task: validate-talos-config
+      - task: configure-complete
     preconditions:
       - msg: An existing Age key interferes with the age key in this repository, rename or delete ~/.config/sops/age/keys.txt
         sh: '! test -f ~/.config/sops/age/keys.txt'
@@ -67,6 +99,27 @@ tasks:
         sh: test -f {{.TEMPLATE_NODE_CONFIG_FILE}}
       - msg: File cloudflare-tunnel.json not found, see the README for information on creating it.
         sh: test -f {{.ROOT_DIR}}/cloudflare-tunnel.json
+
+  configure-complete:
+    internal: true
+    silent: true
+    cmds:
+      - |
+        echo ""
+        echo "=============================================="
+        echo "  Configuration complete!"
+        echo "=============================================="
+        echo ""
+        echo "Generated files are ready. Next steps:"
+        echo ""
+        echo "  1. Review generated files in:"
+        echo "     - kubernetes/  (Kubernetes manifests)"
+        echo "     - talos/       (Talos configuration)"
+        echo "     - bootstrap/   (Bootstrap resources)"
+        echo ""
+        echo "  2. Bootstrap the Talos cluster:"
+        echo "     task bootstrap:talos"
+        echo ""
 
   validate-schemas:
     internal: true
