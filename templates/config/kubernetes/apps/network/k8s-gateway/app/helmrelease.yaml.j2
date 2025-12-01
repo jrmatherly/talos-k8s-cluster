@@ -20,10 +20,21 @@ spec:
     fallthrough:
       enabled: true
     extraZonePlugins:
+      - name: log
+      - name: errors
+      - name: health
+        configBlock: |-
+          lameduck 5s
+      - name: ready
+      - name: prometheus
+        parameters: 0.0.0.0:9153
       - name: forward
         parameters: . #{ k8s_gateway_fallback_dns | join(' ') }#
         configBlock: |-
           policy sequential
+      - name: loop
+      - name: reload
+      - name: loadbalance
     ttl: 1
     service:
       type: LoadBalancer

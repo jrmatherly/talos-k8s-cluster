@@ -16,10 +16,21 @@ spec:
     fallthrough:
       enabled: true
     extraZonePlugins:
+      - name: log
+      - name: errors
+      - name: health
+        configBlock: |-
+          lameduck 5s
+      - name: ready
+      - name: prometheus
+        parameters: 0.0.0.0:9153
       - name: forward
         parameters: . 172.64.36.1 172.64.36.2 1.1.1.1
         configBlock: |-
           policy sequential
+      - name: loop
+      - name: reload
+      - name: loadbalance
     ttl: 1
     service:
       type: LoadBalancer
