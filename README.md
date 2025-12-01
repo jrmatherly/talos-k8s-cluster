@@ -228,6 +228,9 @@ The `external-dns` application created in the `network` namespace will handle cr
 
 `k8s_gateway` will provide DNS resolution to external Kubernetes resources (i.e. points of entry to the cluster) from any device that uses your internal DNS server. For this to work, your internal DNS server must be configured to forward DNS queries for `${cloudflare_domain}` to `${cluster_dns_gateway_addr}` instead of the upstream DNS server(s) it normally uses. This is a form of **split DNS** (aka split-horizon DNS / conditional forwarding).
 
+> [!NOTE]
+> `k8s_gateway` is configured with fallback DNS servers (public DNS from your `node_dns_servers` configuration). This means queries for hostnames not managed by the cluster will be forwarded to public DNS, allowing you to resolve both internal cluster services and external internet addresses through the same DNS server.
+
 _... Nothing working? That is expected, this is DNS after all!_
 
 ### 🪝 Github Webhook
@@ -266,11 +269,11 @@ task talos:reset
 ### ⚙️ Updating Talos node configuration
 
 > [!TIP]
-> Ensure you have updated `talconfig.yaml` and any patches with your updated configuration. In some cases you **not only need to apply the configuration but also upgrade talos** to apply new configuration.
+> To update Talos configuration, edit the source files (`nodes.yaml` for node-specific settings, or templates in `templates/config/talos/patches/` for global patches) and run `task configure` to regenerate. In some cases you **not only need to apply the configuration but also upgrade Talos** to apply new configuration.
 
 ```sh
-# (Re)generate the Talos config
-task talos:generate-config
+# After editing nodes.yaml or template patches, regenerate all configs
+task configure
 # Apply the config to the node
 task talos:apply-node IP=? MODE=?
 # e.g. task talos:apply-node IP=10.10.10.10 MODE=auto
@@ -308,17 +311,19 @@ You don't need to re-bootstrap the cluster to add new nodes. Follow these steps:
    talosctl get links -n <ip> --insecure
    ```
 
-3. **Update the configuration**: Read the documentation for [talhelper](https://budimanjojo.github.io/talhelper/latest/) and extend the `talconfig.yaml` file manually with the new node information (including the disk and MAC address from step 2).
+3. **Get a schematic ID**: Visit [factory.talos.dev](https://factory.talos.dev/) to generate a schematic ID for your new node. Include any required system extensions (e.g., CPU microcode updates). You can reuse an existing schematic ID if the new node has similar hardware.
 
-4. **Generate and apply the configuration**:
+4. **Update the nodes.yaml configuration**: Add a new node entry to your `nodes.yaml` file with the information gathered in steps 2-3. See [nodes.sample.yaml](./.taskfiles/template/resources/nodes.sample.yaml) for field documentation and examples.
+
+5. **Regenerate and apply the configuration**:
 
    ```sh
-   # Render your talosconfig based on the talconfig.yaml file
-   task talos:generate-config
+   # Regenerate all configuration files (including talos/talconfig.yaml)
+   task configure
 
-   # Apply the configuration to the node
-   task talos:apply-node IP=?
-   # e.g. task talos:apply-node IP=10.10.10.10
+   # Apply the configuration to the new node
+   task talos:apply-node IP=<new-node-ip>
+   # e.g. task talos:apply-node IP=192.168.1.114
    ```
 
 The node should join the cluster automatically and workloads will be scheduled once they report as ready.
@@ -397,16 +402,19 @@ Below are some optional considerations you may want to explore.
 
 ### DNS
 
-The template uses [k8s_gateway](https://github.com/ori-edge/k8s_gateway) to provide DNS for your applications, consider exploring [external-dns](https://github.com/kubernetes-sigs/external-dns) as an alternative.
+This template includes two DNS solutions:
 
-External-DNS offers broad support for various DNS providers, including but not limited to:
+- **[k8s_gateway](https://github.com/ori-edge/k8s_gateway)** - Provides internal/split DNS resolution for cluster services. Configured at `${cluster_dns_gateway_addr}`.
+- **[external-dns](https://github.com/kubernetes-sigs/external-dns)** (cloudflare-dns) - Manages public DNS records on Cloudflare for external services.
+
+If you want to manage DNS records on additional providers (for internal DNS offloading), external-dns supports many options:
 
 - [Pi-hole](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/pihole.md)
 - [UniFi](https://github.com/kashalls/external-dns-unifi-webhook)
 - [Adguard Home](https://github.com/muhlba91/external-dns-provider-adguard)
 - [Bind](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/rfc2136.md)
 
-This flexibility allows you to integrate seamlessly with a range of DNS solutions to suit your environment and offload DNS from your cluster to your router, or external device.
+This flexibility allows you to integrate seamlessly with a range of DNS solutions to suit your environment and offload DNS from your cluster to your router or external device.
 
 ### Secrets
 
