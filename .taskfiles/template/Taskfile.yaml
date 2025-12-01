@@ -47,8 +47,8 @@ tasks:
   generate-template-config:
     internal: true
     cmds:
-      - mv {{.TEMPLATE_CONFIG_FILE | replace ".yaml" ".sample.yaml"}} {{.TEMPLATE_CONFIG_FILE}}
-      - mv {{.TEMPLATE_NODE_CONFIG_FILE | replace ".yaml" ".sample.yaml"}} {{.TEMPLATE_NODE_CONFIG_FILE}}
+      - cp {{.TEMPLATE_RESOURCES_DIR}}/cluster.sample.yaml {{.TEMPLATE_CONFIG_FILE}}
+      - cp {{.TEMPLATE_RESOURCES_DIR}}/nodes.sample.yaml {{.TEMPLATE_NODE_CONFIG_FILE}}
     status:
       - test -f {{.TEMPLATE_CONFIG_FILE}}
       - test -f {{.TEMPLATE_NODE_CONFIG_FILE}}

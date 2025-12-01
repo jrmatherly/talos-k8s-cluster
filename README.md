@@ -1,11 +1,11 @@
-# ⛵ Cluster Template
+# ⛵ Talos Linux Kubernetes Cluster
 
-Welcome to my template designed for deploying a single Kubernetes cluster. Whether you're setting up a cluster at home on bare-metal or virtual machines (VMs), this project aims to simplify the process and make Kubernetes more accessible. This template is inspired by my personal [home-ops](https://github.com/onedr0p/home-ops) repository, providing a practical starting point for anyone interested in managing their own Kubernetes environment.
+Talos Linux + Flux template designed for deploying a single Kubernetes cluster. Whether you're setting up a cluster on bare-metal or virtual machines (VMs), this project aims to simplify the process and make Kubernetes more accessible.
 
-At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—such as [cluster.yaml](./cluster.sample.yaml) and [nodes.yaml](./nodes.sample.yaml)—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
+At its core, this project leverages [makejinja](https://github.com/mirkolenz/makejinja), a powerful tool for rendering templates. By reading configuration files—such as [cluster.yaml](./.taskfiles/template/resources/cluster.sample.yaml) and [nodes.yaml](./.taskfiles/template/resources/nodes.sample.yaml)—Makejinja generates the necessary configurations to deploy a Kubernetes cluster with the following features:
 
 - Easy configuration through YAML files.
-- Compatibility with home setups, whether on physical hardware or VMs.
+- Compatibility with physical hardware or VMs.
 - A modular and extensible approach to cluster deployment and management.
 
 With this approach, you'll gain a solid foundation to build and manage your Kubernetes cluster efficiently.
@@ -61,7 +61,7 @@ There are **5 stages** outlined below for completing this project, make sure you
 1. Create a new repository by clicking the green `Use this template` button at the top of this page, then clone the new repo you just created and `cd` into it. Alternatively you can us the [GitHub CLI](https://cli.github.com/) ...
 
     ```sh
-    export REPONAME="home-ops"
+    export REPONAME="talos-k8s-cluster"
     gh repo create $REPONAME --template jrmatherly/talos-k8s-cluster --disable-wiki --public --clone && cd $REPONAME
     ```
 
@@ -95,10 +95,13 @@ There are **5 stages** outlined below for completing this project, make sure you
 
 1. Create a Cloudflare API token for use with cloudflared and external-dns by reviewing the official [documentation](https://developers.cloudflare.com/fundamentals/api/get-started/create-token/) and following the instructions below.
 
-   - Click the blue `Use template` button for the `Edit zone DNS` template.
-   - Name your token `kubernetes`
-   - Under `Permissions`, click `+ Add More` and add permissions `Zone - DNS - Edit` and `Account - Cloudflare Tunnel - Read`
-   - Limit the permissions to a specific account and/or zone resources and then click `Continue to Summary` and then `Create Token`.
+   - Navigate to **Cloudflare Portal** → **Manage Account** → **Account API Tokens**
+   - Click the blue **Create Token** button
+   - Click the blue **Use template** button for the **Edit zone DNS** template
+   - Click the pencil/edit icon next to **Token name** and change it to: `kubernetes`
+   - Under **Permissions**, click **+ Add More** and add: `Account - Cloudflare Tunnel - Read`
+   - Under **Zone Resources**, set to: **Include** → **All zones from an account** → **\<your account\>**
+   - Click **Continue to summary** and then **Create Token**
    - **Save this token somewhere safe**, you will need it later on.
 
 2. Create the Cloudflare Tunnel:
@@ -218,12 +221,12 @@ There are **5 stages** outlined below for completing this project, make sure you
 
 The `external-dns` application created in the `network` namespace will handle creating public DNS records. By default, `echo` and the `flux-webhook` are the only subdomains reachable from the public internet. In order to make additional applications public you must **set the correct gateway** like in the HelmRelease for `echo`.
 
-### 🏠 Home DNS
+### 🏠 Internal DNS
 
 > [!TIP]
 > Use the `envoy-internal` gateway on `HTTPRoutes` to make applications private to your network. If you're having trouble with internal DNS resolution check out [this](https://github.com/onedr0p/cluster-template/discussions/719) GitHub discussion.
 
-`k8s_gateway` will provide DNS resolution to external Kubernetes resources (i.e. points of entry to the cluster) from any device that uses your home DNS server. For this to work, your home DNS server must be configured to forward DNS queries for `${cloudflare_domain}` to `${cluster_dns_gateway_addr}` instead of the upstream DNS server(s) it normally uses. This is a form of **split DNS** (aka split-horizon DNS / conditional forwarding).
+`k8s_gateway` will provide DNS resolution to external Kubernetes resources (i.e. points of entry to the cluster) from any device that uses your internal DNS server. For this to work, your internal DNS server must be configured to forward DNS queries for `${cloudflare_domain}` to `${cluster_dns_gateway_addr}` instead of the upstream DNS server(s) it normally uses. This is a form of **split DNS** (aka split-horizon DNS / conditional forwarding).
 
 _... Nothing working? That is expected, this is DNS after all!_
 

@@ -1,0 +1,171 @@
+---
+# ==============================================================================
+# CLUSTER CONFIGURATION
+# ==============================================================================
+# This file defines the core settings for your Talos Kubernetes cluster.
+# Fill in the REQUIRED fields and optionally customize the others.
+#
+# TIP: Use 'task configure' to validate and render your configuration.
+# ==============================================================================
+
+# ==============================================================================
+# NETWORK CONFIGURATION
+# ==============================================================================
+
+# -- The network CIDR that contains your node IP addresses.
+#    This is the subnet where your Talos nodes will be assigned IPs.
+#    (REQUIRED)
+#    Example: "192.168.1.0/24" for a typical home network
+#    Example: "10.0.0.0/24" for a private network
+node_cidr: ""
+
+# -- DNS servers for the Talos nodes to use for external resolution.
+#    These are used by the nodes themselves, not for cluster DNS.
+#    Public DNS servers from this list are also used as fallback for k8s_gateway.
+#    (OPTIONAL) / (DEFAULT: ["1.1.1.1", "1.0.0.1"] - Cloudflare DNS)
+#    Example: ["192.168.1.1", "1.1.1.1"] - Local router + Cloudflare
+#    Example: ["172.64.36.x", "172.64.36.x"] - Cloudflare for Personal Resolvers
+# node_dns_servers: []
+
+# -- NTP servers for time synchronization on Talos nodes.
+#    Accurate time is critical for certificate validation and cluster operations.
+#    (OPTIONAL) / (DEFAULT: ["162.159.200.1", "162.159.200.123"] - Cloudflare NTP)
+# node_ntp_servers: []
+
+# -- The default gateway (router) IP for the nodes.
+#    (OPTIONAL) / (DEFAULT: First usable IP in node_cidr, e.g., .1)
+#    Only set this if your gateway is NOT the first IP in your subnet.
+#    Example: "192.168.1.254" if your router uses .254 instead of .1
+# node_default_gateway: ""
+
+# -- VLAN tag for Talos node network interfaces.
+#    Only needed if your nodes are on a tagged VLAN and your switch ports are NOT tagged.
+#    (OPTIONAL) / (REF: https://www.talos.dev/latest/advanced/advanced-networking/#vlans)
+#    Example: "100" for VLAN ID 100
+# node_vlan_tag: ""
+
+# ==============================================================================
+# KUBERNETES CLUSTER SETTINGS
+# ==============================================================================
+
+# -- Virtual IP address for the Kubernetes API server.
+#    This IP is shared across control plane nodes for high availability.
+#    (REQUIRED) - Must be an UNUSED IP within node_cidr
+#    TIP: Choose an IP outside the range you'll assign to nodes.
+#    Example: If nodes are .101-.106, use .100 for the API
+cluster_api_addr: ""
+
+# -- Additional hostnames/IPs to include in the API server certificate.
+#    Useful if you want to access the cluster by hostname or external IP.
+#    (OPTIONAL)
+#    Example: ["k8s.example.com", "192.168.1.200"]
+# cluster_api_tls_sans: []
+
+# -- Pod network CIDR for internal pod-to-pod communication.
+#    Must NOT overlap with node_cidr or cluster_svc_cidr.
+#    (OPTIONAL) / (DEFAULT: "10.42.0.0/16" - 65,536 pod IPs)
+#    WARNING: Changing this after cluster creation requires a full rebuild.
+# cluster_pod_cidr: ""
+
+# -- Service network CIDR for Kubernetes ClusterIP services.
+#    Must NOT overlap with node_cidr or cluster_pod_cidr.
+#    (OPTIONAL) / (DEFAULT: "10.43.0.0/16" - 65,536 service IPs)
+#    WARNING: Changing this after cluster creation requires a full rebuild.
+# cluster_svc_cidr: ""
+
+# ==============================================================================
+# LOAD BALANCER IPS (Cilium L2/BGP Announcements)
+# ==============================================================================
+# These IPs are announced by Cilium and used for LoadBalancer services.
+# All must be UNUSED IPs within node_cidr.
+
+# -- IP for k8s_gateway DNS service (internal DNS resolution).
+#    Configure your router/DNS server to forward your domain queries here.
+#    This enables split-DNS so internal services resolve to internal IPs.
+#    (REQUIRED) - Must be an UNUSED IP within node_cidr
+#    TIP: See docs/udm-split-dns.md for router configuration examples.
+cluster_dns_gateway_addr: ""
+
+# -- IP for the internal ingress gateway (envoy-internal).
+#    Used for services only accessible from your local network.
+#    (REQUIRED) - Must be an UNUSED IP within node_cidr
+cluster_gateway_addr: ""
+
+# -- IP for the external ingress gateway (envoy-external via Cloudflare Tunnel).
+#    Used for services accessible from the public internet.
+#    (REQUIRED) - Must be an UNUSED IP within node_cidr
+cloudflare_gateway_addr: ""
+
+# ==============================================================================
+# GITHUB REPOSITORY SETTINGS
+# ==============================================================================
+
+# -- Your GitHub repository in "owner/repo" format.
+#    This is where Flux will sync cluster state from.
+#    (REQUIRED)
+#    Example: "myusername/my-k8s-cluster"
+repository_name: ""
+
+# -- Git branch for Flux to monitor.
+#    (OPTIONAL) / (DEFAULT: "main")
+# repository_branch: ""
+
+# -- Repository visibility setting.
+#    (OPTIONAL) / (DEFAULT: "public")
+#    NOTE: If "private", you must add github-deploy.key.pub to your repo's deploy keys.
+#    See README for detailed instructions.
+# repository_visibility: ""
+
+# ==============================================================================
+# CLOUDFLARE SETTINGS
+# ==============================================================================
+
+# -- Your Cloudflare domain(s) for the cluster.
+#    Can be a single domain string or an array of domains.
+#    First domain is primary (used for flux-webhook, internal infrastructure).
+#    (REQUIRED)
+#    Single domain example: "example.com"
+#    Multiple domains example: ["example.com", "example.org"]
+#
+#    In templates, domains are available as:
+#      ${SECRET_DOMAIN}   - Primary domain (first in list)
+#      ${SECRET_DOMAIN_2} - Second domain
+#      ${SECRET_DOMAIN_3} - Third domain, etc.
+cloudflare_domain: ""
+
+# -- Cloudflare API Token with required permissions.
+#    (REQUIRED) - See README "Stage 3: Cloudflare configuration" for creation steps.
+#    Required permissions:
+#      - Zone:DNS:Edit (from template)
+#      - Account:Cloudflare Tunnel:Read (add manually)
+#    TIP: Create token at: Cloudflare Portal → Manage Account → Account API Tokens
+cloudflare_token: ""
+# ==============================================================================
+# CILIUM NETWORKING (Advanced)
+# ==============================================================================
+
+# -- Load balancer mode for Cilium.
+#    DSR (Direct Server Return) is more efficient but requires compatible network.
+#    SNAT works in all environments but adds latency.
+#    (OPTIONAL) / (DEFAULT: "dsr")
+#    Values: "dsr" or "snat"
+#    REF: https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/
+# cilium_loadbalancer_mode: ""
+
+# -- BGP Configuration (for advanced networking setups)
+#    Enable BGP peering with your router for dynamic route advertisement.
+#    All three BGP settings must be configured together to enable BGP.
+#    (OPTIONAL) - Only needed if your router supports BGP
+#    REF: https://docs.cilium.io/en/latest/network/bgp-control-plane/
+
+# -- BGP router IP address (your router's IP that speaks BGP)
+#    Example: "192.168.1.1"
+# cilium_bgp_router_addr: ""
+
+# -- BGP ASN for your router
+#    Example: "64512"
+# cilium_bgp_router_asn: ""
+
+# -- BGP ASN for Kubernetes nodes
+#    Example: "64513"
+# cilium_bgp_node_asn: ""

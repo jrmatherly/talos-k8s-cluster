@@ -1,0 +1,136 @@
+---
+# ==============================================================================
+# NODE CONFIGURATION
+# ==============================================================================
+# This file defines the nodes in your Talos Kubernetes cluster.
+# Each node requires specific hardware information gathered from the Talos installer.
+#
+# BEFORE YOU START:
+# 1. Boot each node from the Talos ISO/image (it will enter maintenance mode)
+# 2. Find the node's IP address (check your router/DHCP leases or use nmap)
+# 3. Gather required info using talosctl commands (see below)
+#
+# TIP: Use 'task configure' to validate your configuration after editing.
+# ==============================================================================
+
+# ==============================================================================
+# GATHERING NODE INFORMATION
+# ==============================================================================
+# While each node is in maintenance mode, run these commands to get required info:
+#
+# Get disk information (look for your target install disk):
+#   talosctl get disks -n <node-ip> --insecure
+#
+#   Example output:
+#   NODE          NAMESPACE   TYPE   ID        VERSION   SIZE      ...   TYPE   DEVICE NAME
+#   192.168.1.10  runtime     Disk   sda       1         256 GB          HDD    /dev/sda
+#   192.168.1.10  runtime     Disk   nvme0n1   1         512 GB          SSD    /dev/nvme0n1
+#
+#   Use the DEVICE NAME (e.g., "/dev/sda" or "/dev/nvme0n1") for the 'disk' field.
+#   Alternatively, use the disk serial number for more reliable identification.
+#
+# Get network interface MAC address:
+#   talosctl get links -n <node-ip> --insecure
+#
+#   Example output:
+#   NODE          NAMESPACE   TYPE         ID     VERSION   TYPE       ...   HW ADDR
+#   192.168.1.10  runtime     LinkStatus   eth0   2         ether           aa:bb:cc:dd:ee:ff
+#   192.168.1.10  runtime     LinkStatus   eth1   1         ether           11:22:33:44:55:66
+#
+#   Use the HW ADDR of your primary network interface for the 'mac_addr' field.
+# ==============================================================================
+
+nodes:
+  []
+  # ---------------------------------------------------------------------------
+  # NODE TEMPLATE - Copy and uncomment for each node in your cluster
+  # ---------------------------------------------------------------------------
+  # - name: ""              # (REQUIRED) Hostname for this node
+  #                         #   Must be lowercase alphanumeric with hyphens only
+  #                         #   Examples: "k8s-cp-1", "talos-worker-01", "node1"
+  #
+  #   address: ""           # (REQUIRED) Static IP address for this node
+  #                         #   Must be within the node_cidr defined in cluster.yaml
+  #                         #   Example: "192.168.1.101"
+  #
+  #   controller: true      # (REQUIRED) Node role in the cluster
+  #                         #   true  = Control plane node (runs etcd, API server, scheduler)
+  #                         #   false = Worker node (runs workloads only)
+  #                         #   TIP: For HA, use 3 or 5 controller nodes (odd numbers for quorum)
+  #                         #   NOTE: Controller nodes can also run workloads in this template
+  #
+  #   disk: ""              # (REQUIRED) Disk device path OR serial number for Talos installation
+  #                         #   Get this from: talosctl get disks -n <ip> --insecure
+  #                         #   Device path examples: "/dev/sda", "/dev/nvme0n1", "/dev/vda"
+  #                         #   Serial number: More reliable for multi-disk systems
+  #                         #   WARNING: All data on this disk will be erased!
+  #
+  #   mac_addr: ""          # (REQUIRED) MAC address of the primary network interface
+  #                         #   Get this from: talosctl get links -n <ip> --insecure
+  #                         #   Format: "aa:bb:cc:dd:ee:ff" (lowercase with colons)
+  #                         #   Used for consistent network configuration
+  #
+  #   schematic_id: ""      # (REQUIRED) Talos Image Factory schematic ID
+  #                         #   Get this from: https://factory.talos.dev/
+  #                         #   This ID defines your Talos image with specific extensions
+  #                         #   Example: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #                         #   TIP: Start minimal (CPU extensions only), add more later
+  #
+  #   # --- ADVANCED/OPTIONAL SETTINGS ---
+  #
+  #   mtu: 1500             # (OPTIONAL) Network interface MTU
+  #                         #   Default: 1500 (standard Ethernet)
+  #                         #   Use 9000 for jumbo frames if your network supports it
+  #
+  #   secureboot: false     # (OPTIONAL) Enable UEFI Secure Boot
+  #                         #   Requires compatible hardware and Talos SecureBoot image
+  #                         #   REF: https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/secureboot
+  #
+  #   encrypt_disk: false   # (OPTIONAL) Enable TPM-based disk encryption
+  #                         #   Requires TPM 2.0 hardware and secureboot: true
+  #                         #   REF: https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/secureboot
+
+  # ---------------------------------------------------------------------------
+  # EXAMPLE: 3 Control Plane + 3 Worker Node Configuration
+  # ---------------------------------------------------------------------------
+  # - name: "talos-cp-001"
+  #   address: "192.168.1.101"
+  #   controller: true
+  #   disk: "/dev/sda"
+  #   mac_addr: "aa:bb:cc:11:22:33"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #
+  # - name: "talos-cp-002"
+  #   address: "192.168.1.102"
+  #   controller: true
+  #   disk: "/dev/sda"
+  #   mac_addr: "aa:bb:cc:11:22:34"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #
+  # - name: "talos-cp-003"
+  #   address: "192.168.1.103"
+  #   controller: true
+  #   disk: "/dev/sda"
+  #   mac_addr: "aa:bb:cc:11:22:35"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #
+  # - name: "talos-wrkr-001"
+  #   address: "192.168.1.111"
+  #   controller: false
+  #   disk: "/dev/nvme0n1"
+  #   mac_addr: "aa:bb:cc:44:55:66"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #
+  # - name: "talos-wrkr-002"
+  #   address: "192.168.1.112"
+  #   controller: false
+  #   disk: "/dev/nvme0n1"
+  #   mac_addr: "aa:bb:cc:44:55:67"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #
+  # - name: "talos-wrkr-003"
+  #   address: "192.168.1.113"
+  #   controller: false
+  #   disk: "/dev/nvme0n1"
+  #   mac_addr: "aa:bb:cc:44:55:68"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
