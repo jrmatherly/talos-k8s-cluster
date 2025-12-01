@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns) and [cloudflared](https://github.com/cloudflare/cloudflared).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns) and [cloudflared](https://github.com/cloudflare/cloudflared).
 
 **Other features include:**
 
@@ -212,6 +212,16 @@ There are **5 stages** outlined below for completing this project, make sure you
 
     ```sh
     kubectl -n network describe certificates
+    ```
+
+6. Access Hubble UI for network observability (internal only):
+
+   📍 _Requires split DNS configured to resolve `hubble.${cloudflare_domain}` via k8s_gateway_
+
+    ```sh
+    # Open in browser: https://hubble.${cloudflare_domain}
+    # Or use port-forward for direct access:
+    kubectl -n kube-system port-forward svc/hubble-ui 8080:80
     ```
 
 ### 🌐 Public DNS

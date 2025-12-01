@@ -189,6 +189,7 @@ kubernetes/apps/<namespace>/<app-name>/
     ├── kustomization.yaml   # Kustomize config
     ├── helmrelease.yaml     # HelmRelease resource
     ├── ocirepository.yaml   # OCI source for Helm chart
+    ├── httproute.yaml       # HTTPRoute for Gateway API (if needed)
     └── secret.sops.yaml     # Encrypted secrets (if needed)
 ```
 
@@ -226,6 +227,18 @@ talosctl health
 
 # DNS testing (after k8s-gateway deployed)
 dig @<cluster_dns_gateway_addr> <hostname>.<domain>
+
+# Hubble network observability
+# CLI access (requires cilium CLI with hubble port-forward running):
+cilium hubble port-forward &
+hubble status
+hubble observe --follow
+
+# Web UI access:
+# Via HTTPRoute: https://hubble.<domain> (requires split DNS)
+# Via port-forward (local:8080 → service:80 → container:8081):
+kubectl -n kube-system port-forward svc/hubble-ui 8080:80
+# Then open http://localhost:8080
 ```
 
 ## Important Warnings
