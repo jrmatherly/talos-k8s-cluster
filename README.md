@@ -339,6 +339,9 @@ You don't need to re-bootstrap the cluster to add new nodes. Follow these steps:
    # Regenerate all configuration files (including talos/talconfig.yaml)
    task configure
 
+   # Generate individual node configs from talconfig.yaml
+   task talos:generate-config
+
    # Apply the configuration to the new node
    task talos:apply-node IP=<new-node-ip>
    # e.g. task talos:apply-node IP=192.168.1.114
