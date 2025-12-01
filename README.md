@@ -279,12 +279,20 @@ task talos:reset
 ### ⚙️ Updating Talos node configuration
 
 > [!TIP]
-> To update Talos configuration, edit the source files (`nodes.yaml` for node-specific settings, or templates in `templates/config/talos/patches/` for global patches) and run `task configure` to regenerate. In some cases you **not only need to apply the configuration but also upgrade Talos** to apply new configuration.
+> To update Talos configuration, edit the source files (`nodes.yaml` for node-specific settings, or templates in `templates/config/talos/patches/` for global patches) and run `task configure` followed by `task talos:generate-config` to regenerate. In some cases you **not only need to apply the configuration but also upgrade Talos** to apply new configuration.
 
 ```sh
-# After editing nodes.yaml or template patches, regenerate all configs
+# After editing nodes.yaml or template patches:
+
+# Step 1: Render Jinja2 templates (updates talconfig.yaml)
 task configure
-# Apply the config to the node
+
+# Step 2: Regenerate individual node configs from talconfig.yaml
+# IMPORTANT: task configure only renders templates - generate-config
+# creates the actual node config files in talos/clusterconfig/
+task talos:generate-config
+
+# Step 3: Apply the config to the node
 task talos:apply-node IP=? MODE=?
 # e.g. task talos:apply-node IP=10.10.10.10 MODE=auto
 ```

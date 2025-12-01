@@ -94,6 +94,10 @@ task init
 # Render templates and validate configuration
 task configure
 
+# Regenerate individual Talos node configs from talconfig.yaml
+# IMPORTANT: Run after 'task configure' when updating nodes.yaml
+task talos:generate-config
+
 # Bootstrap Talos cluster (new cluster)
 task bootstrap:talos
 
