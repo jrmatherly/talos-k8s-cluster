@@ -11,6 +11,19 @@ spec:
   values:
     fullnameOverride: k8s-gateway
     domain: "${SECRET_DOMAIN}"
+#% if cloudflare_domains | length > 1 %#
+    extraZones:
+#% for domain in cloudflare_domains[1:] %#
+      - "${SECRET_DOMAIN_#{ loop.index + 1 }#}"
+#% endfor %#
+#% endif %#
+    fallthrough:
+      enabled: true
+    extraZonePlugins:
+      - name: forward
+        parameters: . #{ k8s_gateway_fallback_dns | join(' ') }#
+        configBlock: |-
+          policy sequential
     ttl: 1
     service:
       type: LoadBalancer

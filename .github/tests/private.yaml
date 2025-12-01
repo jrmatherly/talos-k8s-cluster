@@ -10,7 +10,7 @@ cluster_api_addr: "10.10.10.254"
 # cluster_api_tls_sans: []
 cluster_gateway_addr: "10.10.10.252"
 cluster_dns_gateway_addr: "10.10.10.253"
-repository_name: "onedr0p/cluster-template"
+repository_name: "jrmatherly/talos-k8s-cluster"
 # repository_branch: ""
 repository_visibility: "private"
 cloudflare_domains: ["example.com"]

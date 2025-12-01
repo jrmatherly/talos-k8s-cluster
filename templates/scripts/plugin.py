@@ -146,6 +146,23 @@ class Plugin(makejinja.plugin.Plugin):
         # Set default values for optional fields
         data.setdefault('node_default_gateway', nthhost(data.get('node_cidr'), 1))
         data.setdefault('node_dns_servers', ['1.1.1.1', '1.0.0.1'])
+
+        # Set k8s_gateway fallback DNS (filter out private IPs to avoid DNS loops)
+        # Only use public DNS servers from node_dns_servers, plus 1.1.1.1 as backup
+        node_dns = data.get('node_dns_servers', ['1.1.1.1', '1.0.0.1'])
+        fallback_dns = []
+        for dns in node_dns:
+            try:
+                ip = ipaddress.ip_address(dns)
+                # Only include public (non-private) IP addresses
+                if not ip.is_private:
+                    fallback_dns.append(dns)
+            except ValueError:
+                pass
+        # Ensure we always have at least 1.1.1.1 as a fallback
+        if '1.1.1.1' not in fallback_dns:
+            fallback_dns.append('1.1.1.1')
+        data.setdefault('k8s_gateway_fallback_dns', fallback_dns)
         data.setdefault('node_ntp_servers', ['162.159.200.1', '162.159.200.123'])
         data.setdefault('cluster_pod_cidr', '10.42.0.0/16')
         data.setdefault('cluster_svc_cidr', '10.43.0.0/16')

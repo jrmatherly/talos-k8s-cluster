@@ -8,6 +8,7 @@ import (
 	node_cidr: net.IPCIDR & !=cluster_pod_cidr & !=cluster_svc_cidr
 	node_dns_servers?: [...net.IPv4]
 	node_ntp_servers?: [...net.IPv4]
+	k8s_gateway_fallback_dns?: [...net.IPv4]
 	node_default_gateway?: net.IPv4 & !=""
 	node_vlan_tag?: string & !=""
 	cluster_pod_cidr: *"10.42.0.0/16" | net.IPCIDR & !=node_cidr & !=cluster_svc_cidr
