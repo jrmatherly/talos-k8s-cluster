@@ -2,7 +2,7 @@
 
 This directory contains Kustomization patches that are added to the talhelper configuration file.
 
-<https://www.talos.dev/v1.7/talos-guides/configuration/patching/>
+<https://docs.siderolabs.com/talos/v1.11/configure-your-talos-cluster/system-configuration/patching>
 
 ## Patch Directories
 
