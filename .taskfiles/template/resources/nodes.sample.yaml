@@ -89,6 +89,13 @@ nodes:
   #   encrypt_disk: false   # (OPTIONAL) Enable TPM-based disk encryption
   #                         #   Requires TPM 2.0 hardware and secureboot: true
   #                         #   REF: https://www.talos.dev/latest/talos-guides/install/bare-metal-platforms/secureboot
+  #
+  #   nodeLabels:           # (OPTIONAL) Kubernetes node labels
+  #     topology.kubernetes.io/region: "talos-k8s"    # Required for Proxmox CSI
+  #     topology.kubernetes.io/zone: "pve-node-01"  # Proxmox host this VM runs on
+  #                         #   Used by Proxmox CSI for volume topology constraints
+  #                         #   Region = Proxmox cluster name, Zone = Proxmox node name
+  #                         #   REF: docs/proxmox-csi-implementation.md
 
   # ---------------------------------------------------------------------------
   # EXAMPLE: 3 Control Plane + 3 Worker Node Configuration
@@ -134,3 +141,29 @@ nodes:
   #   disk: "/dev/nvme0n1"
   #   mac_addr: "aa:bb:cc:44:55:68"
   #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+
+  # ---------------------------------------------------------------------------
+  # EXAMPLE: With Proxmox CSI Topology Labels (Approach A - Static Labels)
+  # ---------------------------------------------------------------------------
+  # Each node specifies its Proxmox host as the zone. All nodes share the same region.
+  # See docs/proxmox-csi-implementation.md for details.
+  #
+  # - name: "talos-cp-001"
+  #   address: "192.168.1.101"
+  #   controller: true
+  #   disk: "/dev/sda"
+  #   mac_addr: "aa:bb:cc:11:22:33"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #   nodeLabels:
+  #     topology.kubernetes.io/region: "talos-k8s"
+  #     topology.kubernetes.io/zone: "pve-node-01"
+  #
+  # - name: "talos-wrkr-001"
+  #   address: "192.168.1.111"
+  #   controller: false
+  #   disk: "/dev/nvme0n1"
+  #   mac_addr: "aa:bb:cc:44:55:66"
+  #   schematic_id: "ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515"
+  #   nodeLabels:
+  #     topology.kubernetes.io/region: "talos-k8s"
+  #     topology.kubernetes.io/zone: "pve-node-02"

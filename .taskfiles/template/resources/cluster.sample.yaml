@@ -169,3 +169,49 @@ cloudflare_token: ""
 # -- BGP ASN for Kubernetes nodes
 #    Example: "64513"
 # cilium_bgp_node_asn: ""
+
+# ==============================================================================
+# PROXMOX INTEGRATION (Optional)
+# ==============================================================================
+# Configuration for Proxmox CSI Plugin (and optionally CCM).
+# Required if deploying persistent storage via Proxmox CSI.
+# REF: docs/proxmox-csi-implementation.md
+
+# -- Proxmox API URL for CSI (and CCM if using Approach B) communication.
+#    (REQUIRED for Proxmox integration)
+#    Example: "https://192.168.1.10:8006/api2/json"
+# proxmox_api_url: ""
+
+# -- Skip TLS certificate verification for self-signed Proxmox certs.
+#    (OPTIONAL) / (DEFAULT: true)
+# proxmox_insecure: true
+
+# -- Proxmox region name (identifies the Proxmox cluster).
+#    Used for topology.kubernetes.io/region label.
+#    (OPTIONAL) / (DEFAULT: "talos-k8s")
+# proxmox_region: ""
+
+# -- Proxmox storage pool name for CSI volumes.
+#    Must support disk images (e.g., local-lvm, local-zfs, ceph).
+#    (OPTIONAL) / (DEFAULT: "local-lvm")
+# proxmox_storage: ""
+
+# -- Proxmox CSI API Token ID (from step 1.4 of implementation guide)
+#    (REQUIRED for CSI) Format: "user@realm!token-name"
+#    Example: "kubernetes-csi@pve!csi"
+# proxmox_csi_token_id: ""
+
+# -- Proxmox CSI API Token Secret
+#    (REQUIRED for CSI) - The secret value from token creation
+# proxmox_csi_token_secret: ""
+
+# -- Proxmox CCM API Token ID (from step 1.3 of implementation guide)
+#    (REQUIRED for Approach B only) Format: "user@realm!token-name"
+#    Example: "kubernetes-ccm@pve!ccm"
+#    NOTE: Skip if using Approach A (Static Labels)
+# proxmox_ccm_token_id: ""
+
+# -- Proxmox CCM API Token Secret
+#    (REQUIRED for Approach B only) - The secret value from token creation
+#    NOTE: Skip if using Approach A (Static Labels)
+# proxmox_ccm_token_secret: ""

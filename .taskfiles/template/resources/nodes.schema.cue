@@ -24,6 +24,9 @@ import (
 	mtu?:          >=1450 & <=9000
 	secureboot?:   bool
 	encrypt_disk?: bool
+	// Node labels for Kubernetes (used for CSI topology, etc.)
+	// Example: {"topology.kubernetes.io/region": "talos-k8s", "topology.kubernetes.io/zone": "pve-node-01"}
+	nodeLabels?: {[string]: string}
 }
 
 #Config

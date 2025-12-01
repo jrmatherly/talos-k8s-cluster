@@ -20,3 +20,11 @@ cloudflare_gateway_addr: "10.10.10.251"
 # cilium_bgp_router_asn: ""
 # cilium_bgp_node_asn: ""
 # cilium_loadbalancer_mode: ""
+# Proxmox Integration (optional - testing Approach A with CSI only)
+proxmox_api_url: "https://10.10.10.1:8006/api2/json"
+# proxmox_insecure: true  # uses default
+# proxmox_region: ""  # uses default
+# proxmox_storage: ""  # uses default
+proxmox_csi_token_id: "test-csi@pve!token"
+proxmox_csi_token_secret: "fake-secret"
+# CCM tokens not needed for Approach A

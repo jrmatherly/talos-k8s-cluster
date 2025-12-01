@@ -37,6 +37,9 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.22.100"
+    nodeLabels:
+      topology.kubernetes.io/region: "matherlynet"
+      topology.kubernetes.io/zone: "vs01"
   - hostname: "talos-cp-002"
     ipAddress: "192.168.22.102"
     installDisk: "/dev/sda"
@@ -56,6 +59,9 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.22.100"
+    nodeLabels:
+      topology.kubernetes.io/region: "matherlynet"
+      topology.kubernetes.io/zone: "vs01"
   - hostname: "talos-cp-003"
     ipAddress: "192.168.22.103"
     installDisk: "/dev/sda"
@@ -75,6 +81,9 @@ nodes:
         mtu: 1500
         vip:
           ip: "192.168.22.100"
+    nodeLabels:
+      topology.kubernetes.io/region: "matherlynet"
+      topology.kubernetes.io/zone: "vs01"
   - hostname: "talos-wrkr-001"
     ipAddress: "192.168.22.111"
     installDisk: "/dev/sda"
@@ -92,6 +101,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.23.254"
         mtu: 1500
+    nodeLabels:
+      topology.kubernetes.io/region: "matherlynet"
+      topology.kubernetes.io/zone: "vs01"
   - hostname: "talos-wrkr-002"
     ipAddress: "192.168.22.112"
     installDisk: "/dev/sda"
@@ -109,6 +121,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.23.254"
         mtu: 1500
+    nodeLabels:
+      topology.kubernetes.io/region: "matherlynet"
+      topology.kubernetes.io/zone: "vs01"
   - hostname: "talos-wrkr-003"
     ipAddress: "192.168.22.113"
     installDisk: "/dev/sda"
@@ -126,6 +141,9 @@ nodes:
           - network: "0.0.0.0/0"
             gateway: "192.168.23.254"
         mtu: 1500
+    nodeLabels:
+      topology.kubernetes.io/region: "matherlynet"
+      topology.kubernetes.io/zone: "vs01"
 
 # Global patches
 patches:

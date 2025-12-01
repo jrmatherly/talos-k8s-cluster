@@ -27,6 +27,18 @@ import (
 	cilium_bgp_router_asn?: string & !=""
 	cilium_bgp_node_asn?: string & !=""
 	cilium_loadbalancer_mode?: *"dsr" | "snat"
+
+	// Proxmox CSI Integration (required for Proxmox storage)
+	proxmox_api_url?: string & =~"^https?://.+/api2/json$"
+	proxmox_insecure?: *true | bool
+	proxmox_region?: string & !=""
+	proxmox_storage?: string & !=""
+	proxmox_csi_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
+	proxmox_csi_token_secret?: string & !=""
+
+	// Proxmox CCM Integration (Approach B only - skip for Approach A)
+	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
+	proxmox_ccm_token_secret?: string & !=""
 }
 
 #Config

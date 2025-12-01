@@ -63,6 +63,12 @@ nodes:
           ip: "#{ cluster_api_addr }#"
         #% endif %#
         #% endif %#
+    #% if item.nodeLabels is defined %#
+    nodeLabels:
+      #% for key, value in item.nodeLabels.items() %#
+      #{ key }#: "#{ value }#"
+      #% endfor %#
+    #% endif %#
     #% if talos_patches('%s' % (item.name)) | length == 0 %#
     #% if item.encrypt_disk | default(false, true) %#
     patches:
