@@ -19,7 +19,7 @@ spec:
     controller:
       plugin:
         image:
-          repository: ghcr.io/sergelogvinov/proxmox-csi-plugin
+          repository: ghcr.io/sergelogvinov/proxmox-csi-controller
           tag: v0.16.0
       # CSI sidecar versions for Kubernetes 1.34.x
       provisioner:
@@ -44,7 +44,7 @@ spec:
     node:
       plugin:
         image:
-          repository: ghcr.io/sergelogvinov/proxmox-csi-plugin
+          repository: ghcr.io/sergelogvinov/proxmox-csi-node
           tag: v0.16.0
       driverRegistrar:
         image:
