@@ -8,7 +8,7 @@ spec:
   path: ./kubernetes/apps/csi-proxmox/proxmox-csi/app
   dependsOn:
     - name: cilium
-      namespace: flux-system
+      namespace: kube-system
   postBuild:
     substituteFrom:
       - name: cluster-secrets
