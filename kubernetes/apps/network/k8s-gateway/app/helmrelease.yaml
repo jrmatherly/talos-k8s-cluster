@@ -11,6 +11,15 @@ spec:
   values:
     fullnameOverride: k8s-gateway
     domain: "${SECRET_DOMAIN}"
+    extraZones:
+      - "${SECRET_DOMAIN_2}"
+    fallthrough:
+      enabled: true
+    extraZonePlugins:
+      - name: forward
+        parameters: . 172.64.36.1 172.64.36.2 1.1.1.1
+        configBlock: |-
+          policy sequential
     ttl: 1
     service:
       type: LoadBalancer
