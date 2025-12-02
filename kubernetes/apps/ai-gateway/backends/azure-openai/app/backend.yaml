@@ -34,6 +34,7 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-primary
+  type: APIKey
   apiKey:
     secretRef:
       name: azure-primary-secret
@@ -74,6 +75,7 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-secondary
+  type: APIKey
   apiKey:
     secretRef:
       name: azure-secondary-secret
@@ -114,6 +116,7 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-cohere
+  type: APIKey
   apiKey:
     secretRef:
       name: azure-cohere-secret
