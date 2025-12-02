@@ -1,0 +1,32 @@
+#% if ai_gateway_enabled and ai_gateway_azure_deployments %#
+---
+# AIGatewayRoute for Azure AI model routing
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata:
+  name: azure-ai
+spec:
+  parentRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  # Input schema - clients use OpenAI-compatible API
+  schema:
+    name: OpenAI
+    version: v1
+  rules:
+#% for deployment in ai_gateway_azure_deployments %#
+#% for model in deployment.models %#
+    # Route for model: #{ model }# via deployment: #{ deployment.name }#
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: #{ model }#
+      backendRefs:
+        - name: azure-#{ deployment.name }#
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+#% endfor %#
+#% endfor %#
+#% endif %#

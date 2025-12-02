@@ -39,6 +39,29 @@ import (
 	// Proxmox CCM Integration (Approach B only - skip for Approach A)
 	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
 	proxmox_ccm_token_secret?: string & !=""
+
+	// Envoy AI Gateway Integration (optional)
+	ai_gateway_enabled?: bool
+	ai_gateway_version?: string & !=""
+	ai_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
+	ai_gateway_azure_deployments?: [...{
+		name: string & =~"^[a-z0-9-]+$"
+		host: string & =~"^[a-zA-Z0-9.-]+\\.azure\\.com$"  // Hostname only, no path
+		base_path?: string  // Optional base path (e.g., "/v1/rerank" for Cohere rerank)
+		api_key: string & !=""
+		models: [...string] & [_, ...]  // At least one model required
+		schema_name?: *"AzureOpenAI" | "OpenAI" | "Cohere" | "Anthropic"  // API schema type
+	}]
+	ai_gateway_mcp_enabled?: bool
+	ai_gateway_mcp_servers?: [...{
+		name: string & =~"^[a-z0-9-]+$"
+		host: string & !=""
+		path?: string
+		api_key?: string & !=""
+		tool_filter?: [...string]
+	}]
+	ai_gateway_ratelimit_enabled?: bool
+	ai_gateway_ratelimit_default_limit?: int & >0
 }
 
 #Config

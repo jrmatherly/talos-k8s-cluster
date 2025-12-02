@@ -1,0 +1,24 @@
+---
+# External HTTPRoute for AI Gateway via aiops.<domain>
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ai-gateway-external
+  namespace: network
+spec:
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  hostnames:
+    - aiops.matherly.net
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: ai-gateway-envoy-ai-gateway-system
+          namespace: envoy-ai-gateway-system
+          kind: Service
+          port: 443

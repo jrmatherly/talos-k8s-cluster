@@ -28,3 +28,13 @@ proxmox_api_url: "https://10.10.10.1:8006/api2/json"
 proxmox_csi_token_id: "test-csi@pve!token"
 proxmox_csi_token_secret: "fake-secret"
 # CCM tokens not needed for Approach A
+
+# AI Gateway Integration (optional - minimal testing)
+ai_gateway_enabled: true
+ai_gateway_azure_deployments:
+  - name: "test"
+    host: "test.openai.azure.com"
+    api_key: "fake"
+    models: ["gpt-4"]
+# ai_gateway_ratelimit_enabled: false  # uses default
+# ai_gateway_mcp_enabled: false  # uses default

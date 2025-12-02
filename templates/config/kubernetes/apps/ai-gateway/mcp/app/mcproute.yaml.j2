@@ -1,0 +1,38 @@
+#% if ai_gateway_enabled and ai_gateway_mcp_enabled and ai_gateway_mcp_servers %#
+---
+# MCPRoute for aggregating MCP servers
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: MCPRoute
+metadata:
+  name: mcp-aggregated
+spec:
+  parentRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rules:
+#% for server in ai_gateway_mcp_servers %#
+    - backendRefs:
+        - name: mcp-#{ server.name }#
+          kind: Backend
+          group: gateway.envoyproxy.io
+      mcpServer:
+        name: #{ server.name }#
+#% if server.path is defined and server.path %#
+        path: #{ server.path }#
+#% endif %#
+#% if server.api_key is defined and server.api_key %#
+        auth:
+          type: APIKey
+          apiKeySecretRef:
+            name: mcp-#{ server.name }#-secret
+            namespace: #{ ai_gateway_namespace }#
+#% endif %#
+#% if server.tool_filter is defined and server.tool_filter %#
+        toolFilter:
+#% for filter in server.tool_filter %#
+          - "#{ filter }#"
+#% endfor %#
+#% endif %#
+#% endfor %#
+#% endif %#

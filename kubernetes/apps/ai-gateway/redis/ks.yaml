@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ai-gateway-redis
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/ai-gateway/redis/app
+  dependsOn:
+    - name: ai-gateway-controller
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: envoy-ai-gateway-system
+  wait: true

@@ -1,0 +1,9 @@
+#% if ai_gateway_enabled %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: #{ ai_gateway_namespace }#
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+#% endif %#

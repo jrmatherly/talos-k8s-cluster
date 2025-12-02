@@ -1,0 +1,117 @@
+---
+# AIServiceBackend for Azure deployment: primary
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: azure-primary
+spec:
+  schema:
+    name: AzureOpenAI
+    version: "2024-10-21"
+  backendRef:
+    name: azure-primary
+    port: 443
+---
+# Backend service for Azure: primary
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-primary
+spec:
+  endpoints:
+    - fqdn:
+        hostname: aanopenai.openai.azure.com
+        port: 443
+---
+# BackendSecurityPolicy for API key authentication: primary
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-primary-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-primary
+  apiKey:
+    secretRef:
+      name: azure-primary-secret
+      namespace: envoy-ai-gateway-system
+---
+# AIServiceBackend for Azure deployment: secondary
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: azure-secondary
+spec:
+  schema:
+    name: AzureOpenAI
+    version: "2024-10-21"
+  backendRef:
+    name: azure-secondary
+    port: 443
+---
+# Backend service for Azure: secondary
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-secondary
+spec:
+  endpoints:
+    - fqdn:
+        hostname: ets-east-us2.openai.azure.com
+        port: 443
+---
+# BackendSecurityPolicy for API key authentication: secondary
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-secondary-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-secondary
+  apiKey:
+    secretRef:
+      name: azure-secondary-secret
+      namespace: envoy-ai-gateway-system
+---
+# AIServiceBackend for Azure deployment: cohere
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: azure-cohere
+spec:
+  schema:
+    name: Cohere
+    version: "v2"
+  backendRef:
+    name: azure-cohere
+    port: 443
+---
+# Backend service for Azure: cohere
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-cohere
+spec:
+  endpoints:
+    - fqdn:
+        hostname: aan-cohere-rerank-v3-5.eastus.models.ai.azure.com
+        port: 443
+---
+# BackendSecurityPolicy for API key authentication: cohere
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-cohere-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-cohere
+  apiKey:
+    secretRef:
+      name: azure-cohere-secret
+      namespace: envoy-ai-gateway-system

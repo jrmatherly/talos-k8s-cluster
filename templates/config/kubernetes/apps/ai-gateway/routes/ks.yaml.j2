@@ -1,0 +1,26 @@
+#% if ai_gateway_enabled %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ai-gateway-routes
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/ai-gateway/routes/app
+  dependsOn:
+    - name: ai-gateway-backends-azure
+#% if ai_gateway_ratelimit_enabled %#
+    - name: ai-gateway-redis
+#% endif %#
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: #{ ai_gateway_namespace }#
+  wait: true
+#% endif %#

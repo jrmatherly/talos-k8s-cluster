@@ -1,0 +1,15 @@
+#% if ai_gateway_enabled and ai_gateway_mcp_enabled and ai_gateway_mcp_servers %#
+#% for server in ai_gateway_mcp_servers %#
+---
+# Backend for MCP server: #{ server.name }#
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: mcp-#{ server.name }#
+spec:
+  endpoints:
+    - fqdn:
+        hostname: #{ server.host }#
+        port: 443
+#% endfor %#
+#% endif %#

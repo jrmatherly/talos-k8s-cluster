@@ -253,6 +253,12 @@ hubble observe --follow
 # Via port-forward (local:8080 → service:80 → container:8081):
 kubectl -n kube-system port-forward svc/hubble-ui 8080:80
 # Then open http://localhost:8080
+
+# AI Gateway diagnostics (if enabled)
+kubectl get pods -n envoy-ai-gateway-system
+kubectl get aigatewayroutes -n envoy-ai-gateway-system
+kubectl get aiservicebackends -n envoy-ai-gateway-system
+kubectl logs -n envoy-ai-gateway-system deploy/ai-gateway-controller
 ```
 
 ## Talos Configuration Workflow
@@ -285,6 +291,29 @@ For Proxmox persistent storage, add to `cluster.yaml`:
 Add topology labels to each node in `nodes.yaml` (see nodeLabels above).
 
 **Note:** CSI templates are conditionally rendered only when both `proxmox_csi_token_id` and `proxmox_csi_token_secret` are set.
+
+## Envoy AI Gateway Integration
+
+For AI/LLM traffic management, add to `cluster.yaml`:
+- `ai_gateway_enabled` - Enable AI Gateway (default: false)
+- `ai_gateway_version` - Chart version (default: "v0.4.0")
+- `ai_gateway_addr` - LoadBalancer IP (default: cluster_gateway_addr)
+- `ai_gateway_azure_deployments` - Array of Azure OpenAI configurations:
+  ```yaml
+  ai_gateway_azure_deployments:
+    - name: "primary"
+      host: "my-resource.openai.azure.com"
+      api_key: "your-api-key"
+      models: ["gpt-4", "gpt-4o"]
+  ```
+- `ai_gateway_mcp_enabled` - Enable MCP gateway (default: false)
+- `ai_gateway_mcp_servers` - Array of MCP server configurations
+- `ai_gateway_ratelimit_enabled` - Enable Redis rate limiting (default: false)
+- `ai_gateway_ratelimit_default_limit` - Tokens per hour per user (default: 100000)
+
+**API Endpoint**: `aiops.<domain>` routes to AI Gateway.
+
+**Note:** AI Gateway templates are conditionally rendered only when `ai_gateway_enabled` is true.
 
 ## Important Warnings
 

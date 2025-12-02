@@ -1,0 +1,26 @@
+#% if ai_gateway_enabled %#
+---
+# External HTTPRoute for AI Gateway via aiops.<domain>
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ai-gateway-external
+  namespace: network
+spec:
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  hostnames:
+    - aiops.#{ primary_domain }#
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: ai-gateway-#{ ai_gateway_namespace }#
+          namespace: #{ ai_gateway_namespace }#
+          kind: Service
+          port: 443
+#% endif %#

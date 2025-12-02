@@ -1,0 +1,19 @@
+---
+# MCPRoute for aggregating MCP servers
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: MCPRoute
+metadata:
+  name: mcp-aggregated
+spec:
+  parentRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rules:
+    - backendRefs:
+        - name: mcp-context7
+          kind: Backend
+          group: gateway.envoyproxy.io
+      mcpServer:
+        name: context7
+        path: /mcp

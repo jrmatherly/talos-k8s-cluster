@@ -1,0 +1,36 @@
+#% if ai_gateway_enabled and ai_gateway_ratelimit_enabled %#
+---
+# BackendTrafficPolicy for token-based rate limiting
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: ai-gateway-ratelimit
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIGatewayRoute
+      name: azure-openai
+  rateLimit:
+    type: Global
+    global:
+      rules:
+        - clientSelectors:
+            - headers:
+                - name: x-user-id
+                  type: Distinct
+          limit:
+            # Token limit per user per hour
+            requests: #{ ai_gateway_ratelimit_default_limit }#
+            unit: Hour
+          cost:
+            # No cost for requests (only responses)
+            request:
+              from: Number
+              number: 0
+            # Cost based on total tokens from response metadata
+            response:
+              from: Metadata
+              metadata:
+                namespace: "io.envoy.ai_gateway"
+                key: "llmRequestCosts.totalTokens"
+#% endif %#

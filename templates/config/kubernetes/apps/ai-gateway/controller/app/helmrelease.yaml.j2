@@ -1,0 +1,16 @@
+#% if ai_gateway_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ai-gateway
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: ai-gateway
+  interval: 1h
+  values:
+    # AI Gateway controller configuration
+    controller:
+      replicaCount: 1
+#% endif %#

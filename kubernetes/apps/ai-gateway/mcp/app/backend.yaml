@@ -1,0 +1,11 @@
+---
+# Backend for MCP server: context7
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: mcp-context7
+spec:
+  endpoints:
+    - fqdn:
+        hostname: mcp.context7.io
+        port: 443

@@ -1,0 +1,116 @@
+---
+# AIGatewayRoute for Azure AI model routing
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata:
+  name: azure-ai
+spec:
+  parentRefs:
+    - name: ai-gateway
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  # Input schema - clients use OpenAI-compatible API
+  schema:
+    name: OpenAI
+    version: v1
+  rules:
+    # Route for model: gpt-4.1 via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: gpt-4.1
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: gpt-4.1-nano via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: gpt-4.1-nano
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: gpt-4o-mini via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: gpt-4o-mini
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: o3 via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: o3
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: o4-mini via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: o4-mini
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: text-embedding-3-small via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: text-embedding-3-small
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: text-embedding-ada-002 via deployment: primary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: text-embedding-ada-002
+      backendRefs:
+        - name: azure-primary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: gpt-5-nano via deployment: secondary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: gpt-5-nano
+      backendRefs:
+        - name: azure-secondary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: gpt-5-mini via deployment: secondary
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: gpt-5-mini
+      backendRefs:
+        - name: azure-secondary
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io
+    # Route for model: cohere-rerank-v3.5 via deployment: cohere
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: cohere-rerank-v3.5
+      backendRefs:
+        - name: azure-cohere
+          kind: AIServiceBackend
+          group: aigateway.envoyproxy.io

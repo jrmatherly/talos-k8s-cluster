@@ -1,0 +1,52 @@
+#% if ai_gateway_enabled and ai_gateway_azure_deployments %#
+#% for deployment in ai_gateway_azure_deployments %#
+#% set schema_name = deployment.schema_name | default('AzureOpenAI') %#
+---
+# AIServiceBackend for Azure deployment: #{ deployment.name }#
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: azure-#{ deployment.name }#
+spec:
+  schema:
+    name: #{ schema_name }#
+#% if schema_name == 'AzureOpenAI' %#
+    version: "2024-10-21"
+#% elif schema_name == 'Cohere' %#
+    version: "v2"
+#% elif schema_name == 'Anthropic' %#
+    version: "v1"
+#% else %#
+    version: "v1"
+#% endif %#
+  backendRef:
+    name: azure-#{ deployment.name }#
+    port: 443
+---
+# Backend service for Azure: #{ deployment.name }#
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-#{ deployment.name }#
+spec:
+  endpoints:
+    - fqdn:
+        hostname: #{ deployment.host }#
+        port: 443
+---
+# BackendSecurityPolicy for API key authentication: #{ deployment.name }#
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-#{ deployment.name }#-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-#{ deployment.name }#
+  apiKey:
+    secretRef:
+      name: azure-#{ deployment.name }#-secret
+      namespace: #{ ai_gateway_namespace }#
+#% endfor %#
+#% endif %#
