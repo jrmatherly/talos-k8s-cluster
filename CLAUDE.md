@@ -286,19 +286,6 @@ Add topology labels to each node in `nodes.yaml` (see nodeLabels above).
 
 **Note:** CSI templates are conditionally rendered only when both `proxmox_csi_token_id` and `proxmox_csi_token_secret` are set.
 
-## Devtron Integration
-
-For Devtron Kubernetes management platform, add to `cluster.yaml`:
-- `devtron_enabled` - Enable Devtron deployment (default: false)
-- `devtron_hostname` - Hostname prefix, e.g., "devtron" → devtron.example.com (default: "devtron")
-- `devtron_storage_class` - StorageClass for PVCs (empty = cluster default)
-- `devtron_gateway` - Gateway selection: "external" or "internal" (default: "external")
-- `devtron_flux_integration` - Enable FluxCD integration features (default: true)
-
-**Note:** Devtron templates are conditionally rendered only when `devtron_enabled` is true.
-
-See `docs/devtron-docs/IMPLEMENTATION-PLAN.md` for detailed implementation documentation.
-
 ## Important Warnings
 
 1. **Never edit generated directories** (`kubernetes/`, `talos/`, `bootstrap/`) directly

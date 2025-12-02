@@ -39,13 +39,6 @@ import (
 	// Proxmox CCM Integration (Approach B only - skip for Approach A)
 	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
 	proxmox_ccm_token_secret?: string & !=""
-
-	// Devtron Kubernetes Management Platform (optional)
-	devtron_enabled?: *false | bool
-	devtron_hostname?: *"devtron" | string & !=""
-	devtron_storage_class?: string & !=""
-	devtron_gateway?: *"external" | "internal"
-	devtron_flux_integration?: *true | bool
 }
 
 #Config

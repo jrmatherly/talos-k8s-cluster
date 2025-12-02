@@ -459,10 +459,6 @@ If your workloads require other storage solutions with features like replication
 
 These tools offer a variety of solutions to meet your persistent storage needs, whether you're using cloud-native or self-hosted infrastructures.
 
-### Kubernetes Management
-
-**Included (optional):** This template includes [Devtron](https://devtron.ai/) Freemium, a Kubernetes management platform that provides release orchestration, resource monitoring, RBAC, and GitOps integration with a web-based dashboard. Enable it by setting `devtron_enabled: true` in `cluster.yaml`. See `docs/devtron-docs/IMPLEMENTATION-PLAN.md` for details.
-
 ### Community Repositories
 
 Community member [@whazor](https://github.com/whazor) created [Kubesearch](https://kubesearch.dev) to allow searching Flux HelmReleases across Github and Gitlab repositories with the `kubesearch` topic.
