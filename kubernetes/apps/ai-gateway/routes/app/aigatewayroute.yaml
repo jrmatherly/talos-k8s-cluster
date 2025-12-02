@@ -1,6 +1,7 @@
 ---
 # AIGatewayRoute for Azure AI model routing
-# Note: schema field was removed in v0.4.0 - API schema is now defined in AIServiceBackend
+# Note: In v0.4.0, when group is specified in backendRefs, only InferencePool is supported.
+#       For AIServiceBackend, omit group and kind fields - they default correctly.
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: AIGatewayRoute
 metadata:
@@ -10,6 +11,15 @@ spec:
     - name: ai-gateway
       kind: Gateway
       group: gateway.networking.k8s.io
+  # Token usage tracking for rate limiting
+  # These metadata keys are used by BackendTrafficPolicy to enforce token-based limits
+  llmRequestCosts:
+    - metadataKey: llm_input_token
+      type: InputToken
+    - metadataKey: llm_output_token
+      type: OutputToken
+    - metadataKey: llm_total_token
+      type: TotalToken
   rules:
     # Route for model: gpt-4.1 via deployment: primary
     - matches:
@@ -19,8 +29,6 @@ spec:
               value: gpt-4.1
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: gpt-4.1-nano via deployment: primary
     - matches:
         - headers:
@@ -29,8 +37,6 @@ spec:
               value: gpt-4.1-nano
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: gpt-4o-mini via deployment: primary
     - matches:
         - headers:
@@ -39,8 +45,6 @@ spec:
               value: gpt-4o-mini
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: o3 via deployment: primary
     - matches:
         - headers:
@@ -49,8 +53,6 @@ spec:
               value: o3
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: o4-mini via deployment: primary
     - matches:
         - headers:
@@ -59,8 +61,6 @@ spec:
               value: o4-mini
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: text-embedding-3-small via deployment: primary
     - matches:
         - headers:
@@ -69,8 +69,6 @@ spec:
               value: text-embedding-3-small
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: text-embedding-ada-002 via deployment: primary
     - matches:
         - headers:
@@ -79,8 +77,6 @@ spec:
               value: text-embedding-ada-002
       backendRefs:
         - name: azure-primary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: gpt-5-nano via deployment: secondary
     - matches:
         - headers:
@@ -89,8 +85,6 @@ spec:
               value: gpt-5-nano
       backendRefs:
         - name: azure-secondary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: gpt-5-mini via deployment: secondary
     - matches:
         - headers:
@@ -99,8 +93,6 @@ spec:
               value: gpt-5-mini
       backendRefs:
         - name: azure-secondary
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
     # Route for model: cohere-rerank-v3.5 via deployment: cohere
     - matches:
         - headers:
@@ -109,5 +101,3 @@ spec:
               value: cohere-rerank-v3.5
       backendRefs:
         - name: azure-cohere
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io

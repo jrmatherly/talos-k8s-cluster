@@ -11,5 +11,19 @@ spec:
     - fqdn:
         hostname: #{ server.host }#
         port: 443
+---
+# BackendTLSPolicy for MCP server TLS validation: #{ server.name }#
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: mcp-#{ server.name }#-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: mcp-#{ server.name }#
+  validation:
+    wellKnownCACertificates: System
+    hostname: #{ server.host }#
 #% endfor %#
 #% endif %#

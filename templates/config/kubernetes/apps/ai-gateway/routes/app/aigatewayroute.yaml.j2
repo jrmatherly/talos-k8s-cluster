@@ -1,7 +1,8 @@
 #% if ai_gateway_enabled and ai_gateway_azure_deployments %#
 ---
 # AIGatewayRoute for Azure AI model routing
-# Note: schema field was removed in v0.4.0 - API schema is now defined in AIServiceBackend
+# Note: In v0.4.0, when group is specified in backendRefs, only InferencePool is supported.
+#       For AIServiceBackend, omit group and kind fields - they default correctly.
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: AIGatewayRoute
 metadata:
@@ -11,6 +12,17 @@ spec:
     - name: ai-gateway
       kind: Gateway
       group: gateway.networking.k8s.io
+#% if ai_gateway_ratelimit_enabled %#
+  # Token usage tracking for rate limiting
+  # These metadata keys are used by BackendTrafficPolicy to enforce token-based limits
+  llmRequestCosts:
+    - metadataKey: llm_input_token
+      type: InputToken
+    - metadataKey: llm_output_token
+      type: OutputToken
+    - metadataKey: llm_total_token
+      type: TotalToken
+#% endif %#
   rules:
 #% for deployment in ai_gateway_azure_deployments %#
 #% for model in deployment.models %#
@@ -22,8 +34,6 @@ spec:
               value: #{ model }#
       backendRefs:
         - name: azure-#{ deployment.name }#
-          kind: AIServiceBackend
-          group: aigateway.envoyproxy.io
 #% endfor %#
 #% endfor %#
 #% endif %#

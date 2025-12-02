@@ -11,7 +11,7 @@ spec:
   schema:
     name: #{ schema_name }#
 #% if schema_name == 'AzureOpenAI' %#
-    version: "2024-10-21"
+    version: "2025-01-01-preview"
 #% elif schema_name == 'Cohere' %#
     version: "v2"
 #% elif schema_name == 'Anthropic' %#
@@ -24,7 +24,7 @@ spec:
     kind: Backend
     group: gateway.envoyproxy.io
 ---
-# Backend service for Azure: #{ deployment.name }#
+# Backend endpoint for Azure: #{ deployment.name }#
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: Backend
 metadata:
@@ -35,7 +35,23 @@ spec:
         hostname: #{ deployment.host }#
         port: 443
 ---
-# BackendSecurityPolicy for API key authentication: #{ deployment.name }#
+# BackendTLSPolicy for TLS validation to Azure endpoint: #{ deployment.name }#
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-#{ deployment.name }#-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-#{ deployment.name }#
+  validation:
+    wellKnownCACertificates: System
+    hostname: #{ deployment.host }#
+---
+# BackendSecurityPolicy for Azure API key authentication: #{ deployment.name }#
+# Note: AzureAPIKey injects into 'api-key' header (Azure requirement)
+#       APIKey would inject into 'Authorization' header (wrong for Azure)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: BackendSecurityPolicy
 metadata:
@@ -45,10 +61,19 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-#{ deployment.name }#
+#% if schema_name == 'AzureOpenAI' %#
+  type: AzureAPIKey
+  azureAPIKey:
+    secretRef:
+      name: azure-#{ deployment.name }#-secret
+      namespace: #{ ai_gateway_namespace }#
+#% else %#
+  # Non-Azure schemas (Cohere, Anthropic via Azure) use standard APIKey
   type: APIKey
   apiKey:
     secretRef:
       name: azure-#{ deployment.name }#-secret
       namespace: #{ ai_gateway_namespace }#
+#% endif %#
 #% endfor %#
 #% endif %#

@@ -18,3 +18,22 @@ spec:
           kubernetes:
             deploy:
               type: GatewayNamespace
+#% if ai_gateway_enabled and ai_gateway_ratelimit_enabled %#
+            # Rate limit deployment configuration for AI Gateway
+            rateLimitDeployment:
+              patch:
+                type: StrategicMerge
+                value:
+                  spec:
+                    template:
+                      spec:
+                        containers:
+                          - name: envoy-ratelimit
+                            imagePullPolicy: IfNotPresent
+        # Global rate limit backend (Redis)
+        rateLimit:
+          backend:
+            type: Redis
+            redis:
+              url: redis.#{ ai_gateway_namespace }#.svc.cluster.local:6379
+#% endif %#

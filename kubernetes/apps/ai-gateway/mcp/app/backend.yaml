@@ -9,3 +9,17 @@ spec:
     - fqdn:
         hostname: mcp.context7.io
         port: 443
+---
+# BackendTLSPolicy for MCP server TLS validation: context7
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: mcp-context7-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: mcp-context7
+  validation:
+    wellKnownCACertificates: System
+    hostname: mcp.context7.io

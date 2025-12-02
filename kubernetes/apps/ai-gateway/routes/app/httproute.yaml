@@ -1,5 +1,7 @@
 ---
 # External HTTPRoute for AI Gateway via aiops.<domain>
+# Routes traffic from envoy-external gateway to the AI Gateway's Envoy service
+# Note: The service name matches the Gateway name (ai-gateway), created by Envoy Gateway
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -18,7 +20,7 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: ai-gateway-envoy-ai-gateway-system
+        - name: ai-gateway
           namespace: envoy-ai-gateway-system
           kind: Service
-          port: 443
+          port: 80

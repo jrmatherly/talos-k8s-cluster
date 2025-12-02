@@ -7,13 +7,13 @@ metadata:
 spec:
   schema:
     name: AzureOpenAI
-    version: "2024-10-21"
+    version: "2025-01-01-preview"
   backendRef:
     name: azure-primary
     kind: Backend
     group: gateway.envoyproxy.io
 ---
-# Backend service for Azure: primary
+# Backend endpoint for Azure: primary
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: Backend
 metadata:
@@ -24,7 +24,23 @@ spec:
         hostname: aanopenai.openai.azure.com
         port: 443
 ---
-# BackendSecurityPolicy for API key authentication: primary
+# BackendTLSPolicy for TLS validation to Azure endpoint: primary
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-primary-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-primary
+  validation:
+    wellKnownCACertificates: System
+    hostname: aanopenai.openai.azure.com
+---
+# BackendSecurityPolicy for Azure API key authentication: primary
+# Note: AzureAPIKey injects into 'api-key' header (Azure requirement)
+#       APIKey would inject into 'Authorization' header (wrong for Azure)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: BackendSecurityPolicy
 metadata:
@@ -34,8 +50,8 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-primary
-  type: APIKey
-  apiKey:
+  type: AzureAPIKey
+  azureAPIKey:
     secretRef:
       name: azure-primary-secret
       namespace: envoy-ai-gateway-system
@@ -48,13 +64,13 @@ metadata:
 spec:
   schema:
     name: AzureOpenAI
-    version: "2024-10-21"
+    version: "2025-01-01-preview"
   backendRef:
     name: azure-secondary
     kind: Backend
     group: gateway.envoyproxy.io
 ---
-# Backend service for Azure: secondary
+# Backend endpoint for Azure: secondary
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: Backend
 metadata:
@@ -65,7 +81,23 @@ spec:
         hostname: ets-east-us2.openai.azure.com
         port: 443
 ---
-# BackendSecurityPolicy for API key authentication: secondary
+# BackendTLSPolicy for TLS validation to Azure endpoint: secondary
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-secondary-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-secondary
+  validation:
+    wellKnownCACertificates: System
+    hostname: ets-east-us2.openai.azure.com
+---
+# BackendSecurityPolicy for Azure API key authentication: secondary
+# Note: AzureAPIKey injects into 'api-key' header (Azure requirement)
+#       APIKey would inject into 'Authorization' header (wrong for Azure)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: BackendSecurityPolicy
 metadata:
@@ -75,8 +107,8 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-secondary
-  type: APIKey
-  apiKey:
+  type: AzureAPIKey
+  azureAPIKey:
     secretRef:
       name: azure-secondary-secret
       namespace: envoy-ai-gateway-system
@@ -95,7 +127,7 @@ spec:
     kind: Backend
     group: gateway.envoyproxy.io
 ---
-# Backend service for Azure: cohere
+# Backend endpoint for Azure: cohere
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: Backend
 metadata:
@@ -106,7 +138,23 @@ spec:
         hostname: aan-cohere-rerank-v3-5.eastus.models.ai.azure.com
         port: 443
 ---
-# BackendSecurityPolicy for API key authentication: cohere
+# BackendTLSPolicy for TLS validation to Azure endpoint: cohere
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-cohere-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-cohere
+  validation:
+    wellKnownCACertificates: System
+    hostname: aan-cohere-rerank-v3-5.eastus.models.ai.azure.com
+---
+# BackendSecurityPolicy for Azure API key authentication: cohere
+# Note: AzureAPIKey injects into 'api-key' header (Azure requirement)
+#       APIKey would inject into 'Authorization' header (wrong for Azure)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: BackendSecurityPolicy
 metadata:
@@ -116,6 +164,7 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-cohere
+  # Non-Azure schemas (Cohere, Anthropic via Azure) use standard APIKey
   type: APIKey
   apiKey:
     secretRef:
