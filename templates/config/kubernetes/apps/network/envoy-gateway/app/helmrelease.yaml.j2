@@ -14,9 +14,12 @@ spec:
     config:
       envoyGateway:
 #% if ai_gateway_enabled %#
-        # Enable Backend API for AI Gateway to route to external backends
+        # Enable extension APIs for AI Gateway
+        # - enableBackend: Required for routing to external backends (Backend CRD)
+        # - enableEnvoyPatchPolicy: Required for AI Gateway to inject ext_proc filter
         extensionApis:
           enableBackend: true
+          enableEnvoyPatchPolicy: true
 #% endif %#
         provider:
           type: Kubernetes
