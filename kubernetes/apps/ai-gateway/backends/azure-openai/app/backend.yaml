@@ -10,7 +10,8 @@ spec:
     version: "2024-10-21"
   backendRef:
     name: azure-primary
-    port: 443
+    kind: Backend
+    group: gateway.envoyproxy.io
 ---
 # Backend service for Azure: primary
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -49,7 +50,8 @@ spec:
     version: "2024-10-21"
   backendRef:
     name: azure-secondary
-    port: 443
+    kind: Backend
+    group: gateway.envoyproxy.io
 ---
 # Backend service for Azure: secondary
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -88,7 +90,8 @@ spec:
     version: "v2"
   backendRef:
     name: azure-cohere
-    port: 443
+    kind: Backend
+    group: gateway.envoyproxy.io
 ---
 # Backend service for Azure: cohere
 apiVersion: gateway.envoyproxy.io/v1alpha1

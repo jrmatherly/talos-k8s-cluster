@@ -9,11 +9,8 @@ spec:
     - name: ai-gateway
       kind: Gateway
       group: gateway.networking.k8s.io
-  rules:
-    - backendRefs:
-        - name: mcp-context7
-          kind: Backend
-          group: gateway.envoyproxy.io
-      mcpServer:
-        name: context7
-        path: /mcp
+  backendRefs:
+    - name: mcp-context7
+      kind: Backend
+      group: gateway.envoyproxy.io
+      path: "/mcp"

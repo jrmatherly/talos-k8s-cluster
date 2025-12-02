@@ -21,7 +21,8 @@ spec:
 #% endif %#
   backendRef:
     name: azure-#{ deployment.name }#
-    port: 443
+    kind: Backend
+    group: gateway.envoyproxy.io
 ---
 # Backend service for Azure: #{ deployment.name }#
 apiVersion: gateway.envoyproxy.io/v1alpha1
