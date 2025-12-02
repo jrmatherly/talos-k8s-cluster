@@ -45,6 +45,7 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-#{ deployment.name }#
+  type: APIKey
   apiKey:
     secretRef:
       name: azure-#{ deployment.name }#-secret
