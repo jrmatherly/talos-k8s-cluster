@@ -187,18 +187,6 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("proxmox_region", "talos-k8s")
         data.setdefault("proxmox_storage", "local-lvm")
 
-        # Envoy AI Gateway defaults
-        data.setdefault("ai_gateway_enabled", False)
-        data.setdefault("ai_gateway_version", "v0.4.0")
-        data.setdefault("ai_gateway_namespace", "envoy-ai-gateway-system")
-        # Default to cluster_gateway_addr if ai_gateway_addr not specified
-        data.setdefault("ai_gateway_addr", data.get("cluster_gateway_addr", ""))
-        data.setdefault("ai_gateway_azure_deployments", [])
-        data.setdefault("ai_gateway_mcp_enabled", False)
-        data.setdefault("ai_gateway_mcp_servers", [])
-        data.setdefault("ai_gateway_ratelimit_enabled", False)
-        data.setdefault("ai_gateway_ratelimit_default_limit", 100000)
-
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

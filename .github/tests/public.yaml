@@ -31,26 +31,3 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens (Approach B only)
 proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
-
-# AI Gateway Integration (optional - full testing)
-ai_gateway_enabled: true
-ai_gateway_version: "v0.4.0"
-ai_gateway_addr: "10.10.10.250"
-ai_gateway_azure_deployments:
-  - name: "test-primary"
-    host: "test-resource.openai.azure.com"
-    api_key: "fake-api-key"
-    models: ["gpt-4", "gpt-4o"]
-  - name: "test-secondary"
-    host: "test-resource-2.openai.azure.com"
-    api_key: "fake-api-key-2"
-    models: ["gpt-35-turbo"]
-ai_gateway_ratelimit_enabled: true
-ai_gateway_ratelimit_default_limit: 50000
-ai_gateway_mcp_enabled: true
-ai_gateway_mcp_servers:
-  - name: "test-github"
-    host: "api.githubcopilot.com"
-    path: "/mcp/readonly"
-    api_key: "fake-token"
-    tool_filter: [".*issues?.*"]
