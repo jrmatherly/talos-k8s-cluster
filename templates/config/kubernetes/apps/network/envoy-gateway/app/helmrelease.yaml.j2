@@ -20,9 +20,18 @@ spec:
         extensionApis:
           enableBackend: true
           enableEnvoyPatchPolicy: true
+        # Disable XDSNameSchemeV2 for AI Gateway v0.4.0 compatibility
+        # In EG v1.6, listener names changed from "namespace/gateway/section" to "port/protocol"
+        # AI Gateway extension manager expects the old naming scheme
+        runtimeFlags:
+          disabled:
+            - XDSNameSchemeV2
         # Extension manager for AI Gateway to hook into xDS translation
         # This allows AI Gateway controller to inject ext_proc filter for request/response transformation
         extensionManager:
+          # failOpen: true allows xDS to continue even if extension errors occur
+          # This helps diagnose issues - errors are logged but config is still pushed
+          failOpen: true
           hooks:
             xdsTranslator:
               translation:
