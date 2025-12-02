@@ -32,7 +32,7 @@
 
 ```bash
 helm upgrade -i eg oci://docker.io/envoyproxy/gateway-helm \
-  --version v0.0.0-latest \
+  --version v0.4.0 \
   --namespace envoy-gateway-system \
   --create-namespace \
   -f https://raw.githubusercontent.com/envoyproxy/ai-gateway/main/manifests/envoy-gateway-values.yaml
@@ -50,7 +50,7 @@ Both installed via additional `-f` flags with addon values files.
 
 ```bash
 helm upgrade -i aieg-crd oci://docker.io/envoyproxy/ai-gateway-crds-helm \
-  --version v0.0.0-latest \
+  --version v0.4.0 \
   --namespace envoy-ai-gateway-system \
   --create-namespace
 ```
@@ -59,7 +59,7 @@ helm upgrade -i aieg-crd oci://docker.io/envoyproxy/ai-gateway-crds-helm \
 
 ```bash
 helm upgrade -i aieg oci://docker.io/envoyproxy/ai-gateway-helm \
-  --version v0.0.0-latest \
+  --version v0.4.0 \
   --namespace envoy-ai-gateway-system \
   --create-namespace
 ```
@@ -94,7 +94,7 @@ If only `ai-gateway-helm` was installed (no separate CRD chart):
 
 ```bash
 helm upgrade -i aieg-crd oci://docker.io/envoyproxy/ai-gateway-crds-helm \
-  --version v0.0.0-latest \
+  --version v0.4.0 \
   --namespace envoy-ai-gateway-system \
   --take-ownership
 ```

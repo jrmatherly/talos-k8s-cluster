@@ -13,6 +13,11 @@ spec:
       imageRegistry: mirror.gcr.io
     config:
       envoyGateway:
+#% if ai_gateway_enabled %#
+        # Enable Backend API for AI Gateway to route to external backends
+        extensionApis:
+          enableBackend: true
+#% endif %#
         provider:
           type: Kubernetes
           kubernetes:

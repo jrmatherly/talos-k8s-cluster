@@ -2,6 +2,8 @@
 
 This addendum documents additional changes required across the project that were not captured in the original implementation plan.
 
+> **Implementation Status**: Successfully deployed December 2025. See [Deployment Lessons Learned](#deployment-lessons-learned) for critical fixes discovered during deployment.
+
 ## Version Update
 
 **Important**: The latest stable version is **v0.4.0** (released November 8, 2025), not the previously noted version. Update all references accordingly.
@@ -435,3 +437,199 @@ For initial implementation, AI Gateway resources can be skipped by kubeconform's
 4. **Flux Entry Point** (ks.yaml.j2 update)
 5. **Documentation** (README.md, CLAUDE.md)
 6. **Validation** (run `task configure` with test config)
+
+---
+
+## Deployment Lessons Learned
+
+> **Date**: December 2025
+> **Version**: Envoy AI Gateway v0.4.0
+
+The following critical issues were discovered and resolved during production deployment:
+
+### Issue 1: AIGatewayRoute backendRefs Validation Failure
+
+**Symptom**: Kustomization `ai-gateway-routes` fails with:
+```
+only InferencePool from inference.networking.k8s.io group is supported
+```
+
+**Root Cause**: In v0.4.0, when `kind` and `group` are explicitly specified in AIGatewayRoute `backendRefs`, the controller ONLY accepts `InferencePool` (for self-hosted inference models). For managed services using `AIServiceBackend`, these fields must be **omitted** entirely.
+
+**Fix**: Remove explicit `kind` and `group` from backendRefs:
+```yaml
+# Wrong
+backendRefs:
+  - name: azure-primary
+    kind: AIServiceBackend
+    group: aigateway.envoyproxy.io
+
+# Correct
+backendRefs:
+  - name: azure-primary
+```
+
+### Issue 2: Azure Authentication Failure (Wrong Header)
+
+**Symptom**: 401 Unauthorized responses from Azure OpenAI despite valid API key.
+
+**Root Cause**: `type: APIKey` injects the key into the `Authorization: Bearer <key>` header. Azure OpenAI requires the key in the `api-key` header.
+
+**Fix**: Use `type: AzureAPIKey` with `azureAPIKey.secretRef`:
+```yaml
+spec:
+  type: AzureAPIKey
+  azureAPIKey:
+    secretRef:
+      name: azure-secret
+      namespace: envoy-ai-gateway-system
+```
+
+### Issue 3: Missing BackendTLSPolicy
+
+**Symptom**: TLS handshake failures to Azure/MCP endpoints.
+
+**Root Cause**: v0.4.0 requires explicit BackendTLSPolicy for TLS validation on outbound connections.
+
+**Fix**: Create BackendTLSPolicy for each Backend:
+```yaml
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-primary-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-primary
+  validation:
+    wellKnownCACertificates: System
+    hostname: my-resource.openai.azure.com
+```
+
+### Issue 4: Rate Limiting Not Working
+
+**Symptom**: Token-based rate limits not enforced despite BackendTrafficPolicy configured.
+
+**Root Cause**: Two issues:
+1. Missing `llmRequestCosts` in AIGatewayRoute to track token usage
+2. Missing Redis rate limit backend configuration in Envoy Gateway
+
+**Fix**:
+1. Add to AIGatewayRoute:
+    ```yaml
+    spec:
+    llmRequestCosts:
+        - metadataKey: llm_input_token
+        type: InputToken
+        - metadataKey: llm_output_token
+        type: OutputToken
+        - metadataKey: llm_total_token
+        type: TotalToken
+    ```
+
+2. Add to Envoy Gateway HelmRelease values:
+    ```yaml
+    config:
+    envoyGateway:
+        rateLimit:
+        backend:
+            type: Redis
+            redis:
+            url: redis.envoy-ai-gateway-system.svc.cluster.local:6379
+    ```
+
+### Issue 5: HTTPRoute Service Name Mismatch
+
+**Symptom**: External HTTPRoute returns 503/no healthy upstream.
+
+**Root Cause**: Service name created by Envoy Gateway matches the Gateway name (`ai-gateway`), not a custom pattern.
+
+**Fix**: Reference `ai-gateway` service, port 80:
+```yaml
+backendRefs:
+  - name: ai-gateway
+    namespace: envoy-ai-gateway-system
+    kind: Service
+    port: 80
+```
+
+### Deployed Template Structure
+
+The final deployed templates in `templates/config/kubernetes/apps/ai-gateway/`:
+
+```
+ai-gateway/
+├── ks.yaml.j2                    # Parent Kustomization
+├── crds/
+│   ├── ks.yaml.j2
+│   └── app/
+│       ├── kustomization.yaml.j2
+│       ├── helmrelease.yaml.j2
+│       └── ocirepository.yaml.j2
+├── controller/
+│   ├── ks.yaml.j2
+│   └── app/
+│       ├── kustomization.yaml.j2
+│       ├── helmrelease.yaml.j2
+│       ├── ocirepository.yaml.j2
+│       └── gateway.yaml.j2       # AI Gateway resource
+├── redis/
+│   ├── ks.yaml.j2
+│   └── app/
+│       ├── kustomization.yaml.j2
+│       └── deployment.yaml.j2
+├── backends/
+│   └── azure-openai/
+│       ├── ks.yaml.j2
+│       └── app/
+│           ├── kustomization.yaml.j2
+│           ├── backend.yaml.j2   # AIServiceBackend + Backend + BackendTLSPolicy + BackendSecurityPolicy
+│           └── secret.sops.yaml.j2
+├── mcp/
+│   ├── ks.yaml.j2
+│   └── app/
+│       ├── kustomization.yaml.j2
+│       ├── backend.yaml.j2       # Backend + BackendTLSPolicy + BackendSecurityPolicy
+│       ├── mcproute.yaml.j2
+│       └── secret.sops.yaml.j2
+└── routes/
+    ├── ks.yaml.j2
+    └── app/
+        ├── kustomization.yaml.j2
+        ├── aigatewayroute.yaml.j2  # AIGatewayRoute with llmRequestCosts
+        ├── httproute.yaml.j2       # External access route
+        └── ratelimit-policy.yaml.j2
+```
+
+### Key Configuration Differences from Plan
+
+| Aspect | Original Plan | Actual Implementation |
+|--------|--------------|----------------------|
+| Gateway name | `envoy-ai-gateway` | `ai-gateway` |
+| BackendSecurityPolicy type | `APIKey` | `AzureAPIKey` (for Azure) |
+| backendRefs in AIGatewayRoute | Explicit kind/group | Name only |
+| BackendTLSPolicy | Not mentioned | Required for all backends |
+| llmRequestCosts | Not in route | Required for rate limiting |
+| Envoy Gateway rateLimit | Not configured | Redis backend required |
+| AIServiceBackend structure | Direct host spec | backendRef to Backend resource |
+
+### Verification Commands
+
+After deployment, verify with:
+```bash
+# Check all Kustomizations are Ready
+kubectl get ks -n envoy-ai-gateway-system
+
+# Check all CRDs are Accepted
+kubectl get aigatewayroutes,aiservicebackends,backendsecuritypolicies -n envoy-ai-gateway-system
+
+# Check Gateway is Programmed
+kubectl get gateways -n envoy-ai-gateway-system
+
+# Check pods are running
+kubectl get pods -n envoy-ai-gateway-system
+
+# Check BackendTLSPolicies exist
+kubectl get backendtlspolicies -n envoy-ai-gateway-system
+```

@@ -305,6 +305,7 @@ For AI/LLM traffic management, add to `cluster.yaml`:
       host: "my-resource.openai.azure.com"
       api_key: "your-api-key"
       models: ["gpt-4", "gpt-4o"]
+      schema_name: "AzureOpenAI"  # Optional: AzureOpenAI (default), Cohere, etc.
   ```
 - `ai_gateway_mcp_enabled` - Enable MCP gateway (default: false)
 - `ai_gateway_mcp_servers` - Array of MCP server configurations
@@ -314,6 +315,30 @@ For AI/LLM traffic management, add to `cluster.yaml`:
 **API Endpoint**: `aiops.<domain>` routes to AI Gateway.
 
 **Note:** AI Gateway templates are conditionally rendered only when `ai_gateway_enabled` is true.
+
+### AI Gateway Architecture
+
+Envoy AI Gateway is an **extension** to Envoy Gateway (not a replacement):
+- **Envoy Gateway**: Base component managing Gateway resources and Envoy proxy deployments
+- **Envoy AI Gateway**: Extension controller adding AI-specific CRDs (AIGatewayRoute, AIServiceBackend, etc.)
+
+Both components work together - AI Gateway configures the Envoy proxies created by Envoy Gateway.
+
+### Key v0.4.0 API Notes
+
+When working with AI Gateway templates, be aware of these critical v0.4.0 behaviors:
+
+1. **AIGatewayRoute backendRefs**: Do NOT specify `kind` or `group` - they default to AIServiceBackend. Explicit specification triggers InferencePool-only validation.
+
+2. **BackendSecurityPolicy types**:
+   - `AzureAPIKey` - Injects into `api-key` header (required for Azure OpenAI)
+   - `APIKey` - Injects into `Authorization` header (for Cohere, standard APIs)
+
+3. **BackendTLSPolicy**: Required for each Backend connecting to TLS endpoints (Azure, MCP servers).
+
+4. **llmRequestCosts**: Required in AIGatewayRoute for token-based rate limiting to work.
+
+See `docs/envoy-ai-gateway-research/IMPLEMENTATION-PLAN.md` for complete details.
 
 ## Important Warnings
 

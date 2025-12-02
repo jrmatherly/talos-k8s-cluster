@@ -142,7 +142,7 @@ config:
 ```bash
 # Install Envoy Gateway with both addons
 helm upgrade -i eg oci://docker.io/envoyproxy/gateway-helm \
-  --version v0.0.0-latest \
+  --version v0.4.0 \
   --namespace envoy-gateway-system \
   --create-namespace \
   -f https://raw.githubusercontent.com/envoyproxy/ai-gateway/main/manifests/envoy-gateway-values.yaml \

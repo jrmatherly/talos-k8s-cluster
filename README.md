@@ -461,12 +461,13 @@ These tools offer a variety of solutions to meet your persistent storage needs, 
 
 ### AI Gateway (Optional)
 
-For AI/LLM workload management, this template includes optional [Envoy AI Gateway](https://aigateway.envoyproxy.io/) integration:
+For AI/LLM workload management, this template includes optional [Envoy AI Gateway](https://aigateway.envoyproxy.io/) v0.4.0 integration:
 
 - **Multiple Azure OpenAI deployments** with model-based routing via `x-ai-eg-model` header
 - **MCP (Model Context Protocol)** gateway for agent tool integration
 - **Token-based rate limiting** via Redis (per-user limits based on actual token consumption)
 - **Unified API endpoint** at `aiops.<domain>`
+- **TLS validation** with BackendTLSPolicy for secure backend connections
 
 Enable by setting `ai_gateway_enabled: true` in `cluster.yaml` and configuring your Azure OpenAI deployments:
 
@@ -479,9 +480,15 @@ ai_gateway_azure_deployments:
     models: ["gpt-4", "gpt-4o"]
 ai_gateway_ratelimit_enabled: true
 ai_gateway_mcp_enabled: true
+ai_gateway_mcp_servers:
+  - name: "context7"
+    host: "mcp.context7.io"
+    path: "/mcp"
 ```
 
-See the [cluster.sample.yaml](./.taskfiles/template/resources/cluster.sample.yaml) comments for detailed configuration options.
+**Architecture Note**: Envoy AI Gateway extends (not replaces) the existing Envoy Gateway deployment. Both components work together - AI Gateway adds AI-specific CRDs while Envoy Gateway manages the underlying proxy infrastructure.
+
+See the [cluster.sample.yaml](./.taskfiles/template/resources/cluster.sample.yaml) comments for detailed configuration options and `docs/envoy-ai-gateway-research/` for implementation details.
 
 ### Community Repositories
 

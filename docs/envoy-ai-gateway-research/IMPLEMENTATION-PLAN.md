@@ -4,6 +4,8 @@
 
 This document outlines the implementation plan for integrating Envoy AI Gateway into the Talos Kubernetes Cluster template. The AI Gateway extends the existing Envoy Gateway deployment with AI/LLM traffic management capabilities.
 
+> **IMPORTANT - v0.4.0 API Changes**: This plan has been updated based on actual deployment experience. See the [Critical v0.4.0 Fixes](#critical-v040-fixes) section for essential corrections to the original API specifications.
+
 ## Current State Analysis
 
 ### Existing Infrastructure
@@ -839,6 +841,197 @@ Azure OpenAI uses API Key authentication (not Entra ID OIDC in this implementati
 
 ### API Version
 Using `2025-01-01-preview` schema version for latest features.
+
+## Critical v0.4.0 Fixes
+
+> **Status**: These fixes have been validated in production deployment (December 2025).
+
+The following critical corrections were discovered during actual v0.4.0 deployment and must be applied:
+
+### 1. AIGatewayRoute backendRefs - DO NOT Specify kind/group
+
+**Problem**: When `kind` and `group` are explicitly specified in AIGatewayRoute backendRefs, the controller only accepts `InferencePool` (for self-hosted models). For managed services like Azure OpenAI using `AIServiceBackend`, these fields must be **omitted**.
+
+**Error Message**:
+```
+only InferencePool from inference.networking.k8s.io group is supported
+```
+
+**Wrong** (causes validation failure):
+```yaml
+backendRefs:
+  - name: azure-primary
+    kind: AIServiceBackend
+    group: aigateway.envoyproxy.io
+```
+
+**Correct** (works with AIServiceBackend):
+```yaml
+backendRefs:
+  - name: azure-primary
+  # Do NOT specify kind or group - they default correctly to AIServiceBackend
+```
+
+### 2. BackendSecurityPolicy - Use AzureAPIKey Type for Azure
+
+**Problem**: Azure OpenAI requires the API key in the `api-key` header, not the `Authorization` header.
+
+- `type: APIKey` → Injects into `Authorization: Bearer <key>` header (wrong for Azure)
+- `type: AzureAPIKey` → Injects into `api-key: <key>` header (correct for Azure)
+
+**Wrong**:
+```yaml
+spec:
+  type: APIKey
+  apiKey:
+    secretRef:
+      name: azure-secret
+```
+
+**Correct**:
+```yaml
+spec:
+  type: AzureAPIKey
+  azureAPIKey:
+    secretRef:
+      name: azure-secret
+      namespace: envoy-ai-gateway-system
+```
+
+> **Note**: For non-Azure schemas (Cohere, Anthropic via Azure AI), use `type: APIKey` as they expect the standard Authorization header.
+
+### 3. BackendTLSPolicy Required for TLS Backends
+
+**Problem**: Without BackendTLSPolicy, TLS validation fails for outbound connections to Azure/MCP endpoints.
+
+**Required for each Backend**:
+```yaml
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-primary-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-primary
+  validation:
+    wellKnownCACertificates: System
+    hostname: my-resource.openai.azure.com
+```
+
+### 4. AIServiceBackend Structure Change
+
+**v0.4.0 Structure** (backendRef references separate Backend resource):
+```yaml
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: azure-primary
+spec:
+  schema:
+    name: AzureOpenAI
+    version: "2025-01-01-preview"
+  backendRef:
+    name: azure-primary
+    kind: Backend
+    group: gateway.envoyproxy.io
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-primary
+spec:
+  endpoints:
+    - fqdn:
+        hostname: my-resource.openai.azure.com
+        port: 443
+```
+
+### 5. llmRequestCosts Required for Token-Based Rate Limiting
+
+**Problem**: Rate limiting by token consumption requires explicit `llmRequestCosts` configuration in AIGatewayRoute.
+
+**Required in AIGatewayRoute**:
+```yaml
+spec:
+  llmRequestCosts:
+    - metadataKey: llm_input_token
+      type: InputToken
+    - metadataKey: llm_output_token
+      type: OutputToken
+    - metadataKey: llm_total_token
+      type: TotalToken
+```
+
+**BackendTrafficPolicy must reference the metadata key**:
+```yaml
+cost:
+  response:
+    from: Metadata
+    metadata:
+      namespace: "io.envoy.ai_gateway"
+      key: "llm_total_token"  # Must match llmRequestCosts metadataKey
+```
+
+### 6. HTTPRoute Service Name
+
+**Problem**: The service created by Envoy Gateway for the AI Gateway matches the Gateway name, not a custom pattern.
+
+**Gateway name**: `ai-gateway`
+**Service created**: `ai-gateway` (in same namespace)
+
+**Correct HTTPRoute backendRef**:
+```yaml
+backendRefs:
+  - name: ai-gateway  # Matches Gateway metadata.name
+    namespace: envoy-ai-gateway-system
+    kind: Service
+    port: 80
+```
+
+### 7. Envoy Gateway Rate Limit Backend Configuration
+
+**Problem**: Token-based rate limiting requires Redis configuration in the base Envoy Gateway HelmRelease.
+
+**Add to Envoy Gateway values**:
+```yaml
+config:
+  envoyGateway:
+    provider:
+      type: Kubernetes
+      kubernetes:
+        rateLimitDeployment:
+          patch:
+            type: StrategicMerge
+            value:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: envoy-ratelimit
+                        imagePullPolicy: IfNotPresent
+    rateLimit:
+      backend:
+        type: Redis
+        redis:
+          url: redis.envoy-ai-gateway-system.svc.cluster.local:6379
+```
+
+---
+
+## Architecture Clarification
+
+**Q: Does Envoy AI Gateway duplicate Envoy Gateway?**
+
+**A: No.** Envoy AI Gateway is an **extension** that requires Envoy Gateway as a base:
+
+- **Envoy Gateway**: Base component that manages Gateway resources, creates Envoy proxy deployments
+- **Envoy AI Gateway**: Extension controller that adds AI-specific CRDs (AIGatewayRoute, AIServiceBackend, etc.)
+
+They are **complementary**, not redundant. The AI Gateway controller watches its custom resources and configures the Envoy proxies created by Envoy Gateway.
+
+---
 
 ## Next Steps
 
