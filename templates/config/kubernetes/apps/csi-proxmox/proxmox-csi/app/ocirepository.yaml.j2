@@ -1,3 +1,4 @@
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
@@ -12,3 +13,4 @@ spec:
     # Helm chart version (not app version) - check releases for latest
     tag: 0.5.1
   url: oci://ghcr.io/sergelogvinov/charts/proxmox-csi-plugin
+#% endif %#

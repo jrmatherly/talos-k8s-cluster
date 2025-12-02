@@ -31,3 +31,9 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens (Approach B only)
 proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
+# Devtron Kubernetes Management Platform (optional)
+devtron_enabled: true
+devtron_hostname: "devtron"
+devtron_storage_class: "proxmox-csi"
+devtron_gateway: "external"
+devtron_flux_integration: true

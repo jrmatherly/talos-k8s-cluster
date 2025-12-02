@@ -1,9 +1,7 @@
-#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: csi-proxmox
+  name: devtroncd
   labels:
     pod-security.kubernetes.io/enforce: privileged
-#% endif %#

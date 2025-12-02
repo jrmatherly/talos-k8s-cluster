@@ -1,0 +1,12 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmChart
+metadata:
+  name: devtron-operator
+spec:
+  chart: devtron-operator
+  interval: 1h
+  reconcileStrategy: ChartVersion
+  sourceRef:
+    kind: HelmRepository
+    name: devtron

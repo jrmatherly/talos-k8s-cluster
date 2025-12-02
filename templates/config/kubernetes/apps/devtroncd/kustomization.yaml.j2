@@ -1,13 +1,13 @@
-#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+#% if devtron_enabled %#
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: csi-proxmox
+namespace: devtroncd
 
 components:
   - ../../components/sops
 
 resources:
   - ./namespace.yaml
-  - ./proxmox-csi/ks.yaml
+  - ./devtron/ks.yaml
 #% endif %#

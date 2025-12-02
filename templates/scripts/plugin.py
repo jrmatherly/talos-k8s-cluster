@@ -187,6 +187,13 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("proxmox_region", "talos-k8s")
         data.setdefault("proxmox_storage", "local-lvm")
 
+        # Devtron defaults
+        data.setdefault("devtron_enabled", False)
+        data.setdefault("devtron_hostname", "devtron")
+        data.setdefault("devtron_gateway", "external")
+        data.setdefault("devtron_flux_integration", True)
+        # Note: devtron_storage_class has no default (uses cluster default StorageClass)
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

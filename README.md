@@ -445,7 +445,9 @@ For a more streamlined approach to those issues, consider [External Secrets](htt
 
 ### Storage
 
-If your workloads require persistent storage with features like replication or connectivity to NFS, SMB, or iSCSI servers, there are several projects worth exploring:
+**Included (optional):** This template includes [Proxmox CSI](https://github.com/sergelogvinov/proxmox-csi-plugin) for dynamic persistent volume provisioning from Proxmox storage pools. Enable it by configuring the `proxmox_csi_*` variables in `cluster.yaml`. See `docs/proxmox-csi-implementation.md` for details.
+
+If your workloads require other storage solutions with features like replication or connectivity to NFS, SMB, or iSCSI servers, there are several projects worth exploring:
 
 - [rook-ceph](https://github.com/rook/rook)
 - [longhorn](https://github.com/longhorn/longhorn)
@@ -455,7 +457,11 @@ If your workloads require persistent storage with features like replication or c
 - [csi-driver-smb](https://github.com/kubernetes-csi/csi-driver-smb)
 - [synology-csi](https://github.com/SynologyOpenSource/synology-csi)
 
-These tools offer a variety of solutions to meet your persistent storage needs, whether you’re using cloud-native or self-hosted infrastructures.
+These tools offer a variety of solutions to meet your persistent storage needs, whether you're using cloud-native or self-hosted infrastructures.
+
+### Kubernetes Management
+
+**Included (optional):** This template includes [Devtron](https://devtron.ai/) Freemium, a Kubernetes management platform that provides release orchestration, resource monitoring, RBAC, and GitOps integration with a web-based dashboard. Enable it by setting `devtron_enabled: true` in `cluster.yaml`. See `docs/devtron-docs/IMPLEMENTATION-PLAN.md` for details.
 
 ### Community Repositories
 

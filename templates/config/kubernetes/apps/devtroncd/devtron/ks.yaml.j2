@@ -1,0 +1,29 @@
+#% if devtron_enabled %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: devtron
+spec:
+  dependsOn:
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+    - name: proxmox-csi
+      namespace: csi-proxmox
+#% endif %#
+    - name: envoy-gateway
+      namespace: network
+  interval: 1h
+  path: ./kubernetes/apps/devtroncd/devtron/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: devtroncd
+  timeout: 30m
+  wait: false
+#% endif %#
