@@ -20,6 +20,28 @@ spec:
         extensionApis:
           enableBackend: true
           enableEnvoyPatchPolicy: true
+        # Extension manager for AI Gateway to hook into xDS translation
+        # This allows AI Gateway controller to inject ext_proc filter for request/response transformation
+        extensionManager:
+          hooks:
+            xdsTranslator:
+              translation:
+                listener:
+                  includeAll: true
+                route:
+                  includeAll: true
+                cluster:
+                  includeAll: true
+                secret:
+                  includeAll: true
+              post:
+                - Translation
+                - Cluster
+                - Route
+          service:
+            fqdn:
+              hostname: ai-gateway-controller.#{ ai_gateway_namespace }#.svc.cluster.local
+              port: 1063
 #% endif %#
         provider:
           type: Kubernetes
