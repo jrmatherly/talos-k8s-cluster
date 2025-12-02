@@ -1,5 +1,6 @@
 ---
 # AIGatewayRoute for Azure AI model routing
+# Note: schema field was removed in v0.4.0 - API schema is now defined in AIServiceBackend
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: AIGatewayRoute
 metadata:
@@ -9,10 +10,6 @@ spec:
     - name: ai-gateway
       kind: Gateway
       group: gateway.networking.k8s.io
-  # Input schema - clients use OpenAI-compatible API
-  schema:
-    name: OpenAI
-    version: v1
   rules:
     # Route for model: gpt-4.1 via deployment: primary
     - matches:
