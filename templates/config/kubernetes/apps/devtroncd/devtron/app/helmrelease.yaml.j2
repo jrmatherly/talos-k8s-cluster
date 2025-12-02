@@ -20,7 +20,7 @@ spec:
 #% endif %#
     configs:
       BASE_URL_SCHEME: "HTTPS"
-      BASE_URL: "#{ devtron_hostname }#.${SECRET_DOMAIN}"
+      BASE_URL: "#{ devtron_hostname }#.#{ primary_domain }#"
       BLOB_STORAGE_PROVIDER: "MINIO"
 #% if devtron_flux_integration %#
       FEATURE_LINK_EXTERNAL_FLUX_ENABLE: "true"

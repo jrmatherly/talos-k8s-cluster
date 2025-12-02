@@ -5,7 +5,7 @@ kind: HTTPRoute
 metadata:
   name: devtron-dashboard
 spec:
-  hostnames: ["#{ devtron_hostname }#.${SECRET_DOMAIN}"]
+  hostnames: ["#{ devtron_hostname }#.#{ primary_domain }#"]
   parentRefs:
     - name: envoy-#{ devtron_gateway }#
       namespace: network

@@ -4,7 +4,7 @@ kind: HTTPRoute
 metadata:
   name: devtron-dashboard
 spec:
-  hostnames: ["devtron.${SECRET_DOMAIN}"]
+  hostnames: ["devtron.matherly.net"]
   parentRefs:
     - name: envoy-external
       namespace: network

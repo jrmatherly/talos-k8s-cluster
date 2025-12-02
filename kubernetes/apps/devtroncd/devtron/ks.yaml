@@ -11,10 +11,10 @@ spec:
       namespace: network
   interval: 1h
   path: ./kubernetes/apps/devtroncd/devtron/app
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+  # NOTE: postBuild substitution is intentionally omitted for Devtron.
+  # The Devtron Helm chart uses ${...} variable syntax internally (e.g., ${PG_DATABASE})
+  # which conflicts with Flux's postBuild substitution, causing duplicate YAML key errors.
+  # Domain values are hardcoded in templates using Jinja2's primary_domain variable.
   prune: true
   sourceRef:
     kind: GitRepository

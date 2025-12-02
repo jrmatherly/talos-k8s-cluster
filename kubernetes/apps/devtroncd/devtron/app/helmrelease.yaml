@@ -17,7 +17,7 @@ spec:
       storageClass: "proxmox-csi"
     configs:
       BASE_URL_SCHEME: "HTTPS"
-      BASE_URL: "devtron.${SECRET_DOMAIN}"
+      BASE_URL: "devtron.matherly.net"
       BLOB_STORAGE_PROVIDER: "MINIO"
       FEATURE_LINK_EXTERNAL_FLUX_ENABLE: "true"
       FEATURE_FLUX_DEPLOYMENTS_ENABLE: "true"
