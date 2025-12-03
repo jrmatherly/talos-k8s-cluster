@@ -158,6 +158,13 @@ Required fields:
 - `cloudflare_domain` - Primary domain (string or array)
 - `cloudflare_token` - Cloudflare API token
 
+Optional fields for Kgateway/AgentGateway (AI/LLM):
+- `agentgateway_addr` - AgentGateway LoadBalancer IP (enables kgateway-system)
+- `azure_openai_api_key` - Azure OpenAI API key (enables ai-system)
+- `azure_openai_resource_name` - Azure OpenAI resource name
+- `azure_openai_deployment_name` - Azure OpenAI deployment name
+- `azure_openai_api_version` - API version (default: "2025-04-01-preview")
+
 ### nodes.yaml (User Input)
 Each node requires:
 - `name` - Hostname (lowercase alphanumeric with hyphens)
@@ -285,6 +292,60 @@ For Proxmox persistent storage, add to `cluster.yaml`:
 Add topology labels to each node in `nodes.yaml` (see nodeLabels above).
 
 **Note:** CSI templates are conditionally rendered only when both `proxmox_csi_token_id` and `proxmox_csi_token_secret` are set.
+
+## Kgateway/AgentGateway Integration
+
+Kgateway provides AI/LLM gateway capabilities for routing to LLM providers like Azure OpenAI.
+
+### Architecture
+
+Kgateway runs alongside envoy-gateway (complement, not replace):
+- **envoy-gateway**: General HTTP/HTTPS ingress (internal + external via Cloudflare)
+- **kgateway/agentgateway**: AI workload routing (LLM providers)
+
+### Namespaces
+- `kgateway-system` - Control plane (kgateway, agentgateway pods)
+- `ai-system` - AI workloads (Backends, HTTPRoutes, secrets)
+
+### Configuration
+
+Enable by setting `agentgateway_addr` in `cluster.yaml`. Add Azure OpenAI credentials to enable the ai-system namespace:
+
+```yaml
+agentgateway_addr: "192.168.22.145"
+azure_openai_api_key: "your-api-key"
+azure_openai_resource_name: "your-resource-name"
+azure_openai_deployment_name: "gpt-4"
+```
+
+### Key Implementation Details
+
+1. **GatewayParameters**: Kgateway creates Services from Gateway resources. To pass Cilium LB IPAM annotations, use `GatewayParameters` with `spec.kube.service.extraAnnotations` and reference via `spec.infrastructure.parametersRef` in the Gateway.
+
+2. **TLS Listeners**: Kgateway requires exactly 1 certificateRef per HTTPS listener. Create separate listeners for each domain with hostname patterns (`*.matherly.net`, `*.spoonsofsalt.org`).
+
+3. **Backend CRD Schema (v2.1.1)**: Uses nested structure `spec.ai.llm.azureopenai` with fields: `endpoint`, `deploymentName`, `apiVersion`, `authToken`.
+
+4. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
+
+### Debugging Kgateway
+
+```bash
+# Check kgateway resources
+kubectl get ks -n kgateway-system
+kubectl get ks -n ai-system
+kubectl get gateway -n kgateway-system
+kubectl get gatewayparameters -n kgateway-system
+kubectl get backends.gateway.kgateway.dev -n ai-system
+kubectl get httproute -n ai-system
+
+# Check pods and services
+kubectl get pods -n kgateway-system
+kubectl get svc -n kgateway-system agentgateway
+
+# Verify Service has LB annotation
+kubectl get svc -n kgateway-system agentgateway -o jsonpath='{.metadata.annotations}'
+```
 
 ## Important Warnings
 

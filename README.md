@@ -16,6 +16,7 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
 - **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns) and [cloudflared](https://github.com/cloudflare/cloudflared).
+- **Optional components:** [kgateway](https://kgateway.dev/) with AgentGateway for AI/LLM routing (Azure OpenAI, etc.).
 
 **Other features include:**
 
@@ -458,6 +459,33 @@ If your workloads require other storage solutions with features like replication
 - [synology-csi](https://github.com/SynologyOpenSource/synology-csi)
 
 These tools offer a variety of solutions to meet your persistent storage needs, whether you're using cloud-native or self-hosted infrastructures.
+
+### AI/LLM Gateway (Kgateway with AgentGateway)
+
+**Included (optional):** This template includes [Kgateway](https://kgateway.dev/) with AgentGateway for AI/LLM traffic routing and management. AgentGateway provides:
+
+- **Unified API endpoint** for multiple LLM providers (Azure OpenAI, OpenAI, Anthropic, etc.)
+- **Traffic management** with rate limiting, failover, and load balancing
+- **Observability** for AI/LLM traffic patterns and usage
+
+Enable it by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# AI Gateway configuration (optional)
+agentgateway_addr: '192.168.1.145'  # LoadBalancer IP for AI Gateway
+
+# Azure OpenAI Backend (optional, requires agentgateway_addr)
+azure_openai_resource_name: 'your-resource'
+azure_openai_deployment_name: 'gpt-4o'
+azure_openai_api_version: '2025-04-01-preview'
+azure_openai_api_key: 'your-api-key'
+```
+
+When enabled, this deploys:
+- **kgateway-system namespace**: Kgateway CRDs, controller, and AgentGateway Gateway
+- **ai-system namespace**: Backend configurations and HTTPRoutes for LLM providers
+
+Access the AI Gateway endpoint at `https://ai.<domain>/v1/chat/completions` (requires split DNS or Cloudflare Tunnel).
 
 ### Community Repositories
 
