@@ -17,4 +17,3 @@ spec:
     hosts:
       - host: "aan-cohere-rerank-v3-5.eastus.models.ai.azure.com"
         port: 443
-        tls: true

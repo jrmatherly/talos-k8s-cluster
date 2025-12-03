@@ -1,0 +1,17 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: BackendConfigPolicy
+metadata:
+  name: azure-cohere-embed-tls
+  labels:
+    app.kubernetes.io/name: azure-cohere-embed
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  targetRefs:
+    - name: azure-cohere-embed
+      kind: Backend
+      group: gateway.kgateway.dev
+  tls:
+    sni: "aaronsai.services.ai.azure.com"
+    wellKnownCACertificates: System

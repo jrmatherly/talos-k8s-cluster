@@ -17,4 +17,3 @@ spec:
     hosts:
       - host: "aaronsai.services.ai.azure.com"
         port: 443
-        tls: true
