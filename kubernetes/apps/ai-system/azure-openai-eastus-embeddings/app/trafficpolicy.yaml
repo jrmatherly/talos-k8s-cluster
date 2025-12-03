@@ -9,18 +9,12 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus-embeddings
 
-  # Rate Limiting: 3,000 RPM, 500,000 TPM
-  policies:
-    localRateLimit:
-      - maxTokens: 500000
-        tokensPerFill: 8333
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 50
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 50
         tokensPerFill: 50
         fillInterval: 1s
-        type: requests
 
   timeouts:
     request: 60s

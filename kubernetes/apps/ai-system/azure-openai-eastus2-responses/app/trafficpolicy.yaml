@@ -9,18 +9,12 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus2-responses
 
-  # Rate Limiting: 8,240 RPM, 824,000 TPM (Azure GPT-5.1/Codex tier limits)
-  policies:
-    localRateLimit:
-      - maxTokens: 824000
-        tokensPerFill: 13733
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 137
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 137
         tokensPerFill: 137
         fillInterval: 1s
-        type: requests
 
   timeouts:
     request: 180s

@@ -9,17 +9,12 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus2-realtime
 
-  policies:
-    localRateLimit:
-      - maxTokens: 100000
-        tokensPerFill: 1666
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 1
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 1
         tokensPerFill: 1
         fillInterval: 2s
-        type: requests
 
   timeouts:
     request: 300s

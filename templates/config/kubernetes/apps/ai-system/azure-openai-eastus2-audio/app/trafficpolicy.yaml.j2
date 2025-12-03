@@ -11,19 +11,14 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus2-audio
 
-  #| Rate Limiting: 1,500 RPM, 250,000 TPM (Azure gpt-audio tier limits) #|
+  #| Rate Limiting: 1,500 RPM (Azure gpt-audio tier limits) #|
   #| Note: gpt-audio-mini has 200 RPM, 100k TPM #|
-  policies:
-    localRateLimit:
-      - maxTokens: 250000
-        tokensPerFill: 4166
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 25
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 25
         tokensPerFill: 25
         fillInterval: 1s
-        type: requests
 
   #| Audio processing may take longer; extended timeout #|
   timeouts:

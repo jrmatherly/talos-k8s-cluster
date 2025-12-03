@@ -12,18 +12,13 @@ spec:
       name: azure-openai-eastus2-responses
 
 #% if agentgateway_rate_limit_enabled | default(true) %#
-  # Rate Limiting: 8,240 RPM, 824,000 TPM (Azure GPT-5.1/Codex tier limits)
-  policies:
-    localRateLimit:
-      - maxTokens: 824000
-        tokensPerFill: 13733
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 137
+  #| Rate Limiting: 8,240 RPM (Azure GPT-5.1/Codex tier limits) #|
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 137
         tokensPerFill: 137
         fillInterval: 1s
-        type: requests
 #% endif %#
 
   timeouts:
@@ -38,6 +33,7 @@ spec:
       - reset
 
 #% if agentgateway_prompt_guard_enabled | default(true) %#
+  #| Prompt Guards - PII/sensitive data protection #|
   ai:
     promptGuard:
       request:

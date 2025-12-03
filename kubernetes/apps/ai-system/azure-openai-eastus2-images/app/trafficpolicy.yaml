@@ -9,12 +9,12 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus2-images
 
-  policies:
-    localRateLimit:
-      - maxTokens: 1
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 1
         tokensPerFill: 1
         fillInterval: 1s
-        type: requests
 
   timeouts:
     request: 120s

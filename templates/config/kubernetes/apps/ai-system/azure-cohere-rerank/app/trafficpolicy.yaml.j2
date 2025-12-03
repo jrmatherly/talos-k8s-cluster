@@ -12,13 +12,13 @@ spec:
       kind: HTTPRoute
       name: azure-cohere-rerank
 
-  # Rate Limiting: 1,000 RPM (conservative default)
-  policies:
-    localRateLimit:
-      - maxTokens: 17
+  #| Rate Limiting: 1,000 RPM (conservative default) #|
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 17
         tokensPerFill: 17
         fillInterval: 1s
-        type: requests
 
   timeouts:
     request: 60s

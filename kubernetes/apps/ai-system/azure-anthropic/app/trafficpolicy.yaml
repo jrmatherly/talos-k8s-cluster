@@ -9,18 +9,12 @@ spec:
       kind: HTTPRoute
       name: azure-anthropic
 
-  # Rate Limiting: 1,000 RPM, 1,000,000 TPM (Claude tier limits)
-  policies:
-    localRateLimit:
-      - maxTokens: 1000000
-        tokensPerFill: 16666
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 17
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 17
         tokensPerFill: 17
         fillInterval: 1s
-        type: requests
 
   timeouts:
     request: 180s

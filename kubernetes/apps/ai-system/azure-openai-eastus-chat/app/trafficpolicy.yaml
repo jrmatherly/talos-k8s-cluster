@@ -9,18 +9,12 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus-chat
 
-  # Rate Limiting: 2,000 RPM, 400,000 TPM (Azure GPT-4 tier limits)
-  policies:
-    localRateLimit:
-      - maxTokens: 400000
-        tokensPerFill: 6666
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 33
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 33
         tokensPerFill: 33
         fillInterval: 1s
-        type: requests
 
   timeouts:
     request: 120s

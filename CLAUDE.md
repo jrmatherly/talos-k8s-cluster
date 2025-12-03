@@ -64,7 +64,7 @@ This project uses **non-standard delimiters** to avoid conflicts with Helm/Go te
 |-----------|-------------|
 | Variables | `#{...}#`   |
 | Blocks    | `#%...%#`   |
-| Comments  | `#\|...\|#` |
+| Comments  | `#\|...#\|` |
 
 Example:
 ```yaml

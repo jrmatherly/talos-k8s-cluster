@@ -12,18 +12,13 @@ spec:
       name: azure-anthropic
 
 #% if agentgateway_rate_limit_enabled | default(true) %#
-  # Rate Limiting: 1,000 RPM, 1,000,000 TPM (Claude tier limits)
-  policies:
-    localRateLimit:
-      - maxTokens: 1000000
-        tokensPerFill: 16666
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      - maxTokens: 17
+  #| Rate Limiting: 1,000 RPM (Claude tier limits) #|
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 17
         tokensPerFill: 17
         fillInterval: 1s
-        type: requests
 #% endif %#
 
   timeouts:
@@ -38,6 +33,7 @@ spec:
       - reset
 
 #% if agentgateway_prompt_guard_enabled | default(true) %#
+  #| Prompt Guards - PII/sensitive data protection #|
   ai:
     promptGuard:
       request:

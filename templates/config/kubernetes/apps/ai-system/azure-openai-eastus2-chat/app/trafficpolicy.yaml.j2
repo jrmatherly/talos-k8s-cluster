@@ -12,27 +12,20 @@ spec:
       name: azure-openai-eastus2-chat
 
 #% if agentgateway_rate_limit_enabled | default(true) %#
-  # Rate Limiting: 4,500 RPM, 450,000 TPM (Azure GPT-5 tier limits)
-  policies:
-    localRateLimit:
-      # TPM limit (450,000 tokens per minute = 7,500 per second)
-      - maxTokens: 450000
-        tokensPerFill: 7500
-        fillInterval: 1s
-        type: tokens
-        tokenize: true
-      # RPM limit (4,500 requests per minute = 75 per second)
-      - maxTokens: 75
+  #| Rate Limiting: 4,500 RPM (Azure GPT-5 tier limits) #|
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 75
         tokensPerFill: 75
         fillInterval: 1s
-        type: requests
 #% endif %#
 
-  # Timeout: 120s for chat completions
+  #| Timeout: 120s for chat completions #|
   timeouts:
     request: 120s
 
-  # Retry Policy
+  #| Retry Policy #|
   retry:
     attempts: 3
     backoffBaseInterval: 1s
@@ -42,7 +35,7 @@ spec:
       - reset
 
 #% if agentgateway_prompt_guard_enabled | default(true) %#
-  # Prompt Guards - PII/sensitive data protection
+  #| Prompt Guards - PII/sensitive data protection #|
   ai:
     promptGuard:
       request:
