@@ -1,6 +1,6 @@
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus-embeddings
   labels:
@@ -12,14 +12,14 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
-        endpoint: "https://aanopenai.openai.azure.com"
+        endpoint: "aanopenai.openai.azure.com"
         deploymentName: "text-embedding-3-small"
         apiVersion: "2023-05-15"
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-openai-eastus-credentials
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-eastus-credentials
+    tls: {}

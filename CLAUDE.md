@@ -66,6 +66,12 @@ This project uses **non-standard delimiters** to avoid conflicts with Helm/Go te
 | Blocks    | `#%...%#`   |
 | Comments  | `#\|...#\|` |
 
+**IMPORTANT**: Comment delimiters use `#|` for BOTH start AND end (not `|#`). This is defined in `makejinja.toml`:
+```toml
+comment_start = "#|"
+comment_end = "#|"
+```
+
 Example:
 ```yaml
 # In templates/config/kubernetes/apps/network/k8s-gateway/app/helmrelease.yaml.j2
@@ -143,7 +149,7 @@ task template:debug
 
 ### Template Files (*.j2)
 - Follow output format conventions (YAML, shell, etc.)
-- Use custom delimiters: `#{...}#`, `#%...%#`, `#|...|#`
+- Use custom delimiters: `#{...}#`, `#%...%#`, `#|...#|`
 
 ## Key Configuration Files
 
@@ -326,9 +332,25 @@ azure_openai_deployment_name: "gpt-4"
 
 2. **TLS Listeners**: Kgateway requires exactly 1 certificateRef per HTTPS listener. Create separate listeners for each domain with hostname patterns (`*.matherly.net`, `*.spoonsofsalt.org`).
 
-3. **Backend CRD Schema (v2.1.1)**: Uses nested structure `spec.ai.llm.azureopenai` with fields: `endpoint`, `deploymentName`, `apiVersion`, `authToken`.
+3. **Two Backend CRD Types**: AI workloads require `AgentgatewayBackend` (`agentgateway.dev/v1alpha1`), NOT `Backend` (`gateway.kgateway.dev/v1alpha1`). The `Backend` CRD only supports `type: AWS|Static|DynamicForwardProxy` - it does NOT have `type: AI`. The `AgentgatewayBackend` CRD uses `spec.ai.provider.{azureopenai|anthropic|openai}` with authentication via `spec.policies.auth.secretRef` and TLS via `spec.policies.tls: {}`:
+   ```yaml
+   apiVersion: agentgateway.dev/v1alpha1
+   kind: AgentgatewayBackend
+   spec:
+     ai:
+       provider:
+         azureopenai:
+           endpoint: "resource.openai.azure.com"  # No https:// prefix
+           deploymentName: "gpt-4"
+           apiVersion: "2025-01-01-preview"
+     policies:
+       auth:
+         secretRef:
+           name: azure-openai-credentials  # Secret with 'Authorization' key
+       tls: {}  # Enable TLS for HTTPS backends
+   ```
 
-4. **Backend Path Configuration**: The `spec.ai.llm.path` field only supports `path.full`, NOT `path.prefix`. For path prefix transformation, use HTTPRoute `URLRewrite` filter instead:
+4. **Backend Path Configuration**: For path prefix transformation, use HTTPRoute `URLRewrite` filter:
    ```yaml
    # In HTTPRoute - transforms /anthropic/messages → /anthropic/v1/messages
    filters:
@@ -382,19 +404,24 @@ azure_openai_deployment_name: "gpt-4"
          name: azure-cohere-rerank-credentials
    ```
 
-8. **AI Backend with Host Override**: For AI providers hosted on custom endpoints (e.g., Anthropic on Azure AI Foundry), use the provider's native config with `host` and `port` at the `spec.ai.llm` level:
+8. **AI Backend with Host Override**: For AI providers hosted on custom endpoints (e.g., Anthropic on Azure AI Foundry), use `AgentgatewayBackend` with the provider config and `host`/`port` at the `spec.ai` level:
    ```yaml
+   apiVersion: agentgateway.dev/v1alpha1
+   kind: AgentgatewayBackend
    spec:
-     type: AI
      ai:
-       llm:
+       provider:
          anthropic:
-           authToken: ...
            apiVersion: "2023-06-01"
            model: "claude-sonnet-4-5-20250929"
-         # Override to Azure AI Foundry endpoint
-         host: "resource-name.services.ai.azure.com"
-         port: 443  # Required when host is specified
+       # Override to Azure AI Foundry endpoint
+       host: "resource-name.services.ai.azure.com"
+       port: 443  # Required when host is specified
+     policies:
+       auth:
+         secretRef:
+           name: azure-anthropic-credentials
+       tls: {}
    ```
 
 9. **ReferenceGrant Namespace and Flux targetNamespace**: When a Flux Kustomization has `targetNamespace`, it overrides the namespace in ALL resources within that kustomization. ReferenceGrants for cross-namespace secret access must be deployed via a **separate** Kustomization that targets the namespace where the secrets reside:
@@ -456,7 +483,8 @@ kubectl get ks -n kgateway-system
 kubectl get ks -n ai-system
 kubectl get gateway -n kgateway-system
 kubectl get gatewayparameters -n kgateway-system
-kubectl get backends.gateway.kgateway.dev -n ai-system
+kubectl get agentgatewaybackends.agentgateway.dev -n ai-system  # AI backends
+kubectl get backends.gateway.kgateway.dev -n ai-system          # Static backends
 kubectl get httproute -n ai-system
 
 # Check pods and services

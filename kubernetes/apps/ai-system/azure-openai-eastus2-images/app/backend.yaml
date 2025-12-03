@@ -1,6 +1,6 @@
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-images
   labels:
@@ -12,14 +12,14 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
-        endpoint: "https://ets-east-us2.openai.azure.com"
+        endpoint: "ets-east-us2.openai.azure.com"
         deploymentName: "gpt-image-1"
         apiVersion: "2025-04-01-preview"
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-openai-eastus2-images-credentials
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-eastus2-images-credentials
+    tls: {}

@@ -1,7 +1,9 @@
 #% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_realtime_deployment_name is defined %#
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+#| AgentgatewayBackend for Azure OpenAI - uses agentgateway.dev CRD for AI workloads #|
+#| Realtime uses different URL pattern: /openai/realtime?deployment=... #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-realtime
   labels:
@@ -13,16 +15,15 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
-        #| Realtime uses different URL pattern: /openai/realtime?deployment=... #|
-        endpoint: "https://#{ azure_openai_eastus2_resource_name }#.openai.azure.com"
+        endpoint: "#{ azure_openai_eastus2_resource_name }#.openai.azure.com"
         deploymentName: "#{ azure_openai_eastus2_realtime_deployment_name }#"
         apiVersion: "#{ azure_openai_eastus2_realtime_api_version | default('2024-10-01-preview') }#"
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-openai-eastus2-realtime-credentials
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-eastus2-realtime-credentials
+    tls: {}
 #% endif %#

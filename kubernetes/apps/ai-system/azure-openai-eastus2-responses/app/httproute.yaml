@@ -15,7 +15,7 @@ spec:
             type: PathPrefix
             value: /azure/eastus2/responses
       backendRefs:
-        - group: gateway.kgateway.dev
-          kind: Backend
+        - group: agentgateway.dev
+          kind: AgentgatewayBackend
           name: azure-openai-eastus2-responses
           namespace: ai-system
