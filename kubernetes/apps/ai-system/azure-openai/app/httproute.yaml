@@ -8,7 +8,7 @@ spec:
     - name: agentgateway
       namespace: kgateway-system
   hostnames:
-    - "aiops.matherly.net"
+    - "llms.matherly.net"
   rules:
     - matches:
         - path:

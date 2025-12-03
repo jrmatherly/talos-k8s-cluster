@@ -10,9 +10,11 @@ metadata:
     app.kubernetes.io/component: ai-gateway
     app.kubernetes.io/part-of: kgateway
 spec:
+  # Select the dedicated metrics service, not the Gateway-created LoadBalancer service
+  # The agentgateway-metrics service exposes port 15020 for Prometheus scraping
   selector:
     matchLabels:
-      app.kubernetes.io/name: agentgateway
+      app.kubernetes.io/name: agentgateway-metrics
   namespaceSelector:
     matchNames:
       - kgateway-system

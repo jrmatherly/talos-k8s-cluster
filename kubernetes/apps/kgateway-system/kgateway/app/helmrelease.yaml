@@ -21,4 +21,6 @@ spec:
         port: 15020
       tracing:
         enabled: true
-        otlpEndpoint: "otel-collector.monitoring:4317"
+        # OTLP gRPC endpoint for distributed tracing
+        # Format: http://<service>.<namespace>:<port> (port 4317 for gRPC)
+        otlpEndpoint: "http://otel-collector.monitoring:4317"

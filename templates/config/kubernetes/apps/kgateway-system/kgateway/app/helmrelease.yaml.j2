@@ -24,7 +24,9 @@ spec:
 #% if otel_collector_endpoint is defined %#
       tracing:
         enabled: true
-        otlpEndpoint: "#{ otel_collector_endpoint }#"
+        # OTLP gRPC endpoint for distributed tracing
+        # Format: http://<service>.<namespace>:<port> (port 4317 for gRPC)
+        otlpEndpoint: "http://#{ otel_collector_endpoint }#"
 #% endif %#
 #% endif %#
 #% endif %#
