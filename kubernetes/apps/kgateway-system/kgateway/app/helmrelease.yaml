@@ -19,3 +19,6 @@ spec:
       metrics:
         enabled: true
         port: 15020
+      tracing:
+        enabled: true
+        otlpEndpoint: "otel-collector.monitoring:4317"

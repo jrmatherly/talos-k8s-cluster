@@ -21,7 +21,7 @@ spec:
       enabled: true
       folderName: kgateway
     # Additional labels for resource identification
+    # Note: app.kubernetes.io/name is already defined by the chart
     additionalLabels:
-      app.kubernetes.io/name: kgateway-dashboards
       app.kubernetes.io/component: monitoring
       app.kubernetes.io/part-of: kgateway
