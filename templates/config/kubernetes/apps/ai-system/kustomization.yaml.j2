@@ -57,6 +57,10 @@ resources:
 #% if azure_anthropic_api_key is defined %#
   - ./azure-anthropic/ks.yaml
 #% endif %#
+#| ai-secrets must be created BEFORE cohere backends that use postBuild.substituteFrom #|
+#% if azure_cohere_rerank_api_key is defined or azure_cohere_embed_api_key is defined %#
+  - ./ai-secrets/ks.yaml
+#% endif %#
 #% if azure_cohere_rerank_api_key is defined %#
   - ./azure-cohere-rerank/ks.yaml
 #% endif %#

@@ -2,20 +2,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: azure-cohere-embed
+  name: ai-secrets
 spec:
   interval: 1h
-  path: ./kubernetes/apps/ai-system/azure-cohere-embed/app
+  path: ./kubernetes/apps/ai-system/ai-secrets/app
   dependsOn:
     - name: kgateway
       namespace: kgateway-system
-    - name: ai-secrets
-  postBuild:
-    substituteFrom:
-      - kind: Secret
-        name: cluster-secrets
-      - kind: Secret
-        name: azure-cohere-embed-credentials
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   prune: true
   sourceRef:
     kind: GitRepository

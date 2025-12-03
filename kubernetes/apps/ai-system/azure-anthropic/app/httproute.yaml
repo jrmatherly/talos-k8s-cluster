@@ -14,6 +14,12 @@ spec:
         - path:
             type: PathPrefix
             value: /anthropic/messages
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /anthropic/v1/messages
       backendRefs:
         - group: gateway.kgateway.dev
           kind: Backend

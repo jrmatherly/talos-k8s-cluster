@@ -328,7 +328,36 @@ azure_openai_deployment_name: "gpt-4"
 
 3. **Backend CRD Schema (v2.1.1)**: Uses nested structure `spec.ai.llm.azureopenai` with fields: `endpoint`, `deploymentName`, `apiVersion`, `authToken`.
 
-4. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
+4. **Backend Path Configuration**: The `spec.ai.llm.path` field only supports `path.full`, NOT `path.prefix`. For path prefix transformation, use HTTPRoute `URLRewrite` filter instead:
+   ```yaml
+   # In HTTPRoute - transforms /anthropic/messages → /anthropic/v1/messages
+   filters:
+     - type: URLRewrite
+       urlRewrite:
+         path:
+           type: ReplacePrefixMatch
+           replacePrefixMatch: /anthropic/v1/messages
+   ```
+
+5. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
+
+6. **Static Backend Secret Bootstrapping**: Static backends (Cohere, etc.) use `postBuild.substituteFrom` to inject API keys into HTTPRoutes. This creates a circular dependency if the secret is in the same kustomization. Solution: Create a separate `ai-secrets` kustomization that runs before backend kustomizations:
+   ```yaml
+   # ai-system/ai-secrets/ks.yaml - runs first, creates secrets
+   dependsOn:
+     - name: kgateway
+       namespace: kgateway-system
+   decryption:
+     provider: sops  # No postBuild - secrets applied directly
+
+   # ai-system/azure-cohere-rerank/ks.yaml - runs after ai-secrets
+   dependsOn:
+     - name: ai-secrets  # Ensures secret exists before postBuild
+   postBuild:
+     substituteFrom:
+       - kind: Secret
+         name: azure-cohere-rerank-credentials
+   ```
 
 ### Observability
 

@@ -5,7 +5,7 @@ kind: Kustomization
 resources:
   - ./backend.yaml
   - ./httproute.yaml
-  - ./secret.sops.yaml
+  #| Secret moved to ai-secrets kustomization to resolve circular dependency #|
 #% if agentgateway_rate_limit_enabled | default(true) %#
   - ./trafficpolicy.yaml
 #% endif %#

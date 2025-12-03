@@ -10,6 +10,8 @@ spec:
   dependsOn:
     - name: kgateway
       namespace: kgateway-system
+    #| ai-secrets creates the credentials secret before this kustomization runs #|
+    - name: ai-secrets
   postBuild:
     substituteFrom:
       - kind: Secret

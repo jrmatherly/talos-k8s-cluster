@@ -22,7 +22,4 @@ spec:
             name: azure-anthropic-credentials
         apiVersion: "2023-06-01"
         model: "claude-sonnet-4-5-20250929"
-      # Override to Azure AI Foundry endpoint
       host: "ets-east-us2.services.ai.azure.com"
-      path:
-        prefix: "/anthropic/v1"
