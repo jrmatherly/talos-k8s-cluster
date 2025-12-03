@@ -18,3 +18,4 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus-chat
+          namespace: ai-system

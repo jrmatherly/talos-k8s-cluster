@@ -397,6 +397,25 @@ azure_openai_deployment_name: "gpt-4"
          port: 443  # Required when host is specified
    ```
 
+9. **ReferenceGrant Namespace and Flux targetNamespace**: When a Flux Kustomization has `targetNamespace`, it overrides the namespace in ALL resources within that kustomization. ReferenceGrants for cross-namespace secret access must be deployed via a **separate** Kustomization that targets the namespace where the secrets reside:
+   ```yaml
+   # ReferenceGrant must be in network namespace (where TLS secrets are)
+   # Deploy via network kustomization, NOT kgateway kustomization
+   apiVersion: gateway.networking.k8s.io/v1beta1
+   kind: ReferenceGrant
+   metadata:
+     name: agentgateway-tls-secrets
+     # namespace inherited from parent kustomization (network)
+   spec:
+     from:
+       - group: gateway.networking.k8s.io
+         kind: Gateway
+         namespace: kgateway-system
+     to:
+       - group: ""
+         kind: Secret
+   ```
+
 ### Observability
 
 AgentGateway observability is **enabled by default** when `agentgateway_addr` is set. Disable with `agentgateway_observability_enabled: false`.

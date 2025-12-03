@@ -24,3 +24,4 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-anthropic
+          namespace: ai-system

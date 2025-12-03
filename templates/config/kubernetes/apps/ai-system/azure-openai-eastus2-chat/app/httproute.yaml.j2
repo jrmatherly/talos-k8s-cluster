@@ -19,6 +19,7 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus2-chat
+          namespace: ai-system
     #| Backward compatibility: route /v1/ to eastus2-chat for existing clients #|
     - matches:
         - path:
@@ -28,4 +29,5 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus2-chat
+          namespace: ai-system
 #% endif %#

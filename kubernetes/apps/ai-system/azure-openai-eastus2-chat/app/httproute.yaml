@@ -18,6 +18,7 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus2-chat
+          namespace: ai-system
     - matches:
         - path:
             type: PathPrefix
@@ -26,3 +27,4 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus2-chat
+          namespace: ai-system

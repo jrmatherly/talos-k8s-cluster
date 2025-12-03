@@ -29,3 +29,4 @@ spec:
         - group: gateway.kgateway.dev
           kind: Backend
           name: azure-cohere-rerank
+          namespace: ai-system
