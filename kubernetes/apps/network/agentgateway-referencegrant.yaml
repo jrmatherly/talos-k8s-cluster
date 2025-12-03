@@ -1,11 +1,9 @@
-#% if agentgateway_addr is defined %#
 ---
 # Allow agentgateway to reference TLS secrets from network namespace
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
   name: agentgateway-tls-secrets
-  namespace: network
 spec:
   from:
     - group: gateway.networking.k8s.io
@@ -14,4 +12,3 @@ spec:
   to:
     - group: ""
       kind: Secret
-#% endif %#

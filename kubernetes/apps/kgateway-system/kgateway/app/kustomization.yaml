@@ -6,7 +6,6 @@ resources:
   - ./gatewayparameters.yaml
   - ./helmrelease.yaml
   - ./ocirepository.yaml
-  - ./referencegrant.yaml
   - ./gitrepository.yaml
   - ./helmrelease-dashboards.yaml
   - ./httplistenerpolicy.yaml
