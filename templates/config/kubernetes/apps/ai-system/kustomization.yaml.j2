@@ -1,0 +1,13 @@
+#% if agentgateway_addr is defined and azure_openai_api_key is defined %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ai-system
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./azure-openai/ks.yaml
+#% endif %#

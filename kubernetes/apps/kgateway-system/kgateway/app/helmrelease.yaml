@@ -1,0 +1,16 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kgateway
+  interval: 1h
+  values:
+    agentgateway:
+      enabled: true
+    controller:
+      extraEnv:
+        KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"

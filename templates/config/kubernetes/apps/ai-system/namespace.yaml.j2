@@ -1,0 +1,9 @@
+#% if agentgateway_addr is defined and azure_openai_api_key is defined %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-system
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+#% endif %#

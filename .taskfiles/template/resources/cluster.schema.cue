@@ -39,6 +39,15 @@ import (
 	// Proxmox CCM Integration (Approach B only - skip for Approach A)
 	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
 	proxmox_ccm_token_secret?: string & !=""
+
+	// Kgateway / AgentGateway Integration (AI/LLM Infrastructure)
+	agentgateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
+	azure_openai_api_key?: string & !=""
+	azure_openai_resource_name?: string & !=""
+	azure_openai_deployment_name?: string & !=""
+	azure_openai_api_version?: string & !=""
+	openai_api_key?: string & !=""
+	anthropic_api_key?: string & !=""
 }
 
 #Config

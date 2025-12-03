@@ -31,3 +31,11 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens (Approach B only)
 proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
+# Kgateway / AgentGateway Configuration (AI/LLM Infrastructure)
+agentgateway_addr: "10.10.10.250"
+azure_openai_api_key: "fake-api-key"
+azure_openai_resource_name: "test-resource"
+azure_openai_deployment_name: "gpt-4"
+azure_openai_api_version: "2025-04-01-preview"
+openai_api_key: "sk-fake-key"
+anthropic_api_key: "sk-ant-fake-key"

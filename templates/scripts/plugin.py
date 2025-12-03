@@ -187,6 +187,10 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("proxmox_region", "talos-k8s")
         data.setdefault("proxmox_storage", "local-lvm")
 
+        # Kgateway / AgentGateway defaults
+        if data.get("azure_openai_api_key"):
+            data.setdefault("azure_openai_api_version", "2025-04-01-preview")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

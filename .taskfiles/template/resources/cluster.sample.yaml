@@ -215,3 +215,41 @@ cloudflare_token: ""
 #    (REQUIRED for Approach B only) - The secret value from token creation
 #    NOTE: Skip if using Approach A (Static Labels)
 # proxmox_ccm_token_secret: ""
+
+# ==============================================================================
+# KGATEWAY / AGENTGATEWAY INTEGRATION (Optional - AI/LLM Infrastructure)
+# ==============================================================================
+# Configuration for Kgateway with AgentGateway for AI/LLM gateway capabilities.
+# Enables routing to LLM providers (Azure OpenAI, OpenAI, Anthropic) and MCP servers.
+# REF: docs/kgateway-research/19-integration-plan.md
+
+# -- Load balancer IP for AgentGateway (AI workloads).
+#    (REQUIRED for Kgateway) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.145"
+# agentgateway_addr: ""
+
+# -- Azure OpenAI API Key
+#    (REQUIRED for LLM routing via Azure OpenAI)
+# azure_openai_api_key: ""
+
+# -- Azure OpenAI Resource Name (the name of your Azure OpenAI resource)
+#    (REQUIRED for Azure OpenAI)
+#    Example: "my-openai-resource"
+# azure_openai_resource_name: ""
+
+# -- Azure OpenAI Deployment Name (the name of your model deployment)
+#    (REQUIRED for Azure OpenAI)
+#    Example: "gpt-5-mini"
+# azure_openai_deployment_name: ""
+
+# -- Azure OpenAI API Version
+#    (OPTIONAL) / (DEFAULT: "2025-04-01-preview")
+# azure_openai_api_version: ""
+
+# -- OpenAI API Key (for direct OpenAI routing)
+#    (OPTIONAL) - Only needed if routing to OpenAI directly
+# openai_api_key: ""
+
+# -- Anthropic API Key (for Claude routing)
+#    (OPTIONAL) - Only needed if routing to Anthropic
+# anthropic_api_key: ""

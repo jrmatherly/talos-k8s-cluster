@@ -1,0 +1,32 @@
+#% if agentgateway_addr is defined %#
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: agentgateway
+  annotations:
+    lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
+spec:
+  gatewayClassName: agentgateway
+  listeners:
+    - name: http
+      port: 8080
+      protocol: HTTP
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      port: 8443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+#% for domain in cloudflare_domains %#
+          - kind: Secret
+            name: #{ domain | replace('.', '-') }#-production-tls
+            namespace: network
+#% endfor %#
+#% endif %#
