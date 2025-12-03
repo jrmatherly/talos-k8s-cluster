@@ -27,6 +27,6 @@ spec:
                 value: "Bearer ${AZURE_COHERE_RERANK_API_KEY}"
       backendRefs:
         - group: gateway.kgateway.dev
-          kind: Backend
+          kind: AgentgatewayBackend
           name: azure-cohere-rerank
           namespace: ai-system

@@ -1,9 +1,9 @@
 #% if agentgateway_addr is defined and azure_anthropic_api_key is defined %#
 ---
-#| AgentgatewayBackend for Anthropic via Azure AI Foundry #|
-#| Uses anthropic provider with host/port override for Azure endpoint #|
+#| AgentgatewayBackend for Anthropic via Azure AI Foundry (kgateway v2.2+) #|
+#| Uses openai provider with custom host for Azure AI Foundry endpoint #|
 #| Path transformation handled by HTTPRoute URLRewrite filter #|
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: AgentgatewayBackend
 metadata:
   name: azure-anthropic
@@ -18,15 +18,17 @@ metadata:
 spec:
   ai:
     provider:
-      anthropic:
-        apiVersion: "2023-06-01"
+      #| Azure AI Foundry serves Anthropic via OpenAI-compatible API #|
+      openai:
         model: "claude-sonnet-4-5-20250929"
-    #| Override host/port to Azure AI Foundry endpoint #|
-    host: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
-    port: 443
+      #| Override host/port to Azure AI Foundry endpoint #|
+      host: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
+      port: 443
+      path: "/anthropic/v1/messages"
   policies:
     auth:
       secretRef:
         name: azure-anthropic-credentials
-    tls: {}
+    tls:
+      sni: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
 #% endif %#

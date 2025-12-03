@@ -301,9 +301,9 @@ Add topology labels to each node in `nodes.yaml` (see nodeLabels above).
 
 **Note:** CSI templates are conditionally rendered only when both `proxmox_csi_token_id` and `proxmox_csi_token_secret` are set.
 
-## Kgateway/AgentGateway Integration
+## Kgateway/AgentGateway Integration (v2.2+)
 
-Kgateway provides AI/LLM gateway capabilities for routing to LLM providers like Azure OpenAI.
+Kgateway v2.2+ provides AI/LLM gateway capabilities via AgentGateway. **Note**: The built-in AI Gateway in Kgateway (using `Backend` CRD with `type: AI`) was deprecated in v2.1 and removed in v2.2. Use `AgentgatewayBackend` CRD instead.
 
 ### Architecture
 
@@ -313,7 +313,7 @@ Kgateway runs alongside envoy-gateway (complement, not replace):
 
 ### Namespaces
 - `kgateway-system` - Control plane (kgateway, agentgateway pods)
-- `ai-system` - AI workloads (Backends, HTTPRoutes, secrets)
+- `ai-system` - AI workloads (AgentgatewayBackends, HTTPRoutes, secrets)
 
 ### Configuration
 
@@ -326,33 +326,90 @@ azure_openai_resource_name: "your-resource-name"
 azure_openai_deployment_name: "gpt-4"
 ```
 
-### Key Implementation Details
+### Key Implementation Details (v2.2+)
 
 1. **GatewayParameters**: Kgateway creates Services from Gateway resources. To pass Cilium LB IPAM annotations, use `GatewayParameters` with `spec.kube.service.extraAnnotations` and reference via `spec.infrastructure.parametersRef` in the Gateway.
 
 2. **TLS Listeners**: Kgateway requires exactly 1 certificateRef per HTTPS listener. Create separate listeners for each domain with hostname patterns (`*.matherly.net`, `*.spoonsofsalt.org`).
 
-3. **Two Backend CRD Types**: AI workloads require `AgentgatewayBackend` (`agentgateway.dev/v1alpha1`), NOT `Backend` (`gateway.kgateway.dev/v1alpha1`). The `Backend` CRD only supports `type: AWS|Static|DynamicForwardProxy` - it does NOT have `type: AI`. The `AgentgatewayBackend` CRD uses `spec.ai.provider.{azureopenai|anthropic|openai}` with authentication via `spec.policies.auth.secretRef` and TLS via `spec.policies.tls: {}`:
+3. **AgentgatewayBackend CRD Schema (v2.2+)**: AI workloads use `AgentgatewayBackend` (`gateway.kgateway.dev/v1alpha1`). Auth is configured via `spec.policies.auth.secretRef`. **Note**: No `type` field - the type is inferred from `spec.ai` or `spec.static`.
+
+   **Azure OpenAI Backend:**
    ```yaml
-   apiVersion: agentgateway.dev/v1alpha1
+   apiVersion: gateway.kgateway.dev/v1alpha1
    kind: AgentgatewayBackend
+   metadata:
+     name: azure-openai-chat
    spec:
      ai:
        provider:
          azureopenai:
-           endpoint: "resource.openai.azure.com"  # No https:// prefix
+           endpoint: "resource-name.openai.azure.com"  # NO https:// prefix
            deploymentName: "gpt-4"
            apiVersion: "2025-01-01-preview"
      policies:
        auth:
          secretRef:
            name: azure-openai-credentials  # Secret with 'Authorization' key
-       tls: {}  # Enable TLS for HTTPS backends
    ```
 
-4. **Backend Path Configuration**: For path prefix transformation, use HTTPRoute `URLRewrite` filter:
+   **Static Backend (Cohere, etc.):**
    ```yaml
-   # In HTTPRoute - transforms /anthropic/messages → /anthropic/v1/messages
+   apiVersion: gateway.kgateway.dev/v1alpha1
+   kind: AgentgatewayBackend
+   metadata:
+     name: azure-cohere-embed
+   spec:
+     static:
+       host: "resource.services.ai.azure.com"
+       port: 443
+     policies:
+       auth:
+         secretRef:
+           name: azure-cohere-credentials
+       tls:
+         sni: "resource.services.ai.azure.com"
+   ```
+
+   **Custom Host Override (e.g., Anthropic via Azure AI Foundry):**
+   ```yaml
+   apiVersion: gateway.kgateway.dev/v1alpha1
+   kind: AgentgatewayBackend
+   metadata:
+     name: azure-anthropic
+   spec:
+     ai:
+       provider:
+         openai:  # Azure AI Foundry uses OpenAI-compatible API
+           model: "claude-sonnet-4-5-20250929"
+       # Override host/port to Azure AI Foundry endpoint
+       host: "resource-name.services.ai.azure.com"
+       port: 443
+       path: "/anthropic/v1/messages"
+     policies:
+       auth:
+         secretRef:
+           name: azure-anthropic-credentials
+       tls:
+         sni: "resource-name.services.ai.azure.com"
+   ```
+
+4. **HTTPRoute backendRefs**: HTTPRoutes reference `AgentgatewayBackend` (not `Backend`):
+   ```yaml
+   apiVersion: gateway.networking.k8s.io/v1
+   kind: HTTPRoute
+   spec:
+     rules:
+       - backendRefs:
+           - group: gateway.kgateway.dev
+             kind: AgentgatewayBackend
+             name: azure-openai-chat
+             namespace: ai-system
+   ```
+
+5. **Path Configuration**: For path transformation, use HTTPRoute `URLRewrite` filter:
+   ```yaml
+   # In HTTPRoute - transforms /anthropic/messages -> /anthropic/v1/messages
    filters:
      - type: URLRewrite
        urlRewrite:
@@ -361,30 +418,7 @@ azure_openai_deployment_name: "gpt-4"
            replacePrefixMatch: /anthropic/v1/messages
    ```
 
-5. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
-
-6. **Static Backend TLS Configuration**: Static backends only support `host` and `port` in `spec.static.hosts[]` - there is NO `tls` field. Use a separate `BackendConfigPolicy` for TLS origination:
-   ```yaml
-   # Backend - only host and port
-   spec:
-     type: Static
-     static:
-       hosts:
-         - host: "example.services.ai.azure.com"
-           port: 443
-   ---
-   # BackendConfigPolicy - configures TLS for the Backend
-   apiVersion: gateway.kgateway.dev/v1alpha1
-   kind: BackendConfigPolicy
-   spec:
-     targetRefs:
-       - name: my-backend
-         kind: Backend
-         group: gateway.kgateway.dev
-     tls:
-       sni: "example.services.ai.azure.com"
-       wellKnownCACertificates: System
-   ```
+6. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
 
 7. **Static Backend Secret Bootstrapping**: Static backends (Cohere, etc.) use `postBuild.substituteFrom` to inject API keys into HTTPRoutes. This creates a circular dependency if the secret is in the same kustomization. Solution: Create a separate `ai-secrets` kustomization that runs before backend kustomizations:
    ```yaml
@@ -404,27 +438,7 @@ azure_openai_deployment_name: "gpt-4"
          name: azure-cohere-rerank-credentials
    ```
 
-8. **AI Backend with Host Override**: For AI providers hosted on custom endpoints (e.g., Anthropic on Azure AI Foundry), use `AgentgatewayBackend` with the provider config and `host`/`port` at the `spec.ai` level:
-   ```yaml
-   apiVersion: agentgateway.dev/v1alpha1
-   kind: AgentgatewayBackend
-   spec:
-     ai:
-       provider:
-         anthropic:
-           apiVersion: "2023-06-01"
-           model: "claude-sonnet-4-5-20250929"
-       # Override to Azure AI Foundry endpoint
-       host: "resource-name.services.ai.azure.com"
-       port: 443  # Required when host is specified
-     policies:
-       auth:
-         secretRef:
-           name: azure-anthropic-credentials
-       tls: {}
-   ```
-
-9. **ReferenceGrant Namespace and Flux targetNamespace**: When a Flux Kustomization has `targetNamespace`, it overrides the namespace in ALL resources within that kustomization. ReferenceGrants for cross-namespace secret access must be deployed via a **separate** Kustomization that targets the namespace where the secrets reside:
+8. **ReferenceGrant Namespace and Flux targetNamespace**: When a Flux Kustomization has `targetNamespace`, it overrides the namespace in ALL resources within that kustomization. ReferenceGrants for cross-namespace secret access must be deployed via a **separate** Kustomization that targets the namespace where the secrets reside:
    ```yaml
    # ReferenceGrant must be in network namespace (where TLS secrets are)
    # Deploy via network kustomization, NOT kgateway kustomization
@@ -442,6 +456,8 @@ azure_openai_deployment_name: "gpt-4"
        - group: ""
          kind: Secret
    ```
+
+9. **AgentGateway UI**: The AgentGateway pod exposes a built-in UI on port 15000. Access via HTTPRoute at `https://agentgateway.<domain>` (requires split DNS).
 
 ### Observability
 
@@ -483,16 +499,22 @@ kubectl get ks -n kgateway-system
 kubectl get ks -n ai-system
 kubectl get gateway -n kgateway-system
 kubectl get gatewayparameters -n kgateway-system
-kubectl get agentgatewaybackends.agentgateway.dev -n ai-system  # AI backends
-kubectl get backends.gateway.kgateway.dev -n ai-system          # Static backends
+kubectl get agentgatewaybackends.gateway.kgateway.dev -n ai-system  # AI and Static backends (v2.2+)
 kubectl get httproute -n ai-system
 
 # Check pods and services
 kubectl get pods -n kgateway-system
 kubectl get svc -n kgateway-system agentgateway
+kubectl get svc -n kgateway-system agentgateway-ui  # UI service on port 15000
 
 # Verify Service has LB annotation
 kubectl get svc -n kgateway-system agentgateway -o jsonpath='{.metadata.annotations}'
+
+# Access AgentGateway UI
+# Via HTTPRoute: https://agentgateway.<domain> (requires split DNS)
+# Via port-forward:
+kubectl -n kgateway-system port-forward svc/agentgateway-ui 15000:15000
+# Then open http://localhost:15000
 
 # Observability debugging
 kubectl get servicemonitor -n kgateway-system
@@ -504,12 +526,6 @@ kubectl logs -n kgateway-system -l app.kubernetes.io/name=agentgateway -f
 
 # Check Prometheus alert status
 kubectl get prometheusrule -n kgateway-system ai-gateway-alerts -o yaml
-
-# Check BackendConfigPolicy for static backends
-kubectl get backendconfigpolicy -n ai-system
-
-# Verify static backend TLS configuration
-kubectl describe backendconfigpolicy -n ai-system azure-cohere-embed-tls
 ```
 
 ## Adding New Applications/Templates

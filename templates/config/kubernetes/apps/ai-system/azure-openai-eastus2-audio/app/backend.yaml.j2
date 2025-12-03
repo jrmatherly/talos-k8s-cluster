@@ -1,8 +1,8 @@
 #% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_audio_deployment_name is defined %#
 ---
-#| AgentgatewayBackend for Azure OpenAI - uses agentgateway.dev CRD for AI workloads #|
+#| AgentgatewayBackend for Azure OpenAI (kgateway v2.2+) #|
 #| Audio uses standard chat/completions endpoint #|
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-audio
@@ -25,5 +25,4 @@ spec:
     auth:
       secretRef:
         name: azure-openai-eastus2-audio-credentials
-    tls: {}
 #% endif %#

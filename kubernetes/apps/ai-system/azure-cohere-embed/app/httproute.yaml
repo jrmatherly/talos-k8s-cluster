@@ -27,6 +27,6 @@ spec:
                 value: "Bearer ${AZURE_COHERE_EMBED_API_KEY}"
       backendRefs:
         - group: gateway.kgateway.dev
-          kind: Backend
+          kind: AgentgatewayBackend
           name: azure-cohere-embed
           namespace: ai-system

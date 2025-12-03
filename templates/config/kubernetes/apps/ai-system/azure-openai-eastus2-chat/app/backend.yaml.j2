@@ -1,18 +1,15 @@
 #% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_chat_deployment_name is defined %#
 ---
-#| AgentgatewayBackend for Azure OpenAI - uses agentgateway.dev CRD for AI workloads #|
-#| Note: Backend CRD (gateway.kgateway.dev) only supports AWS/Static/DynamicForwardProxy types #|
-apiVersion: agentgateway.dev/v1alpha1
+#| AgentgatewayBackend for Azure OpenAI (kgateway v2.2+) #|
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-chat
   labels:
-    # Cost attribution labels
     cost-center: ai-gateway
     provider: azure-openai
     region: eastus2
     model-type: chat
-    # Standard Kubernetes labels
     app.kubernetes.io/name: azure-openai-eastus2-chat
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
@@ -22,12 +19,9 @@ spec:
       azureopenai:
         endpoint: "#{ azure_openai_eastus2_resource_name }#.openai.azure.com"
         deploymentName: "#{ azure_openai_eastus2_chat_deployment_name }#"
-        apiVersion: "#{ azure_openai_eastus2_chat_api_version | default('2025-01-01-preview') }#"
+        apiVersion: "#{ azure_openai_eastus2_chat_api_version | default('2025-04-01-preview') }#"
   policies:
-    #| Authentication - secretRef must contain 'Authorization' key with API key value #|
     auth:
       secretRef:
         name: azure-openai-eastus2-chat-credentials
-    #| TLS - enables HTTPS with system CA bundle #|
-    tls: {}
 #% endif %#

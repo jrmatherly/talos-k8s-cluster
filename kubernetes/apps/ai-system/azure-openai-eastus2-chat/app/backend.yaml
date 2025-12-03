@@ -1,15 +1,13 @@
 ---
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-chat
   labels:
-    # Cost attribution labels
     cost-center: ai-gateway
     provider: azure-openai
     region: eastus2
     model-type: chat
-    # Standard Kubernetes labels
     app.kubernetes.io/name: azure-openai-eastus2-chat
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
@@ -24,4 +22,3 @@ spec:
     auth:
       secretRef:
         name: azure-openai-eastus2-chat-credentials
-    tls: {}

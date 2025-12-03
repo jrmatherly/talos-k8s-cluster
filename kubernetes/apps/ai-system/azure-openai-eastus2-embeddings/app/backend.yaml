@@ -1,5 +1,5 @@
 ---
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-embeddings
@@ -22,4 +22,3 @@ spec:
     auth:
       secretRef:
         name: azure-openai-eastus2-embeddings-credentials
-    tls: {}

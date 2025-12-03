@@ -1,5 +1,5 @@
 ---
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: AgentgatewayBackend
 metadata:
   name: azure-anthropic
@@ -14,13 +14,14 @@ metadata:
 spec:
   ai:
     provider:
-      anthropic:
-        apiVersion: "2023-06-01"
+      openai:
         model: "claude-sonnet-4-5-20250929"
-    host: "ets-east-us2.services.ai.azure.com"
-    port: 443
+      host: "ets-east-us2.services.ai.azure.com"
+      port: 443
+      path: "/anthropic/v1/messages"
   policies:
     auth:
       secretRef:
         name: azure-anthropic-credentials
-    tls: {}
+    tls:
+      sni: "ets-east-us2.services.ai.azure.com"
