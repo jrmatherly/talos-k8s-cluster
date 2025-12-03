@@ -4,14 +4,14 @@ kind: Backend
 metadata:
   name: azure-openai
 spec:
-  type: llm
-  provider: azure-openai
-  config:
-    resourceName: "ets-east-us2"
-    deploymentName: "gpt-5-mini"
-    apiVersion: "2025-04-01-preview"
-  authToken:
-    kind: SecretRef
-    secretRef:
-      name: llm-credentials
-      key: azure-openai-key
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        endpoint: "https://ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5-mini"
+        apiVersion: "2025-04-01-preview"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-credentials

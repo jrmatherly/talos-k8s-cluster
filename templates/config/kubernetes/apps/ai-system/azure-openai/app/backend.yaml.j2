@@ -5,15 +5,15 @@ kind: Backend
 metadata:
   name: azure-openai
 spec:
-  type: llm
-  provider: azure-openai
-  config:
-    resourceName: "#{ azure_openai_resource_name }#"
-    deploymentName: "#{ azure_openai_deployment_name }#"
-    apiVersion: "#{ azure_openai_api_version | default('2025-04-01-preview') }#"
-  authToken:
-    kind: SecretRef
-    secretRef:
-      name: llm-credentials
-      key: azure-openai-key
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        endpoint: "https://#{ azure_openai_resource_name }#.openai.azure.com"
+        deploymentName: "#{ azure_openai_deployment_name }#"
+        apiVersion: "#{ azure_openai_api_version | default('2025-04-01-preview') }#"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-credentials
 #% endif %#
