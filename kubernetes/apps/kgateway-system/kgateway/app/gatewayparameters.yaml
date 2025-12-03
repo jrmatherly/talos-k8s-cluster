@@ -1,0 +1,11 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: agentgateway-params
+  namespace: kgateway-system
+spec:
+  kube:
+    service:
+      extraAnnotations:
+        lbipam.cilium.io/ips: "192.168.22.145"

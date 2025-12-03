@@ -1,0 +1,13 @@
+#% if agentgateway_addr is defined %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: agentgateway-params
+  namespace: kgateway-system
+spec:
+  kube:
+    service:
+      extraAnnotations:
+        lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
+#% endif %#
