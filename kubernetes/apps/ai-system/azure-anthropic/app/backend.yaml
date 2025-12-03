@@ -23,3 +23,4 @@ spec:
         apiVersion: "2023-06-01"
         model: "claude-sonnet-4-5-20250929"
       host: "ets-east-us2.services.ai.azure.com"
+      port: 443

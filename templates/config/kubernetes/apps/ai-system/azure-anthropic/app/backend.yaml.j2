@@ -23,7 +23,8 @@ spec:
             name: azure-anthropic-credentials
         apiVersion: "2023-06-01"
         model: "claude-sonnet-4-5-20250929"
-      #| Override host to Azure AI Foundry endpoint #|
+      #| Override host/port to Azure AI Foundry endpoint #|
       #| Path transformation handled by HTTPRoute URLRewrite filter #|
       host: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
+      port: 443
 #% endif %#

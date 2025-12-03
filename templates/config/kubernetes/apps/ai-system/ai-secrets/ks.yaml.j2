@@ -13,10 +13,8 @@ spec:
   dependsOn:
     - name: kgateway
       namespace: kgateway-system
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+  #| NOTE: decryption.provider: sops is added by cluster-apps patch #|
+  #| Do NOT specify secretRef - Flux automatically finds sops-age in flux-system #|
   prune: true
   sourceRef:
     kind: GitRepository
