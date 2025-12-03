@@ -8,4 +8,11 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./referencegrant.yaml
+#% if agentgateway_observability_enabled | default(true) %#
+  - ./gitrepository.yaml
+  - ./helmrelease-dashboards.yaml
+  - ./httplistenerpolicy.yaml
+  - ./servicemonitor.yaml
+  - ./prometheusrule.yaml
+#% endif %#
 #% endif %#

@@ -1,0 +1,11 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kgateway-dashboards
+  namespace: kgateway-system
+spec:
+  interval: 1h
+  url: https://github.com/kgateway-dev/dashboards.git
+  ref:
+    branch: main

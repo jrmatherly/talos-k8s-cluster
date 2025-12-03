@@ -7,3 +7,8 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./referencegrant.yaml
+  - ./gitrepository.yaml
+  - ./helmrelease-dashboards.yaml
+  - ./httplistenerpolicy.yaml
+  - ./servicemonitor.yaml
+  - ./prometheusrule.yaml

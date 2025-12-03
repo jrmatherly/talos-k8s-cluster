@@ -228,6 +228,18 @@ cloudflare_token: ""
 #    Example: "192.168.1.145"
 # agentgateway_addr: ""
 
+# -- Enable AgentGateway observability (ServiceMonitor, access logs, PrometheusRules).
+#    When enabled, deploys Prometheus metrics scraping, JSON access logging,
+#    alerting rules, and official Kgateway Grafana dashboards.
+#    (OPTIONAL) / (DEFAULT: true when agentgateway_addr is set)
+# agentgateway_observability_enabled: true
+
+# -- OpenTelemetry collector endpoint for distributed tracing.
+#    Enables OTLP tracing export from the agentgateway proxy.
+#    (OPTIONAL) - Only needed if you have an OTLP collector deployed
+#    Example: "otel-collector.monitoring:4317"
+# otel_collector_endpoint: ""
+
 # -- Azure OpenAI API Key
 #    (REQUIRED for LLM routing via Azure OpenAI)
 # azure_openai_api_key: ""

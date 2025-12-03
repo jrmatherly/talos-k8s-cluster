@@ -14,3 +14,8 @@ spec:
     controller:
       extraEnv:
         KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
+    # Observability configuration
+    observability:
+      metrics:
+        enabled: true
+        port: 15020

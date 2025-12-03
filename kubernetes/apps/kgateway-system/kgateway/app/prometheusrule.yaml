@@ -1,0 +1,126 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ai-gateway-alerts
+  namespace: kgateway-system
+  labels:
+    app.kubernetes.io/name: agentgateway
+    app.kubernetes.io/component: alerting
+    app.kubernetes.io/part-of: kgateway
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+    - name: ai-gateway.rules
+      rules:
+        # High Error Rate Alert
+        - alert: AIGatewayHighErrorRate
+          expr: |
+            (
+              sum(rate(envoy_cluster_upstream_rq_xx{envoy_response_code_class="5", cluster=~".*agentgateway.*"}[5m]))
+              /
+              sum(rate(envoy_cluster_upstream_rq_total{cluster=~".*agentgateway.*"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway error rate above 5%"
+            description: "AI Gateway is experiencing {{ $value | humanizePercentage }} error rate over the last 5 minutes."
+            runbook_url: "https://docs.example.com/runbooks/ai-gateway-errors"
+
+        # Critical Error Rate Alert
+        - alert: AIGatewayCriticalErrorRate
+          expr: |
+            (
+              sum(rate(envoy_cluster_upstream_rq_xx{envoy_response_code_class="5", cluster=~".*agentgateway.*"}[5m]))
+              /
+              sum(rate(envoy_cluster_upstream_rq_total{cluster=~".*agentgateway.*"}[5m]))
+            ) > 0.15
+          for: 2m
+          labels:
+            severity: critical
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway critical error rate above 15%"
+            description: "AI Gateway is experiencing {{ $value | humanizePercentage }} error rate. Immediate action required."
+
+        # High Latency Alert (P95 > 30s)
+        - alert: AIGatewayHighLatency
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(envoy_cluster_upstream_rq_time_bucket{cluster=~".*agentgateway.*"}[5m])) by (le)
+            ) / 1000 > 30
+          for: 5m
+          labels:
+            severity: warning
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway P95 latency above 30s"
+            description: "AI Gateway P95 latency is {{ $value | humanizeDuration }}. This may indicate backend performance issues."
+
+        # Rate Limit Exceeded Alert
+        - alert: AIGatewayRateLimitExceeded
+          expr: |
+            sum(rate(envoy_http_local_rate_limit_rate_limited{cluster=~".*agentgateway.*"}[5m])) > 10
+          for: 5m
+          labels:
+            severity: warning
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway rate limit frequently exceeded"
+            description: "AI Gateway is rate limiting {{ $value | humanize }} requests per second. Consider increasing limits or scaling."
+
+        # Token Usage Approaching Limit (80% of TPM)
+        - alert: AIGatewayTPMApproachingLimit
+          expr: |
+            sum(rate(agentgateway_gen_ai_client_token_usage[1m])) * 60 > 360000
+          for: 2m
+          labels:
+            severity: warning
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway approaching TPM limit (80%)"
+            description: "Current token usage rate: {{ $value | humanize }}/min. Approaching the 450K TPM limit."
+
+        # Backend Unhealthy Alert
+        - alert: AIGatewayBackendUnhealthy
+          expr: |
+            sum(envoy_cluster_health_check_healthy{cluster=~".*agentgateway.*"})
+            /
+            sum(envoy_cluster_membership_total{cluster=~".*agentgateway.*"}) < 0.5
+          for: 2m
+          labels:
+            severity: critical
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway backend health degraded"
+            description: "Less than 50% of backend endpoints are healthy. Immediate investigation required."
+
+        # No Traffic Alert (potential issue)
+        - alert: AIGatewayNoTraffic
+          expr: |
+            sum(rate(envoy_cluster_upstream_rq_total{cluster=~".*agentgateway.*"}[10m])) == 0
+          for: 30m
+          labels:
+            severity: info
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway receiving no traffic"
+            description: "AI Gateway has not received any requests in the last 30 minutes. Verify if this is expected."
+
+        # Connection Pool Exhaustion
+        - alert: AIGatewayConnectionPoolExhausted
+          expr: |
+            sum(envoy_cluster_upstream_cx_active{cluster=~".*agentgateway.*"})
+            /
+            sum(envoy_cluster_upstream_cx_pool_capacity{cluster=~".*agentgateway.*"}) > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            component: ai-gateway
+          annotations:
+            summary: "AI Gateway connection pool near capacity"
+            description: "Connection pool is {{ $value | humanizePercentage }} utilized. Consider scaling or increasing pool size."

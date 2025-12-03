@@ -191,6 +191,10 @@ class Plugin(makejinja.plugin.Plugin):
         if data.get("azure_openai_api_key"):
             data.setdefault("azure_openai_api_version", "2025-04-01-preview")
 
+        # AgentGateway observability defaults (enabled by default when agentgateway is configured)
+        if data.get("agentgateway_addr"):
+            data.setdefault("agentgateway_observability_enabled", True)
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

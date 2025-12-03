@@ -42,6 +42,8 @@ import (
 
 	// Kgateway / AgentGateway Integration (AI/LLM Infrastructure)
 	agentgateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
+	agentgateway_observability_enabled?: *true | bool  // Enable metrics, access logs, and alerts
+	otel_collector_endpoint?: string & =~"^[a-z0-9.-]+:[0-9]+$"  // OTLP endpoint (e.g., "otel-collector.monitoring:4317")
 	azure_openai_api_key?: string & !=""
 	azure_openai_resource_name?: string & !=""
 	azure_openai_deployment_name?: string & !=""

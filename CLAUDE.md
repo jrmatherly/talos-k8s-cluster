@@ -160,6 +160,8 @@ Required fields:
 
 Optional fields for Kgateway/AgentGateway (AI/LLM):
 - `agentgateway_addr` - AgentGateway LoadBalancer IP (enables kgateway-system)
+- `agentgateway_observability_enabled` - Enable metrics, access logs, alerts (default: true)
+- `otel_collector_endpoint` - OTLP endpoint for distributed tracing (e.g., "otel-collector.monitoring:4317")
 - `azure_openai_api_key` - Azure OpenAI API key (enables ai-system)
 - `azure_openai_resource_name` - Azure OpenAI resource name
 - `azure_openai_deployment_name` - Azure OpenAI deployment name
@@ -328,6 +330,38 @@ azure_openai_deployment_name: "gpt-4"
 
 4. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
 
+### Observability
+
+AgentGateway observability is **enabled by default** when `agentgateway_addr` is set. Disable with `agentgateway_observability_enabled: false`.
+
+**Components deployed when enabled:**
+- **ServiceMonitor**: Prometheus metrics scraping (port 15020, 30s interval)
+  - Filters for `agentgateway_*`, `envoy_*`, `llm_*` metrics to reduce cardinality
+- **HTTPListenerPolicy**: JSON access logging to stdout with AI-specific fields
+  - Includes timing, upstream info, request headers, and `X-MODEL` header
+- **PrometheusRule**: 8 alert rules for AI gateway monitoring:
+  - `AIGatewayHighErrorRate` (>5% for 5m, warning)
+  - `AIGatewayCriticalErrorRate` (>15% for 2m, critical)
+  - `AIGatewayHighLatency` (P95 >30s, warning)
+  - `AIGatewayRateLimitExceeded` (>10 req/s rate limited, warning)
+  - `AIGatewayTPMApproachingLimit` (>80% of 450K TPM, warning)
+  - `AIGatewayBackendUnhealthy` (<50% healthy backends, critical)
+  - `AIGatewayNoTraffic` (no requests for 30m, info)
+  - `AIGatewayConnectionPoolExhausted` (>90% pool usage, warning)
+
+**Grafana Dashboards:**
+Two official Kgateway dashboards are automatically provisioned:
+- **Envoy Dashboard**: Data-plane metrics (request rates, latencies, errors)
+- **Kgateway Operations Dashboard**: Control-plane metrics
+
+Dashboards appear in the `kgateway` folder in Grafana (requires kube-prometheus-stack with sidecar discovery).
+
+**Optional OTLP Tracing:**
+Set `otel_collector_endpoint` in `cluster.yaml` to enable distributed tracing:
+```yaml
+otel_collector_endpoint: "otel-collector.monitoring:4317"
+```
+
 ### Debugging Kgateway
 
 ```bash
@@ -345,6 +379,17 @@ kubectl get svc -n kgateway-system agentgateway
 
 # Verify Service has LB annotation
 kubectl get svc -n kgateway-system agentgateway -o jsonpath='{.metadata.annotations}'
+
+# Observability debugging
+kubectl get servicemonitor -n kgateway-system
+kubectl get prometheusrule -n kgateway-system
+kubectl get httplistenerpolicy -n kgateway-system
+
+# Check agentgateway access logs (JSON format)
+kubectl logs -n kgateway-system -l app.kubernetes.io/name=agentgateway -f
+
+# Check Prometheus alert status
+kubectl get prometheusrule -n kgateway-system ai-gateway-alerts -o yaml
 ```
 
 ## Important Warnings

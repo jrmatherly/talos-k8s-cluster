@@ -466,13 +466,17 @@ These tools offer a variety of solutions to meet your persistent storage needs, 
 
 - **Unified API endpoint** for multiple LLM providers (Azure OpenAI, OpenAI, Anthropic, etc.)
 - **Traffic management** with rate limiting, failover, and load balancing
-- **Observability** for AI/LLM traffic patterns and usage
+- **Full observability** with Prometheus metrics, Grafana dashboards, and alerting rules
 
 Enable it by configuring the following variables in `cluster.yaml`:
 
 ```yaml
 # AI Gateway configuration (optional)
 agentgateway_addr: '192.168.1.145'  # LoadBalancer IP for AI Gateway
+
+# Observability (optional, defaults shown)
+# agentgateway_observability_enabled: true  # Metrics, logging, alerts, dashboards
+# otel_collector_endpoint: ''               # OTLP tracing endpoint (if using OpenTelemetry)
 
 # Azure OpenAI Backend (optional, requires agentgateway_addr)
 azure_openai_resource_name: 'your-resource'
@@ -482,8 +486,14 @@ azure_openai_api_key: 'your-api-key'
 ```
 
 When enabled, this deploys:
-- **kgateway-system namespace**: Kgateway CRDs, controller, and AgentGateway Gateway
+- **kgateway-system namespace**: Kgateway CRDs, controller, AgentGateway Gateway, and observability resources
 - **ai-system namespace**: Backend configurations and HTTPRoutes for LLM providers
+
+**Observability features** (enabled by default):
+- **Prometheus ServiceMonitor** for metrics scraping
+- **Official Grafana dashboards** (Envoy data-plane + Kgateway operations)
+- **JSON access logging** for request/response details
+- **PrometheusRule alerting** for error rates, latency, rate limits, and backend health
 
 Access the AI Gateway endpoint at `https://ai.<domain>/v1/chat/completions` (requires split DNS or Cloudflare Tunnel).
 

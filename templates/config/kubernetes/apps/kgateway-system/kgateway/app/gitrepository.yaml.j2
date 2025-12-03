@@ -1,0 +1,13 @@
+#% if agentgateway_addr is defined and agentgateway_observability_enabled | default(true) %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kgateway-dashboards
+  namespace: kgateway-system
+spec:
+  interval: 1h
+  url: https://github.com/kgateway-dev/dashboards.git
+  ref:
+    branch: main
+#% endif %#

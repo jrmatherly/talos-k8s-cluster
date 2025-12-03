@@ -129,10 +129,5 @@ $RECYCLE.BIN/
 .private/
 
 # Personal documentation/notes
-docs/udm-split-dns.md
-docs/claude-files.md
-docs/proxmox-csi-implementation.md
-docs/kgateway-research/
+docs/
 archive/
-docs/kgateway-docs/
-docs/agentgateway-docs/

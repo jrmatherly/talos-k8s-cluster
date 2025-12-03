@@ -1,0 +1,30 @@
+#% if agentgateway_addr is defined and agentgateway_observability_enabled | default(true) %#
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: agentgateway
+  namespace: kgateway-system
+  labels:
+    app.kubernetes.io/name: agentgateway
+    app.kubernetes.io/component: ai-gateway
+    app.kubernetes.io/part-of: kgateway
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+  namespaceSelector:
+    matchNames:
+      - kgateway-system
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      scheme: http
+      scrapeTimeout: 10s
+      metricRelabelings:
+        # Keep only relevant metrics to reduce cardinality
+        - sourceLabels: [__name__]
+          regex: '(agentgateway_.*|envoy_.*|llm_.*)'
+          action: keep
+#% endif %#

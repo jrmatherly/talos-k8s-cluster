@@ -33,6 +33,8 @@ proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
 # Kgateway / AgentGateway Configuration (AI/LLM Infrastructure)
 agentgateway_addr: "10.10.10.250"
+agentgateway_observability_enabled: true
+otel_collector_endpoint: "otel-collector.monitoring:4317"
 azure_openai_api_key: "fake-api-key"
 azure_openai_resource_name: "test-resource"
 azure_openai_deployment_name: "gpt-4"

@@ -1,0 +1,29 @@
+#% if agentgateway_addr is defined and agentgateway_observability_enabled | default(true) %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway-dashboards
+  namespace: kgateway-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: install/helm/kgateway-dashboards
+      sourceRef:
+        kind: GitRepository
+        name: kgateway-dashboards
+  values:
+    # Labels for kube-prometheus-stack auto-discovery
+    grafanaLabels:
+      grafana_dashboard: "1"
+    # Dashboard folder organization
+    dashboards:
+      enabled: true
+      folderName: kgateway
+    # Additional labels for resource identification
+    additionalLabels:
+      app.kubernetes.io/name: kgateway-dashboards
+      app.kubernetes.io/component: monitoring
+      app.kubernetes.io/part-of: kgateway
+#% endif %#
