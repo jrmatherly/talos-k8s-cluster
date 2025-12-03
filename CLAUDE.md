@@ -341,14 +341,37 @@ azure_openai_deployment_name: "gpt-4"
 
 5. **Secret Format**: Use `Authorization` as the key name in the secret's stringData.
 
-6. **Static Backend Secret Bootstrapping**: Static backends (Cohere, etc.) use `postBuild.substituteFrom` to inject API keys into HTTPRoutes. This creates a circular dependency if the secret is in the same kustomization. Solution: Create a separate `ai-secrets` kustomization that runs before backend kustomizations:
+6. **Static Backend TLS Configuration**: Static backends only support `host` and `port` in `spec.static.hosts[]` - there is NO `tls` field. Use a separate `BackendConfigPolicy` for TLS origination:
+   ```yaml
+   # Backend - only host and port
+   spec:
+     type: Static
+     static:
+       hosts:
+         - host: "example.services.ai.azure.com"
+           port: 443
+   ---
+   # BackendConfigPolicy - configures TLS for the Backend
+   apiVersion: gateway.kgateway.dev/v1alpha1
+   kind: BackendConfigPolicy
+   spec:
+     targetRefs:
+       - name: my-backend
+         kind: Backend
+         group: gateway.kgateway.dev
+     tls:
+       sni: "example.services.ai.azure.com"
+       wellKnownCACertificates: System
+   ```
+
+7. **Static Backend Secret Bootstrapping**: Static backends (Cohere, etc.) use `postBuild.substituteFrom` to inject API keys into HTTPRoutes. This creates a circular dependency if the secret is in the same kustomization. Solution: Create a separate `ai-secrets` kustomization that runs before backend kustomizations:
    ```yaml
    # ai-system/ai-secrets/ks.yaml - runs first, creates secrets
    dependsOn:
      - name: kgateway
        namespace: kgateway-system
-   decryption:
-     provider: sops  # No postBuild - secrets applied directly
+   # NOTE: decryption.provider: sops is added by cluster-apps patch
+   # Do NOT specify secretRef - Flux auto-discovers sops-age in flux-system
 
    # ai-system/azure-cohere-rerank/ks.yaml - runs after ai-secrets
    dependsOn:
@@ -357,6 +380,21 @@ azure_openai_deployment_name: "gpt-4"
      substituteFrom:
        - kind: Secret
          name: azure-cohere-rerank-credentials
+   ```
+
+8. **AI Backend with Host Override**: For AI providers hosted on custom endpoints (e.g., Anthropic on Azure AI Foundry), use the provider's native config with `host` and `port` at the `spec.ai.llm` level:
+   ```yaml
+   spec:
+     type: AI
+     ai:
+       llm:
+         anthropic:
+           authToken: ...
+           apiVersion: "2023-06-01"
+           model: "claude-sonnet-4-5-20250929"
+         # Override to Azure AI Foundry endpoint
+         host: "resource-name.services.ai.azure.com"
+         port: 443  # Required when host is specified
    ```
 
 ### Observability
@@ -419,6 +457,12 @@ kubectl logs -n kgateway-system -l app.kubernetes.io/name=agentgateway -f
 
 # Check Prometheus alert status
 kubectl get prometheusrule -n kgateway-system ai-gateway-alerts -o yaml
+
+# Check BackendConfigPolicy for static backends
+kubectl get backendconfigpolicy -n ai-system
+
+# Verify static backend TLS configuration
+kubectl describe backendconfigpolicy -n ai-system azure-cohere-embed-tls
 ```
 
 ## Adding New Applications/Templates
