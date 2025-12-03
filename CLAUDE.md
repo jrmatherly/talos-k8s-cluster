@@ -332,11 +332,11 @@ azure_openai_deployment_name: "gpt-4"
 
 2. **TLS Listeners**: Kgateway requires exactly 1 certificateRef per HTTPS listener. Create separate listeners for each domain with hostname patterns (`*.matherly.net`, `*.spoonsofsalt.org`).
 
-3. **AgentgatewayBackend CRD Schema (v2.2+)**: AI workloads use `AgentgatewayBackend` (`gateway.kgateway.dev/v1alpha1`). Auth is configured via `spec.policies.auth.secretRef`. **Note**: No `type` field - the type is inferred from `spec.ai` or `spec.static`.
+3. **AgentgatewayBackend CRD Schema (v2.2+)**: AI workloads use `AgentgatewayBackend` (`agentgateway.dev/v1alpha1`). Auth is configured via `spec.policies.auth.secretRef`. **Note**: No `type` field - the type is inferred from `spec.ai` or `spec.static`.
 
    **Azure OpenAI Backend:**
    ```yaml
-   apiVersion: gateway.kgateway.dev/v1alpha1
+   apiVersion: agentgateway.dev/v1alpha1
    kind: AgentgatewayBackend
    metadata:
      name: azure-openai-chat
@@ -355,7 +355,7 @@ azure_openai_deployment_name: "gpt-4"
 
    **Static Backend (Cohere, etc.):**
    ```yaml
-   apiVersion: gateway.kgateway.dev/v1alpha1
+   apiVersion: agentgateway.dev/v1alpha1
    kind: AgentgatewayBackend
    metadata:
      name: azure-cohere-embed
@@ -373,7 +373,7 @@ azure_openai_deployment_name: "gpt-4"
 
    **Custom Host Override (e.g., Anthropic via Azure AI Foundry):**
    ```yaml
-   apiVersion: gateway.kgateway.dev/v1alpha1
+   apiVersion: agentgateway.dev/v1alpha1
    kind: AgentgatewayBackend
    metadata:
      name: azure-anthropic
@@ -382,10 +382,10 @@ azure_openai_deployment_name: "gpt-4"
        provider:
          openai:  # Azure AI Foundry uses OpenAI-compatible API
            model: "claude-sonnet-4-5-20250929"
-       # Override host/port to Azure AI Foundry endpoint
-       host: "resource-name.services.ai.azure.com"
-       port: 443
-       path: "/anthropic/v1/messages"
+         # Override host/port to Azure AI Foundry endpoint
+         host: "resource-name.services.ai.azure.com"
+         port: 443
+         path: "/anthropic/v1/messages"
      policies:
        auth:
          secretRef:
@@ -401,7 +401,7 @@ azure_openai_deployment_name: "gpt-4"
    spec:
      rules:
        - backendRefs:
-           - group: gateway.kgateway.dev
+           - group: agentgateway.dev
              kind: AgentgatewayBackend
              name: azure-openai-chat
              namespace: ai-system
@@ -499,7 +499,7 @@ kubectl get ks -n kgateway-system
 kubectl get ks -n ai-system
 kubectl get gateway -n kgateway-system
 kubectl get gatewayparameters -n kgateway-system
-kubectl get agentgatewaybackends.gateway.kgateway.dev -n ai-system  # AI and Static backends (v2.2+)
+kubectl get agentgatewaybackends.agentgateway.dev -n ai-system  # AI and Static backends (v2.2+)
 kubectl get httproute -n ai-system
 
 # Check pods and services

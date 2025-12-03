@@ -15,7 +15,7 @@ spec:
             type: PathPrefix
             value: /azure/eastus2/realtime
       backendRefs:
-        - group: gateway.kgateway.dev
+        - group: agentgateway.dev
           kind: AgentgatewayBackend
           name: azure-openai-eastus2-realtime
           namespace: ai-system

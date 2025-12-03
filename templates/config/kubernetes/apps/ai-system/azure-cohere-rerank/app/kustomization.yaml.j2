@@ -4,7 +4,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./backend.yaml
-  - ./backendconfigpolicy.yaml
   - ./httproute.yaml
   #| Secret moved to ai-secrets kustomization to resolve circular dependency #|
 #% if agentgateway_rate_limit_enabled | default(true) %#
