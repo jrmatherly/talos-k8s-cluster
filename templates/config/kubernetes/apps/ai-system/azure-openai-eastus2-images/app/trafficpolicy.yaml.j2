@@ -1,0 +1,35 @@
+#% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_images_deployment_name is defined %#
+#% if agentgateway_rate_limit_enabled | default(true) %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-openai-eastus2-images-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-openai-eastus2-images
+
+  #| Rate Limiting: 60 RPM (Azure gpt-image-1 tier limits) #|
+  #| Note: No TPM limit for image generation models #|
+  policies:
+    localRateLimit:
+      - maxTokens: 1
+        tokensPerFill: 1
+        fillInterval: 1s
+        type: requests
+
+  #| Image generation can take 30-60s; extended timeout #|
+  timeouts:
+    request: 120s
+
+  retry:
+    attempts: 2
+    backoffBaseInterval: 5s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset
+#% endif %#
+#% endif %#

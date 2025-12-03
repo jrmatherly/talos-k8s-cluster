@@ -1,0 +1,25 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-eastus2-realtime
+  labels:
+    cost-center: ai-gateway
+    provider: azure-openai
+    region: eastus2
+    model-type: realtime
+    app.kubernetes.io/name: azure-openai-eastus2-realtime
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        endpoint: "https://ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-realtime"
+        apiVersion: "2024-10-01-preview"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-eastus2-realtime-credentials

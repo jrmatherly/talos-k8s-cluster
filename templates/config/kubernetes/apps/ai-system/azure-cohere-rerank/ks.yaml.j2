@@ -1,0 +1,26 @@
+#% if agentgateway_addr is defined and azure_cohere_rerank_api_key is defined %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: azure-cohere-rerank
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/ai-system/azure-cohere-rerank/app
+  dependsOn:
+    - name: kgateway
+      namespace: kgateway-system
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+      - kind: Secret
+        name: azure-cohere-rerank-credentials
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: ai-system
+  wait: true
+#% endif %#

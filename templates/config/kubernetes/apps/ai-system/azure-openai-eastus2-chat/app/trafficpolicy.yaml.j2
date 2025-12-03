@@ -1,0 +1,65 @@
+#% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_chat_deployment_name is defined %#
+#% if agentgateway_rate_limit_enabled | default(true) or agentgateway_prompt_guard_enabled | default(true) %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-openai-eastus2-chat-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-openai-eastus2-chat
+
+#% if agentgateway_rate_limit_enabled | default(true) %#
+  # Rate Limiting: 4,500 RPM, 450,000 TPM (Azure GPT-5 tier limits)
+  policies:
+    localRateLimit:
+      # TPM limit (450,000 tokens per minute = 7,500 per second)
+      - maxTokens: 450000
+        tokensPerFill: 7500
+        fillInterval: 1s
+        type: tokens
+        tokenize: true
+      # RPM limit (4,500 requests per minute = 75 per second)
+      - maxTokens: 75
+        tokensPerFill: 75
+        fillInterval: 1s
+        type: requests
+#% endif %#
+
+  # Timeout: 120s for chat completions
+  timeouts:
+    request: 120s
+
+  # Retry Policy
+  retry:
+    attempts: 3
+    backoffBaseInterval: 1s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset
+
+#% if agentgateway_prompt_guard_enabled | default(true) %#
+  # Prompt Guards - PII/sensitive data protection
+  ai:
+    promptGuard:
+      request:
+        customResponse:
+          message: "Request blocked: contains sensitive data patterns"
+        regex:
+          action: REJECT
+          builtins:
+            - CREDIT_CARD
+            - SSN
+      response:
+        regex:
+          action: MASK
+          builtins:
+            - CREDIT_CARD
+            - SSN
+            - EMAIL
+#% endif %#
+#% endif %#
+#% endif %#

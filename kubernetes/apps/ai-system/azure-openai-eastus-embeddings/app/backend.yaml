@@ -1,0 +1,25 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-eastus-embeddings
+  labels:
+    cost-center: ai-gateway
+    provider: azure-openai
+    region: eastus
+    model-type: embeddings
+    app.kubernetes.io/name: azure-openai-eastus-embeddings
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        endpoint: "https://aanopenai.openai.azure.com"
+        deploymentName: "text-embedding-3-small"
+        apiVersion: "2023-05-15"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-eastus-credentials

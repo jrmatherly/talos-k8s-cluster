@@ -1,0 +1,28 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: azure-openai-eastus2-chat
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: kgateway-system
+  hostnames:
+    - "llms.matherly.net"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /azure/eastus2/chat/completions
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: azure-openai-eastus2-chat
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /v1/
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: azure-openai-eastus2-chat

@@ -1,0 +1,27 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-eastus2-chat
+  labels:
+    # Cost attribution labels
+    cost-center: ai-gateway
+    provider: azure-openai
+    region: eastus2
+    model-type: chat
+    # Standard Kubernetes labels
+    app.kubernetes.io/name: azure-openai-eastus2-chat
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        endpoint: "https://ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5-mini"
+        apiVersion: "2025-04-01-preview"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-eastus2-chat-credentials

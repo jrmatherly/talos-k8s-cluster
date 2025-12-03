@@ -1,0 +1,31 @@
+#% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_chat_deployment_name is defined %#
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: azure-openai-eastus2-chat
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: kgateway-system
+  hostnames:
+    - "llms.#{ primary_domain }#"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /azure/eastus2/chat/completions
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: azure-openai-eastus2-chat
+    #| Backward compatibility: route /v1/ to eastus2-chat for existing clients #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /v1/
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: azure-openai-eastus2-chat
+#% endif %#

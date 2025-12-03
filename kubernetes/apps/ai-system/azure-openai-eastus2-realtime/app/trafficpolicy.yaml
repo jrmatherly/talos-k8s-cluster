@@ -1,0 +1,33 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-openai-eastus2-realtime-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-openai-eastus2-realtime
+
+  policies:
+    localRateLimit:
+      - maxTokens: 100000
+        tokensPerFill: 1666
+        fillInterval: 1s
+        type: tokens
+        tokenize: true
+      - maxTokens: 1
+        tokensPerFill: 1
+        fillInterval: 2s
+        type: requests
+
+  timeouts:
+    request: 300s
+
+  retry:
+    attempts: 2
+    backoffBaseInterval: 2s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset

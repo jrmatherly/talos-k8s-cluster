@@ -1,0 +1,29 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-cohere-rerank-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-cohere-rerank
+
+  # Rate Limiting: 1,000 RPM (conservative default)
+  policies:
+    localRateLimit:
+      - maxTokens: 17
+        tokensPerFill: 17
+        fillInterval: 1s
+        type: requests
+
+  timeouts:
+    request: 60s
+
+  retry:
+    attempts: 3
+    backoffBaseInterval: 1s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset

@@ -187,13 +187,74 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("proxmox_region", "talos-k8s")
         data.setdefault("proxmox_storage", "local-lvm")
 
-        # Kgateway / AgentGateway defaults
-        if data.get("azure_openai_api_key"):
-            data.setdefault("azure_openai_api_version", "2025-04-01-preview")
+        # =============================================================
+        # Kgateway / AgentGateway Multi-Backend Configuration
+        # =============================================================
 
-        # AgentGateway observability defaults (enabled by default when agentgateway is configured)
+        # Backward compatibility: map legacy azure_openai_* variables to new schema
+        # This allows existing cluster.yaml files to work without modification
+        if data.get("azure_openai_api_key") and not data.get(
+            "azure_openai_eastus2_api_key"
+        ):
+            # Map legacy variables to new eastus2 shared API key
+            data["azure_openai_eastus2_api_key"] = data["azure_openai_api_key"]
+            data.setdefault(
+                "azure_openai_eastus2_resource_name",
+                data.get("azure_openai_resource_name", ""),
+            )
+            data.setdefault(
+                "azure_openai_eastus2_chat_deployment_name",
+                data.get("azure_openai_deployment_name", ""),
+            )
+            data.setdefault(
+                "azure_openai_eastus2_chat_api_version",
+                data.get("azure_openai_api_version", "2025-04-01-preview"),
+            )
+
+        # Set API version defaults for East US2 backends (shared API key)
+        # Each backend is enabled by deployment_name being set (not api_key)
+        if data.get("azure_openai_eastus2_api_key"):
+            if data.get("azure_openai_eastus2_chat_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus2_chat_api_version", "2025-01-01-preview"
+                )
+            if data.get("azure_openai_eastus2_responses_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus2_responses_api_version", "2025-04-01-preview"
+                )
+            if data.get("azure_openai_eastus2_embeddings_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus2_embeddings_api_version", "2023-05-15"
+                )
+            if data.get("azure_openai_eastus2_realtime_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus2_realtime_api_version", "2024-10-01-preview"
+                )
+            if data.get("azure_openai_eastus2_images_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus2_images_api_version", "2025-04-01-preview"
+                )
+            if data.get("azure_openai_eastus2_audio_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus2_audio_api_version", "2025-01-01-preview"
+                )
+
+        # Set API version defaults for East US backends (shared API key)
+        if data.get("azure_openai_eastus_api_key"):
+            if data.get("azure_openai_eastus_chat_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus_chat_api_version", "2025-01-01-preview"
+                )
+            if data.get("azure_openai_eastus_embeddings_deployment_name"):
+                data.setdefault(
+                    "azure_openai_eastus_embeddings_api_version", "2023-05-15"
+                )
+
+        # Enhancement settings defaults (enabled by default)
         if data.get("agentgateway_addr"):
             data.setdefault("agentgateway_observability_enabled", True)
+            data.setdefault("agentgateway_prompt_guard_enabled", True)
+            data.setdefault("agentgateway_rate_limit_enabled", True)
 
         return data
 

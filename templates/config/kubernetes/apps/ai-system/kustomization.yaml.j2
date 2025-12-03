@@ -1,4 +1,25 @@
-#% if agentgateway_addr is defined and azure_openai_api_key is defined %#
+#| AI System Namespace - conditionally render when any AI backend is configured #|
+#| East US2 backends use shared API key + deployment_name to enable each backend #|
+#% set eastus2_enabled = azure_openai_eastus2_api_key is defined and (
+    azure_openai_eastus2_chat_deployment_name is defined or
+    azure_openai_eastus2_responses_deployment_name is defined or
+    azure_openai_eastus2_embeddings_deployment_name is defined or
+    azure_openai_eastus2_realtime_deployment_name is defined or
+    azure_openai_eastus2_images_deployment_name is defined or
+    azure_openai_eastus2_audio_deployment_name is defined
+) %#
+#% set eastus_enabled = azure_openai_eastus_api_key is defined and (
+    azure_openai_eastus_chat_deployment_name is defined or
+    azure_openai_eastus_embeddings_deployment_name is defined
+) %#
+#% set ai_system_enabled = agentgateway_addr is defined and (
+    eastus2_enabled or
+    eastus_enabled or
+    azure_anthropic_api_key is defined or
+    azure_cohere_rerank_api_key is defined or
+    azure_cohere_embed_api_key is defined
+) %#
+#% if ai_system_enabled %#
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -9,5 +30,37 @@ components:
 
 resources:
   - ./namespace.yaml
-  - ./azure-openai/ks.yaml
+#% if azure_openai_eastus2_api_key is defined and azure_openai_eastus2_chat_deployment_name is defined %#
+  - ./azure-openai-eastus2-chat/ks.yaml
+#% endif %#
+#% if azure_openai_eastus2_api_key is defined and azure_openai_eastus2_responses_deployment_name is defined %#
+  - ./azure-openai-eastus2-responses/ks.yaml
+#% endif %#
+#% if azure_openai_eastus2_api_key is defined and azure_openai_eastus2_embeddings_deployment_name is defined %#
+  - ./azure-openai-eastus2-embeddings/ks.yaml
+#% endif %#
+#% if azure_openai_eastus2_api_key is defined and azure_openai_eastus2_realtime_deployment_name is defined %#
+  - ./azure-openai-eastus2-realtime/ks.yaml
+#% endif %#
+#% if azure_openai_eastus2_api_key is defined and azure_openai_eastus2_images_deployment_name is defined %#
+  - ./azure-openai-eastus2-images/ks.yaml
+#% endif %#
+#% if azure_openai_eastus2_api_key is defined and azure_openai_eastus2_audio_deployment_name is defined %#
+  - ./azure-openai-eastus2-audio/ks.yaml
+#% endif %#
+#% if azure_openai_eastus_api_key is defined and azure_openai_eastus_chat_deployment_name is defined %#
+  - ./azure-openai-eastus-chat/ks.yaml
+#% endif %#
+#% if azure_openai_eastus_api_key is defined and azure_openai_eastus_embeddings_deployment_name is defined %#
+  - ./azure-openai-eastus-embeddings/ks.yaml
+#% endif %#
+#% if azure_anthropic_api_key is defined %#
+  - ./azure-anthropic/ks.yaml
+#% endif %#
+#% if azure_cohere_rerank_api_key is defined %#
+  - ./azure-cohere-rerank/ks.yaml
+#% endif %#
+#% if azure_cohere_embed_api_key is defined %#
+  - ./azure-cohere-embed/ks.yaml
+#% endif %#
 #% endif %#

@@ -1,0 +1,52 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-openai-eastus2-responses-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-openai-eastus2-responses
+
+  # Rate Limiting: 8,240 RPM, 824,000 TPM (Azure GPT-5.1/Codex tier limits)
+  policies:
+    localRateLimit:
+      - maxTokens: 824000
+        tokensPerFill: 13733
+        fillInterval: 1s
+        type: tokens
+        tokenize: true
+      - maxTokens: 137
+        tokensPerFill: 137
+        fillInterval: 1s
+        type: requests
+
+  timeouts:
+    request: 180s
+
+  retry:
+    attempts: 3
+    backoffBaseInterval: 1s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset
+
+  ai:
+    promptGuard:
+      request:
+        customResponse:
+          message: "Request blocked: contains sensitive data patterns"
+        regex:
+          action: REJECT
+          builtins:
+            - CREDIT_CARD
+            - SSN
+      response:
+        regex:
+          action: MASK
+          builtins:
+            - CREDIT_CARD
+            - SSN
+            - EMAIL

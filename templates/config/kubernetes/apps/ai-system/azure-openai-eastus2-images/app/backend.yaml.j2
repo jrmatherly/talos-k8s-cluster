@@ -1,0 +1,28 @@
+#% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_images_deployment_name is defined %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-eastus2-images
+  labels:
+    cost-center: ai-gateway
+    provider: azure-openai
+    region: eastus2
+    model-type: images
+    app.kubernetes.io/name: azure-openai-eastus2-images
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        #| Images endpoint: /deployments/.../images/generations #|
+        endpoint: "https://#{ azure_openai_eastus2_resource_name }#.openai.azure.com"
+        deploymentName: "#{ azure_openai_eastus2_images_deployment_name }#"
+        apiVersion: "#{ azure_openai_eastus2_images_api_version | default('2025-04-01-preview') }#"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-eastus2-images-credentials
+#% endif %#

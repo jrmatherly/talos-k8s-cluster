@@ -358,6 +358,22 @@ To enable Renovate, click the 'Configure' button over at their [Github app page]
 
 The base Renovate configuration in your repository can be viewed at [.renovaterc.json5](.renovaterc.json5). By default it is scheduled to be active with PRs every weekend, but you can [change the schedule to anything you want](https://docs.renovatebot.com/presets-schedule), or remove it if you want Renovate to open PRs immediately.
 
+## 🧩 Adding New Applications/Templates
+
+When extending this project with new application templates, multiple configuration files must be updated **before** running `task configure`. This ensures templates render correctly and pass CI validation.
+
+**Files to update (in order):**
+1. `.taskfiles/template/resources/cluster.schema.cue` - Add CUE schema definitions for new fields
+2. `.taskfiles/template/resources/cluster.sample.yaml` - Add sample/documentation entries
+3. `cluster.yaml` - Add actual configuration values (required for local rendering)
+4. `.github/tests/public.yaml` and `private.yaml` - Add test values for CI
+5. `templates/scripts/plugin.py` - Add default values and backward compatibility logic
+6. Create template files in `templates/config/kubernetes/apps/<namespace>/`
+7. Update parent `kustomization.yaml.j2` with conditional includes
+
+> [!TIP]
+> For AI assistants (Claude, etc.): See the detailed checklist in `.serena/memories/adding-new-templates-checklist.md` for complete instructions and common mistakes to avoid.
+
 ## 🐛 Debugging
 
 Below is a general guide on trying to debug an issue with an resource or application. For example, if a workload/resource is not showing up or a pod has started but in a `CrashLoopBackOff` or `Pending` state. These steps do not include a way to fix the problem as the problem could be one of many different things.

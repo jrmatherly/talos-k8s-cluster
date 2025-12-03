@@ -392,6 +392,19 @@ kubectl logs -n kgateway-system -l app.kubernetes.io/name=agentgateway -f
 kubectl get prometheusrule -n kgateway-system ai-gateway-alerts -o yaml
 ```
 
+## Adding New Applications/Templates
+
+When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.
+
+**Quick reference - files to update:**
+1. `.taskfiles/template/resources/cluster.schema.cue` - CUE schema definitions
+2. `.taskfiles/template/resources/cluster.sample.yaml` - Sample/documentation
+3. `cluster.yaml` - **Primary config** with actual values (required for rendering)
+4. `.github/tests/public.yaml` and `private.yaml` - Test configurations
+5. `templates/scripts/plugin.py` - Default values and backward compatibility
+6. Template files in `templates/config/kubernetes/apps/<namespace>/`
+7. Parent `kustomization.yaml.j2` - Conditional includes
+
 ## Important Warnings
 
 1. **Never edit generated directories** (`kubernetes/`, `talos/`, `bootstrap/`) directly
@@ -401,3 +414,4 @@ kubectl get prometheusrule -n kgateway-system ai-gateway-alerts -o yaml
 5. **BGP requires all three settings**: `cilium_bgp_router_addr`, `cilium_bgp_router_asn`, `cilium_bgp_node_asn`
 6. **Helm chart extraZonePlugins/extraConfig** often REPLACES defaults rather than extending - include all required plugins explicitly
 7. **Flux Kustomization dependsOn** namespaces must match where the dependency actually runs (e.g., `cilium` is in `kube-system`, not `flux-system`)
+8. **Adding new templates** requires updating multiple config files first - see checklist above

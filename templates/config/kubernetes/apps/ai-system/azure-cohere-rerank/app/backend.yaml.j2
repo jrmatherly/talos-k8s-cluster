@@ -1,0 +1,23 @@
+#% if agentgateway_addr is defined and azure_cohere_rerank_api_key is defined %#
+---
+#| Static backend for Cohere Rerank - uses dedicated Azure AI Models endpoint #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-cohere-rerank
+  labels:
+    cost-center: ai-gateway
+    provider: azure-cohere
+    region: eastus
+    model-type: rerank
+    app.kubernetes.io/name: azure-cohere-rerank
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "#{ azure_cohere_rerank_host | default('aan-cohere-rerank-v3-5.eastus.models.ai.azure.com') }#"
+        port: 443
+        tls: true
+#% endif %#

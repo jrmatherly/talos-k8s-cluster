@@ -1,0 +1,38 @@
+#% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_embeddings_deployment_name is defined %#
+#% if agentgateway_rate_limit_enabled | default(true) %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-openai-eastus2-embeddings-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-openai-eastus2-embeddings
+
+  # Rate Limiting: 6,000 RPM, 1,000,000 TPM (Azure embeddings tier limits)
+  policies:
+    localRateLimit:
+      - maxTokens: 1000000
+        tokensPerFill: 16666
+        fillInterval: 1s
+        type: tokens
+        tokenize: true
+      - maxTokens: 100
+        tokensPerFill: 100
+        fillInterval: 1s
+        type: requests
+
+  timeouts:
+    request: 60s
+
+  retry:
+    attempts: 3
+    backoffBaseInterval: 1s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset
+#% endif %#
+#% endif %#

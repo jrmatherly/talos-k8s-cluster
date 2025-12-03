@@ -1,0 +1,27 @@
+#% if agentgateway_addr is defined and azure_openai_eastus_api_key is defined %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-eastus-chat
+  labels:
+    cost-center: ai-gateway
+    provider: azure-openai
+    region: eastus
+    model-type: chat
+    app.kubernetes.io/name: azure-openai-eastus-chat
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: AI
+  ai:
+    llm:
+      azureopenai:
+        endpoint: "https://#{ azure_openai_eastus_resource_name }#.openai.azure.com"
+        deploymentName: "#{ azure_openai_eastus_chat_deployment_name | default('gpt-4.1') }#"
+        apiVersion: "#{ azure_openai_eastus_chat_api_version | default('2025-01-01-preview') }#"
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-eastus-credentials
+#% endif %#

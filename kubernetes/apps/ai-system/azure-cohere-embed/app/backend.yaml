@@ -1,0 +1,20 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: azure-cohere-embed
+  labels:
+    cost-center: ai-gateway
+    provider: azure-cohere
+    region: eastus
+    model-type: embed
+    app.kubernetes.io/name: azure-cohere-embed
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "aaronsai.services.ai.azure.com"
+        port: 443
+        tls: true

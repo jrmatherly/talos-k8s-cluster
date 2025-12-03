@@ -1,0 +1,40 @@
+#% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_audio_deployment_name is defined %#
+#% if agentgateway_rate_limit_enabled | default(true) %#
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-openai-eastus2-audio-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-openai-eastus2-audio
+
+  #| Rate Limiting: 1,500 RPM, 250,000 TPM (Azure gpt-audio tier limits) #|
+  #| Note: gpt-audio-mini has 200 RPM, 100k TPM #|
+  policies:
+    localRateLimit:
+      - maxTokens: 250000
+        tokensPerFill: 4166
+        fillInterval: 1s
+        type: tokens
+        tokenize: true
+      - maxTokens: 25
+        tokensPerFill: 25
+        fillInterval: 1s
+        type: requests
+
+  #| Audio processing may take longer; extended timeout #|
+  timeouts:
+    request: 180s
+
+  retry:
+    attempts: 3
+    backoffBaseInterval: 1s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset
+#% endif %#
+#% endif %#

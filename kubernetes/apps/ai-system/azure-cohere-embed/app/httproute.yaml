@@ -1,0 +1,31 @@
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: azure-cohere-embed
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: kgateway-system
+  hostnames:
+    - "llms.matherly.net"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /cohere/embed
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /openai/v1/embeddings
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: Authorization
+                value: "Bearer ${AZURE_COHERE_EMBED_API_KEY}"
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: azure-cohere-embed

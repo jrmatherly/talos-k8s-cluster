@@ -44,6 +44,46 @@ import (
 	agentgateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
 	agentgateway_observability_enabled?: *true | bool  // Enable metrics, access logs, and alerts
 	otel_collector_endpoint?: string & =~"^[a-z0-9.-]+:[0-9]+$"  // OTLP endpoint (e.g., "otel-collector.monitoring:4317")
+
+	// Enhancement settings
+	agentgateway_prompt_guard_enabled?: *true | bool  // Enable PII/sensitive data blocking
+	agentgateway_rate_limit_enabled?: *true | bool    // Enable rate limiting per backend
+
+	// Azure OpenAI - East US2 (Primary Region) - shared API key for all backends
+	azure_openai_eastus2_resource_name?: string & !=""
+	azure_openai_eastus2_api_key?: string & !=""  // Single shared key for all East US2 backends
+	azure_openai_eastus2_chat_deployment_name?: string & !=""
+	azure_openai_eastus2_chat_api_version?: string & !=""
+	azure_openai_eastus2_responses_deployment_name?: string & !=""
+	azure_openai_eastus2_responses_api_version?: string & !=""
+	azure_openai_eastus2_embeddings_deployment_name?: string & !=""
+	azure_openai_eastus2_embeddings_api_version?: string & !=""
+	azure_openai_eastus2_realtime_deployment_name?: string & !=""
+	azure_openai_eastus2_realtime_api_version?: string & !=""
+	azure_openai_eastus2_images_deployment_name?: string & !=""
+	azure_openai_eastus2_images_api_version?: string & !=""
+	azure_openai_eastus2_audio_deployment_name?: string & !=""
+	azure_openai_eastus2_audio_api_version?: string & !=""
+
+	// Azure OpenAI - East US (Secondary Region)
+	azure_openai_eastus_resource_name?: string & !=""
+	azure_openai_eastus_api_key?: string & !=""
+	azure_openai_eastus_chat_deployment_name?: string & !=""
+	azure_openai_eastus_chat_api_version?: string & !=""
+	azure_openai_eastus_embeddings_deployment_name?: string & !=""
+	azure_openai_eastus_embeddings_api_version?: string & !=""
+
+	// Azure AI Foundry - Anthropic Claude
+	azure_anthropic_resource_name?: string & !=""
+	azure_anthropic_api_key?: string & !=""
+
+	// Azure AI Models - Cohere
+	azure_cohere_rerank_host?: string & =~"^[a-z0-9.-]+$"
+	azure_cohere_rerank_api_key?: string & !=""
+	azure_cohere_embed_host?: string & =~"^[a-z0-9.-]+$"
+	azure_cohere_embed_api_key?: string & !=""
+
+	// Direct Provider APIs (non-Azure) - legacy/backward compatibility
 	azure_openai_api_key?: string & !=""
 	azure_openai_resource_name?: string & !=""
 	azure_openai_deployment_name?: string & !=""
