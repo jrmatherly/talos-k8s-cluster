@@ -12,14 +12,14 @@ spec:
       kind: GatewayParameters
   listeners:
     - name: http
-      port: 8080
+      port: 80
       protocol: HTTP
       allowedRoutes:
         namespaces:
           from: All
     - name: https-matherly-net
       hostname: "*.matherly.net"
-      port: 8443
+      port: 443
       protocol: HTTPS
       allowedRoutes:
         namespaces:
@@ -32,7 +32,7 @@ spec:
             namespace: network
     - name: https-spoonsofsalt-org
       hostname: "*.spoonsofsalt.org"
-      port: 8443
+      port: 443
       protocol: HTTPS
       allowedRoutes:
         namespaces:

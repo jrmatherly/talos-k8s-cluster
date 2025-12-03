@@ -13,7 +13,7 @@ spec:
       kind: GatewayParameters
   listeners:
     - name: http
-      port: 8080
+      port: 80
       protocol: HTTP
       allowedRoutes:
         namespaces:
@@ -21,7 +21,7 @@ spec:
 #% for domain in cloudflare_domains %#
     - name: https-#{ domain | replace('.', '-') }#
       hostname: "*.#{ domain }#"
-      port: 8443
+      port: 443
       protocol: HTTPS
       allowedRoutes:
         namespaces:
