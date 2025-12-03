@@ -15,7 +15,9 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
+#% for domain in cloudflare_domains %#
+    - name: https-#{ domain | replace('.', '-') }#
+      hostname: "*.#{ domain }#"
       port: 8443
       protocol: HTTPS
       allowedRoutes:
@@ -24,7 +26,6 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-#% for domain in cloudflare_domains %#
           - kind: Secret
             name: #{ domain | replace('.', '-') }#-production-tls
             namespace: network

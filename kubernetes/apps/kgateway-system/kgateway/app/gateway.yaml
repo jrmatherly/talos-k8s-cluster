@@ -14,7 +14,8 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
+    - name: https-matherly-net
+      hostname: "*.matherly.net"
       port: 8443
       protocol: HTTPS
       allowedRoutes:
@@ -26,6 +27,16 @@ spec:
           - kind: Secret
             name: matherly-net-production-tls
             namespace: network
+    - name: https-spoonsofsalt-org
+      hostname: "*.spoonsofsalt.org"
+      port: 8443
+      protocol: HTTPS
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
           - kind: Secret
             name: spoonsofsalt-org-production-tls
             namespace: network
