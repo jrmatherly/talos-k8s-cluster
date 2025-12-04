@@ -1,0 +1,9 @@
+#% if envoy_ai_gateway_enabled and azure_openai_api_key %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ai-system
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+#% endif %#

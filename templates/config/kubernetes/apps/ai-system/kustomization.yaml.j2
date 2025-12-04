@@ -1,0 +1,13 @@
+#% if envoy_ai_gateway_enabled and azure_openai_api_key %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ai-system
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./azure-openai/ks.yaml
+#% endif %#

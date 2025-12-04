@@ -166,9 +166,93 @@ spec:
     - name: envoy-internal
       namespace: network
       sectionName: http
+    - name: envoy-ai
+      namespace: network
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
             statusCode: 301
+---
+# AI Gateway for LLM traffic routing
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-ai
+  annotations:
+    external-dns.alpha.kubernetes.io/target: ai.${SECRET_DOMAIN}
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: ai.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "192.168.22.145"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: matherly-net-production-tls
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
+---
+# Client traffic policy for AI Gateway with larger buffer for LLM payloads
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: envoy-ai
+spec:
+  clientIPDetection:
+    xForwardedFor:
+      numTrustedHops: 1
+  connection:
+    bufferLimit: 50Mi
+  http2:
+    initialStreamWindowSize: 1Mi
+    initialConnectionWindowSize: 16Mi
+    onInvalidMessage: TerminateStream
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-ai
+  tcpKeepalive: {}
+  timeout:
+    http:
+      requestReceivedTimeout: 0s
+  tls:
+    minVersion: "1.2"
+    alpnProtocols:
+      - h2
+      - http/1.1
+---
+# Backend traffic policy for AI Gateway with longer timeouts
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: envoy-ai
+spec:
+  compression:
+    - type: Gzip
+  connection:
+    bufferLimit: 50Mi
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-ai
+  tcpKeepalive: {}
+  timeout:
+    http:
+      requestTimeout: 120s

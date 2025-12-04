@@ -39,6 +39,21 @@ import (
 	// Proxmox CCM Integration (Approach B only - skip for Approach A)
 	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
 	proxmox_ccm_token_secret?: string & !=""
+
+	// Envoy AI Gateway Configuration (optional - for AI/LLM routing)
+	envoy_ai_gateway_enabled?: bool
+	envoy_ai_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
+
+	// Azure OpenAI Configuration (required if envoy_ai_gateway_enabled)
+	azure_openai_api_key?: string & !=""
+	azure_openai_resource_name?: string & !=""
+	azure_openai_deployment_name?: string & !=""
+	azure_openai_api_version?: string | *"2025-01-01-preview"
+
+	// Azure Entra ID Authentication (optional - alternative to API key)
+	azure_tenant_id?: string & !=""
+	azure_client_id?: string & !=""
+	azure_client_secret?: string & !=""
 }
 
 #Config

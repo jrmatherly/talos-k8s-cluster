@@ -18,3 +18,20 @@ spec:
           kubernetes:
             deploy:
               type: GatewayNamespace
+#% if envoy_ai_gateway_enabled %#
+        extensionApis:
+          enableEnvoyPatchPolicy: true
+          enableBackend: true
+        extensionManager:
+          hooks:
+            xdsTranslator:
+              post:
+                - Listeners
+                - Routes
+                - Clusters
+                - Secrets
+              includeAll: true
+          service:
+            fqdn: ai-gateway-controller.envoy-ai-gateway-system.svc.cluster.local
+            port: 1063
+#% endif %#

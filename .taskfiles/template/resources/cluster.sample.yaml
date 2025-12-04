@@ -215,3 +215,43 @@ cloudflare_token: ""
 #    (REQUIRED for Approach B only) - The secret value from token creation
 #    NOTE: Skip if using Approach A (Static Labels)
 # proxmox_ccm_token_secret: ""
+
+# ==============================================================================
+# ENVOY AI GATEWAY (Optional)
+# ==============================================================================
+# Configuration for AI/LLM traffic routing via Envoy AI Gateway.
+# This extends the existing Envoy Gateway with AI-specific capabilities.
+# REF: https://aigateway.envoyproxy.io/docs/
+
+# -- Enable Envoy AI Gateway integration.
+#    (OPTIONAL) / (DEFAULT: false)
+# envoy_ai_gateway_enabled: true
+
+# -- Load balancer IP for the AI Gateway.
+#    (REQUIRED if envoy_ai_gateway_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.145"
+# envoy_ai_gateway_addr: ""
+
+# -- Azure OpenAI API Key for authentication.
+#    (REQUIRED if envoy_ai_gateway_enabled) - From Azure Portal
+# azure_openai_api_key: ""
+
+# -- Azure OpenAI resource name (the subdomain of your endpoint).
+#    (REQUIRED if envoy_ai_gateway_enabled)
+#    Example: "my-openai" for https://my-openai.openai.azure.com
+# azure_openai_resource_name: ""
+
+# -- Azure OpenAI deployment name.
+#    (REQUIRED if envoy_ai_gateway_enabled)
+#    Example: "gpt-4" or "gpt-5-chat"
+# azure_openai_deployment_name: ""
+
+# -- Azure OpenAI API version.
+#    (OPTIONAL) / (DEFAULT: "2025-01-01-preview")
+# azure_openai_api_version: ""
+
+# -- Azure Entra ID Authentication (optional - alternative to API key)
+#    Use these for production workloads instead of API key.
+# azure_tenant_id: ""
+# azure_client_id: ""
+# azure_client_secret: ""

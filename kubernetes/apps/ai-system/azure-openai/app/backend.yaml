@@ -1,0 +1,25 @@
+---
+# Backend endpoint definition for Azure OpenAI
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-backend
+spec:
+  endpoints:
+    - fqdn:
+        hostname: aanopenai.openai.azure.com
+        port: 443
+---
+# BackendTLSPolicy for TLS validation
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTLSPolicy
+metadata:
+  name: azure-openai-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-openai-backend
+  validation:
+    wellKnownCACertificates: System
+    hostname: aanopenai.openai.azure.com

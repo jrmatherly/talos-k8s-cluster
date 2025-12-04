@@ -1,0 +1,14 @@
+---
+# AI Service Backend for Azure OpenAI
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata:
+  name: azure-openai
+spec:
+  schema:
+    name: AzureOpenAI
+    version: "2025-01-01-preview"
+  backendRef:
+    group: gateway.envoyproxy.io
+    kind: Backend
+    name: azure-openai-backend

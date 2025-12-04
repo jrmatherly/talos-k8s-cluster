@@ -1,0 +1,9 @@
+#% if envoy_ai_gateway_enabled %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: envoy-ai-gateway-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+#% endif %#
