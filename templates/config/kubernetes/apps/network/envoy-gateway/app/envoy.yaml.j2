@@ -4,13 +4,6 @@ kind: EnvoyProxy
 metadata:
   name: envoy
 spec:
-  bootstrap:
-    type: JSONPatch
-    jsonPatches:
-      # Bind admin interface to all interfaces (required for external access via HTTPRoute)
-      - op: replace
-        path: "/admin/address/socket_address/address"
-        value: "0.0.0.0"
   logging:
     level:
       default: info
@@ -268,22 +261,23 @@ spec:
       requestTimeout: 120s
 #% endif %#
 ---
-# Service to expose Envoy Admin UI on internal gateway pods
+# Service to expose Envoy Gateway Admin Console
 apiVersion: v1
 kind: Service
 metadata:
-  name: envoy-internal-admin
+  name: envoy-gateway-admin
 spec:
   selector:
-    gateway.envoyproxy.io/owning-gateway-name: envoy-internal
-    gateway.envoyproxy.io/owning-gateway-namespace: network
+    app.kubernetes.io/instance: envoy-gateway
+    app.kubernetes.io/name: gateway-helm
+    control-plane: envoy-gateway
   ports:
     - name: admin
       port: 19000
       targetPort: 19000
       protocol: TCP
 ---
-# HTTPRoute to expose Envoy Admin UI via envoy-internal gateway
+# HTTPRoute to expose Envoy Gateway Admin Console via envoy-internal gateway
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -299,5 +293,5 @@ spec:
     - envoy-ui.${SECRET_DOMAIN}
   rules:
     - backendRefs:
-        - name: envoy-internal-admin
+        - name: envoy-gateway-admin
           port: 19000
