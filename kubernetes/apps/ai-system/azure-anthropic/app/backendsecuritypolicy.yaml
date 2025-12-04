@@ -1,6 +1,6 @@
 ---
 # Auth for fast model (claude-haiku-4-5)
-# NOTE: Anthropic uses x-api-key header (not api-key like Azure OpenAI)
+# Uses AnthropicAPIKey type which automatically injects x-api-key header
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: BackendSecurityPolicy
 metadata:
@@ -10,11 +10,10 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-anthropic-fast
-  type: APIKey
-  apiKey:
+  type: AnthropicAPIKey
+  anthropicAPIKey:
     secretRef:
       name: azure-anthropic-credentials
-    headerName: x-api-key
 ---
 # Auth for balanced model (claude-sonnet-4-5)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
@@ -26,11 +25,10 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-anthropic-balanced
-  type: APIKey
-  apiKey:
+  type: AnthropicAPIKey
+  anthropicAPIKey:
     secretRef:
       name: azure-anthropic-credentials
-    headerName: x-api-key
 ---
 # Auth for advanced models (claude-opus-4-5, claude-opus-4-1)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
@@ -42,8 +40,7 @@ spec:
     - group: aigateway.envoyproxy.io
       kind: AIServiceBackend
       name: azure-anthropic-advanced
-  type: APIKey
-  apiKey:
+  type: AnthropicAPIKey
+  anthropicAPIKey:
     secretRef:
       name: azure-anthropic-credentials
-    headerName: x-api-key
