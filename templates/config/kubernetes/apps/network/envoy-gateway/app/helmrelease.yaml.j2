@@ -25,12 +25,19 @@ spec:
         extensionManager:
           hooks:
             xdsTranslator:
+              translation:
+                listener:
+                  includeAll: true
+                route:
+                  includeAll: true
+                cluster:
+                  includeAll: true
+                secret:
+                  includeAll: true
               post:
-                - Listeners
-                - Routes
-                - Clusters
-                - Secrets
-              includeAll: true
+                - Translation
+                - Cluster
+                - Route
           service:
             fqdn:
               hostname: ai-gateway-controller.envoy-ai-gateway-system.svc.cluster.local
