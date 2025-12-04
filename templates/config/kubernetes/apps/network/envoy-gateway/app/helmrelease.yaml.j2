@@ -32,6 +32,7 @@ spec:
                 - Secrets
               includeAll: true
           service:
-            fqdn: ai-gateway-controller.envoy-ai-gateway-system.svc.cluster.local
-            port: 1063
+            fqdn:
+              hostname: ai-gateway-controller.envoy-ai-gateway-system.svc.cluster.local
+              port: 1063
 #% endif %#
