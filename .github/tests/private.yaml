@@ -28,6 +28,3 @@ proxmox_api_url: "https://10.10.10.1:8006/api2/json"
 proxmox_csi_token_id: "test-csi@pve!token"
 proxmox_csi_token_secret: "fake-secret"
 # CCM tokens not needed for Approach A
-# Kgateway / AgentGateway Configuration (optional - testing minimal config)
-# agentgateway_addr: ""  # not set - kgateway templates not rendered
-# azure_openai_eastus2_chat_api_key: ""  # not set - ai-system templates not rendered
