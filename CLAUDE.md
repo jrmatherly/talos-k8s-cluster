@@ -332,11 +332,11 @@ azure_openai_deployment_name: "gpt-4"
 
 2. **TLS Listeners**: Kgateway requires exactly 1 certificateRef per HTTPS listener. Create separate listeners for each domain with hostname patterns (`*.matherly.net`, `*.spoonsofsalt.org`).
 
-3. **Backend CRD Schema (v2.1.1)**: AI workloads use `Backend` (`agentgateway.dev/v1alpha1`) with `type: AI` or `type: Static`. Auth is configured via `spec.ai.llm.<provider>.authToken.secretRef`.
+3. **Backend CRD Schema (v2.1.1)**: AI workloads use `Backend` (`gateway.kgateway.dev/v1alpha1`) with `type: AI` or `type: Static`. Auth is configured via `spec.ai.llm.<provider>.authToken.secretRef`.
 
    **Azure OpenAI Backend:**
    ```yaml
-   apiVersion: agentgateway.dev/v1alpha1
+   apiVersion: gateway.kgateway.dev/v1alpha1
    kind: Backend
    metadata:
      name: azure-openai-chat
@@ -357,7 +357,7 @@ azure_openai_deployment_name: "gpt-4"
    **Static Backend (Cohere, etc.):**
    Static backends use `spec.static.hosts[]` and require a separate `BackendConfigPolicy` for TLS:
    ```yaml
-   apiVersion: agentgateway.dev/v1alpha1
+   apiVersion: gateway.kgateway.dev/v1alpha1
    kind: Backend
    metadata:
      name: azure-cohere-embed
@@ -368,7 +368,7 @@ azure_openai_deployment_name: "gpt-4"
          - host: "resource.services.ai.azure.com"
            port: 443
    ---
-   apiVersion: agentgateway.dev/v1alpha1
+   apiVersion: gateway.kgateway.dev/v1alpha1
    kind: BackendConfigPolicy
    metadata:
      name: azure-cohere-embed-tls
@@ -376,7 +376,7 @@ azure_openai_deployment_name: "gpt-4"
      targetRefs:
        - name: azure-cohere-embed
          kind: Backend
-         group: agentgateway.dev
+         group: gateway.kgateway.dev
      tls:
        sni: "resource.services.ai.azure.com"
        wellKnownCACertificates: System
@@ -384,7 +384,7 @@ azure_openai_deployment_name: "gpt-4"
 
    **Custom Host Override (e.g., Anthropic via Azure AI Foundry):**
    ```yaml
-   apiVersion: agentgateway.dev/v1alpha1
+   apiVersion: gateway.kgateway.dev/v1alpha1
    kind: Backend
    metadata:
      name: azure-anthropic
@@ -411,7 +411,7 @@ azure_openai_deployment_name: "gpt-4"
    spec:
      rules:
        - backendRefs:
-           - group: agentgateway.dev
+           - group: gateway.kgateway.dev
              kind: Backend
              name: azure-openai-chat
              namespace: ai-system

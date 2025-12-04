@@ -2,7 +2,7 @@
 ---
 #| Backend (static) for Cohere Rerank (kgateway v2.1.1) #|
 #| Uses dedicated Azure AI Models endpoint #|
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: Backend
 metadata:
   name: azure-cohere-rerank
@@ -23,7 +23,7 @@ spec:
 ---
 #| BackendConfigPolicy for TLS configuration (kgateway v2.1.1) #|
 #| Static backends require separate policy for TLS origination #|
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: BackendConfigPolicy
 metadata:
   name: azure-cohere-rerank-tls
@@ -35,7 +35,7 @@ spec:
   targetRefs:
     - name: azure-cohere-rerank
       kind: Backend
-      group: agentgateway.dev
+      group: gateway.kgateway.dev
   tls:
     sni: "#{ azure_cohere_rerank_host | default('aan-cohere-rerank-v3-5.eastus.models.ai.azure.com') }#"
     wellKnownCACertificates: System

@@ -2,7 +2,7 @@
 ---
 #| Backend (static) for Cohere Embed (kgateway v2.1.1) #|
 #| Uses Azure AI Services OpenAI-compatible endpoint #|
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: Backend
 metadata:
   name: azure-cohere-embed
@@ -23,7 +23,7 @@ spec:
 ---
 #| BackendConfigPolicy for TLS configuration (kgateway v2.1.1) #|
 #| Static backends require separate policy for TLS origination #|
-apiVersion: agentgateway.dev/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: BackendConfigPolicy
 metadata:
   name: azure-cohere-embed-tls
@@ -35,7 +35,7 @@ spec:
   targetRefs:
     - name: azure-cohere-embed
       kind: Backend
-      group: agentgateway.dev
+      group: gateway.kgateway.dev
   tls:
     sni: "#{ azure_cohere_embed_host | default('aaronsai.services.ai.azure.com') }#"
     wellKnownCACertificates: System

@@ -24,7 +24,7 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /anthropic/v1/messages
       backendRefs:
-        - group: agentgateway.dev
+        - group: gateway.kgateway.dev
           kind: Backend
           name: azure-anthropic-opus
           namespace: ai-system

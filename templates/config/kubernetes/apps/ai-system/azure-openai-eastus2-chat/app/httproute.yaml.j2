@@ -16,7 +16,7 @@ spec:
             type: PathPrefix
             value: /azure/eastus2/chat/completions
       backendRefs:
-        - group: agentgateway.dev
+        - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus2-chat
           namespace: ai-system
@@ -26,7 +26,7 @@ spec:
             type: PathPrefix
             value: /v1/
       backendRefs:
-        - group: agentgateway.dev
+        - group: gateway.kgateway.dev
           kind: Backend
           name: azure-openai-eastus2-chat
           namespace: ai-system
