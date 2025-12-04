@@ -19,6 +19,7 @@ spec:
         namespaces:
           from: All
     - name: https
+      hostname: "*.#{ primary_domain }#"
       port: 443
       protocol: HTTPS
       allowedRoutes:
@@ -27,10 +28,8 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-#% for domain in cloudflare_domains %#
           - group: ""
             kind: Secret
-            name: #{ domain | replace('.', '-') }#-production-tls
+            name: #{ primary_domain | replace('.', '-') }#-production-tls
             namespace: network
-#% endfor %#
 #% endif %#
