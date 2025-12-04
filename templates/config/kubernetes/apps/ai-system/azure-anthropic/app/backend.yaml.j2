@@ -19,10 +19,10 @@ spec:
   ai:
     provider:
       #| Use anthropic provider - sends auth via x-api-key header #|
-      #| Model is taken from request when not specified in backend #|
-      #| Available models: claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-5, claude-opus-4-1 #|
+      #| Default model: claude-haiku-4-5 #|
+      #| For other models, use separate backends (azure-anthropic-sonnet, azure-anthropic-opus, etc.) #|
       anthropic:
-        model: ""
+        model: "claude-haiku-4-5"
       #| Override host/port to Azure AI Foundry endpoint #|
       host: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
       port: 443
