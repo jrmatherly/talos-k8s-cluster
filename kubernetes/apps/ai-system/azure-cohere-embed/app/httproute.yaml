@@ -20,11 +20,6 @@ spec:
             path:
               type: ReplaceFullPath
               replaceFullPath: /openai/v1/embeddings
-        - type: RequestHeaderModifier
-          requestHeaderModifier:
-            set:
-              - name: Authorization
-                value: "Bearer ${AZURE_COHERE_EMBED_API_KEY}"
       backendRefs:
         - group: agentgateway.dev
           kind: AgentgatewayBackend

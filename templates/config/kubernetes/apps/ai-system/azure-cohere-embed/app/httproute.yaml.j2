@@ -1,6 +1,7 @@
 #% if agentgateway_addr is defined and azure_cohere_embed_api_key is defined %#
 ---
-#| Static backends cannot use SecretRef - API key is injected via Flux postBuild substitution #|
+#| HTTPRoute for Cohere Embed (kgateway v2.2+) #|
+#| Auth handled by AgentgatewayBackend policies.auth.secretRef #|
 #| Uses OpenAI-compatible API format at /openai/v1/embeddings #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -23,11 +24,6 @@ spec:
             path:
               type: ReplaceFullPath
               replaceFullPath: /openai/v1/embeddings
-        - type: RequestHeaderModifier
-          requestHeaderModifier:
-            set:
-              - name: Authorization
-                value: "Bearer ${AZURE_COHERE_EMBED_API_KEY}"
       backendRefs:
         - group: agentgateway.dev
           kind: AgentgatewayBackend

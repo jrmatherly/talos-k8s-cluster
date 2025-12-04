@@ -1,6 +1,7 @@
 #% if agentgateway_addr is defined and azure_cohere_rerank_api_key is defined %#
 ---
-#| Static backends cannot use SecretRef - API key is injected via Flux postBuild substitution #|
+#| HTTPRoute for Cohere Rerank (kgateway v2.2+) #|
+#| Auth handled by AgentgatewayBackend policies.auth.secretRef #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -22,11 +23,6 @@ spec:
             path:
               type: ReplaceFullPath
               replaceFullPath: /v2/rerank
-        - type: RequestHeaderModifier
-          requestHeaderModifier:
-            set:
-              - name: Authorization
-                value: "Bearer ${AZURE_COHERE_RERANK_API_KEY}"
       backendRefs:
         - group: agentgateway.dev
           kind: AgentgatewayBackend
