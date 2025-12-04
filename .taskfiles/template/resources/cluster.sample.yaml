@@ -232,23 +232,20 @@ cloudflare_token: ""
 #    Example: "192.168.1.145"
 # envoy_ai_gateway_addr: ""
 
-# -- Azure OpenAI API Key for authentication.
+# ==============================================================================
+# AZURE OPENAI - US EAST REGION
+# ==============================================================================
+# Models: gpt-4.1, gpt-4.1-nano, gpt-4o-mini, o3, o4-mini
+#         text-embedding-3-small, text-embedding-ada-002
+
+# -- Azure OpenAI US East API Key for authentication.
 #    (REQUIRED if envoy_ai_gateway_enabled) - From Azure Portal
-# azure_openai_api_key: ""
+# azure_openai_us_east_api_key: ""
 
-# -- Azure OpenAI resource name (the subdomain of your endpoint).
+# -- Azure OpenAI US East resource name (the subdomain of your endpoint).
 #    (REQUIRED if envoy_ai_gateway_enabled)
-#    Example: "my-openai" for https://my-openai.openai.azure.com
-# azure_openai_resource_name: ""
-
-# -- Azure OpenAI deployment name.
-#    (REQUIRED if envoy_ai_gateway_enabled)
-#    Example: "gpt-4" or "gpt-5-chat"
-# azure_openai_deployment_name: ""
-
-# -- Azure OpenAI API version.
-#    (OPTIONAL) / (DEFAULT: "2025-01-01-preview")
-# azure_openai_api_version: ""
+#    Example: "my-openai" for https://my-openai.cognitiveservices.azure.com
+# azure_openai_us_east_resource_name: ""
 
 # -- Azure Entra ID Authentication (optional - alternative to API key)
 #    Use these for production workloads instead of API key.

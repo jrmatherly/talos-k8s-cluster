@@ -1,0 +1,74 @@
+#% if envoy_ai_gateway_enabled and azure_openai_us_east_api_key %#
+---
+# Auth for chat models
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-openai-us-east-chat-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-openai-us-east-chat
+#% if azure_tenant_id and azure_client_id %#
+  type: AzureCredentials
+  azureCredentials:
+    clientID: "#{ azure_client_id }#"
+    tenantID: "#{ azure_tenant_id }#"
+    clientSecretRef:
+      name: azure-us-east-credentials
+#% else %#
+  type: AzureAPIKey
+  azureAPIKey:
+    secretRef:
+      name: azure-openai-us-east-credentials
+#% endif %#
+---
+# Auth for reasoning models
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-openai-us-east-reasoning-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-openai-us-east-reasoning
+#% if azure_tenant_id and azure_client_id %#
+  type: AzureCredentials
+  azureCredentials:
+    clientID: "#{ azure_client_id }#"
+    tenantID: "#{ azure_tenant_id }#"
+    clientSecretRef:
+      name: azure-us-east-credentials
+#% else %#
+  type: AzureAPIKey
+  azureAPIKey:
+    secretRef:
+      name: azure-openai-us-east-credentials
+#% endif %#
+---
+# Auth for embedding models
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: BackendSecurityPolicy
+metadata:
+  name: azure-openai-us-east-embedding-auth
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIServiceBackend
+      name: azure-openai-us-east-embedding
+#% if azure_tenant_id and azure_client_id %#
+  type: AzureCredentials
+  azureCredentials:
+    clientID: "#{ azure_client_id }#"
+    tenantID: "#{ azure_tenant_id }#"
+    clientSecretRef:
+      name: azure-us-east-credentials
+#% else %#
+  type: AzureAPIKey
+  azureAPIKey:
+    secretRef:
+      name: azure-openai-us-east-credentials
+#% endif %#
+#% endif %#

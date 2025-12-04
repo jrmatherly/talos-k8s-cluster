@@ -303,12 +303,20 @@ Optional AI/LLM traffic routing via Envoy AI Gateway extension. Provides intelli
 envoy_ai_gateway_enabled: true
 envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
 
-# Azure OpenAI settings
-azure_openai_api_key: "<api-key>"
-azure_openai_resource_name: "myopenai"      # Subdomain of endpoint
-azure_openai_deployment_name: "gpt-4"
-azure_openai_api_version: "2025-01-01-preview"
+# Azure OpenAI - US East Region
+azure_openai_us_east_api_key: "<api-key>"
+azure_openai_us_east_resource_name: "myopenai"  # Subdomain of endpoint
 ```
+
+### Multi-Model Architecture
+
+The AI Gateway supports multiple model types with appropriate timeouts:
+
+| Model Type | Models | Timeout | AIServiceBackend |
+|------------|--------|---------|------------------|
+| Chat | gpt-4.1, gpt-4.1-nano, gpt-4o-mini | 120s | azure-openai-us-east-chat |
+| Reasoning | o3, o4-mini | 300s | azure-openai-us-east-reasoning |
+| Embedding | text-embedding-3-small, text-embedding-ada-002 | 60s | azure-openai-us-east-embedding |
 
 ### Architecture
 
@@ -317,7 +325,8 @@ When enabled, the following components are deployed:
 - **ClientTrafficPolicy** - Larger buffers (50Mi) for LLM payloads
 - **BackendTrafficPolicy** - Extended timeouts (120s) for LLM responses
 - **ai-gateway-controller** - External processor for AI routing (envoy-ai-gateway-system namespace)
-- **AIGatewayRoute** - Routes `/v1/chat/completions` to Azure OpenAI
+- **AIGatewayRoute** - Routes requests to appropriate backend based on `x-ai-eg-model` header
+- **AIServiceBackend** - Per-model-type schema configuration (chat, reasoning, embedding)
 - **BackendSecurityPolicy** - Injects `api-key` header for Azure authentication
 
 ### Key Files
@@ -326,7 +335,7 @@ When enabled, the following components are deployed:
 |------|---------|
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/envoy.yaml.j2` | Gateway, traffic policies |
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/helmrelease.yaml.j2` | extensionManager hooks |
-| `templates/config/kubernetes/apps/ai-system/envoy-ai-gateway/` | AI Gateway controller, routes |
+| `templates/config/kubernetes/apps/ai-system/azure-openai-us-east/` | Backend, routes, auth for US East |
 
 ### Critical: extensionManager Configuration
 
@@ -358,10 +367,23 @@ extensionManager:
 ### Testing
 
 ```bash
-# Verify AI Gateway endpoint
-curl -X POST "https://llms.<domain>/v1/chat/completions" \
+# Test GPT-4.1-nano (chat model)
+curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
   -H "Content-Type: application/json" \
-  -d '{"model":"gpt-4","messages":[{"role":"user","content":"Hello"}]}'
+  -H "x-ai-eg-model: gpt-4.1-nano" \
+  -d '{"model": "gpt-4.1-nano", "messages": [{"role": "user", "content": "Hello"}]}'
+
+# Test O3 reasoning model (300s timeout)
+curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "x-ai-eg-model: o3" \
+  -d '{"model": "o3", "messages": [{"role": "user", "content": "What is 15 * 23?"}]}'
+
+# Test embeddings
+curl -s -X POST "https://llms.<domain>/v1/embeddings" \
+  -H "Content-Type: application/json" \
+  -H "x-ai-eg-model: text-embedding-3-small" \
+  -d '{"model": "text-embedding-3-small", "input": "Hello world"}'
 
 # Check extproc filter injection (should show envoy.filters.http.ext_proc)
 kubectl get pods -n network -l gateway.envoyproxy.io/owning-gateway-name=envoy-ai

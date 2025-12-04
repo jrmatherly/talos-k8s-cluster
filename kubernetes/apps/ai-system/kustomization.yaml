@@ -8,4 +8,4 @@ components:
 
 resources:
   - ./namespace.yaml
-  - ./azure-openai/ks.yaml
+  - ./azure-openai-us-east/ks.yaml

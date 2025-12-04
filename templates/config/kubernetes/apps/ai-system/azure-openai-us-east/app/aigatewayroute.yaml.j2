@@ -1,0 +1,63 @@
+#% if envoy_ai_gateway_enabled and azure_openai_us_east_api_key %#
+---
+# AI Gateway Route for Azure OpenAI US East
+# Routes multiple model types with appropriate timeouts
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata:
+  name: azure-openai-us-east-route
+spec:
+  parentRefs:
+    - name: envoy-ai
+      namespace: network
+  rules:
+    # Chat models (gpt-4.1, gpt-4.1-nano, gpt-4o-mini) - 120s timeout
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "gpt-4.1"
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "gpt-4.1-nano"
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "gpt-4o-mini"
+      backendRefs:
+        - name: azure-openai-us-east-chat
+          namespace: ai-system
+      timeouts:
+        request: 120s
+    # Reasoning models (o3, o4-mini) - 300s timeout for extended thinking
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "o3"
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "o4-mini"
+      backendRefs:
+        - name: azure-openai-us-east-reasoning
+          namespace: ai-system
+      timeouts:
+        request: 300s
+    # Embedding models (text-embedding-3-small, text-embedding-ada-002) - 60s timeout
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "text-embedding-3-small"
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "text-embedding-ada-002"
+      backendRefs:
+        - name: azure-openai-us-east-embedding
+          namespace: ai-system
+      timeouts:
+        request: 60s
+#% endif %#

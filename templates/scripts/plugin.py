@@ -189,7 +189,7 @@ class Plugin(makejinja.plugin.Plugin):
 
         # Envoy AI Gateway defaults
         data.setdefault("envoy_ai_gateway_enabled", False)
-        data.setdefault("azure_openai_api_version", "2025-01-01-preview")
+        # Note: azure_openai_api_version removed - now per-model in templates
 
         return data
 

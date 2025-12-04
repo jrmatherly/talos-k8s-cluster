@@ -34,7 +34,6 @@ proxmox_ccm_token_secret: "fake-secret"
 # Envoy AI Gateway Configuration (testing full deployment)
 envoy_ai_gateway_enabled: true
 envoy_ai_gateway_addr: "10.10.10.145"
-azure_openai_api_key: "fake-api-key"
-azure_openai_resource_name: "test-openai-resource"
-azure_openai_deployment_name: "gpt-5-chat"
-azure_openai_api_version: "2025-01-01-preview"
+# Azure OpenAI - US East Region
+azure_openai_us_east_api_key: "fake-api-key"
+azure_openai_us_east_resource_name: "test-openai-resource"
