@@ -1,6 +1,6 @@
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-anthropic-opus
   labels:
@@ -13,15 +13,15 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       anthropic:
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-anthropic-opus-credentials
-        apiVersion: "2023-06-01"
         model: "claude-opus-4-5"
       host: "ets-east-us2.services.ai.azure.com"
       port: 443
+  policies:
+    auth:
+      secretRef:
+        name: azure-anthropic-opus-credentials
+    tls:
+      sni: "ets-east-us2.services.ai.azure.com"

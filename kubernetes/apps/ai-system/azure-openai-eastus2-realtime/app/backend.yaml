@@ -1,6 +1,6 @@
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-realtime
   labels:
@@ -12,14 +12,13 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
-        endpoint: "https://ets-east-us2.openai.azure.com"
+        endpoint: "ets-east-us2.openai.azure.com"
         deploymentName: "gpt-realtime"
         apiVersion: "2024-10-01-preview"
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-openai-eastus2-realtime-credentials
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-eastus2-realtime-credentials
