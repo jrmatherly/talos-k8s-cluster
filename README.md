@@ -224,6 +224,17 @@ There are **5 stages** outlined below for completing this project, make sure you
     kubectl -n kube-system port-forward svc/hubble-ui 8080:80
     ```
 
+7. Access Envoy Gateway Admin Console (internal only):
+
+   📍 _Requires split DNS configured to resolve `envoy-ui.${cloudflare_domain}` via k8s_gateway_
+
+    ```sh
+    # Open in browser: https://envoy-ui.${cloudflare_domain}
+    # Or use port-forward for direct access:
+    kubectl -n network port-forward deploy/envoy-gateway 19000:19000
+    # Then open http://localhost:19000
+    ```
+
 ### 🌐 Public DNS
 
 > [!TIP]

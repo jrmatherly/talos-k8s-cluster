@@ -376,6 +376,47 @@ kubectl logs -n envoy-ai-gateway-system deploy/ai-gateway-controller
 
 See `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes.
 
+## Envoy Gateway Admin Console
+
+The Envoy Gateway provides a web-based Admin Console for monitoring and debugging. It is exposed at `https://envoy-ui.<domain>` via the `envoy-internal` gateway.
+
+### Configuration
+
+The Admin Console requires the admin server to bind to all interfaces (configured in `helmrelease.yaml.j2`):
+
+```yaml
+config:
+  envoyGateway:
+    admin:
+      address:
+        host: "0.0.0.0"
+        port: 19000
+```
+
+### Access
+
+```bash
+# Via HTTPRoute (requires split DNS):
+https://envoy-ui.<domain>
+
+# Via port-forward (direct access):
+kubectl port-forward -n network deploy/envoy-gateway 19000:19000
+# Then open http://localhost:19000
+```
+
+### Features
+
+- **Dashboard** - System status overview and quick navigation
+- **Server Info** - Runtime details, version, uptime
+- **Config Dump** - Full xDS configuration for debugging
+- **Stats** - Prometheus metrics
+- **Profiling** - pprof for performance analysis
+
+**Note:** After changing admin.address configuration, restart the controller:
+```bash
+kubectl rollout restart deployment/envoy-gateway -n network
+```
+
 ## Adding New Applications/Templates
 
 When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.
