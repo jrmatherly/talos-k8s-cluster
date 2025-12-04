@@ -10,8 +10,8 @@ spec:
         hostname: aanopenai.openai.azure.com
         port: 443
 ---
-# BackendTLSPolicy for TLS validation
-apiVersion: gateway.envoyproxy.io/v1alpha1
+# BackendTLSPolicy for TLS validation (Gateway API standard)
+apiVersion: gateway.networking.k8s.io/v1alpha3
 kind: BackendTLSPolicy
 metadata:
   name: azure-openai-tls
