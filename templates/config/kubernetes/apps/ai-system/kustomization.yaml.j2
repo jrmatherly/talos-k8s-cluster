@@ -56,6 +56,8 @@ resources:
 #% endif %#
 #% if azure_anthropic_api_key is defined %#
   - ./azure-anthropic/ks.yaml
+  - ./azure-anthropic-sonnet/ks.yaml
+  - ./azure-anthropic-opus/ks.yaml
 #% endif %#
 #| ai-secrets must be created BEFORE cohere backends that use postBuild.substituteFrom #|
 #% if azure_cohere_rerank_api_key is defined or azure_cohere_embed_api_key is defined %#

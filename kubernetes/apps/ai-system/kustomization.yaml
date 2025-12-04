@@ -17,6 +17,8 @@ resources:
   - ./azure-openai-eastus-chat/ks.yaml
   - ./azure-openai-eastus-embeddings/ks.yaml
   - ./azure-anthropic/ks.yaml
+  - ./azure-anthropic-sonnet/ks.yaml
+  - ./azure-anthropic-opus/ks.yaml
   - ./ai-secrets/ks.yaml
   - ./azure-cohere-rerank/ks.yaml
   - ./azure-cohere-embed/ks.yaml

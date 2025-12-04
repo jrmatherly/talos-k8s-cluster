@@ -1,0 +1,28 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: azure-anthropic-sonnet-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: azure-anthropic-sonnet
+
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 17
+        tokensPerFill: 17
+        fillInterval: 1s
+
+  timeouts:
+    request: 180s
+
+  retry:
+    attempts: 3
+    backoffBaseInterval: 1s
+    retryOn:
+      - 5xx
+      - unavailable
+      - reset
