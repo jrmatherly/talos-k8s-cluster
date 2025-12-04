@@ -14,8 +14,7 @@ metadata:
 spec:
   ai:
     provider:
-      anthropic:
-        model: "claude-sonnet-4-5-20250929"
+      anthropic: {}
       host: "ets-east-us2.services.ai.azure.com"
       port: 443
   policies:
