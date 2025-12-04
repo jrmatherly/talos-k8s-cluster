@@ -13,6 +13,10 @@ spec:
       imageRegistry: mirror.gcr.io
     config:
       envoyGateway:
+        admin:
+          address:
+            host: "0.0.0.0"
+            port: 19000
         provider:
           type: Kubernetes
           kubernetes:
