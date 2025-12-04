@@ -15,7 +15,7 @@ spec:
   ai:
     provider:
       anthropic:
-        model: "claude-haiku-4-5"
+        model: ""
       host: "ets-east-us2.services.ai.azure.com"
       port: 443
   policies:
