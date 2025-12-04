@@ -1,9 +1,9 @@
 #% if agentgateway_addr is defined and azure_cohere_rerank_api_key is defined %#
 ---
-#| Backend (static) for Cohere Rerank (kgateway v2.1.1) #|
+#| AgentgatewayBackend (static) for Cohere Rerank (kgateway v2.2+) #|
 #| Uses dedicated Azure AI Models endpoint #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-cohere-rerank
   labels:
@@ -15,28 +15,13 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: Static
   static:
-    hosts:
-      - host: "#{ azure_cohere_rerank_host | default('aan-cohere-rerank-v3-5.eastus.models.ai.azure.com') }#"
-        port: 443
----
-#| BackendConfigPolicy for TLS configuration (kgateway v2.1.1) #|
-#| Static backends require separate policy for TLS origination #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: BackendConfigPolicy
-metadata:
-  name: azure-cohere-rerank-tls
-  labels:
-    app.kubernetes.io/name: azure-cohere-rerank
-    app.kubernetes.io/component: ai-backend
-    app.kubernetes.io/part-of: ai-system
-spec:
-  targetRefs:
-    - name: azure-cohere-rerank
-      kind: Backend
-      group: gateway.kgateway.dev
-  tls:
-    sni: "#{ azure_cohere_rerank_host | default('aan-cohere-rerank-v3-5.eastus.models.ai.azure.com') }#"
-    wellKnownCACertificates: System
+    host: "#{ azure_cohere_rerank_host | default('aan-cohere-rerank-v3-5.eastus.models.ai.azure.com') }#"
+    port: 443
+  policies:
+    auth:
+      secretRef:
+        name: azure-cohere-rerank-credentials
+    tls:
+      sni: "#{ azure_cohere_rerank_host | default('aan-cohere-rerank-v3-5.eastus.models.ai.azure.com') }#"
 #% endif %#

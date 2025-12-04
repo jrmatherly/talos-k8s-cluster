@@ -1,8 +1,8 @@
 #% if agentgateway_addr is defined and azure_openai_eastus_api_key is defined %#
 ---
-#| Backend for Azure OpenAI (kgateway v2.1.1) #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+#| AgentgatewayBackend for Azure OpenAI (kgateway v2.2+) #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus-embeddings
   labels:
@@ -14,15 +14,14 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
-        endpoint: "https://#{ azure_openai_eastus_resource_name }#.openai.azure.com"
+        endpoint: "#{ azure_openai_eastus_resource_name }#.openai.azure.com"
         deploymentName: "#{ azure_openai_eastus_embeddings_deployment_name | default('text-embedding-3-small') }#"
         apiVersion: "#{ azure_openai_eastus_embeddings_api_version | default('2023-05-15') }#"
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-openai-eastus-credentials
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-eastus-credentials
 #% endif %#

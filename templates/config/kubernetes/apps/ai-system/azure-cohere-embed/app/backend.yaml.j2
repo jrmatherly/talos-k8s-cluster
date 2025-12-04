@@ -1,9 +1,9 @@
 #% if agentgateway_addr is defined and azure_cohere_embed_api_key is defined %#
 ---
-#| Backend (static) for Cohere Embed (kgateway v2.1.1) #|
+#| AgentgatewayBackend (static) for Cohere Embed (kgateway v2.2+) #|
 #| Uses Azure AI Services OpenAI-compatible endpoint #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-cohere-embed
   labels:
@@ -15,28 +15,13 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: Static
   static:
-    hosts:
-      - host: "#{ azure_cohere_embed_host | default('aaronsai.services.ai.azure.com') }#"
-        port: 443
----
-#| BackendConfigPolicy for TLS configuration (kgateway v2.1.1) #|
-#| Static backends require separate policy for TLS origination #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: BackendConfigPolicy
-metadata:
-  name: azure-cohere-embed-tls
-  labels:
-    app.kubernetes.io/name: azure-cohere-embed
-    app.kubernetes.io/component: ai-backend
-    app.kubernetes.io/part-of: ai-system
-spec:
-  targetRefs:
-    - name: azure-cohere-embed
-      kind: Backend
-      group: gateway.kgateway.dev
-  tls:
-    sni: "#{ azure_cohere_embed_host | default('aaronsai.services.ai.azure.com') }#"
-    wellKnownCACertificates: System
+    host: "#{ azure_cohere_embed_host | default('aaronsai.services.ai.azure.com') }#"
+    port: 443
+  policies:
+    auth:
+      secretRef:
+        name: azure-cohere-embed-credentials
+    tls:
+      sni: "#{ azure_cohere_embed_host | default('aaronsai.services.ai.azure.com') }#"
 #% endif %#

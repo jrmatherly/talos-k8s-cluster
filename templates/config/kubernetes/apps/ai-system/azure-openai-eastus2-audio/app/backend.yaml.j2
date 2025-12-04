@@ -1,9 +1,9 @@
 #% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_audio_deployment_name is defined %#
 ---
-#| Backend for Azure OpenAI (kgateway v2.1.1) #|
+#| AgentgatewayBackend for Azure OpenAI (kgateway v2.2+) #|
 #| Audio uses standard chat/completions endpoint #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-eastus2-audio
   labels:
@@ -15,15 +15,14 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
-        endpoint: "https://#{ azure_openai_eastus2_resource_name }#.openai.azure.com"
+        endpoint: "#{ azure_openai_eastus2_resource_name }#.openai.azure.com"
         deploymentName: "#{ azure_openai_eastus2_audio_deployment_name }#"
         apiVersion: "#{ azure_openai_eastus2_audio_api_version | default('2025-01-01-preview') }#"
-        authToken:
-          kind: SecretRef
-          secretRef:
-            name: azure-openai-eastus2-audio-credentials
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-eastus2-audio-credentials
 #% endif %#

@@ -16,8 +16,8 @@ spec:
             type: PathPrefix
             value: /azure/eastus/embeddings
       backendRefs:
-        - group: gateway.kgateway.dev
-          kind: Backend
+        - group: agentgateway.dev
+          kind: AgentgatewayBackend
           name: azure-openai-eastus-embeddings
           namespace: ai-system
 #% endif %#
