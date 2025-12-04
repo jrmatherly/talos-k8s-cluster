@@ -1,6 +1,8 @@
 #% if agentgateway_addr is defined and azure_openai_eastus2_api_key is defined and azure_openai_eastus2_responses_deployment_name is defined %#
-#% if agentgateway_rate_limit_enabled | default(true) or agentgateway_prompt_guard_enabled | default(true) %#
+#% if agentgateway_rate_limit_enabled | default(true) %#
 ---
+#| TrafficPolicy for rate limiting, timeouts, and retries (Kgateway v2.2+) #|
+#| NOTE: Prompt guards moved to AgentgatewayPolicy in v2.2 - use spec.backend.ai.promptGuard #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
 metadata:
@@ -11,7 +13,6 @@ spec:
       kind: HTTPRoute
       name: azure-openai-eastus2-responses
 
-#% if agentgateway_rate_limit_enabled | default(true) %#
   #| Rate Limiting: 8,240 RPM (Azure GPT-5.1/Codex tier limits) #|
   rateLimit:
     local:
@@ -19,7 +20,6 @@ spec:
         maxTokens: 137
         tokensPerFill: 137
         fillInterval: 1s
-#% endif %#
 
   timeouts:
     request: 180s
@@ -31,26 +31,5 @@ spec:
       - 5xx
       - unavailable
       - reset
-
-#% if agentgateway_prompt_guard_enabled | default(true) %#
-  #| Prompt Guards - PII/sensitive data protection #|
-  ai:
-    promptGuard:
-      request:
-        customResponse:
-          message: "Request blocked: contains sensitive data patterns"
-        regex:
-          action: REJECT
-          builtins:
-            - CREDIT_CARD
-            - SSN
-      response:
-        regex:
-          action: MASK
-          builtins:
-            - CREDIT_CARD
-            - SSN
-            - EMAIL
-#% endif %#
 #% endif %#
 #% endif %#
