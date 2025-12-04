@@ -18,18 +18,4 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https
-      hostname: "*.#{ primary_domain }#"
-      port: 443
-      protocol: HTTPS
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - group: ""
-            kind: Secret
-            name: #{ primary_domain | replace('.', '-') }#-production-tls
-            namespace: network
 #% endif %#
