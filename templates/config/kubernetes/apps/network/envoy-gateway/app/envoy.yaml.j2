@@ -4,6 +4,13 @@ kind: EnvoyProxy
 metadata:
   name: envoy
 spec:
+  bootstrap:
+    type: JSONPatch
+    jsonPatches:
+      # Bind admin interface to all interfaces (required for external access via HTTPRoute)
+      - op: replace
+        path: "/admin/address/socket_address/address"
+        value: "0.0.0.0"
   logging:
     level:
       default: info
