@@ -52,6 +52,10 @@ import (
 	azure_openai_us_east2_api_key?: string & !=""
 	azure_openai_us_east2_resource_name?: string & !=""
 
+	// Azure AI Foundry - Anthropic (optional - uses US East2 resource)
+	azure_anthropic_api_key?: string & !=""
+	azure_anthropic_resource_name?: string & !=""
+
 	// Azure Entra ID Authentication (optional - alternative to API key)
 	azure_tenant_id?: string & !=""
 	azure_client_id?: string & !=""

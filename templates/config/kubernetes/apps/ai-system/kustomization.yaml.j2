@@ -1,4 +1,4 @@
-#% if envoy_ai_gateway_enabled and (azure_openai_us_east_api_key or azure_openai_us_east2_api_key) %#
+#% if envoy_ai_gateway_enabled and (azure_openai_us_east_api_key or azure_openai_us_east2_api_key or azure_anthropic_api_key) %#
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -14,5 +14,8 @@ resources:
 #% endif %#
 #% if azure_openai_us_east2_api_key %#
   - ./azure-openai-us-east2/ks.yaml
+#% endif %#
+#% if azure_anthropic_api_key %#
+  - ./azure-anthropic/ks.yaml
 #% endif %#
 #% endif %#

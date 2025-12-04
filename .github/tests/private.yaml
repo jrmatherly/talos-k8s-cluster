@@ -36,3 +36,6 @@ proxmox_csi_token_secret: "fake-secret"
 # Azure OpenAI - US East2 Region (commented - disabled)
 # azure_openai_us_east2_api_key: ""
 # azure_openai_us_east2_resource_name: ""
+# Azure AI Foundry - Anthropic (commented - disabled)
+# azure_anthropic_api_key: ""
+# azure_anthropic_resource_name: ""

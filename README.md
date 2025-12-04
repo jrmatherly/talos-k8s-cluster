@@ -497,17 +497,20 @@ Enable it by configuring the following variables in `cluster.yaml`:
 envoy_ai_gateway_enabled: true
 envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
 
-# Azure OpenAI - US East Region
+# Azure OpenAI - US East Region (Phase 1)
 azure_openai_us_east_api_key: "<api-key>"
 azure_openai_us_east_resource_name: "myopenai"  # Subdomain of endpoint
+
+# Azure OpenAI - US East2 Region (Phase 2)
+azure_openai_us_east2_api_key: "<api-key>"
+azure_openai_us_east2_resource_name: "ets-east-us2"  # Subdomain of endpoint
 ```
 
 When enabled, the AI Gateway provides:
 - Dedicated `envoy-ai` Gateway at `llms.${cloudflare_domain}`
-- Multi-model support with appropriate timeouts per model type:
-  - **Chat models** (gpt-4.1, gpt-4.1-nano, gpt-4o-mini): 120s timeout
-  - **Reasoning models** (o3, o4-mini): 300s timeout for extended thinking
-  - **Embedding models** (text-embedding-3-small, text-embedding-ada-002): 60s timeout
+- Multi-backend support with appropriate timeouts per model type:
+  - **Phase 1 (US East):** gpt-4.1, gpt-4.1-nano, gpt-4o-mini, o3, o4-mini, embeddings
+  - **Phase 2 (US East2):** gpt-5, gpt-5-nano, gpt-5-chat, gpt-5-mini, gpt-5.1, gpt-5.1-chat, gpt-5.1-codex, gpt-5.1-codex-mini, text-embedding-3-large
 - Larger buffers (50Mi) for LLM payloads
 - Backend security policy with API key injection
 - Header-based routing via `x-ai-eg-model` header
@@ -515,20 +518,26 @@ When enabled, the AI Gateway provides:
 **Verification:**
 
 ```sh
-# Test chat completion (specify model via header)
+# Phase 1: Test GPT-4.1-nano (US East)
 curl -X POST "https://llms.${cloudflare_domain}/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "x-ai-eg-model: gpt-4.1-nano" \
   -d '{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Hello"}]}'
 
+# Phase 2: Test GPT-5 (US East2)
+curl -X POST "https://llms.${cloudflare_domain}/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "x-ai-eg-model: gpt-5" \
+  -d '{"model":"gpt-5","messages":[{"role":"user","content":"Hello"}]}'
+
 # Test embeddings
 curl -X POST "https://llms.${cloudflare_domain}/v1/embeddings" \
   -H "Content-Type: application/json" \
-  -H "x-ai-eg-model: text-embedding-3-small" \
-  -d '{"model":"text-embedding-3-small","input":"Hello world"}'
+  -H "x-ai-eg-model: text-embedding-3-large" \
+  -d '{"model":"text-embedding-3-large","input":"Hello world"}'
 ```
 
-See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes.
+See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/REFINED-IMPLEMENTATION-PLAN.md` for detailed implementation notes.
 
 ### Community Repositories
 

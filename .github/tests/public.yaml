@@ -40,3 +40,6 @@ azure_openai_us_east_resource_name: "test-openai-resource"
 # Azure OpenAI - US East2 Region
 azure_openai_us_east2_api_key: "fake-api-key"
 azure_openai_us_east2_resource_name: "ets-east-us2"
+# Azure AI Foundry - Anthropic (US East2)
+azure_anthropic_api_key: "fake-api-key"
+azure_anthropic_resource_name: "ets-east-us2"

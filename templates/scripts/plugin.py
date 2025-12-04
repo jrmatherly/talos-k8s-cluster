@@ -194,6 +194,9 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("azure_openai_us_east_resource_name", "")
         data.setdefault("azure_openai_us_east2_api_key", "")
         data.setdefault("azure_openai_us_east2_resource_name", "")
+        # Azure AI Foundry Anthropic defaults
+        data.setdefault("azure_anthropic_api_key", "")
+        data.setdefault("azure_anthropic_resource_name", "")
 
         return data
 

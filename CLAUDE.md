@@ -303,20 +303,36 @@ Optional AI/LLM traffic routing via Envoy AI Gateway extension. Provides intelli
 envoy_ai_gateway_enabled: true
 envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
 
-# Azure OpenAI - US East Region
+# Azure OpenAI - US East Region (Phase 1)
 azure_openai_us_east_api_key: "<api-key>"
 azure_openai_us_east_resource_name: "myopenai"  # Subdomain of endpoint
+
+# Azure OpenAI - US East2 Region (Phase 2)
+azure_openai_us_east2_api_key: "<api-key>"
+azure_openai_us_east2_resource_name: "ets-east-us2"  # Subdomain of endpoint
 ```
 
 ### Multi-Model Architecture
 
-The AI Gateway supports multiple model types with appropriate timeouts:
+The AI Gateway supports multiple backends with appropriate timeouts per model type.
 
-| Model Type | Models | Timeout | AIServiceBackend | Notes |
-|------------|--------|---------|------------------|-------|
-| Chat | gpt-4.1, gpt-4.1-nano, gpt-4o-mini | 120s | azure-openai-us-east-chat | |
-| Reasoning | o3, o4-mini | 300s | azure-openai-us-east-reasoning | Use `max_completion_tokens` |
-| Embedding | text-embedding-3-small, text-embedding-ada-002 | 60s | azure-openai-us-east-embedding | |
+#### Phase 1: Azure OpenAI US East ✅
+
+| Model Type | Models | Timeout | AIServiceBackend |
+|------------|--------|---------|------------------|
+| Chat | gpt-4.1, gpt-4.1-nano, gpt-4o-mini | 120s | azure-openai-us-east-chat |
+| Reasoning | o3, o4-mini | 300s | azure-openai-us-east-reasoning |
+| Embedding | text-embedding-3-small, text-embedding-ada-002 | 60s | azure-openai-us-east-embedding |
+
+#### Phase 2: Azure OpenAI US East2 ✅
+
+| Model Type | Models | Timeout | AIServiceBackend |
+|------------|--------|---------|------------------|
+| Chat | gpt-5, gpt-5-nano | 120s | azure-openai-us-east2-chat |
+| Thinking | gpt-5-chat, gpt-5.1-chat | 300s | azure-openai-us-east2-chat-thinking |
+| Chat (April) | gpt-5-mini, gpt-5.1 | 120s | azure-openai-us-east2-chat-apr |
+| Codex | gpt-5.1-codex, gpt-5.1-codex-mini | 180s | azure-openai-us-east2-codex |
+| Embedding | text-embedding-3-large | 60s | azure-openai-us-east2-embedding |
 
 **Important:** O-series reasoning models require `max_completion_tokens` instead of `max_tokens`.
 
@@ -337,7 +353,8 @@ When enabled, the following components are deployed:
 |------|---------|
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/envoy.yaml.j2` | Gateway, traffic policies |
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/helmrelease.yaml.j2` | extensionManager hooks |
-| `templates/config/kubernetes/apps/ai-system/azure-openai-us-east/` | Backend, routes, auth for US East |
+| `templates/config/kubernetes/apps/ai-system/azure-openai-us-east/` | Backend, routes, auth for US East (Phase 1) |
+| `templates/config/kubernetes/apps/ai-system/azure-openai-us-east2/` | Backend, routes, auth for US East2 (Phase 2) |
 
 ### Critical: extensionManager Configuration
 
@@ -371,23 +388,35 @@ extensionManager:
 The `x-ai-eg-model` header determines which model/backend handles the request.
 
 ```bash
-# Test GPT-4.1-nano (chat model)
+# Phase 1: Test GPT-4.1-nano (US East chat model)
 curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "x-ai-eg-model: gpt-4.1-nano" \
   -d '{"model": "gpt-4.1-nano", "messages": [{"role": "user", "content": "Hello"}]}'
 
-# Test O3 reasoning model (300s timeout, requires max_completion_tokens)
+# Phase 1: Test O3 reasoning model (300s timeout, requires max_completion_tokens)
 curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "x-ai-eg-model: o3" \
   -d '{"model": "o3", "messages": [{"role": "user", "content": "What is 15 * 23?"}], "max_completion_tokens": 500}'
 
-# Test embeddings
+# Phase 2: Test GPT-5 (US East2 chat model)
+curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "x-ai-eg-model: gpt-5" \
+  -d '{"model": "gpt-5", "messages": [{"role": "user", "content": "Hello"}]}'
+
+# Phase 2: Test GPT-5.1-codex (code model)
+curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "x-ai-eg-model: gpt-5.1-codex" \
+  -d '{"model": "gpt-5.1-codex", "messages": [{"role": "user", "content": "Write a hello world"}]}'
+
+# Test embeddings (Phase 1: small, Phase 2: large)
 curl -s -X POST "https://llms.<domain>/v1/embeddings" \
   -H "Content-Type: application/json" \
-  -H "x-ai-eg-model: text-embedding-3-small" \
-  -d '{"model": "text-embedding-3-small", "input": "Hello world"}'
+  -H "x-ai-eg-model: text-embedding-3-large" \
+  -d '{"model": "text-embedding-3-large", "input": "Hello world"}'
 
 # Check AI Gateway resources
 kubectl get aigatewayroute,aiservicebackend,backendsecuritypolicy -n ai-system

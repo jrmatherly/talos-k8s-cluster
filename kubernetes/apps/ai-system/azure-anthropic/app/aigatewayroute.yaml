@@ -1,0 +1,51 @@
+---
+# AI Gateway Route for Azure AI Foundry Anthropic
+# Routes Claude models with appropriate timeouts
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata:
+  name: azure-anthropic-route
+spec:
+  parentRefs:
+    - name: envoy-ai
+      namespace: network
+      kind: Gateway
+      group: gateway.networking.k8s.io
+  rules:
+    # Fast model (claude-haiku-4-5) - 120s timeout
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "claude-haiku-4-5"
+      backendRefs:
+        - name: azure-anthropic-fast
+          namespace: ai-system
+      timeouts:
+        request: 120s
+    # Balanced model (claude-sonnet-4-5) - 180s timeout
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "claude-sonnet-4-5"
+      backendRefs:
+        - name: azure-anthropic-balanced
+          namespace: ai-system
+      timeouts:
+        request: 180s
+    # Advanced models (claude-opus-4-5, claude-opus-4-1) - 300s timeout
+    - matches:
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "claude-opus-4-5"
+        - headers:
+            - type: Exact
+              name: x-ai-eg-model
+              value: "claude-opus-4-1"
+      backendRefs:
+        - name: azure-anthropic-advanced
+          namespace: ai-system
+      timeouts:
+        request: 300s
