@@ -44,9 +44,13 @@ import (
 	envoy_ai_gateway_enabled?: bool
 	envoy_ai_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
 
-	// Azure OpenAI - US East Region (required if envoy_ai_gateway_enabled)
+	// Azure OpenAI - US East Region (optional)
 	azure_openai_us_east_api_key?: string & !=""
 	azure_openai_us_east_resource_name?: string & !=""
+
+	// Azure OpenAI - US East2 Region (optional)
+	azure_openai_us_east2_api_key?: string & !=""
+	azure_openai_us_east2_resource_name?: string & !=""
 
 	// Azure Entra ID Authentication (optional - alternative to API key)
 	azure_tenant_id?: string & !=""

@@ -239,14 +239,33 @@ cloudflare_token: ""
 #         text-embedding-3-small, text-embedding-ada-002
 
 # -- Azure OpenAI US East API Key for authentication.
-#    (REQUIRED if envoy_ai_gateway_enabled) - From Azure Portal
+#    (optional) - From Azure Portal
 # azure_openai_us_east_api_key: ""
 
 # -- Azure OpenAI US East resource name (the subdomain of your endpoint).
-#    (REQUIRED if envoy_ai_gateway_enabled)
-#    Example: "my-openai" for https://my-openai.cognitiveservices.azure.com
+#    (optional)
+#    Example: "my-openai" for https://my-openai.openai.azure.com
 # azure_openai_us_east_resource_name: ""
 
+# ==============================================================================
+# AZURE OPENAI - US EAST2 REGION
+# ==============================================================================
+# Models: gpt-5, gpt-5-chat, gpt-5-mini, gpt-5-nano, gpt-5.1, gpt-5.1-chat
+#         gpt-5.1-codex, gpt-5.1-codex-mini, gpt-audio, gpt-audio-mini
+#         text-embedding-3-large
+
+# -- Azure OpenAI US East2 API Key for authentication.
+#    (optional) - From Azure Portal
+# azure_openai_us_east2_api_key: ""
+
+# -- Azure OpenAI US East2 resource name (the subdomain of your endpoint).
+#    (optional)
+#    Example: "my-openai-east-us2" for https://my-openai-east-us2.openai.azure.com
+# azure_openai_us_east2_resource_name: ""
+
+# ==============================================================================
+# AZURE ENTRA ID AUTHENTICATION
+# ==============================================================================
 # -- Azure Entra ID Authentication (optional - alternative to API key)
 #    Use these for production workloads instead of API key.
 # azure_tenant_id: ""

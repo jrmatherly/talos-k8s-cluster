@@ -1,0 +1,28 @@
+#% if envoy_ai_gateway_enabled and azure_openai_us_east2_api_key %#
+---
+# Backend endpoint definition for Azure OpenAI US East2
+# Uses .openai.azure.com endpoint for GPT-5 series, Codex, and Audio models
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: Backend
+metadata:
+  name: azure-openai-us-east2-backend
+spec:
+  endpoints:
+    - fqdn:
+        hostname: #{ azure_openai_us_east2_resource_name }#.openai.azure.com
+        port: 443
+---
+# BackendTLSPolicy for TLS validation (Gateway API standard)
+apiVersion: gateway.networking.k8s.io/v1alpha3
+kind: BackendTLSPolicy
+metadata:
+  name: azure-openai-us-east2-tls
+spec:
+  targetRefs:
+    - group: gateway.envoyproxy.io
+      kind: Backend
+      name: azure-openai-us-east2-backend
+  validation:
+    wellKnownCACertificates: System
+    hostname: #{ azure_openai_us_east2_resource_name }#.openai.azure.com
+#% endif %#

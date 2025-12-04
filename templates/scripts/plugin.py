@@ -189,7 +189,11 @@ class Plugin(makejinja.plugin.Plugin):
 
         # Envoy AI Gateway defaults
         data.setdefault("envoy_ai_gateway_enabled", False)
-        # Note: azure_openai_api_version removed - now per-model in templates
+        # Azure OpenAI region defaults (empty strings to prevent undefined errors)
+        data.setdefault("azure_openai_us_east_api_key", "")
+        data.setdefault("azure_openai_us_east_resource_name", "")
+        data.setdefault("azure_openai_us_east2_api_key", "")
+        data.setdefault("azure_openai_us_east2_resource_name", "")
 
         return data
 

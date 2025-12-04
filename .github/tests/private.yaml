@@ -30,3 +30,9 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens not needed for Approach A
 # Envoy AI Gateway Configuration (disabled for private repo testing)
 # envoy_ai_gateway_enabled: false
+# Azure OpenAI - US East Region (commented - disabled)
+# azure_openai_us_east_api_key: ""
+# azure_openai_us_east_resource_name: ""
+# Azure OpenAI - US East2 Region (commented - disabled)
+# azure_openai_us_east2_api_key: ""
+# azure_openai_us_east2_resource_name: ""

@@ -312,11 +312,13 @@ azure_openai_us_east_resource_name: "myopenai"  # Subdomain of endpoint
 
 The AI Gateway supports multiple model types with appropriate timeouts:
 
-| Model Type | Models | Timeout | AIServiceBackend |
-|------------|--------|---------|------------------|
-| Chat | gpt-4.1, gpt-4.1-nano, gpt-4o-mini | 120s | azure-openai-us-east-chat |
-| Reasoning | o3, o4-mini | 300s | azure-openai-us-east-reasoning |
-| Embedding | text-embedding-3-small, text-embedding-ada-002 | 60s | azure-openai-us-east-embedding |
+| Model Type | Models | Timeout | AIServiceBackend | Notes |
+|------------|--------|---------|------------------|-------|
+| Chat | gpt-4.1, gpt-4.1-nano, gpt-4o-mini | 120s | azure-openai-us-east-chat | |
+| Reasoning | o3, o4-mini | 300s | azure-openai-us-east-reasoning | Use `max_completion_tokens` |
+| Embedding | text-embedding-3-small, text-embedding-ada-002 | 60s | azure-openai-us-east-embedding | |
+
+**Important:** O-series reasoning models require `max_completion_tokens` instead of `max_tokens`.
 
 ### Architecture
 
@@ -375,11 +377,11 @@ curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
   -H "x-ai-eg-model: gpt-4.1-nano" \
   -d '{"model": "gpt-4.1-nano", "messages": [{"role": "user", "content": "Hello"}]}'
 
-# Test O3 reasoning model (300s timeout)
+# Test O3 reasoning model (300s timeout, requires max_completion_tokens)
 curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "x-ai-eg-model: o3" \
-  -d '{"model": "o3", "messages": [{"role": "user", "content": "What is 15 * 23?"}]}'
+  -d '{"model": "o3", "messages": [{"role": "user", "content": "What is 15 * 23?"}], "max_completion_tokens": 500}'
 
 # Test embeddings
 curl -s -X POST "https://llms.<domain>/v1/embeddings" \
