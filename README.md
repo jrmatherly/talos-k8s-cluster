@@ -475,6 +475,40 @@ If your workloads require other storage solutions with features like replication
 
 These tools offer a variety of solutions to meet your persistent storage needs, whether you're using cloud-native or self-hosted infrastructures.
 
+### AI Gateway (Envoy AI Gateway)
+
+**Included (optional):** This template includes [Envoy AI Gateway](https://aigateway.envoyproxy.io/) for intelligent AI/LLM traffic routing. When enabled, it extends Envoy Gateway with AI-specific capabilities including request routing to Azure OpenAI backends.
+
+Enable it by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# Enable AI Gateway
+envoy_ai_gateway_enabled: true
+envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
+
+# Azure OpenAI settings
+azure_openai_api_key: "<api-key>"
+azure_openai_resource_name: "myopenai"
+azure_openai_deployment_name: "gpt-4"
+azure_openai_api_version: "2025-01-01-preview"
+```
+
+When enabled, the AI Gateway provides:
+- Dedicated `envoy-ai` Gateway at `llms.${cloudflare_domain}`
+- Larger buffers (50Mi) and extended timeouts (120s) for LLM payloads
+- Backend security policy with API key injection
+- AIGatewayRoute for `/v1/chat/completions` endpoint
+
+**Verification:**
+
+```sh
+curl -X POST "https://llms.${cloudflare_domain}/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+See `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes and troubleshooting.
+
 ### Community Repositories
 
 Community member [@whazor](https://github.com/whazor) created [Kubesearch](https://kubesearch.dev) to allow searching Flux HelmReleases across Github and Gitlab repositories with the `kubesearch` topic.

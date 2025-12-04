@@ -292,6 +292,90 @@ Add topology labels to each node in `nodes.yaml` (see nodeLabels above).
 
 **Note:** CSI templates are conditionally rendered only when both `proxmox_csi_token_id` and `proxmox_csi_token_secret` are set.
 
+## Envoy AI Gateway Integration
+
+Optional AI/LLM traffic routing via Envoy AI Gateway extension. Provides intelligent request routing to Azure OpenAI backends.
+
+### Configuration in cluster.yaml
+
+```yaml
+# Enable AI Gateway
+envoy_ai_gateway_enabled: true
+envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
+
+# Azure OpenAI settings
+azure_openai_api_key: "<api-key>"
+azure_openai_resource_name: "myopenai"      # Subdomain of endpoint
+azure_openai_deployment_name: "gpt-4"
+azure_openai_api_version: "2025-01-01-preview"
+```
+
+### Architecture
+
+When enabled, the following components are deployed:
+- **envoy-ai Gateway** - Dedicated Gateway with LoadBalancer IP at `llms.<domain>`
+- **ClientTrafficPolicy** - Larger buffers (50Mi) for LLM payloads
+- **BackendTrafficPolicy** - Extended timeouts (120s) for LLM responses
+- **ai-gateway-controller** - External processor for AI routing (envoy-ai-gateway-system namespace)
+- **AIGatewayRoute** - Routes `/v1/chat/completions` to Azure OpenAI
+- **BackendSecurityPolicy** - Injects `api-key` header for Azure authentication
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/envoy.yaml.j2` | Gateway, traffic policies |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/helmrelease.yaml.j2` | extensionManager hooks |
+| `templates/config/kubernetes/apps/ai-system/envoy-ai-gateway/` | AI Gateway controller, routes |
+
+### Critical: extensionManager Configuration
+
+The extensionManager hooks must use the correct nested structure:
+
+```yaml
+extensionManager:
+  hooks:
+    xdsTranslator:
+      translation:           # Nested under translation block
+        listener:
+          includeAll: true
+        route:
+          includeAll: true
+        cluster:
+          includeAll: true
+        secret:
+          includeAll: true
+      post:                  # Post hooks at same level as translation
+        - Translation
+        - Cluster
+        - Route
+  service:
+    fqdn:
+      hostname: ai-gateway-controller.envoy-ai-gateway-system.svc.cluster.local
+      port: 1063
+```
+
+### Testing
+
+```bash
+# Verify AI Gateway endpoint
+curl -X POST "https://llms.<domain>/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"gpt-4","messages":[{"role":"user","content":"Hello"}]}'
+
+# Check extproc filter injection (should show envoy.filters.http.ext_proc)
+kubectl get pods -n network -l gateway.envoyproxy.io/owning-gateway-name=envoy-ai
+kubectl logs -n envoy-ai-gateway-system deploy/ai-gateway-controller
+```
+
+### Troubleshooting
+
+- **502 Bad Gateway**: Check BackendTLSPolicy matches backend hostname
+- **No extproc filter**: Verify extensionManager hooks use correct nested structure
+- **Auth failures**: Verify BackendSecurityPolicy `api-key` header injection
+
+See `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes.
+
 ## Adding New Applications/Templates
 
 When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.

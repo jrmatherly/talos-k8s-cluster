@@ -260,3 +260,37 @@ spec:
     http:
       requestTimeout: 120s
 #% endif %#
+---
+# Service to expose Envoy Admin UI on internal gateway pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy-internal-admin
+spec:
+  selector:
+    gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+    gateway.envoyproxy.io/owning-gateway-namespace: network
+  ports:
+    - name: admin
+      port: 19000
+      targetPort: 19000
+      protocol: TCP
+---
+# HTTPRoute to expose Envoy Admin UI via envoy-internal gateway
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: envoy-admin-ui
+  annotations:
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  hostnames:
+    - envoy-ui.${SECRET_DOMAIN}
+  rules:
+    - backendRefs:
+        - name: envoy-internal-admin
+          port: 19000
