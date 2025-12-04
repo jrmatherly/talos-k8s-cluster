@@ -9,3 +9,7 @@ spec:
     service:
       extraAnnotations:
         lbipam.cilium.io/ips: "192.168.22.145"
+    agentgateway:
+      env:
+        - name: ADMIN_ADDR
+          value: "0.0.0.0:15000"
