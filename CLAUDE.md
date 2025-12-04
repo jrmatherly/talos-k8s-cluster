@@ -366,6 +366,8 @@ extensionManager:
 
 ### Testing
 
+The `x-ai-eg-model` header determines which model/backend handles the request.
+
 ```bash
 # Test GPT-4.1-nano (chat model)
 curl -s -X POST "https://llms.<domain>/v1/chat/completions" \
@@ -385,16 +387,25 @@ curl -s -X POST "https://llms.<domain>/v1/embeddings" \
   -H "x-ai-eg-model: text-embedding-3-small" \
   -d '{"model": "text-embedding-3-small", "input": "Hello world"}'
 
-# Check extproc filter injection (should show envoy.filters.http.ext_proc)
-kubectl get pods -n network -l gateway.envoyproxy.io/owning-gateway-name=envoy-ai
+# Check AI Gateway resources
+kubectl get aigatewayroute,aiservicebackend,backendsecuritypolicy -n ai-system
 kubectl logs -n envoy-ai-gateway-system deploy/ai-gateway-controller
 ```
+
+See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models.
 
 ### Troubleshooting
 
 - **502 Bad Gateway**: Check BackendTLSPolicy matches backend hostname
 - **No extproc filter**: Verify extensionManager hooks use correct nested structure
 - **Auth failures**: Verify BackendSecurityPolicy `api-key` header injection
+- **"No matching route found"**: Wait several minutes for xDS propagation, then restart gateway pods:
+  ```bash
+  kubectl rollout restart deployment/envoy-gateway -n network
+  kubectl delete pods -n network -l gateway.envoyproxy.io/owning-gateway-name=envoy-ai
+  ```
+
+**Important:** After configuration changes, xDS propagation can take several minutes. The AI Gateway controller must process the new configuration and inject the extproc filter into the Envoy proxy.
 
 See `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes.
 

@@ -497,28 +497,38 @@ Enable it by configuring the following variables in `cluster.yaml`:
 envoy_ai_gateway_enabled: true
 envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
 
-# Azure OpenAI settings
-azure_openai_api_key: "<api-key>"
-azure_openai_resource_name: "myopenai"
-azure_openai_deployment_name: "gpt-4"
-azure_openai_api_version: "2025-01-01-preview"
+# Azure OpenAI - US East Region
+azure_openai_us_east_api_key: "<api-key>"
+azure_openai_us_east_resource_name: "myopenai"  # Subdomain of endpoint
 ```
 
 When enabled, the AI Gateway provides:
 - Dedicated `envoy-ai` Gateway at `llms.${cloudflare_domain}`
-- Larger buffers (50Mi) and extended timeouts (120s) for LLM payloads
+- Multi-model support with appropriate timeouts per model type:
+  - **Chat models** (gpt-4.1, gpt-4.1-nano, gpt-4o-mini): 120s timeout
+  - **Reasoning models** (o3, o4-mini): 300s timeout for extended thinking
+  - **Embedding models** (text-embedding-3-small, text-embedding-ada-002): 60s timeout
+- Larger buffers (50Mi) for LLM payloads
 - Backend security policy with API key injection
-- AIGatewayRoute for `/v1/chat/completions` endpoint
+- Header-based routing via `x-ai-eg-model` header
 
 **Verification:**
 
 ```sh
+# Test chat completion (specify model via header)
 curl -X POST "https://llms.${cloudflare_domain}/v1/chat/completions" \
   -H "Content-Type: application/json" \
-  -d '{"model":"gpt-4","messages":[{"role":"user","content":"Hello"}]}'
+  -H "x-ai-eg-model: gpt-4.1-nano" \
+  -d '{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Hello"}]}'
+
+# Test embeddings
+curl -X POST "https://llms.${cloudflare_domain}/v1/embeddings" \
+  -H "Content-Type: application/json" \
+  -H "x-ai-eg-model: text-embedding-3-small" \
+  -d '{"model":"text-embedding-3-small","input":"Hello world"}'
 ```
 
-See `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes and troubleshooting.
+See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/RESEARCH-FINDINGS.md` for detailed implementation notes.
 
 ### Community Repositories
 
