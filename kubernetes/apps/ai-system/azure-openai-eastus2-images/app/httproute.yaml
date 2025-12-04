@@ -16,6 +16,6 @@ spec:
             value: /azure/eastus2/images
       backendRefs:
         - group: agentgateway.dev
-          kind: AgentgatewayBackend
+          kind: Backend
           name: azure-openai-eastus2-images
           namespace: ai-system

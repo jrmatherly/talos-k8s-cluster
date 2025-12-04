@@ -1,6 +1,6 @@
 ---
 apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
+kind: Backend
 metadata:
   name: azure-cohere-embed
   labels:
@@ -12,12 +12,25 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
+  type: Static
   static:
-    host: "aaronsai.services.ai.azure.com"
-    port: 443
-  policies:
-    auth:
-      secretRef:
-        name: azure-cohere-embed-credentials
-    tls:
-      sni: "aaronsai.services.ai.azure.com"
+    hosts:
+      - host: "aaronsai.services.ai.azure.com"
+        port: 443
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: BackendConfigPolicy
+metadata:
+  name: azure-cohere-embed-tls
+  labels:
+    app.kubernetes.io/name: azure-cohere-embed
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  targetRefs:
+    - name: azure-cohere-embed
+      kind: Backend
+      group: agentgateway.dev
+  tls:
+    sni: "aaronsai.services.ai.azure.com"
+    wellKnownCACertificates: System

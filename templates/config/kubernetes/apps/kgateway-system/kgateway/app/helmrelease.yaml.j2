@@ -15,18 +15,4 @@ spec:
     controller:
       extraEnv:
         KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
-#% if agentgateway_observability_enabled | default(true) %#
-    # Observability configuration
-    observability:
-      metrics:
-        enabled: true
-        port: 15020
-#% if otel_collector_endpoint is defined %#
-      tracing:
-        enabled: true
-        # OTLP gRPC endpoint for distributed tracing
-        # Format: http://<service>.<namespace>:<port> (port 4317 for gRPC)
-        otlpEndpoint: "http://#{ otel_collector_endpoint }#"
-#% endif %#
-#% endif %#
 #% endif %#

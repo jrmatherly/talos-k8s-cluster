@@ -16,7 +16,7 @@ spec:
             value: /azure/eastus2/chat/completions
       backendRefs:
         - group: agentgateway.dev
-          kind: AgentgatewayBackend
+          kind: Backend
           name: azure-openai-eastus2-chat
           namespace: ai-system
     - matches:
@@ -25,6 +25,6 @@ spec:
             value: /v1/
       backendRefs:
         - group: agentgateway.dev
-          kind: AgentgatewayBackend
+          kind: Backend
           name: azure-openai-eastus2-chat
           namespace: ai-system

@@ -1,6 +1,6 @@
 ---
 apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
+kind: Backend
 metadata:
   name: azure-openai-eastus-chat
   labels:
@@ -12,13 +12,14 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
+  type: AI
   ai:
-    provider:
+    llm:
       azureopenai:
-        endpoint: "aanopenai.openai.azure.com"
+        endpoint: "https://aanopenai.openai.azure.com"
         deploymentName: "gpt-4.1"
         apiVersion: "2025-01-01-preview"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-eastus-credentials
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-openai-eastus-credentials

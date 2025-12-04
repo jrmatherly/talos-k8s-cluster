@@ -1,10 +1,10 @@
 #% if agentgateway_addr is defined and azure_anthropic_api_key is defined %#
 ---
-#| AgentgatewayBackend for Claude Opus via Azure AI Foundry (kgateway v2.2+) #|
+#| Backend for Claude Opus via Azure AI Foundry (kgateway v2.1.1) #|
 #| Uses anthropic provider with custom host for Azure AI Foundry endpoint #|
 #| Azure AI Foundry Anthropic API uses x-api-key header (native Anthropic format) #|
 apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
+kind: Backend
 metadata:
   name: azure-anthropic-opus
   labels:
@@ -17,19 +17,19 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
+  type: AI
   ai:
-    provider:
+    llm:
       #| Use anthropic provider - sends auth via x-api-key header #|
       #| Model: claude-opus-4-5 (Claude 4.5 Opus - highest capability) #|
       anthropic:
+        authToken:
+          kind: SecretRef
+          secretRef:
+            name: azure-anthropic-opus-credentials
+        apiVersion: "2023-06-01"
         model: "claude-opus-4-5"
       #| Override host/port to Azure AI Foundry endpoint #|
       host: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
       port: 443
-  policies:
-    auth:
-      secretRef:
-        name: azure-anthropic-opus-credentials
-    tls:
-      sni: "#{ azure_anthropic_resource_name }#.services.ai.azure.com"
 #% endif %#

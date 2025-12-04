@@ -1,6 +1,6 @@
 ---
 apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
+kind: Backend
 metadata:
   name: azure-cohere-rerank
   labels:
@@ -12,12 +12,25 @@ metadata:
     app.kubernetes.io/component: ai-backend
     app.kubernetes.io/part-of: ai-system
 spec:
+  type: Static
   static:
-    host: "aan-cohere-rerank-v3-5.eastus.models.ai.azure.com"
-    port: 443
-  policies:
-    auth:
-      secretRef:
-        name: azure-cohere-rerank-credentials
-    tls:
-      sni: "aan-cohere-rerank-v3-5.eastus.models.ai.azure.com"
+    hosts:
+      - host: "aan-cohere-rerank-v3-5.eastus.models.ai.azure.com"
+        port: 443
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: BackendConfigPolicy
+metadata:
+  name: azure-cohere-rerank-tls
+  labels:
+    app.kubernetes.io/name: azure-cohere-rerank
+    app.kubernetes.io/component: ai-backend
+    app.kubernetes.io/part-of: ai-system
+spec:
+  targetRefs:
+    - name: azure-cohere-rerank
+      kind: Backend
+      group: agentgateway.dev
+  tls:
+    sni: "aan-cohere-rerank-v3-5.eastus.models.ai.azure.com"
+    wellKnownCACertificates: System

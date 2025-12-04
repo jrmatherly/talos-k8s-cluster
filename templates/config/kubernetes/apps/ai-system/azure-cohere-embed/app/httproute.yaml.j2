@@ -30,7 +30,7 @@ spec:
                 value: "Bearer ${AZURE_COHERE_EMBED_API_KEY}"
       backendRefs:
         - group: agentgateway.dev
-          kind: AgentgatewayBackend
+          kind: Backend
           name: azure-cohere-embed
           namespace: ai-system
 #% endif %#

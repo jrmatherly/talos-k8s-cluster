@@ -14,13 +14,3 @@ spec:
     controller:
       extraEnv:
         KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
-    # Observability configuration
-    observability:
-      metrics:
-        enabled: true
-        port: 15020
-      tracing:
-        enabled: true
-        # OTLP gRPC endpoint for distributed tracing
-        # Format: http://<service>.<namespace>:<port> (port 4317 for gRPC)
-        otlpEndpoint: "http://otel-collector.monitoring:4317"
