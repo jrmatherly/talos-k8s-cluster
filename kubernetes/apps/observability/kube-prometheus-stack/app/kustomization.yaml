@@ -6,4 +6,3 @@ resources:
   - ./ocirepository.yaml
   - ./httproute.yaml
   - ./secret.sops.yaml
-  - ./thanos-objstore-secret.sops.yaml

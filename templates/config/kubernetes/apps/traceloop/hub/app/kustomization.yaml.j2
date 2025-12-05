@@ -1,0 +1,12 @@
+#% if traceloop_enabled and traceloop_hub_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - gitrepository.yaml
+  - helmrelease.yaml
+  - configmap.yaml
+  - secret.sops.yaml
+  - httproute.yaml
+#% endif %#

@@ -1,0 +1,96 @@
+#% if traceloop_enabled and traceloop_hub_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: traceloop-hub
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: helm
+      sourceRef:
+        kind: GitRepository
+        name: traceloop-hub
+      interval: 1h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    replicaCount: #{ traceloop_hub_replicas | default(2) }#
+
+    image:
+      repository: docker.io/traceloop/hub
+      pullPolicy: IfNotPresent
+
+    service:
+      type: ClusterIP
+      port: 3100
+
+    resources:
+      limits:
+        cpu: #{ traceloop_hub_cpu_limit | default('500m') }#
+        memory: #{ traceloop_hub_memory_limit | default('512Mi') }#
+      requests:
+        cpu: #{ traceloop_hub_cpu_request | default('100m') }#
+        memory: #{ traceloop_hub_memory_request | default('256Mi') }#
+
+    probes:
+      liveness:
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
+      readiness:
+        initialDelaySeconds: 10
+        periodSeconds: 10
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
+
+    # Use ConfigMap for hub configuration
+    env:
+      - name: CONFIG_FILE_PATH
+        value: /etc/hub/config.yaml
+
+    # Mount the ConfigMap as a volume
+    extraVolumes:
+      - name: hub-config
+        configMap:
+          name: traceloop-hub-config
+
+    extraVolumeMounts:
+      - name: hub-config
+        mountPath: /etc/hub
+        readOnly: true
+
+    # Secret management - use existing secret for API keys
+    secrets:
+      existingSecretName: traceloop-hub-api-keys
+      keyMapping:
+        #% if azure_openai_us_east_api_key %#
+        azureApiKey: "AZURE_OPENAI_US_EAST_API_KEY"
+        #% endif %#
+        #% if azure_openai_us_east2_api_key %#
+        azureApiKey2: "AZURE_OPENAI_US_EAST2_API_KEY"
+        #% endif %#
+        #% if traceloop_openai_api_key is defined and traceloop_openai_api_key %#
+        openaiApiKey: "OPENAI_API_KEY"
+        #% endif %#
+        #% if traceloop_anthropic_api_key is defined and traceloop_anthropic_api_key %#
+        anthropicApiKey: "ANTHROPIC_API_KEY"
+        #% endif %#
+
+    # Management API (PostgreSQL-backed) - disabled for Phase 1
+    management:
+      enabled: false
+
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+#% endif %#

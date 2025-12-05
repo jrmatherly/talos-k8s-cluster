@@ -1,13 +1,11 @@
-#% if observability_enabled %#
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: observability
+namespace: traceloop
 
 components:
   - ../../components/sops
 
 resources:
   - ./namespace.yaml
-  - ./kube-prometheus-stack/ks.yaml
-#% endif %#
+  - ./hub/ks.yaml

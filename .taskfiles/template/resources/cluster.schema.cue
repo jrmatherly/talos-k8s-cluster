@@ -57,7 +57,7 @@ import (
 	azure_client_id?: string & !=""
 	azure_client_secret?: string & !=""
 
-	// Observability Stack Configuration (optional - LGTM + Thanos)
+	// Observability Stack Configuration (optional - Prometheus/Grafana for K8s metrics)
 	observability_enabled?: bool
 	grafana_admin_password?: string & !=""
 
@@ -71,47 +71,17 @@ import (
 	alertmanager_storage_size?: string & !=""
 	grafana_storage_size?: string & !=""
 
-	// Loki configuration
-	loki_retention?: string & !=""              // e.g., "168h" (7 days)
-	loki_storage_type?: *"filesystem" | "s3"
-	loki_read_replicas?: int & >=1
-	loki_write_replicas?: int & >=1
-	loki_backend_replicas?: int & >=1
-	loki_read_storage_size?: string & !=""
-	loki_write_storage_size?: string & !=""
-	loki_backend_storage_size?: string & !=""
-	loki_bucket_name?: string & !=""
-	loki_s3_endpoint?: string & !=""
-	loki_s3_access_key?: string & !=""
-	loki_s3_secret_key?: string & !=""
-	loki_s3_insecure?: bool
-
-	// Tempo configuration
-	tempo_retention?: string & !=""             // e.g., "168h"
-	tempo_storage_type?: *"local" | "s3"
-	tempo_storage_size?: string & !=""
-	tempo_bucket_name?: string & !=""
-	tempo_s3_endpoint?: string & !=""
-	tempo_s3_access_key?: string & !=""
-	tempo_s3_secret_key?: string & !=""
-	tempo_s3_insecure?: bool
-
-	// Thanos configuration (long-term storage)
-	thanos_enabled?: bool
-	thanos_objstore_type?: *"s3" | "gcs" | "azure"
-	thanos_bucket_name?: string & !=""
-	thanos_s3_endpoint?: string & !=""
-	thanos_s3_access_key?: string & !=""
-	thanos_s3_secret_key?: string & !=""
-	thanos_s3_insecure?: bool
-	thanos_retention_raw?: string & !=""        // e.g., "30d"
-	thanos_retention_5m?: string & !=""         // e.g., "60d"
-	thanos_retention_1h?: string & !=""         // e.g., "180d"
-	thanos_query_replicas?: int & >=1
-	thanos_query_frontend_replicas?: int & >=1
-	thanos_store_replicas?: int & >=1
-	thanos_store_storage_size?: string & !=""
-	thanos_compactor_storage_size?: string & !=""
+	// Traceloop Full Platform Configuration (LLM Observability)
+	traceloop_enabled?: bool
+	traceloop_hub_enabled?: bool
+	traceloop_hub_version?: string & !=""       // e.g., "v0.7.2"
+	traceloop_hub_replicas?: int & >=1
+	traceloop_hub_cpu_limit?: string & !=""
+	traceloop_hub_cpu_request?: string & !=""
+	traceloop_hub_memory_limit?: string & !=""
+	traceloop_hub_memory_request?: string & !=""
+	traceloop_openai_api_key?: string & !=""
+	traceloop_anthropic_api_key?: string & !=""
 }
 
 #Config

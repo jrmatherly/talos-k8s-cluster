@@ -9,7 +9,3 @@ components:
 resources:
   - ./namespace.yaml
   - ./kube-prometheus-stack/ks.yaml
-  - ./loki/ks.yaml
-  - ./tempo/ks.yaml
-  - ./alloy/ks.yaml
-  - ./thanos/ks.yaml

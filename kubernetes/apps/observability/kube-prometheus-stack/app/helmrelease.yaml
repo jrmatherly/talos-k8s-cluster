@@ -115,8 +115,6 @@ spec:
         enabled: true
         storageClassName: proxmox-csi
         size: 10Gi
-      # Additional datasources (Loki, Tempo) configured via sidecar
-
     # ============================================================
     # Prometheus
     # ============================================================
@@ -124,11 +122,6 @@ spec:
       enabled: true
       ingress:
         enabled: false
-      # Thanos sidecar service for querying
-      thanosService:
-        enabled: true
-      thanosServiceMonitor:
-        enabled: true
       prometheusSpec:
         replicas: 1
         replicaExternalLabelName: __replica__
@@ -159,15 +152,6 @@ spec:
               resources:
                 requests:
                   storage: 50Gi
-        # Thanos sidecar configuration
-        thanos:
-          image: quay.io/thanos/thanos:v0.37.2
-          objectStorageConfig:
-            existingSecret:
-              name: thanos-objstore-secret
-              key: objstore.yml
-          # Block duration must be <= 2h for Thanos
-          blockSize: 2h
 
     # ============================================================
     # Prometheus Operator

@@ -1,15 +1,14 @@
-#% if observability_enabled %#
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: loki
+  name: traceloop-hub
 spec:
   dependsOn:
-    - name: kube-prometheus-stack
-      namespace: observability
+    - name: envoy-gateway
+      namespace: network
   interval: 1h
-  path: ./kubernetes/apps/observability/loki/app
+  path: ./kubernetes/apps/traceloop/hub/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -19,6 +18,5 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: observability
+  targetNamespace: traceloop
   wait: false
-#% endif %#
