@@ -5,6 +5,5 @@ kind: Kustomization
 resources:
   - gitrepository.yaml
   - helmrelease.yaml
-  - configmap.yaml
   - secret.sops.yaml
   - httproute.yaml

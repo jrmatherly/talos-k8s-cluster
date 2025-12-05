@@ -57,21 +57,98 @@ spec:
         successThreshold: 1
         failureThreshold: 3
 
-    # Use ConfigMap for hub configuration
-    env:
-      - name: CONFIG_FILE_PATH
-        value: /etc/hub/config.yaml
-
-    # Mount the ConfigMap as a volume
-    extraVolumes:
-      - name: hub-config
-        configMap:
-          name: traceloop-hub-config
-
-    extraVolumeMounts:
-      - name: hub-config
-        mountPath: /etc/hub
-        readOnly: true
+    # Hub configuration - passed through Helm values
+    config:
+      providers:
+        #% if azure_openai_us_east_api_key and azure_openai_us_east_resource_name %#
+        - key: azure-openai-us-east
+          type: azure
+          api_key: OPENAI_API_KEY_PLACEHOLDER
+          resource_name: #{ azure_openai_us_east_resource_name }#
+          api_version: "2024-10-21"
+        #% endif %#
+        #% if azure_openai_us_east2_api_key and azure_openai_us_east2_resource_name %#
+        - key: azure-openai-us-east2
+          type: azure
+          api_key: AZUREAPIKEY2_API_KEY_PLACEHOLDER
+          resource_name: #{ azure_openai_us_east2_resource_name }#
+          api_version: "2024-10-21"
+        #% endif %#
+      models:
+        #% if azure_openai_us_east_api_key and azure_openai_us_east_resource_name %#
+        # Azure OpenAI US East Models
+        - key: gpt-4.1
+          type: gpt-4.1
+          provider: azure-openai-us-east
+          deployment: gpt-4.1
+        - key: gpt-4.1-nano
+          type: gpt-4.1-nano
+          provider: azure-openai-us-east
+          deployment: gpt-4.1-nano
+        - key: gpt-4o-mini
+          type: gpt-4o-mini
+          provider: azure-openai-us-east
+          deployment: gpt-4o-mini
+        - key: o3
+          type: o3
+          provider: azure-openai-us-east
+          deployment: o3
+        - key: o4-mini
+          type: o4-mini
+          provider: azure-openai-us-east
+          deployment: o4-mini
+        - key: text-embedding-3-small
+          type: text-embedding-3-small
+          provider: azure-openai-us-east
+          deployment: text-embedding-3-small
+        #% endif %#
+        #% if azure_openai_us_east2_api_key and azure_openai_us_east2_resource_name %#
+        # Azure OpenAI US East2 Models
+        - key: gpt-5
+          type: gpt-5
+          provider: azure-openai-us-east2
+          deployment: gpt-5
+        - key: gpt-5-nano
+          type: gpt-5-nano
+          provider: azure-openai-us-east2
+          deployment: gpt-5-nano
+        - key: gpt-5.1-codex
+          type: gpt-5.1-codex
+          provider: azure-openai-us-east2
+          deployment: gpt-5.1-codex
+        - key: text-embedding-3-large
+          type: text-embedding-3-large
+          provider: azure-openai-us-east2
+          deployment: text-embedding-3-large
+        #% endif %#
+      pipelines:
+        - name: default
+          type: chat
+          plugins:
+            - logging:
+                level: info
+            - model-router:
+                models:
+                  #% if azure_openai_us_east_api_key and azure_openai_us_east_resource_name %#
+                  - gpt-4.1
+                  - gpt-4.1-nano
+                  - gpt-4o-mini
+                  #% endif %#
+                  #% if azure_openai_us_east2_api_key and azure_openai_us_east2_resource_name %#
+                  - gpt-5
+                  - gpt-5-nano
+                  #% endif %#
+        - name: embeddings
+          type: embeddings
+          plugins:
+            - model-router:
+                models:
+                  #% if azure_openai_us_east_api_key and azure_openai_us_east_resource_name %#
+                  - text-embedding-3-small
+                  #% endif %#
+                  #% if azure_openai_us_east2_api_key and azure_openai_us_east2_resource_name %#
+                  - text-embedding-3-large
+                  #% endif %#
 
     # Secret management - use existing secret for API keys
     # NOTE: openaiApiKey is required by the Helm chart init container (not optional)
