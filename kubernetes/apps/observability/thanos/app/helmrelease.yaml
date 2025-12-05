@@ -13,20 +13,8 @@ spec:
     # ============================================================
     # Global Configuration
     # ============================================================
-    image:
-      registry: quay.io
-      repository: thanos/thanos
-      tag: v0.37.2
-
-    # Object storage configuration (shared across components)
-    objstoreConfig:
-      type: s3
-      config:
-        bucket: thanos
-        endpoint: minio.observability.svc.cluster.local:9000
-        access_key: minioadmin
-        secret_key: 6zKrhjAVaA9sQO8ntDEu7w
-        insecure: True
+    # Use existing secret for object storage (managed by kube-prometheus-stack)
+    existingObjstoreSecret: thanos-objstore-secret
 
     # ============================================================
     # Query Component
