@@ -74,17 +74,24 @@ spec:
         readOnly: true
 
     # Secret management - use existing secret for API keys
+    # NOTE: openaiApiKey is required by the Helm chart init container (not optional)
+    # When using Azure-only, we point it to the Azure US East key as a workaround
     secrets:
       existingSecretName: traceloop-hub-api-keys
       keyMapping:
+        #% if traceloop_openai_api_key is defined and traceloop_openai_api_key %#
+        openaiApiKey: "OPENAI_API_KEY"
+        #% elif azure_openai_us_east_api_key %#
+        # Workaround: Helm chart requires openaiApiKey - use Azure key as placeholder
+        openaiApiKey: "AZURE_OPENAI_US_EAST_API_KEY"
+        #% elif azure_openai_us_east2_api_key %#
+        openaiApiKey: "AZURE_OPENAI_US_EAST2_API_KEY"
+        #% endif %#
         #% if azure_openai_us_east_api_key %#
         azureApiKey: "AZURE_OPENAI_US_EAST_API_KEY"
         #% endif %#
         #% if azure_openai_us_east2_api_key %#
         azureApiKey2: "AZURE_OPENAI_US_EAST2_API_KEY"
-        #% endif %#
-        #% if traceloop_openai_api_key is defined and traceloop_openai_api_key %#
-        openaiApiKey: "OPENAI_API_KEY"
         #% endif %#
         #% if traceloop_anthropic_api_key is defined and traceloop_anthropic_api_key %#
         anthropicApiKey: "ANTHROPIC_API_KEY"

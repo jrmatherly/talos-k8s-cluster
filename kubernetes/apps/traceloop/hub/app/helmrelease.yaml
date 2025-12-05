@@ -73,9 +73,13 @@ spec:
         readOnly: true
 
     # Secret management - use existing secret for API keys
+    # NOTE: openaiApiKey is required by the Helm chart init container (not optional)
+    # When using Azure-only, we point it to the Azure US East key as a workaround
     secrets:
       existingSecretName: traceloop-hub-api-keys
       keyMapping:
+        # Workaround: Helm chart requires openaiApiKey - use Azure key as placeholder
+        openaiApiKey: "AZURE_OPENAI_US_EAST_API_KEY"
         azureApiKey: "AZURE_OPENAI_US_EAST_API_KEY"
         azureApiKey2: "AZURE_OPENAI_US_EAST2_API_KEY"
 
