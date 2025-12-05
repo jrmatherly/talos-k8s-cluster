@@ -140,3 +140,8 @@ spec:
     # ============================================================
     lokiCanary:
       enabled: false
+
+    # Disable helm test when lokiCanary is disabled
+    # REF: https://github.com/grafana/loki/issues/9849
+    test:
+      enabled: false

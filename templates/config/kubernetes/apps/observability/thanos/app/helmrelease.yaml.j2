@@ -1,5 +1,7 @@
 #% if observability_enabled and thanos_enabled %#
 ---
+# stevehipwell/thanos chart - https://github.com/stevehipwell/helm-charts/tree/main/charts/thanos
+# Uses upstream Thanos images from quay.io/thanos/thanos
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -12,10 +14,12 @@ spec:
   timeout: 15m
   values:
     # ============================================================
-    # Global Configuration
+    # Object Store Configuration
     # ============================================================
-    # Use existing secret for object storage (managed by kube-prometheus-stack)
-    existingObjstoreSecret: thanos-objstore-secret
+    objstoreConfig:
+      create: false
+      existingSecret: thanos-objstore-secret
+      key: objstore.yml
 
     # ============================================================
     # Query Component
@@ -23,22 +27,19 @@ spec:
     query:
       enabled: true
       replicaCount: #{ thanos_query_replicas | default(2) }#
-      replicaLabel:
-        - __replica__
-      dnsDiscovery:
-        sidecarsService: prometheus-thanos-discovery
-        sidecarsNamespace: observability
-      stores:
-        # Connect to Prometheus sidecars
-        - dnssrv+_grpc._tcp.prometheus-thanos-discovery.observability.svc.cluster.local
-        # Connect to Store Gateway
-        - dnssrv+_grpc._tcp.thanos-storegateway.observability.svc.cluster.local
+      # Connect to Prometheus sidecars and Store Gateway
+      extraArgs:
+        - --endpoint=dnssrv+_grpc._tcp.prometheus-thanos-discovery.observability.svc.cluster.local
+        - --endpoint=dnssrv+_grpc._tcp.thanos-store-gateway-grpc.observability.svc.cluster.local
+        - --query.replica-label=__replica__
       resources:
         requests:
           cpu: 50m
           memory: 128Mi
         limits:
           memory: 512Mi
+      serviceMonitor:
+        enabled: true
 
     # ============================================================
     # Query Frontend (caching and query splitting)
@@ -46,23 +47,30 @@ spec:
     queryFrontend:
       enabled: true
       replicaCount: #{ thanos_query_frontend_replicas | default(2) }#
-      config: |
-        type: IN-MEMORY
-        config:
-          max_size: 512MB
-          max_size_items: 1000
-          validity: 24h
+      extraArgs:
+        - --query-frontend.compress-responses
+        - --query-range.split-interval=24h
+        - --query-range.max-retries-per-request=5
+        - |
+          --query-range.response-cache-config=
+          type: IN-MEMORY
+          config:
+            max_size: 512MB
+            max_size_items: 1000
+            validity: 24h
       resources:
         requests:
           cpu: 50m
           memory: 64Mi
         limits:
           memory: 256Mi
+      serviceMonitor:
+        enabled: true
 
     # ============================================================
     # Store Gateway (queries object storage)
     # ============================================================
-    storegateway:
+    storeGateway:
       enabled: true
       replicaCount: #{ thanos_store_replicas | default(2) }#
       persistence:
@@ -75,15 +83,21 @@ spec:
           memory: 128Mi
         limits:
           memory: 1Gi
+      serviceMonitor:
+        enabled: true
 
     # ============================================================
     # Compactor (downsamples and compacts blocks)
     # ============================================================
-    compactor:
+    compact:
       enabled: true
-      retentionResolutionRaw: #{ thanos_retention_raw | default('30d') }#
-      retentionResolution5m: #{ thanos_retention_5m | default('60d') }#
-      retentionResolution1h: #{ thanos_retention_1h | default('180d') }#
+      extraArgs:
+        - --retention.resolution-raw=#{ thanos_retention_raw | default('30d') }#
+        - --retention.resolution-5m=#{ thanos_retention_5m | default('60d') }#
+        - --retention.resolution-1h=#{ thanos_retention_1h | default('180d') }#
+        - --compact.concurrency=1
+        - --downsample.concurrency=1
+        - --deduplication.replica-label=__replica__
       persistence:
         enabled: true
         storageClass: #{ prometheus_storage_class | default('proxmox-csi') }#
@@ -94,38 +108,18 @@ spec:
           memory: 256Mi
         limits:
           memory: 1Gi
-
-    # ============================================================
-    # Ruler (evaluates recording/alerting rules against Thanos)
-    # ============================================================
-    ruler:
-      enabled: false  # Use Prometheus ruler by default
-
-    # ============================================================
-    # Bucket Web (UI for object storage browsing)
-    # ============================================================
-    bucketweb:
-      enabled: true
-      replicaCount: 1
-      resources:
-        requests:
-          cpu: 10m
-          memory: 32Mi
-        limits:
-          memory: 64Mi
-
-    # ============================================================
-    # Receive (for remote write - optional, disabled by default)
-    # ============================================================
-    receive:
-      enabled: false  # Use sidecar approach instead
-
-    # ============================================================
-    # Monitoring
-    # ============================================================
-    metrics:
-      enabled: true
       serviceMonitor:
         enabled: true
-        labels: {}
+
+    # ============================================================
+    # Ruler (disabled - use Prometheus ruler)
+    # ============================================================
+    ruler:
+      enabled: false
+
+    # ============================================================
+    # Receiver (disabled - use sidecar approach)
+    # ============================================================
+    receive:
+      enabled: false
 #% endif %#
