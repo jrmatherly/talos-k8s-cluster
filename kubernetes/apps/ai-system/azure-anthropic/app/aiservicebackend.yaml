@@ -1,5 +1,6 @@
 ---
 # Fast model (claude-haiku-4-5) - 120s timeout
+# Azure AI Foundry uses /anthropic/v1/messages path (not /v1/messages)
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: AIServiceBackend
 metadata:
@@ -7,6 +8,7 @@ metadata:
 spec:
   schema:
     name: Anthropic
+    version: "anthropic/v1"
   backendRef:
     group: gateway.envoyproxy.io
     kind: Backend
@@ -20,6 +22,7 @@ metadata:
 spec:
   schema:
     name: Anthropic
+    version: "anthropic/v1"
   backendRef:
     group: gateway.envoyproxy.io
     kind: Backend
@@ -33,6 +36,7 @@ metadata:
 spec:
   schema:
     name: Anthropic
+    version: "anthropic/v1"
   backendRef:
     group: gateway.envoyproxy.io
     kind: Backend
