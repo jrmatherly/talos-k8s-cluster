@@ -22,6 +22,10 @@ spec:
   values:
     replicaCount: 2
 
+    # Enterprise Edition - disabled (using OSS mode)
+    ee:
+      enabled: false
+
     image:
       repository: docker.io/traceloop/hub
       pullPolicy: IfNotPresent
