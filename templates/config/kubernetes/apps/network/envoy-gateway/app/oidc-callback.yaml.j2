@@ -1,0 +1,49 @@
+#| OIDC Callback HTTPRoute for SSO authentication #|
+#| Provides a dedicated sso.<domain> endpoint for OAuth2 callbacks #|
+#| The OAuth2 filter intercepts /oauth2/callback and handles token exchange internally #|
+#| After successful auth, users are redirected to their original URL via state parameter #|
+#% if oidc_enabled and (oidc_google_enabled or oidc_entra_enabled) %#
+---
+#| Kubernetes Service as a placeholder backend for the callback route #|
+#| The OAuth2 filter intercepts callback requests before they reach any backend #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: oidc-callback-placeholder
+spec:
+  #| ClusterIP None creates a headless service - no actual endpoint needed #|
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: oidc-callback
+  annotations:
+    #| Prevent external-dns from creating external records #|
+    #| The sso subdomain is handled by split DNS pointing to internal gateway #|
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  parentRefs:
+#% for gateway in oidc_target_gateways %#
+    - name: #{ gateway }#
+      namespace: network
+      sectionName: https
+#% endfor %#
+  hostnames:
+    - sso.${SECRET_DOMAIN}
+  rules:
+    #| Match all paths - OAuth2 filter will intercept /oauth2/* requests #|
+    #| Other paths will fail gracefully (502) but shouldn't be accessed directly #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: oidc-callback-placeholder
+          port: 80
+#% endif %#

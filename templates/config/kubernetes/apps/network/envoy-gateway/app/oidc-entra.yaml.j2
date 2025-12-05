@@ -21,7 +21,9 @@ spec:
     clientID: "#{ oidc_entra_client_id }#"
     clientSecret:
       name: "oidc-entra-secret"
-    redirectURL: "https://${SECRET_DOMAIN}/oauth2/callback"
+    #| Redirect to dedicated SSO subdomain for OAuth2 callback handling #|
+    #| After callback, users are redirected to their original URL via state parameter #|
+    redirectURL: "https://sso.${SECRET_DOMAIN}/oauth2/callback"
     logoutPath: "/logout"
     scopes:
       - openid

@@ -16,7 +16,7 @@ spec:
     clientID: "976645342576-h0l683golj85f3jse02oe48dhkeq33nf.apps.googleusercontent.com"
     clientSecret:
       name: "oidc-google-secret"
-    redirectURL: "https://${SECRET_DOMAIN}/oauth2/callback"
+    redirectURL: "https://sso.${SECRET_DOMAIN}/oauth2/callback"
     logoutPath: "/logout"
     scopes:
       - openid
