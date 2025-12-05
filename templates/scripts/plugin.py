@@ -190,13 +190,11 @@ class Plugin(makejinja.plugin.Plugin):
         # Envoy AI Gateway defaults
         data.setdefault("envoy_ai_gateway_enabled", False)
         # Azure OpenAI region defaults (empty strings to prevent undefined errors)
+        # Note: US East2 AI Foundry also serves Anthropic models (Claude)
         data.setdefault("azure_openai_us_east_api_key", "")
         data.setdefault("azure_openai_us_east_resource_name", "")
         data.setdefault("azure_openai_us_east2_api_key", "")
         data.setdefault("azure_openai_us_east2_resource_name", "")
-        # Azure AI Foundry Anthropic defaults
-        data.setdefault("azure_anthropic_api_key", "")
-        data.setdefault("azure_anthropic_resource_name", "")
 
         return data
 

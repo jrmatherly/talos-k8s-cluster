@@ -1,7 +1,7 @@
-#% if envoy_ai_gateway_enabled and azure_anthropic_api_key %#
+#% if envoy_ai_gateway_enabled and azure_openai_us_east2_api_key %#
 ---
 # Backend endpoint definition for Azure AI Foundry Anthropic
-# Uses AI Foundry endpoint (services.ai.azure.com) instead of OpenAI endpoint
+# Reuses US East 2 AI Foundry endpoint (serves both OpenAI and Anthropic models)
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: Backend
 metadata:
@@ -9,7 +9,7 @@ metadata:
 spec:
   endpoints:
     - fqdn:
-        hostname: #{ azure_anthropic_resource_name }#.services.ai.azure.com
+        hostname: #{ azure_openai_us_east2_resource_name }#.services.ai.azure.com
         port: 443
 ---
 # BackendTLSPolicy for TLS validation
@@ -24,5 +24,5 @@ spec:
       name: azure-anthropic-backend
   validation:
     wellKnownCACertificates: System
-    hostname: #{ azure_anthropic_resource_name }#.services.ai.azure.com
+    hostname: #{ azure_openai_us_east2_resource_name }#.services.ai.azure.com
 #% endif %#

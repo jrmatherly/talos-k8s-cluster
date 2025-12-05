@@ -260,24 +260,10 @@ cloudflare_token: ""
 
 # -- Azure OpenAI US East2 resource name (the subdomain of your endpoint).
 #    (optional)
-#    Example: "my-openai-east-us2" for https://my-openai-east-us2.openai.azure.com
+#    Example: "my-ai-foundry-east2" for https://my-ai-foundry-east2.services.ai.azure.com
+#    NOTE: US East2 AI Foundry also serves Anthropic models (Claude) via /anthropic/v1/messages
+#          Models: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5, claude-opus-4-1
 # azure_openai_us_east2_resource_name: ""
-
-# ==============================================================================
-# AZURE AI FOUNDRY - ANTHROPIC (US EAST2)
-# ==============================================================================
-# Models: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5, claude-opus-4-1
-# Endpoint: https://{resource}.services.ai.azure.com/anthropic/v1/messages
-# NOTE: Uses Anthropic-native API format with x-api-key header
-
-# -- Azure AI Foundry Anthropic API Key for authentication.
-#    (optional) - From Azure Portal (may be same as US East2 key)
-# azure_anthropic_api_key: ""
-
-# -- Azure AI Foundry Anthropic resource name (the subdomain of your endpoint).
-#    (optional) - Same AI Foundry resource as US East2
-#    Example: "my-ai-foundry" for https://my-ai-foundry.services.ai.azure.com
-# azure_anthropic_resource_name: ""
 
 # ==============================================================================
 # AZURE ENTRA ID AUTHENTICATION
