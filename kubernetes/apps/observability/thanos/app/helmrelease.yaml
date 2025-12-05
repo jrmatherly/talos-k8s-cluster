@@ -17,7 +17,7 @@ spec:
     # ============================================================
     objstoreConfig:
       create: false
-      existingSecret: thanos-objstore-secret
+      name: thanos-objstore-secret
       key: objstore.yml
 
     # ============================================================

@@ -11,8 +11,9 @@ spec:
   interval: 1h
   timeout: 15m
   values:
+    #% if loki_storage_type | default('filesystem') == 's3' %#
     # ============================================================
-    # Deployment Mode: Simple Scalable (recommended for production)
+    # Deployment Mode: Simple Scalable (requires object storage)
     # ============================================================
     deploymentMode: SimpleScalable
 
@@ -27,7 +28,7 @@ spec:
         configs:
           - from: "2024-04-01"
             store: tsdb
-            object_store: #{ loki_storage_type | default('filesystem') }#
+            object_store: s3
             schema: v13
             index:
               prefix: loki_index_
@@ -58,8 +59,7 @@ spec:
         max_query_series: 10000
         split_queries_by_interval: 15m
 
-      #% if loki_storage_type | default('filesystem') == 's3' %#
-      # S3 Storage configuration (for production with object storage)
+      # S3 Storage configuration
       storage:
         type: s3
         s3:
@@ -69,11 +69,6 @@ spec:
           secret_access_key: #{ loki_s3_secret_key | default('') }#
           insecure: #{ loki_s3_insecure | default(true) | string | lower }#
           s3ForcePathStyle: true
-      #% else %#
-      # Filesystem storage (for development/testing)
-      storage:
-        type: filesystem
-      #% endif %#
 
     # ============================================================
     # Simple Scalable Components
@@ -101,6 +96,99 @@ spec:
         enableStatefulSetAutoDeletePVC: true
         size: #{ loki_backend_storage_size | default('10Gi') }#
         storageClass: #{ prometheus_storage_class | default('proxmox-csi') }#
+
+    # Disable singleBinary in SimpleScalable mode
+    singleBinary:
+      replicas: 0
+
+    # Caches for SimpleScalable mode
+    chunksCache:
+      enabled: true
+      allocatedMemory: 1024
+
+    resultsCache:
+      enabled: true
+      allocatedMemory: 512
+    #% else %#
+    # ============================================================
+    # Deployment Mode: SingleBinary (Monolithic - for filesystem storage)
+    # ============================================================
+    deploymentMode: SingleBinary
+
+    # ============================================================
+    # Loki Configuration
+    # ============================================================
+    loki:
+      auth_enabled: false
+      commonConfig:
+        replication_factor: 1
+
+      # Schema configuration for log storage
+      schemaConfig:
+        configs:
+          - from: "2024-04-01"
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+
+      # Ingester configuration
+      ingester:
+        chunk_encoding: snappy
+
+      # Tracing integration (for correlation with Tempo)
+      tracing:
+        enabled: true
+
+      # Querier configuration
+      querier:
+        max_concurrent: 4
+
+      # Limits configuration
+      limits_config:
+        retention_period: #{ loki_retention | default('168h') }#
+        ingestion_rate_mb: 16
+        ingestion_burst_size_mb: 32
+        max_query_parallelism: 32
+        max_query_series: 10000
+        split_queries_by_interval: 15m
+
+      # Filesystem storage
+      storage:
+        type: filesystem
+
+    # ============================================================
+    # SingleBinary Configuration
+    # ============================================================
+    singleBinary:
+      replicas: #{ loki_replicas | default(1) }#
+      persistence:
+        enabled: true
+        size: #{ loki_storage_size | default('10Gi') }#
+        storageClass: #{ prometheus_storage_class | default('proxmox-csi') }#
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+    # Disable scalable components in SingleBinary mode
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    backend:
+      replicas: 0
+
+    # Disable caches not needed in SingleBinary mode
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+    #% endif %#
 
     # ============================================================
     # Gateway (nginx)
@@ -131,23 +219,6 @@ spec:
     sidecar:
       rules:
         enabled: false
-
-    # ============================================================
-    # Disable components not needed in SimpleScalable mode
-    # ============================================================
-    singleBinary:
-      replicas: 0
-
-    # ============================================================
-    # Chunksache and Results Cache (optional - improve performance)
-    # ============================================================
-    chunksCache:
-      enabled: true
-      allocatedMemory: 1024
-
-    resultsCache:
-      enabled: true
-      allocatedMemory: 512
 
     # ============================================================
     # Log Collection with Alloy (replaces Promtail)

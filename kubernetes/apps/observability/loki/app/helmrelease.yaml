@@ -11,15 +11,17 @@ spec:
   timeout: 15m
   values:
     # ============================================================
-    # Deployment Mode: Simple Scalable (recommended for production)
+    # Deployment Mode: SingleBinary (Monolithic - for filesystem storage)
     # ============================================================
-    deploymentMode: SimpleScalable
+    deploymentMode: SingleBinary
 
     # ============================================================
     # Loki Configuration
     # ============================================================
     loki:
       auth_enabled: false
+      commonConfig:
+        replication_factor: 1
 
       # Schema configuration for log storage
       schemaConfig:
@@ -44,10 +46,6 @@ spec:
       querier:
         max_concurrent: 4
 
-      # Query scheduler
-      query_scheduler:
-        max_outstanding_requests_per_tenant: 4096
-
       # Limits configuration
       limits_config:
         retention_period: 168h
@@ -57,36 +55,39 @@ spec:
         max_query_series: 10000
         split_queries_by_interval: 15m
 
-      # Filesystem storage (for development/testing)
+      # Filesystem storage
       storage:
         type: filesystem
 
     # ============================================================
-    # Simple Scalable Components
+    # SingleBinary Configuration
     # ============================================================
-    # Read path (query-frontend, querier)
+    singleBinary:
+      replicas: 1
+      persistence:
+        enabled: true
+        size: 10Gi
+        storageClass: proxmox-csi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+    # Disable scalable components in SingleBinary mode
     read:
-      replicas: 2
-      persistence:
-        enableStatefulSetAutoDeletePVC: true
-        size: 10Gi
-        storageClass: proxmox-csi
-
-    # Write path (distributor, ingester)
+      replicas: 0
     write:
-      replicas: 2
-      persistence:
-        enableStatefulSetAutoDeletePVC: true
-        size: 10Gi
-        storageClass: proxmox-csi
-
-    # Backend (compactor, index-gateway, ruler)
+      replicas: 0
     backend:
-      replicas: 2
-      persistence:
-        enableStatefulSetAutoDeletePVC: true
-        size: 10Gi
-        storageClass: proxmox-csi
+      replicas: 0
+
+    # Disable caches not needed in SingleBinary mode
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
 
     # ============================================================
     # Gateway (nginx)
@@ -117,23 +118,6 @@ spec:
     sidecar:
       rules:
         enabled: false
-
-    # ============================================================
-    # Disable components not needed in SimpleScalable mode
-    # ============================================================
-    singleBinary:
-      replicas: 0
-
-    # ============================================================
-    # Chunksache and Results Cache (optional - improve performance)
-    # ============================================================
-    chunksCache:
-      enabled: true
-      allocatedMemory: 1024
-
-    resultsCache:
-      enabled: true
-      allocatedMemory: 512
 
     # ============================================================
     # Log Collection with Alloy (replaces Promtail)
