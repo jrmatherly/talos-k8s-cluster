@@ -260,9 +260,7 @@ cloudflare_token: ""
 
 # -- Azure OpenAI US East2 resource name (the subdomain of your endpoint).
 #    (optional)
-#    Example: "my-ai-foundry-east2" for https://my-ai-foundry-east2.services.ai.azure.com
-#    NOTE: US East2 AI Foundry also serves Anthropic models (Claude) via /anthropic/v1/messages
-#          Models: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5, claude-opus-4-1
+#    Example: "my-ai-foundry-east2" for https://my-ai-foundry-east2.openai.azure.com
 # azure_openai_us_east2_resource_name: ""
 
 # ==============================================================================

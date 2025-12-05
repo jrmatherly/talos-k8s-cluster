@@ -38,6 +38,5 @@ envoy_ai_gateway_addr: "10.10.10.145"
 azure_openai_us_east_api_key: "fake-api-key"
 azure_openai_us_east_resource_name: "test-openai-resource"
 # Azure OpenAI - US East2 Region
-# Note: US East2 also serves Anthropic models (Claude) via /anthropic/v1/messages
 azure_openai_us_east2_api_key: "fake-api-key"
 azure_openai_us_east2_resource_name: "ets-east-us2"

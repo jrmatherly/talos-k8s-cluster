@@ -49,7 +49,6 @@ import (
 	azure_openai_us_east_resource_name?: string & !=""
 
 	// Azure OpenAI - US East2 Region (optional)
-	// Note: US East2 AI Foundry also serves Anthropic models (Claude) via /anthropic/v1/messages
 	azure_openai_us_east2_api_key?: string & !=""
 	azure_openai_us_east2_resource_name?: string & !=""
 
