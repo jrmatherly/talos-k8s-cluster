@@ -96,7 +96,11 @@ spec:
           type: text-embedding-3-small
           provider: azure-openai-us-east
           deployment: text-embedding-3-small
-        # Azure OpenAI US East2 Models
+        - key: text-embedding-ada-002
+          type: text-embedding-ada-002
+          provider: azure-openai-us-east
+          deployment: text-embedding-ada-002
+        # Azure OpenAI US East2 Models - Chat (120s timeout)
         - key: gpt-5
           type: gpt-5
           provider: azure-openai-us-east2
@@ -105,10 +109,43 @@ spec:
           type: gpt-5-nano
           provider: azure-openai-us-east2
           deployment: gpt-5-nano
+        # Chat with thinking (300s timeout)
+        - key: gpt-5-chat
+          type: gpt-5-chat
+          provider: azure-openai-us-east2
+          deployment: gpt-5-chat
+        - key: gpt-5.1-chat
+          type: gpt-5.1-chat
+          provider: azure-openai-us-east2
+          deployment: gpt-5.1-chat
+        # Chat April preview (120s timeout)
+        - key: gpt-5-mini
+          type: gpt-5-mini
+          provider: azure-openai-us-east2
+          deployment: gpt-5-mini
+        - key: gpt-5.1
+          type: gpt-5.1
+          provider: azure-openai-us-east2
+          deployment: gpt-5.1
+        # Codex models (180s timeout)
         - key: gpt-5.1-codex
           type: gpt-5.1-codex
           provider: azure-openai-us-east2
           deployment: gpt-5.1-codex
+        - key: gpt-5.1-codex-mini
+          type: gpt-5.1-codex-mini
+          provider: azure-openai-us-east2
+          deployment: gpt-5.1-codex-mini
+        # Audio models (180s timeout)
+        - key: gpt-audio
+          type: gpt-audio
+          provider: azure-openai-us-east2
+          deployment: gpt-audio
+        - key: gpt-audio-mini
+          type: gpt-audio-mini
+          provider: azure-openai-us-east2
+          deployment: gpt-audio-mini
+        # Embedding models (60s timeout)
         - key: text-embedding-3-large
           type: text-embedding-3-large
           provider: azure-openai-us-east2
@@ -121,17 +158,35 @@ spec:
                 level: info
             - model-router:
                 models:
+                  # US East - Chat models
                   - gpt-4.1
                   - gpt-4.1-nano
                   - gpt-4o-mini
+                  # US East - Reasoning models
+                  - o3
+                  - o4-mini
+                  # US East2 - Chat models
                   - gpt-5
                   - gpt-5-nano
+                  # US East2 - Chat with thinking
+                  - gpt-5-chat
+                  - gpt-5.1-chat
+                  # US East2 - Chat April preview
+                  - gpt-5-mini
+                  - gpt-5.1
+                  # US East2 - Codex models
+                  - gpt-5.1-codex
+                  - gpt-5.1-codex-mini
+                  # US East2 - Audio models
+                  - gpt-audio
+                  - gpt-audio-mini
         - name: embeddings
           type: embeddings
           plugins:
             - model-router:
                 models:
                   - text-embedding-3-small
+                  - text-embedding-ada-002
                   - text-embedding-3-large
 
     # Secret management - use existing secret for API keys
