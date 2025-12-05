@@ -1,7 +1,8 @@
 #% if envoy_ai_gateway_enabled and azure_openai_us_east2_api_key %#
 ---
 # Fast model (claude-haiku-4-5) - 120s timeout
-# Azure AI Foundry uses /anthropic/v1/messages path (not /v1/messages)
+# Azure AI Foundry Anthropic endpoint: /anthropic/v1/messages
+# Testing without schema.version to allow passthrough routing
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: AIServiceBackend
 metadata:
@@ -9,7 +10,6 @@ metadata:
 spec:
   schema:
     name: Anthropic
-    version: "anthropic/v1"
   backendRef:
     group: gateway.envoyproxy.io
     kind: Backend
@@ -23,7 +23,6 @@ metadata:
 spec:
   schema:
     name: Anthropic
-    version: "anthropic/v1"
   backendRef:
     group: gateway.envoyproxy.io
     kind: Backend
@@ -37,7 +36,6 @@ metadata:
 spec:
   schema:
     name: Anthropic
-    version: "anthropic/v1"
   backendRef:
     group: gateway.envoyproxy.io
     kind: Backend
