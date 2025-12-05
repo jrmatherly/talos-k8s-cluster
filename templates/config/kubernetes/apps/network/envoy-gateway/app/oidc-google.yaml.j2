@@ -16,7 +16,10 @@ spec:
   oidc:
     provider:
       issuer: "https://accounts.google.com"
-      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth"
+      #| Google uses access_type=offline param instead of offline_access scope for refresh tokens #|
+      #| Both endpoints must be specified for authorizationEndpoint customization to take effect #|
+      #| REF: https://github.com/envoyproxy/gateway/issues/7459 #|
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth?access_type=offline"
       tokenEndpoint: "https://oauth2.googleapis.com/token"
     clientID: "#{ oidc_google_client_id }#"
     clientSecret:
@@ -27,7 +30,6 @@ spec:
       - openid
       - email
       - profile
-      - offline_access
     refreshToken: true
     forwardAccessToken: true
     cookieDomain: "#{ oidc_cookie_domain }#"
