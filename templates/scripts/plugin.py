@@ -178,6 +178,9 @@ class Plugin(makejinja.plugin.Plugin):
         bgp_enabled = all(data.get(key) for key in bgp_keys)
         data.setdefault("cilium_bgp_enabled", bgp_enabled)
 
+        # Control plane scheduling (allow workloads on control plane nodes)
+        data.setdefault("allow_scheduling_on_control_planes", True)
+
         # If there is more than one node, enable spegel
         spegel_enabled = len(data.get("nodes")) > 1
         data.setdefault("spegel_enabled", spegel_enabled)
@@ -232,6 +235,12 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("oidc_entra_tenant_id", "")
         data.setdefault("oidc_entra_client_id", "")
         data.setdefault("oidc_entra_client_secret", "")
+        # GitHub OAuth defaults (uses oauth2-proxy)
+        data.setdefault("oidc_github_enabled", False)
+        data.setdefault("oidc_github_client_id", "")
+        data.setdefault("oidc_github_client_secret", "")
+        data.setdefault("oidc_github_org", "")
+        data.setdefault("oidc_github_team", "")
         # OIDC target configuration defaults
         data.setdefault("oidc_target_gateways", ["envoy-internal"])
         data.setdefault("oidc_cookie_domain", data.get("primary_domain", ""))

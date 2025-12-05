@@ -20,6 +20,8 @@ cloudflare_gateway_addr: "10.10.10.251"
 # cilium_bgp_router_asn: ""
 # cilium_bgp_node_asn: ""
 # cilium_loadbalancer_mode: ""
+# Control Plane Scheduling (uses default: true)
+# allow_scheduling_on_control_planes: true
 # Proxmox Integration (optional - testing Approach A with CSI only)
 proxmox_api_url: "https://10.10.10.1:8006/api2/json"
 # proxmox_insecure: true  # uses default
@@ -51,3 +53,8 @@ proxmox_csi_token_secret: "fake-secret"
 # oidc_entra_tenant_id: ""
 # oidc_entra_client_id: ""
 # oidc_entra_client_secret: ""
+# oidc_github_enabled: false
+# oidc_github_client_id: ""
+# oidc_github_client_secret: ""
+# oidc_github_org: ""
+# oidc_github_team: ""

@@ -28,6 +28,9 @@ import (
 	cilium_bgp_node_asn?: string & !=""
 	cilium_loadbalancer_mode?: *"dsr" | "snat"
 
+	// Control Plane Scheduling
+	allow_scheduling_on_control_planes?: *true | bool  // Allow workloads on control plane nodes
+
 	// Proxmox CSI Integration (required for Proxmox storage)
 	proxmox_api_url?: string & =~"^https?://.+/api2/json$"
 	proxmox_insecure?: *true | bool
@@ -96,6 +99,13 @@ import (
 	oidc_entra_tenant_id?: string & !=""        // UUID format tenant ID
 	oidc_entra_client_id?: string & !=""        // Application (client) ID
 	oidc_entra_client_secret?: string & !=""
+
+	// GitHub OAuth Configuration (uses oauth2-proxy for ext_authz)
+	oidc_github_enabled?: bool
+	oidc_github_client_id?: string & !=""
+	oidc_github_client_secret?: string & !=""
+	oidc_github_org?: string & !=""             // Restrict to GitHub organization members
+	oidc_github_team?: string & !=""            // Restrict to specific teams (comma-separated)
 
 	// OIDC Target Configuration
 	oidc_target_gateways?: [...string & !=""]   // Gateway names to protect (e.g., ["envoy-internal", "envoy-external"])

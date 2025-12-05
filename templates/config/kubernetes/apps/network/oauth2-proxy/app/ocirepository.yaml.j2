@@ -1,0 +1,16 @@
+#| OAuth2-Proxy OCI Repository #|
+#% if oidc_enabled and oidc_github_enabled %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: oauth2-proxy
+spec:
+  interval: 12h
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: extract
+  ref:
+    tag: 7.9.0
+  url: oci://ghcr.io/oauth2-proxy/manifests/oauth2-proxy
+#% endif %#

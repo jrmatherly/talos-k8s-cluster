@@ -1,0 +1,32 @@
+#| SecurityPolicy for GitHub OAuth authentication via oauth2-proxy ext_authz #|
+#| Only rendered when oidc_enabled and oidc_github_enabled are true #|
+#% if oidc_enabled and oidc_github_enabled %#
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: oidc-github
+spec:
+  targetRefs:
+#% for gateway in oidc_target_gateways %#
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: #{ gateway }#
+#% endfor %#
+  extAuth:
+    http:
+      backendRefs:
+        - name: oauth2-proxy
+          namespace: network
+          port: 4180
+      headersToBackend:
+        - Authorization
+        - Cookie
+        - X-Forwarded-For
+        - X-Forwarded-Host
+        - X-Forwarded-Proto
+        - X-Forwarded-Uri
+      headersToExtAuth:
+        - Authorization
+        - Cookie
+#% endif %#

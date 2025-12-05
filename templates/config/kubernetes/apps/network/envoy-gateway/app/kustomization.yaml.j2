@@ -13,6 +13,9 @@ resources:
 #% if oidc_enabled and oidc_entra_enabled %#
   - ./oidc-entra.yaml
 #% endif %#
+#% if oidc_enabled and oidc_github_enabled %#
+  - ./oidc-github.yaml
+#% endif %#
 #% if oidc_enabled and (oidc_google_enabled or oidc_entra_enabled) %#
   - ./oidc-secrets.sops.yaml
 #% endif %#

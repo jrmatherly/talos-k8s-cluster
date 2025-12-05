@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns) and [cloudflared](https://github.com/cloudflare/cloudflared).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), [cloudflared](https://github.com/cloudflare/cloudflared), and [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) (for GitHub SSO).
 
 **Other features include:**
 
@@ -33,7 +33,7 @@ There are **5 stages** outlined below for completing this project, make sure you
 ### Stage 1: Machine Preparation
 
 > [!IMPORTANT]
-> If you have **3 or more nodes** it is recommended to make 3 of them controller nodes for a highly available control plane. This project configures **all nodes** to be able to run workloads. **Worker nodes** are therefore **optional**.
+> If you have **3 or more nodes** it is recommended to make 3 of them controller nodes for a highly available control plane. By default, this project configures **all nodes** to be able to run workloads (`allow_scheduling_on_control_planes: true` in `cluster.yaml`). **Worker nodes** are therefore **optional**. Set `allow_scheduling_on_control_planes: false` for production clusters with dedicated worker nodes.
 >
 > **Minimum system requirements**
 >
@@ -538,6 +538,63 @@ curl -X POST "https://llms.${cloudflare_domain}/v1/embeddings" \
 ```
 
 See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/REFINED-IMPLEMENTATION-PLAN.md` for detailed implementation notes.
+
+### OIDC Single Sign-On (SSO)
+
+**Included (optional):** This template supports Single Sign-On (SSO) authentication for cluster applications via Envoy Gateway SecurityPolicy. Multiple identity providers can be configured simultaneously with flexible gateway targeting.
+
+**Supported Providers:**
+
+| Provider | Protocol | Implementation |
+|----------|----------|----------------|
+| Google | OIDC | Native Envoy Gateway |
+| Microsoft Entra ID | OIDC | Native Envoy Gateway |
+| GitHub | OAuth 2.0 | oauth2-proxy (ext_authz) |
+
+Enable SSO by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# Enable OIDC SSO integration
+oidc_enabled: true
+
+# Google OIDC (optional)
+oidc_google_enabled: true
+oidc_google_client_id: "123456789-xxx.apps.googleusercontent.com"
+oidc_google_client_secret: "GOCSPX-xxx"
+
+# Microsoft Entra ID (optional)
+oidc_entra_enabled: true
+oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
+oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
+oidc_entra_client_secret: "xxx"
+
+# GitHub OAuth (optional - uses oauth2-proxy)
+oidc_github_enabled: true
+oidc_github_client_id: "Iv1.xxx"
+oidc_github_client_secret: "xxx"
+oidc_github_org: "my-org"          # Restrict to org members
+oidc_github_team: "devs,admins"    # Restrict to specific teams
+
+# Target gateways to protect
+oidc_target_gateways:
+  - envoy-internal
+```
+
+**Provider Setup Documentation:**
+- `docs/oidc-google-setup.md` - Google Cloud Console OAuth setup
+- `docs/oidc-entra-setup.md` - Microsoft Entra ID app registration
+- `docs/oidc-github-setup.md` - GitHub OAuth application setup
+- `docs/envoy-gateway-oidc-sso.md` - Overall architecture and implementation
+
+**Verification:**
+
+```sh
+# Check SecurityPolicy status
+kubectl get securitypolicy -n network
+
+# Test authentication (navigate to protected app)
+# You should be redirected to your identity provider
+```
 
 ### Community Repositories
 

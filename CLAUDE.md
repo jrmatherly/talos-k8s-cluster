@@ -164,6 +164,9 @@ Required fields:
 - `cloudflare_domain` - Primary domain (string or array)
 - `cloudflare_token` - Cloudflare API token
 
+Control plane scheduling:
+- `allow_scheduling_on_control_planes` - Boolean (default: `true`). When `true`, removes the `node-role.kubernetes.io/control-plane:NoSchedule` taint from control plane nodes, allowing regular workloads to run there. Set to `false` for production clusters with dedicated worker nodes.
+
 ### nodes.yaml (User Input)
 Each node requires:
 - `name` - Hostname (lowercase alphanumeric with hyphens)
@@ -480,6 +483,93 @@ kubectl port-forward -n network deploy/envoy-gateway 19000:19000
 ```bash
 kubectl rollout restart deployment/envoy-gateway -n network
 ```
+
+## OIDC SSO Integration
+
+Optional Single Sign-On (SSO) authentication for cluster applications via Envoy Gateway SecurityPolicy. Supports multiple identity providers with flexible gateway targeting.
+
+### Configuration in cluster.yaml
+
+```yaml
+# Enable OIDC SSO integration
+oidc_enabled: true
+
+# Google OIDC (native Envoy Gateway OIDC)
+oidc_google_enabled: true
+oidc_google_client_id: "123456789-xxx.apps.googleusercontent.com"
+oidc_google_client_secret: "GOCSPX-xxx"
+
+# Microsoft Entra ID (native Envoy Gateway OIDC)
+oidc_entra_enabled: true
+oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
+oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
+oidc_entra_client_secret: "xxx"
+
+# GitHub OAuth (uses oauth2-proxy ext_authz)
+oidc_github_enabled: true
+oidc_github_client_id: "Iv1.xxx"
+oidc_github_client_secret: "xxx"
+oidc_github_org: "my-org"          # Optional: restrict to org members
+oidc_github_team: "devs,admins"    # Optional: restrict to specific teams
+
+# Target gateways to protect
+oidc_target_gateways:
+  - envoy-internal
+  # - envoy-external  # Uncomment if needed
+oidc_cookie_domain: "example.com"  # Cookie domain for SSO
+```
+
+### Architecture
+
+| Provider | Protocol | Implementation | SecurityPolicy |
+|----------|----------|----------------|----------------|
+| Google | OIDC | Native Envoy Gateway | `oidc-google` |
+| Entra ID | OIDC | Native Envoy Gateway | `oidc-entra` |
+| GitHub | OAuth 2.0 | oauth2-proxy (ext_authz) | `oidc-github` |
+
+**Why oauth2-proxy for GitHub?** GitHub only supports OAuth 2.0, not OIDC. It lacks ID tokens and `.well-known/openid-configuration`. oauth2-proxy handles the OAuth flow and provides external authorization to Envoy Gateway.
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-google.yaml.j2` | Google OIDC SecurityPolicy |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-entra.yaml.j2` | Entra ID OIDC SecurityPolicy |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-github.yaml.j2` | GitHub ext_authz SecurityPolicy |
+| `templates/config/kubernetes/apps/network/oauth2-proxy/` | oauth2-proxy deployment for GitHub |
+
+### Testing
+
+```bash
+# Check SecurityPolicy status
+kubectl get securitypolicy -n network
+kubectl describe securitypolicy oidc-google -n network
+
+# Check oauth2-proxy for GitHub
+kubectl get pods -n network -l app.kubernetes.io/name=oauth2-proxy
+kubectl logs -n network -l app.kubernetes.io/name=oauth2-proxy
+
+# Test authentication flow
+# Navigate to a protected app (e.g., https://grafana.<domain>)
+# You should be redirected to the identity provider
+```
+
+### Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| Redirect loop | Cookie domain mismatch | Verify `oidc_cookie_domain` matches your domain |
+| 403 after login | User not authorized | Check org/team restrictions (GitHub) or app permissions |
+| Callback URL error | Redirect URI not registered | Add exact callback URL in provider settings |
+| oauth2-proxy not starting | Missing secret | Check `oauth2-proxy-secret` exists in network namespace |
+
+### Provider Setup Guides
+
+See the detailed setup documentation for each provider:
+- `docs/oidc-google-setup.md` - Google Cloud Console OAuth setup
+- `docs/oidc-entra-setup.md` - Microsoft Entra ID app registration
+- `docs/oidc-github-setup.md` - GitHub OAuth application setup
+- `docs/envoy-gateway-oidc-sso.md` - Overall architecture and implementation
 
 ## Adding New Applications/Templates
 

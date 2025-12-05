@@ -171,6 +171,19 @@ cloudflare_token: ""
 # cilium_bgp_node_asn: ""
 
 # ==============================================================================
+# CONTROL PLANE SCHEDULING
+# ==============================================================================
+
+# -- Allow scheduling workloads on control plane nodes.
+#    When true, removes the node-role.kubernetes.io/control-plane:NoSchedule taint
+#    from control plane nodes, allowing regular workloads to run there.
+#    When false, only system components with tolerations can run on control planes.
+#    (OPTIONAL) / (DEFAULT: true)
+#    TIP: Set to true if you have limited nodes and want to maximize resources.
+#    TIP: Set to false for production clusters with dedicated worker nodes.
+# allow_scheduling_on_control_planes: true
+
+# ==============================================================================
 # PROXMOX INTEGRATION (Optional)
 # ==============================================================================
 # Configuration for Proxmox CSI Plugin (and optionally CCM).
@@ -406,6 +419,40 @@ cloudflare_token: ""
 # -- Azure Client Secret.
 #    (REQUIRED if oidc_entra_enabled) - From App Registration > Certificates & secrets
 # oidc_entra_client_secret: ""
+
+# ==============================================================================
+# GITHUB OAUTH CONFIGURATION
+# ==============================================================================
+# Configure GitHub as an OAuth provider using oauth2-proxy.
+# NOTE: GitHub does NOT support OIDC, so this uses external authorization (ext_authz)
+# with oauth2-proxy as an intermediary.
+# REF: https://github.com/settings/developers
+# REF: docs/oidc-github-setup.md
+
+# -- Enable GitHub OAuth authentication.
+#    (OPTIONAL) / (DEFAULT: false)
+#    NOTE: Requires oauth2-proxy deployment (automatically configured when enabled)
+# oidc_github_enabled: true
+
+# -- GitHub OAuth App Client ID.
+#    (REQUIRED if oidc_github_enabled) - From GitHub Developer Settings
+#    Example: "Iv1.abc123def456"
+# oidc_github_client_id: ""
+
+# -- GitHub OAuth App Client Secret.
+#    (REQUIRED if oidc_github_enabled) - From GitHub Developer Settings
+# oidc_github_client_secret: ""
+
+# -- Restrict access to members of a GitHub organization.
+#    (OPTIONAL) - Leave empty to allow all authenticated GitHub users
+#    Example: "my-org" - Only members of my-org can authenticate
+# oidc_github_org: ""
+
+# -- Restrict access to specific teams within the organization.
+#    (OPTIONAL) - Requires oidc_github_org to be set
+#    Format: "team1,team2" or "org1:team1,org2:team2" for cross-org
+#    Example: "developers,admins"
+# oidc_github_team: ""
 
 # ==============================================================================
 # OIDC TARGET CONFIGURATION

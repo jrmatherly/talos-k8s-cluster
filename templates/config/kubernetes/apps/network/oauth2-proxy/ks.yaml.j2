@@ -1,0 +1,25 @@
+#| OAuth2-Proxy Kustomization for GitHub authentication #|
+#| Only rendered when oidc_enabled and oidc_github_enabled are true #|
+#% if oidc_enabled and oidc_github_enabled %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: oauth2-proxy
+spec:
+  dependsOn:
+    - name: envoy-gateway
+  interval: 1h
+  path: ./kubernetes/apps/network/oauth2-proxy/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network
+  wait: true
+#% endif %#
