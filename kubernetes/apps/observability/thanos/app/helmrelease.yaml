@@ -25,7 +25,7 @@ spec:
         bucket: thanos
         endpoint: minio.observability.svc.cluster.local:9000
         access_key: minioadmin
-        secret_key: minioadmin
+        secret_key: 6zKrhjAVaA9sQO8ntDEu7w
         insecure: True
 
     # ============================================================
