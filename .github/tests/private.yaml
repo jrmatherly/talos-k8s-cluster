@@ -42,3 +42,12 @@ proxmox_csi_token_secret: "fake-secret"
 # Traceloop Full Platform (disabled for private repo testing)
 # traceloop_enabled: false
 # traceloop_hub_enabled: false
+# OIDC SSO Configuration (disabled for private repo testing)
+# oidc_enabled: false
+# oidc_google_enabled: false
+# oidc_google_client_id: ""
+# oidc_google_client_secret: ""
+# oidc_entra_enabled: false
+# oidc_entra_tenant_id: ""
+# oidc_entra_client_id: ""
+# oidc_entra_client_secret: ""

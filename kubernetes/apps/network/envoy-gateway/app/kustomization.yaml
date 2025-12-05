@@ -7,3 +7,5 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./podmonitor.yaml
+  - ./oidc-entra.yaml
+  - ./oidc-secrets.sops.yaml

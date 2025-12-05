@@ -82,6 +82,24 @@ import (
 	traceloop_hub_memory_request?: string & !=""
 	traceloop_openai_api_key?: string & !=""
 	traceloop_anthropic_api_key?: string & !=""
+
+	// OIDC SSO Configuration (optional - for Gateway authentication)
+	oidc_enabled?: bool
+
+	// Google OIDC Configuration
+	oidc_google_enabled?: bool
+	oidc_google_client_id?: string & !=""
+	oidc_google_client_secret?: string & !=""
+
+	// Microsoft Entra ID OIDC Configuration
+	oidc_entra_enabled?: bool
+	oidc_entra_tenant_id?: string & !=""        // UUID format tenant ID
+	oidc_entra_client_id?: string & !=""        // Application (client) ID
+	oidc_entra_client_secret?: string & !=""
+
+	// OIDC Target Configuration
+	oidc_target_gateways?: [...string & !=""]   // Gateway names to protect (e.g., ["envoy-internal", "envoy-external"])
+	oidc_cookie_domain?: string & !=""          // Cookie domain for cross-subdomain SSO
 }
 
 #Config

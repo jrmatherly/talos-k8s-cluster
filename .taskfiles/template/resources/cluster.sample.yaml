@@ -350,3 +350,79 @@ cloudflare_token: ""
 # -- Direct Anthropic API key (optional - if not using Azure).
 #    (OPTIONAL)
 # traceloop_anthropic_api_key: ""
+
+# ==============================================================================
+# OIDC SSO CONFIGURATION (Optional - Gateway Authentication)
+# ==============================================================================
+# Enable Single Sign-On (SSO) authentication for Envoy Gateway using OIDC.
+# Supports Google and Microsoft Entra ID identity providers.
+# REF: docs/envoy-gateway-oidc-sso.md
+
+# -- Enable OIDC SSO integration.
+#    (OPTIONAL) / (DEFAULT: false)
+# oidc_enabled: true
+
+# ==============================================================================
+# GOOGLE OIDC CONFIGURATION
+# ==============================================================================
+# Configure Google as an OIDC identity provider.
+# Requires a Google Cloud OAuth 2.0 Client ID.
+# REF: https://console.cloud.google.com/apis/credentials
+
+# -- Enable Google OIDC authentication.
+#    (OPTIONAL) / (DEFAULT: false)
+# oidc_google_enabled: true
+
+# -- Google OAuth 2.0 Client ID.
+#    (REQUIRED if oidc_google_enabled) - From Google Cloud Console
+#    Example: "123456789-abcdefg.apps.googleusercontent.com"
+# oidc_google_client_id: ""
+
+# -- Google OAuth 2.0 Client Secret.
+#    (REQUIRED if oidc_google_enabled) - From Google Cloud Console
+# oidc_google_client_secret: ""
+
+# ==============================================================================
+# MICROSOFT ENTRA ID (AZURE AD) OIDC CONFIGURATION
+# ==============================================================================
+# Configure Microsoft Entra ID as an OIDC identity provider.
+# Requires an Azure App Registration.
+# REF: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps
+
+# -- Enable Microsoft Entra ID OIDC authentication.
+#    (OPTIONAL) / (DEFAULT: false)
+# oidc_entra_enabled: true
+
+# -- Azure Tenant ID (Directory ID).
+#    (REQUIRED if oidc_entra_enabled) - From Azure Portal
+#    Example: "12345678-1234-1234-1234-123456789abc"
+# oidc_entra_tenant_id: ""
+
+# -- Azure Application (Client) ID.
+#    (REQUIRED if oidc_entra_enabled) - From App Registration
+#    Example: "87654321-4321-4321-4321-cba987654321"
+# oidc_entra_client_id: ""
+
+# -- Azure Client Secret.
+#    (REQUIRED if oidc_entra_enabled) - From App Registration > Certificates & secrets
+# oidc_entra_client_secret: ""
+
+# ==============================================================================
+# OIDC TARGET CONFIGURATION
+# ==============================================================================
+
+# -- Target Gateways for OIDC protection.
+#    (OPTIONAL) / (DEFAULT: ["envoy-internal"])
+#    The Gateways that will require OIDC authentication.
+#    Options: "envoy-internal", "envoy-external", "envoy-ai"
+#    Single gateway example: ["envoy-internal"]
+#    Multiple gateways example: ["envoy-internal", "envoy-external"]
+# oidc_target_gateways:
+#   - envoy-internal
+#   - envoy-external
+
+# -- Cookie domain for cross-subdomain SSO.
+#    (OPTIONAL) / (DEFAULT: primary_domain)
+#    Set to parent domain for SSO across subdomains.
+#    Example: "example.com" enables SSO for app1.example.com, app2.example.com
+# oidc_cookie_domain: ""

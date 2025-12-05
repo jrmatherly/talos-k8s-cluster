@@ -1,0 +1,28 @@
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: oidc-entra
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-internal
+  oidc:
+    provider:
+      issuer: "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/v2.0"
+      authorizationEndpoint: "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/authorize"
+      tokenEndpoint: "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/token"
+    clientID: "5a39e93b-5781-4305-b6c5-848ec1369957"
+    clientSecret:
+      name: "oidc-entra-secret"
+    redirectURL: "https://${SECRET_DOMAIN}/oauth2/callback"
+    logoutPath: "/logout"
+    scopes:
+      - openid
+      - email
+      - profile
+      - offline_access
+    refreshToken: true
+    forwardAccessToken: true
+    cookieDomain: "matherly.net"

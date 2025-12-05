@@ -221,6 +221,21 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("traceloop_openai_api_key", "")
         data.setdefault("traceloop_anthropic_api_key", "")
 
+        # OIDC SSO defaults (Gateway Authentication)
+        data.setdefault("oidc_enabled", False)
+        # Google OIDC defaults
+        data.setdefault("oidc_google_enabled", False)
+        data.setdefault("oidc_google_client_id", "")
+        data.setdefault("oidc_google_client_secret", "")
+        # Microsoft Entra ID OIDC defaults
+        data.setdefault("oidc_entra_enabled", False)
+        data.setdefault("oidc_entra_tenant_id", "")
+        data.setdefault("oidc_entra_client_id", "")
+        data.setdefault("oidc_entra_client_secret", "")
+        # OIDC target configuration defaults
+        data.setdefault("oidc_target_gateways", ["envoy-internal"])
+        data.setdefault("oidc_cookie_domain", data.get("primary_domain", ""))
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:
