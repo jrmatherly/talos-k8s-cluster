@@ -45,7 +45,7 @@ spec:
     grafana:
       enabled: true
       defaultDashboardsEnabled: true
-      defaultDashboardsTimezone: utc
+      defaultDashboardsTimezone: America/New_York
       admin:
         existingSecret: grafana-admin-secret
         userKey: admin-user
@@ -270,6 +270,6 @@ spec:
         port: 2381
         targetPort: 2381
 
-    # CoreDNS is in kube-system, use existing ServiceMonitor
+    # CoreDNS monitoring provided by CoreDNS HelmRelease (prometheus.monitor.enabled)
     coreDns:
       enabled: false
