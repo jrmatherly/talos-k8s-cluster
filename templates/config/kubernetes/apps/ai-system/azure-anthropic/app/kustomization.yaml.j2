@@ -1,11 +1,12 @@
 #% if envoy_ai_gateway_enabled and azure_openai_us_east2_api_key %#
 ---
+# Azure AI Foundry Anthropic - uses standard HTTPRoute with credential injection
+# because Azure AI Foundry Anthropic is not supported by Envoy AI Gateway
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ./backend.yaml
-  - ./aiservicebackend.yaml
-  - ./backendsecuritypolicy.yaml
+  - ./httproutefilter.yaml
   - ./aigatewayroute.yaml
   - ./secret.sops.yaml
 #% endif %#
