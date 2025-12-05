@@ -1,0 +1,23 @@
+#% if observability_enabled and thanos_enabled %#
+---
+# Grafana Datasource for Thanos (long-term queries)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-thanos
+  labels:
+    grafana_datasource: "1"
+data:
+  thanos-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Thanos
+        type: prometheus
+        uid: thanos
+        access: proxy
+        url: http://thanos-query-frontend.observability.svc.cluster.local:9090
+        jsonData:
+          timeInterval: "1m"
+          httpMethod: POST
+        isDefault: false
+#% endif %#

@@ -271,3 +271,125 @@ cloudflare_token: ""
 # azure_tenant_id: ""
 # azure_client_id: ""
 # azure_client_secret: ""
+
+# ==============================================================================
+# OBSERVABILITY STACK (Optional - LGTM + Thanos)
+# ==============================================================================
+# Full observability stack with metrics (Prometheus), logs (Loki), traces (Tempo),
+# dashboards (Grafana), and long-term storage (Thanos).
+# REF: https://grafana.com/oss/lgtm-stack/
+
+# -- Enable the observability stack.
+#    (OPTIONAL) / (DEFAULT: false)
+# observability_enabled: true
+
+# -- Grafana admin password.
+#    (OPTIONAL) / (DEFAULT: "admin")
+#    WARNING: Change this for production deployments!
+# grafana_admin_password: ""
+
+# ==============================================================================
+# PROMETHEUS CONFIGURATION
+# ==============================================================================
+
+# -- Prometheus data retention period.
+#    (OPTIONAL) / (DEFAULT: "7d")
+#    For longer retention, enable Thanos.
+# prometheus_retention: "7d"
+
+# -- Maximum storage size before old data is removed.
+#    (OPTIONAL) / (DEFAULT: "45GB")
+# prometheus_retention_size: "45GB"
+
+# -- Prometheus PVC storage size.
+#    (OPTIONAL) / (DEFAULT: "50Gi")
+# prometheus_storage_size: "50Gi"
+
+# -- Storage class for Prometheus and other observability PVCs.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# prometheus_storage_class: "proxmox-csi"
+
+# -- Number of Prometheus replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# prometheus_replicas: 1
+
+# ==============================================================================
+# LOKI CONFIGURATION (Logging)
+# ==============================================================================
+
+# -- Loki log retention period.
+#    (OPTIONAL) / (DEFAULT: "168h" = 7 days)
+# loki_retention: "168h"
+
+# -- Loki storage backend.
+#    (OPTIONAL) / (DEFAULT: "filesystem")
+#    Values: "filesystem" for local storage, "s3" for object storage
+# loki_storage_type: "filesystem"
+
+# -- Loki replicas for each component.
+#    (OPTIONAL) / (DEFAULT: 2 each)
+# loki_read_replicas: 2
+# loki_write_replicas: 2
+# loki_backend_replicas: 2
+
+# ==============================================================================
+# TEMPO CONFIGURATION (Tracing)
+# ==============================================================================
+
+# -- Tempo trace retention period.
+#    (OPTIONAL) / (DEFAULT: "168h" = 7 days)
+# tempo_retention: "168h"
+
+# -- Tempo storage backend.
+#    (OPTIONAL) / (DEFAULT: "local")
+#    Values: "local" for local storage, "s3" for object storage
+# tempo_storage_type: "local"
+
+# -- Tempo PVC storage size.
+#    (OPTIONAL) / (DEFAULT: "20Gi")
+# tempo_storage_size: "20Gi"
+
+# ==============================================================================
+# THANOS CONFIGURATION (Long-Term Storage)
+# ==============================================================================
+# Thanos provides unlimited retention via object storage, high availability,
+# and global query across multiple Prometheus instances.
+# REF: https://thanos.io/
+
+# -- Enable Thanos for long-term metric storage.
+#    (OPTIONAL) / (DEFAULT: false)
+#    NOTE: Requires object storage (S3, MinIO, GCS, or Azure Blob)
+# thanos_enabled: true
+
+# -- Object storage type for Thanos.
+#    (OPTIONAL) / (DEFAULT: "s3")
+#    Values: "s3", "gcs", "azure"
+# thanos_objstore_type: "s3"
+
+# -- S3 bucket name for Thanos data.
+#    (OPTIONAL) / (DEFAULT: "thanos")
+# thanos_bucket_name: "thanos"
+
+# -- S3 endpoint for object storage.
+#    (OPTIONAL) / (DEFAULT: "minio.observability.svc.cluster.local:9000")
+#    For AWS S3: "s3.amazonaws.com"
+#    For MinIO: "minio.observability.svc.cluster.local:9000"
+# thanos_s3_endpoint: ""
+
+# -- S3 credentials for Thanos.
+#    (REQUIRED if thanos_enabled)
+# thanos_s3_access_key: ""
+# thanos_s3_secret_key: ""
+
+# -- Skip TLS verification for S3 (useful for MinIO with self-signed certs).
+#    (OPTIONAL) / (DEFAULT: true)
+# thanos_s3_insecure: true
+
+# -- Thanos retention periods for different resolutions.
+#    Raw data: full resolution metrics
+#    5m: downsampled to 5-minute intervals
+#    1h: downsampled to 1-hour intervals
+#    (OPTIONAL) / (DEFAULT: 30d, 60d, 180d)
+# thanos_retention_raw: "30d"
+# thanos_retention_5m: "60d"
+# thanos_retention_1h: "180d"

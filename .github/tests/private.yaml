@@ -36,3 +36,7 @@ proxmox_csi_token_secret: "fake-secret"
 # Azure OpenAI - US East2 Region (commented - disabled)
 # azure_openai_us_east2_api_key: ""
 # azure_openai_us_east2_resource_name: ""
+# Observability Stack (disabled for private repo testing)
+# observability_enabled: false
+# grafana_admin_password: ""
+# thanos_enabled: false

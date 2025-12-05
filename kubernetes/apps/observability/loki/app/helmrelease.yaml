@@ -1,0 +1,142 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: loki
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Deployment Mode: Simple Scalable (recommended for production)
+    # ============================================================
+    deploymentMode: SimpleScalable
+
+    # ============================================================
+    # Loki Configuration
+    # ============================================================
+    loki:
+      auth_enabled: false
+
+      # Schema configuration for log storage
+      schemaConfig:
+        configs:
+          - from: "2024-04-01"
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+
+      # Ingester configuration
+      ingester:
+        chunk_encoding: snappy
+
+      # Tracing integration (for correlation with Tempo)
+      tracing:
+        enabled: true
+
+      # Querier configuration
+      querier:
+        max_concurrent: 4
+
+      # Query scheduler
+      query_scheduler:
+        max_outstanding_requests_per_tenant: 4096
+
+      # Limits configuration
+      limits_config:
+        retention_period: 168h
+        ingestion_rate_mb: 16
+        ingestion_burst_size_mb: 32
+        max_query_parallelism: 32
+        max_query_series: 10000
+        split_queries_by_interval: 15m
+
+      # Filesystem storage (for development/testing)
+      storage:
+        type: filesystem
+
+    # ============================================================
+    # Simple Scalable Components
+    # ============================================================
+    # Read path (query-frontend, querier)
+    read:
+      replicas: 2
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: proxmox-csi
+
+    # Write path (distributor, ingester)
+    write:
+      replicas: 2
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: proxmox-csi
+
+    # Backend (compactor, index-gateway, ruler)
+    backend:
+      replicas: 2
+      persistence:
+        enableStatefulSetAutoDeletePVC: true
+        size: 10Gi
+        storageClass: proxmox-csi
+
+    # ============================================================
+    # Gateway (nginx)
+    # ============================================================
+    gateway:
+      enabled: true
+      replicas: 1
+      service:
+        type: ClusterIP
+
+    # ============================================================
+    # Monitoring
+    # ============================================================
+    monitoring:
+      dashboards:
+        enabled: true
+        labels:
+          grafana_dashboard: "1"
+      rules:
+        enabled: true
+      serviceMonitor:
+        enabled: true
+        labels: {}
+
+    # ============================================================
+    # Sidecar (for service discovery)
+    # ============================================================
+    sidecar:
+      rules:
+        enabled: false
+
+    # ============================================================
+    # Disable components not needed in SimpleScalable mode
+    # ============================================================
+    singleBinary:
+      replicas: 0
+
+    # ============================================================
+    # Chunksache and Results Cache (optional - improve performance)
+    # ============================================================
+    chunksCache:
+      enabled: true
+      allocatedMemory: 1024
+
+    resultsCache:
+      enabled: true
+      allocatedMemory: 512
+
+    # ============================================================
+    # Log Collection with Alloy (replaces Promtail)
+    # ============================================================
+    lokiCanary:
+      enabled: false

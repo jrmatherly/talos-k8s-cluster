@@ -1,0 +1,10 @@
+#% if observability_enabled and thanos_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./helmrelease.yaml
+  - ./ocirepository.yaml
+  - ./httproute.yaml
+  - ./datasource.yaml
+#% endif %#

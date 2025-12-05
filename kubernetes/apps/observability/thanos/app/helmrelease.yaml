@@ -1,0 +1,141 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: thanos
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: thanos
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Global Configuration
+    # ============================================================
+    image:
+      registry: quay.io
+      repository: thanos/thanos
+      tag: v0.37.2
+
+    # Object storage configuration (shared across components)
+    objstoreConfig:
+      type: s3
+      config:
+        bucket: thanos
+        endpoint: minio.observability.svc.cluster.local:9000
+        access_key: minioadmin
+        secret_key: minioadmin
+        insecure: True
+
+    # ============================================================
+    # Query Component
+    # ============================================================
+    query:
+      enabled: true
+      replicaCount: 2
+      replicaLabel:
+        - __replica__
+      dnsDiscovery:
+        sidecarsService: prometheus-thanos-discovery
+        sidecarsNamespace: observability
+      stores:
+        # Connect to Prometheus sidecars
+        - dnssrv+_grpc._tcp.prometheus-thanos-discovery.observability.svc.cluster.local
+        # Connect to Store Gateway
+        - dnssrv+_grpc._tcp.thanos-storegateway.observability.svc.cluster.local
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
+
+    # ============================================================
+    # Query Frontend (caching and query splitting)
+    # ============================================================
+    queryFrontend:
+      enabled: true
+      replicaCount: 2
+      config: |
+        type: IN-MEMORY
+        config:
+          max_size: 512MB
+          max_size_items: 1000
+          validity: 24h
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+
+    # ============================================================
+    # Store Gateway (queries object storage)
+    # ============================================================
+    storegateway:
+      enabled: true
+      replicaCount: 2
+      persistence:
+        enabled: true
+        storageClass: proxmox-csi
+        size: 10Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 1Gi
+
+    # ============================================================
+    # Compactor (downsamples and compacts blocks)
+    # ============================================================
+    compactor:
+      enabled: true
+      retentionResolutionRaw: 30d
+      retentionResolution5m: 60d
+      retentionResolution1h: 180d
+      persistence:
+        enabled: true
+        storageClass: proxmox-csi
+        size: 20Gi
+      resources:
+        requests:
+          cpu: 50m
+          memory: 256Mi
+        limits:
+          memory: 1Gi
+
+    # ============================================================
+    # Ruler (evaluates recording/alerting rules against Thanos)
+    # ============================================================
+    ruler:
+      enabled: false  # Use Prometheus ruler by default
+
+    # ============================================================
+    # Bucket Web (UI for object storage browsing)
+    # ============================================================
+    bucketweb:
+      enabled: true
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 64Mi
+
+    # ============================================================
+    # Receive (for remote write - optional, disabled by default)
+    # ============================================================
+    receive:
+      enabled: false  # Use sidecar approach instead
+
+    # ============================================================
+    # Monitoring
+    # ============================================================
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        labels: {}

@@ -1,0 +1,19 @@
+#% if observability_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./kube-prometheus-stack/ks.yaml
+  - ./loki/ks.yaml
+  - ./tempo/ks.yaml
+  - ./alloy/ks.yaml
+  #% if thanos_enabled %#
+  - ./thanos/ks.yaml
+  #% endif %#
+#% endif %#

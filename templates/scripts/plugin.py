@@ -195,6 +195,62 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("azure_openai_us_east2_api_key", "")
         data.setdefault("azure_openai_us_east2_resource_name", "")
 
+        # Observability Stack defaults (LGTM + Thanos)
+        data.setdefault("observability_enabled", False)
+        data.setdefault("grafana_admin_password", "admin")
+
+        # Prometheus defaults
+        data.setdefault("prometheus_retention", "7d")
+        data.setdefault("prometheus_retention_size", "45GB")
+        data.setdefault("prometheus_storage_size", "50Gi")
+        data.setdefault("prometheus_storage_class", "proxmox-csi")
+        data.setdefault("prometheus_replicas", 1)
+        data.setdefault("prometheus_alertmanager_replicas", 1)
+        data.setdefault("alertmanager_storage_size", "5Gi")
+        data.setdefault("grafana_storage_size", "10Gi")
+
+        # Loki defaults
+        data.setdefault("loki_retention", "168h")
+        data.setdefault("loki_storage_type", "filesystem")
+        data.setdefault("loki_read_replicas", 2)
+        data.setdefault("loki_write_replicas", 2)
+        data.setdefault("loki_backend_replicas", 2)
+        data.setdefault("loki_read_storage_size", "10Gi")
+        data.setdefault("loki_write_storage_size", "10Gi")
+        data.setdefault("loki_backend_storage_size", "10Gi")
+        data.setdefault("loki_bucket_name", "loki")
+        data.setdefault("loki_s3_endpoint", "")
+        data.setdefault("loki_s3_access_key", "")
+        data.setdefault("loki_s3_secret_key", "")
+        data.setdefault("loki_s3_insecure", True)
+
+        # Tempo defaults
+        data.setdefault("tempo_retention", "168h")
+        data.setdefault("tempo_storage_type", "local")
+        data.setdefault("tempo_storage_size", "20Gi")
+        data.setdefault("tempo_bucket_name", "tempo")
+        data.setdefault("tempo_s3_endpoint", "")
+        data.setdefault("tempo_s3_access_key", "")
+        data.setdefault("tempo_s3_secret_key", "")
+        data.setdefault("tempo_s3_insecure", True)
+
+        # Thanos defaults (long-term storage)
+        data.setdefault("thanos_enabled", False)
+        data.setdefault("thanos_objstore_type", "s3")
+        data.setdefault("thanos_bucket_name", "thanos")
+        data.setdefault("thanos_s3_endpoint", "minio.observability.svc.cluster.local:9000")
+        data.setdefault("thanos_s3_access_key", "")
+        data.setdefault("thanos_s3_secret_key", "")
+        data.setdefault("thanos_s3_insecure", True)
+        data.setdefault("thanos_retention_raw", "30d")
+        data.setdefault("thanos_retention_5m", "60d")
+        data.setdefault("thanos_retention_1h", "180d")
+        data.setdefault("thanos_query_replicas", 2)
+        data.setdefault("thanos_query_frontend_replicas", 2)
+        data.setdefault("thanos_store_replicas", 2)
+        data.setdefault("thanos_store_storage_size", "10Gi")
+        data.setdefault("thanos_compactor_storage_size", "20Gi")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

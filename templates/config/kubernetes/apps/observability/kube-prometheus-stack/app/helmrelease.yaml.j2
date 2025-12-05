@@ -1,0 +1,303 @@
+#% if observability_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kube-prometheus-stack
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Global Settings
+    # ============================================================
+    fullnameOverride: prometheus
+
+    # ============================================================
+    # CRDs - Managed by the chart
+    # ============================================================
+    crds:
+      enabled: true
+
+    # ============================================================
+    # Alertmanager
+    # ============================================================
+    alertmanager:
+      enabled: true
+      ingress:
+        enabled: false
+      alertmanagerSpec:
+        replicas: #{ prometheus_alertmanager_replicas | default(1) }#
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: #{ prometheus_storage_class | default('proxmox-csi') }#
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: #{ alertmanager_storage_size | default('5Gi') }#
+
+    # ============================================================
+    # Grafana
+    # ============================================================
+    grafana:
+      enabled: true
+      defaultDashboardsEnabled: true
+      defaultDashboardsTimezone: utc
+      admin:
+        existingSecret: grafana-admin-secret
+        userKey: admin-user
+        passwordKey: admin-password
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: default
+              orgId: 1
+              folder: ""
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/default
+            - name: flux
+              orgId: 1
+              folder: Flux
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/flux
+            - name: kubernetes
+              orgId: 1
+              folder: Kubernetes
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/kubernetes
+            - name: nginx
+              orgId: 1
+              folder: Nginx
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/nginx
+      dashboards:
+        flux:
+          flux-cluster:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/cluster.json
+            datasource: Prometheus
+          flux-control-plane:
+            url: https://raw.githubusercontent.com/fluxcd/flux2-monitoring-example/main/monitoring/configs/dashboards/control-plane.json
+            datasource: Prometheus
+      sidecar:
+        dashboards:
+          enabled: true
+          searchNamespace: ALL
+          labelValue: "1"
+          folderAnnotation: grafana_folder
+          provider:
+            foldersFromFilesStructure: true
+        datasources:
+          enabled: true
+          searchNamespace: ALL
+      plugins:
+        - grafana-clock-panel
+        - grafana-piechart-panel
+        - grafana-worldmap-panel
+      serviceMonitor:
+        enabled: true
+      persistence:
+        enabled: true
+        storageClassName: #{ prometheus_storage_class | default('proxmox-csi') }#
+        size: #{ grafana_storage_size | default('10Gi') }#
+      # Additional datasources (Loki, Tempo) configured via sidecar
+
+    # ============================================================
+    # Prometheus
+    # ============================================================
+    prometheus:
+      enabled: true
+      ingress:
+        enabled: false
+      #% if thanos_enabled %#
+      # Thanos sidecar service for querying
+      thanosService:
+        enabled: true
+      thanosServiceMonitor:
+        enabled: true
+      #% endif %#
+      prometheusSpec:
+        replicas: #{ prometheus_replicas | default(1) }#
+        replicaExternalLabelName: __replica__
+        ruleSelectorNilUsesHelmValues: false
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorSelectorNilUsesHelmValues: false
+        probeSelectorNilUsesHelmValues: false
+        scrapeConfigSelectorNilUsesHelmValues: false
+        enableAdminAPI: true
+        walCompression: true
+        enableFeatures:
+          - auto-gomemlimit
+          - memory-snapshot-on-shutdown
+          - new-service-discovery-manager
+        retention: #{ prometheus_retention | default('7d') }#
+        retentionSize: #{ prometheus_retention_size | default('45GB') }#
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            memory: 4Gi
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: #{ prometheus_storage_class | default('proxmox-csi') }#
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: #{ prometheus_storage_size | default('50Gi') }#
+        #% if thanos_enabled %#
+        # Thanos sidecar configuration
+        thanos:
+          image: quay.io/thanos/thanos:v0.37.2
+          objectStorageConfig:
+            existingSecret:
+              name: thanos-objstore-secret
+              key: objstore.yml
+          # Block duration must be <= 2h for Thanos
+          blockSize: 2h
+        #% endif %#
+
+    # ============================================================
+    # Prometheus Operator
+    # ============================================================
+    prometheusOperator:
+      enabled: true
+      admissionWebhooks:
+        certManager:
+          enabled: true
+      prometheusConfigReloader:
+        resources:
+          requests:
+            cpu: 5m
+            memory: 32Mi
+          limits:
+            memory: 64Mi
+
+    # ============================================================
+    # Node Exporter
+    # ============================================================
+    nodeExporter:
+      enabled: true
+      operatingSystems:
+        linux:
+          enabled: true
+        darwin:
+          enabled: false
+
+    prometheus-node-exporter:
+      fullnameOverride: node-exporter
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              targetLabel: kubernetes_node
+
+    # ============================================================
+    # Kube State Metrics
+    # ============================================================
+    kubeStateMetrics:
+      enabled: true
+
+    kube-state-metrics:
+      fullnameOverride: kube-state-metrics
+      metricLabelsAllowlist:
+        - pods=[*]
+        - deployments=[*]
+        - persistentvolumeclaims=[*]
+      prometheus:
+        monitor:
+          enabled: true
+          relabelings:
+            - action: replace
+              regex: (.*)
+              replacement: $1
+              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              targetLabel: kubernetes_node
+
+    # ============================================================
+    # Kubernetes Components (Talos specific)
+    # ============================================================
+    # Talos uses different endpoints for control plane components
+    kubeApiServer:
+      enabled: true
+      serviceMonitor:
+        metricRelabelings:
+          - action: drop
+            regex: (apiserver|etcd|workqueue)_request(|_sli|_slo)_duration_seconds_bucket
+            sourceLabels: ["__name__"]
+
+    kubeControllerManager:
+      enabled: true
+      endpoints:
+        #% for node in nodes %#
+        #% if node.controller %#
+        - #{ node.address }#
+        #% endif %#
+        #% endfor %#
+      service:
+        enabled: true
+        port: 10257
+        targetPort: 10257
+      serviceMonitor:
+        enabled: true
+        https: true
+        insecureSkipVerify: true
+
+    kubeScheduler:
+      enabled: true
+      endpoints:
+        #% for node in nodes %#
+        #% if node.controller %#
+        - #{ node.address }#
+        #% endif %#
+        #% endfor %#
+      service:
+        enabled: true
+        port: 10259
+        targetPort: 10259
+      serviceMonitor:
+        enabled: true
+        https: true
+        insecureSkipVerify: true
+
+    kubeProxy:
+      enabled: false  # Disabled - using Cilium kube-proxy replacement
+
+    kubeEtcd:
+      enabled: true
+      endpoints:
+        #% for node in nodes %#
+        #% if node.controller %#
+        - #{ node.address }#
+        #% endif %#
+        #% endfor %#
+      service:
+        enabled: true
+        port: 2381
+        targetPort: 2381
+
+    # CoreDNS is in kube-system, use existing ServiceMonitor
+    coreDns:
+      enabled: false
+#% endif %#
