@@ -9,7 +9,7 @@ spec:
     - name: envoy-internal
       namespace: network
   hostnames:
-    - hub.traceloop.#{ primary_domain }#
+    - traceloop-hub.#{ primary_domain }#
   rules:
     - matches:
         - path:
