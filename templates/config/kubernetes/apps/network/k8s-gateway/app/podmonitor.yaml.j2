@@ -1,0 +1,19 @@
+# PodMonitor for k8s-gateway (chart doesn't include one)
+# Scrapes Prometheus metrics from port 9153 directly from pods
+# Using PodMonitor since the Service only exposes DNS port, not metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: k8s-gateway
+spec:
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-gateway
