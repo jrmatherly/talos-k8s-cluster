@@ -5,5 +5,5 @@ resources:
   - ./statefulset.yaml
   - ./service.yaml
   - ./httproute.yaml
-  - ./realm-config.yaml
+  - ./realm-config.sops.yaml
   - ./secret.sops.yaml

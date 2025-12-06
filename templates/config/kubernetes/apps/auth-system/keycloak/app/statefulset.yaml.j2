@@ -61,9 +61,14 @@ spec:
                 - ALL
           args:
             - start
+            - --import-realm
             - --hostname-strict=false
             - --proxy-headers=xforwarded
             - --cache-stack=kubernetes
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
           env:
             #| Database configuration - connects to CloudNativePG cluster in database namespace #|
             - name: KC_DB
@@ -140,4 +145,11 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
+      volumes:
+        - name: realm-config
+          secret:
+            secretName: keycloak-realm-config
+            items:
+              - key: realm.json
+                path: realm.json
 #% endif %#
