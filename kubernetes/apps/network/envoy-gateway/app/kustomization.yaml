@@ -11,3 +11,4 @@ resources:
   - ./oidc-callback.yaml
   - ./oidc-ratelimit.yaml
   - ./oidc-secrets.sops.yaml
+  - ./mcp-securitypolicy.yaml

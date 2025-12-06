@@ -169,6 +169,9 @@ spec:
     - name: envoy-ai
       namespace: network
       sectionName: http
+    - name: envoy-mcp
+      namespace: network
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect
@@ -256,6 +259,96 @@ spec:
   timeout:
     http:
       requestTimeout: 120s
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-mcp
+  annotations:
+    external-dns.alpha.kubernetes.io/target: mcp.${SECRET_DOMAIN}
+  labels:
+    gateway-type: mcp
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: mcp.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "192.168.22.150"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: matherly-net-production-tls
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: envoy-mcp
+  labels:
+    gateway-type: mcp
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  clientIPDetection:
+    xForwardedFor:
+      numTrustedHops: 1
+  connection:
+    bufferLimit: 8Mi
+  http2:
+    initialStreamWindowSize: 512Ki
+    initialConnectionWindowSize: 8Mi
+    onInvalidMessage: TerminateStream
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-mcp
+  tcpKeepalive: {}
+  timeout:
+    http:
+      requestReceivedTimeout: 0s
+  tls:
+    minVersion: "1.2"
+    alpnProtocols:
+      - h2
+      - http/1.1
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: envoy-mcp
+  labels:
+    gateway-type: mcp
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  compression:
+    - type: Gzip
+  connection:
+    bufferLimit: 8Mi
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-mcp
+  tcpKeepalive: {}
+  timeout:
+    http:
+      requestTimeout: 120s
+  circuitBreaker:
+    maxConnections: 2048
+    maxPendingRequests: 2048
 ---
 # Service to expose Envoy Gateway Admin Console
 apiVersion: v1
