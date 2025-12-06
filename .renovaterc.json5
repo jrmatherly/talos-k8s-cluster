@@ -30,6 +30,26 @@
   },
   packageRules: [
     {
+      // registry.k8s.io is a CDN/redirect service that doesn't support Docker Registry V2 API
+      // queries for tag listing. We track these via GitHub releases using annotations instead.
+      // Ref: https://github.com/kubernetes/registry.k8s.io
+      description: "Disable Docker lookups for registry.k8s.io (tracked via GitHub releases)",
+      matchDatasources: ["docker"],
+      matchPackagePatterns: ["^registry\\.k8s\\.io/"],
+      enabled: false,
+    },
+    {
+      // Group all kubernetes-csi sidecar updates together
+      description: "Kubernetes CSI Sidecars Group",
+      groupName: "kubernetes-csi-sidecars",
+      matchDatasources: ["github-releases"],
+      matchPackagePatterns: ["^kubernetes-csi/"],
+      addLabels: ["renovate/kubernetes-csi"],
+      group: {
+        commitMessageTopic: "{{{groupName}}}",
+      },
+    },
+    {
       description: "Override Helmfile Dependency Name",
       matchDatasources: ["docker"],
       matchManagers: ["helmfile"],
