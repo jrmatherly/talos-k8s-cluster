@@ -1,0 +1,13 @@
+#% if onedev_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: onedev
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./onedev/ks.yaml
+#% endif %#

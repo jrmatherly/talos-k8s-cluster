@@ -1,0 +1,9 @@
+#% if onedev_enabled %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: onedev
+  labels:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+#% endif %#

@@ -1,0 +1,73 @@
+#% if onedev_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: onedev
+spec:
+  chart:
+    spec:
+      chart: onedev
+      version: "11.5.2"
+      sourceRef:
+        kind: HelmRepository
+        name: onedev
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Initial Settings
+    # ============================================================
+    initSettings:
+      password: "#{ onedev_admin_password }#"
+
+    # ============================================================
+    # Persistence
+    # ============================================================
+    persistence:
+      enabled: true
+      storageClass: "#{ onedev_storage_class }#"
+      size: "#{ onedev_storage_size }#"
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      httpPort: 6610
+      sshPort: #{ onedev_ssh_port }#
+
+    # ============================================================
+    # Resource Limits
+    # ============================================================
+    resources:
+      requests:
+        cpu: "#{ onedev_cpu_request }#"
+        memory: "#{ onedev_memory_request }#"
+      limits:
+        cpu: "#{ onedev_cpu_limit }#"
+        memory: "#{ onedev_memory_limit }#"
+
+    #% if onedev_database_type %#
+    # ============================================================
+    # External Database
+    # ============================================================
+    database:
+      external: true
+      type: "#{ onedev_database_type }#"
+      host: "#{ onedev_database_host }#"
+      port: "#{ onedev_database_port }#"
+      name: "#{ onedev_database_name }#"
+      user: "#{ onedev_database_user }#"
+      password: "#{ onedev_database_password }#"
+    #% endif %#
+
+    # ============================================================
+    # Kubernetes Integration (CI/CD builds as pods)
+    # ============================================================
+    clusterRole:
+      create: true
+
+    serviceAccount:
+      create: true
+#% endif %#

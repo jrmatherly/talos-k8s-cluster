@@ -473,3 +473,76 @@ cloudflare_token: ""
 #    Set to parent domain for SSO across subdomains.
 #    Example: "example.com" enables SSO for app1.example.com, app2.example.com
 # oidc_cookie_domain: ""
+
+# ==============================================================================
+# ONEDEV CONFIGURATION (Optional - Git Server with CI/CD)
+# ==============================================================================
+# OneDev is an All-In-One DevOps Platform with Git hosting, CI/CD, and packages.
+# REF: https://docs.onedev.io/installation-guide/deploy-to-k8s
+# REF: docs/onedev-implementation.md
+
+# -- Enable OneDev deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# onedev_enabled: true
+
+# -- OneDev admin password (initial setup).
+#    (REQUIRED if onedev_enabled) - Will be encrypted with SOPS
+#    NOTE: Change this after initial setup via the web UI
+# onedev_admin_password: "your-secure-password"
+
+# -- Storage size for OneDev data PVC.
+#    (OPTIONAL) / (DEFAULT: "100Gi")
+#    NOTE: Size depends on repository data - minimum 3x your total repo size
+# onedev_storage_size: "100Gi"
+
+# -- Storage class for OneDev PVC.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# onedev_storage_class: "proxmox-csi"
+
+# ==============================================================================
+# ONEDEV EXTERNAL DATABASE (Optional)
+# ==============================================================================
+# If not set, uses embedded H2 database (suitable for small deployments).
+# For production with many users/projects, use external MySQL/PostgreSQL.
+
+# -- External database type.
+#    (OPTIONAL) / (DEFAULT: embedded H2)
+#    Options: "mysql", "postgresql", "mariadb", "mssql"
+# onedev_database_type: "mysql"
+
+# -- External database host.
+#    (REQUIRED if onedev_database_type is set)
+#    Example: "mysql.database.svc" or "192.168.1.50"
+# onedev_database_host: ""
+
+# -- External database port.
+#    (OPTIONAL) / (DEFAULT: "3306")
+# onedev_database_port: "3306"
+
+# -- External database name.
+#    (OPTIONAL) / (DEFAULT: "onedev")
+# onedev_database_name: "onedev"
+
+# -- External database user.
+#    (OPTIONAL) / (DEFAULT: "onedev")
+# onedev_database_user: "onedev"
+
+# -- External database password.
+#    (REQUIRED if onedev_database_type is set)
+# onedev_database_password: ""
+
+# ==============================================================================
+# ONEDEV ADVANCED CONFIGURATION
+# ==============================================================================
+
+# -- SSH service port for git operations.
+#    (OPTIONAL) / (DEFAULT: 6611)
+#    NOTE: If you need SSH access, configure split-DNS or expose via LoadBalancer
+# onedev_ssh_port: 6611
+
+# -- Resource limits for OneDev container.
+#    (OPTIONAL) / Defaults below are suitable for small-medium deployments
+# onedev_cpu_limit: "2000m"
+# onedev_memory_limit: "4Gi"
+# onedev_cpu_request: "500m"
+# onedev_memory_request: "2Gi"

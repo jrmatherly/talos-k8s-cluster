@@ -110,6 +110,23 @@ import (
 	// OIDC Target Configuration
 	oidc_target_gateways?: [...string & !=""]   // Gateway names to protect (e.g., ["envoy-internal", "envoy-external"])
 	oidc_cookie_domain?: string & !=""          // Cookie domain for cross-subdomain SSO
+
+	// OneDev Configuration (Git Server with CI/CD)
+	onedev_enabled?: bool
+	onedev_admin_password?: string & !=""
+	onedev_storage_size?: string & !=""         // e.g., "100Gi"
+	onedev_storage_class?: string & !=""        // e.g., "proxmox-csi"
+	onedev_database_type?: "mysql" | "postgresql" | "mariadb" | "mssql"
+	onedev_database_host?: string & !=""
+	onedev_database_port?: string & !=""
+	onedev_database_name?: string & !=""
+	onedev_database_user?: string & !=""
+	onedev_database_password?: string & !=""
+	onedev_ssh_port?: int & >=1 & <=65535
+	onedev_cpu_limit?: string & !=""
+	onedev_memory_limit?: string & !=""
+	onedev_cpu_request?: string & !=""
+	onedev_memory_request?: string & !=""
 }
 
 #Config

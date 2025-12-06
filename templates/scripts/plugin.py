@@ -245,6 +245,23 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("oidc_target_gateways", ["envoy-internal"])
         data.setdefault("oidc_cookie_domain", data.get("primary_domain", ""))
 
+        # OneDev defaults (Git Server with CI/CD)
+        data.setdefault("onedev_enabled", False)
+        data.setdefault("onedev_admin_password", "")
+        data.setdefault("onedev_storage_size", "100Gi")
+        data.setdefault("onedev_storage_class", "proxmox-csi")
+        data.setdefault("onedev_database_type", "")
+        data.setdefault("onedev_database_host", "")
+        data.setdefault("onedev_database_port", "3306")
+        data.setdefault("onedev_database_name", "onedev")
+        data.setdefault("onedev_database_user", "onedev")
+        data.setdefault("onedev_database_password", "")
+        data.setdefault("onedev_ssh_port", 6611)
+        data.setdefault("onedev_cpu_limit", "2000m")
+        data.setdefault("onedev_memory_limit", "4Gi")
+        data.setdefault("onedev_cpu_request", "500m")
+        data.setdefault("onedev_memory_request", "2Gi")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

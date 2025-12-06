@@ -70,3 +70,19 @@ oidc_target_gateways:
   - envoy-internal
   - envoy-external
 oidc_cookie_domain: "example.com"
+# OneDev Git Server (testing full deployment with external DB)
+onedev_enabled: true
+onedev_admin_password: "test-admin-password"
+onedev_storage_size: "50Gi"
+onedev_storage_class: "proxmox-csi"
+onedev_database_type: "mysql"
+onedev_database_host: "mysql.database.svc.cluster.local"
+onedev_database_port: "3306"
+onedev_database_name: "onedev"
+onedev_database_user: "onedev"
+onedev_database_password: "test-db-password"
+onedev_ssh_port: 6611
+onedev_cpu_limit: "2000m"
+onedev_memory_limit: "4Gi"
+onedev_cpu_request: "500m"
+onedev_memory_request: "2Gi"

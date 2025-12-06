@@ -1,4 +1,5 @@
 #| OAuth2-Proxy OCI Repository #|
+#| NOTE: The OCI path is /charts/ not /manifests/ (repo name differs from package path) #|
 #% if oidc_enabled and oidc_github_enabled %#
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
@@ -11,6 +12,6 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: extract
   ref:
-    tag: 7.9.0
-  url: oci://ghcr.io/oauth2-proxy/manifests/oauth2-proxy
+    tag: 9.0.0
+  url: oci://ghcr.io/oauth2-proxy/charts/oauth2-proxy
 #% endif %#
