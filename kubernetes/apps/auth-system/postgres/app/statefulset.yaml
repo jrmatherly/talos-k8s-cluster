@@ -24,15 +24,15 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
         seccompProfile:
           type: RuntimeDefault
 
       containers:
         - name: postgres
-          image: postgres:16-alpine
+          image: bitnami/postgresql:16
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -41,27 +41,25 @@ spec:
               drop:
                 - ALL
           env:
-            - name: POSTGRES_DB
+            - name: POSTGRESQL_DATABASE
               value: keycloak
-            - name: POSTGRES_USER
+            - name: POSTGRESQL_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: keycloak-postgres-secret
                   key: username
-            - name: POSTGRES_PASSWORD
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-postgres-secret
                   key: password
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
           ports:
             - name: postgres
               containerPort: 5432
               protocol: TCP
           volumeMounts:
             - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /bitnami/postgresql
           resources:
             requests:
               cpu: 250m
@@ -72,11 +70,9 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - keycloak
+                - /bin/sh
+                - -c
+                - pg_isready -U keycloak -d keycloak
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -84,11 +80,9 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - keycloak
+                - /bin/sh
+                - -c
+                - pg_isready -U keycloak -d keycloak
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
@@ -105,4 +99,4 @@ spec:
         storageClassName: proxmox-csi
         resources:
           requests:
-            storage: 20Gi
+            storage: 10Gi

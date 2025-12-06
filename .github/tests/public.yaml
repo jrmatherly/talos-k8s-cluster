@@ -82,11 +82,11 @@ keycloak_version: "26.0.7"
 keycloak_realm: "k8s-cluster"
 keycloak_admin_password: "test-admin-password"
 keycloak_oidc_client_secret: "test-oidc-client-secret"
-# PostgreSQL Configuration (Keycloak backend)
-postgres_replicas: 1
-postgres_version: "16"
-postgres_storage_size: "10Gi"
-postgres_password: "test-postgres-password"
+# Keycloak PostgreSQL Configuration (Keycloak backend)
+keycloak_postgres_replicas: 1
+keycloak_postgres_version: "16"
+keycloak_postgres_storage_size: "10Gi"
+keycloak_postgres_password: "test-postgres-password"
 # Redis Configuration (MCP session state)
 redis_replicas: 1
 redis_version: "7.4"

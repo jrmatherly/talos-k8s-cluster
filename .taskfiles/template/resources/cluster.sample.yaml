@@ -533,25 +533,26 @@ cloudflare_token: ""
 # keycloak_oidc_client_secret: ""
 
 # ==============================================================================
-# POSTGRESQL CONFIGURATION (Keycloak Backend)
+# KEYCLOAK POSTGRESQL CONFIGURATION (Keycloak Backend)
 # ==============================================================================
-# PostgreSQL database for Keycloak persistent storage.
+# Bitnami PostgreSQL database for Keycloak persistent storage.
+# Uses non-root operation for restricted Pod Security Standards.
 
-# -- Number of PostgreSQL replicas.
+# -- Number of PostgreSQL replicas for Keycloak.
 #    (OPTIONAL) / (DEFAULT: 1)
-# postgres_replicas: 1
+# keycloak_postgres_replicas: 1
 
-# -- PostgreSQL version to deploy.
+# -- Bitnami PostgreSQL version to deploy.
 #    (OPTIONAL) / (DEFAULT: "16")
-# postgres_version: "16"
+# keycloak_postgres_version: "16"
 
-# -- PostgreSQL PVC storage size.
+# -- PostgreSQL PVC storage size for Keycloak.
 #    (OPTIONAL) / (DEFAULT: "10Gi")
-# postgres_storage_size: "10Gi"
+# keycloak_postgres_storage_size: "10Gi"
 
-# -- PostgreSQL password.
+# -- PostgreSQL password for Keycloak database.
 #    (REQUIRED if mcp_gateway_enabled) - Will be encrypted with SOPS
-# postgres_password: ""
+# keycloak_postgres_password: ""
 
 # ==============================================================================
 # REDIS CONFIGURATION (MCP Session State)

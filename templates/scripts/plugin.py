@@ -259,11 +259,11 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_admin_password", "")
         data.setdefault("keycloak_oidc_client_secret", "")
 
-        # PostgreSQL defaults (Keycloak backend)
-        data.setdefault("postgres_replicas", 1)
-        data.setdefault("postgres_version", "16")
-        data.setdefault("postgres_storage_size", "10Gi")
-        data.setdefault("postgres_password", "")
+        # Keycloak PostgreSQL defaults (Keycloak backend)
+        data.setdefault("keycloak_postgres_replicas", 1)
+        data.setdefault("keycloak_postgres_version", "16")
+        data.setdefault("keycloak_postgres_storage_size", "10Gi")
+        data.setdefault("keycloak_postgres_password", "")
 
         # Redis defaults (MCP session state)
         data.setdefault("redis_replicas", 1)

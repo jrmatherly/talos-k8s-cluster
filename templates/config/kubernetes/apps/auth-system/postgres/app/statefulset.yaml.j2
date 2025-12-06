@@ -1,5 +1,6 @@
 #| PostgreSQL StatefulSet for Keycloak backend database #|
-#| Uses mcp_storage_class for persistent storage (default: proxmox-csi) #|
+#| Uses Bitnami PostgreSQL for non-root operation in restricted PSS #|
+#| Reference: https://github.com/bitnami/containers/blob/main/bitnami/postgresql/README.md #|
 #% if mcp_gateway_enabled %#
 ---
 apiVersion: apps/v1
@@ -26,17 +27,18 @@ spec:
         app.kubernetes.io/part-of: mcp-gateway
     spec:
       #| Pod Security Context for restricted namespace #|
+      #| Bitnami PostgreSQL runs as UID 1001 by default #|
       securityContext:
         runAsNonRoot: true
-        runAsUser: 999
-        runAsGroup: 999
-        fsGroup: 999
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
         seccompProfile:
           type: RuntimeDefault
 
       containers:
         - name: postgres
-          image: postgres:16-alpine
+          image: bitnami/postgresql:#{ keycloak_postgres_version | default('16') }#
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
@@ -45,27 +47,27 @@ spec:
               drop:
                 - ALL
           env:
-            - name: POSTGRES_DB
+            #| Bitnami uses POSTGRESQL_* prefix instead of POSTGRES_* #|
+            - name: POSTGRESQL_DATABASE
               value: keycloak
-            - name: POSTGRES_USER
+            - name: POSTGRESQL_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: keycloak-postgres-secret
                   key: username
-            - name: POSTGRES_PASSWORD
+            - name: POSTGRESQL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-postgres-secret
                   key: password
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
           ports:
             - name: postgres
               containerPort: 5432
               protocol: TCP
           volumeMounts:
+            #| Bitnami uses /bitnami/postgresql instead of /var/lib/postgresql/data #|
             - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /bitnami/postgresql
           resources:
             requests:
               cpu: 250m
@@ -76,11 +78,9 @@ spec:
           livenessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - keycloak
+                - /bin/sh
+                - -c
+                - pg_isready -U keycloak -d keycloak
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -88,11 +88,9 @@ spec:
           readinessProbe:
             exec:
               command:
-                - pg_isready
-                - -U
-                - $(POSTGRES_USER)
-                - -d
-                - keycloak
+                - /bin/sh
+                - -c
+                - pg_isready -U keycloak -d keycloak
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 5
@@ -109,5 +107,5 @@ spec:
         storageClassName: #{ mcp_storage_class | default('proxmox-csi') }#
         resources:
           requests:
-            storage: 20Gi
+            storage: #{ keycloak_postgres_storage_size | default('10Gi') }#
 #% endif %#

@@ -125,11 +125,11 @@ import (
 	keycloak_admin_password?: string & !=""     // Keycloak admin password (encrypted with SOPS)
 	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway (encrypted with SOPS)
 
-	// PostgreSQL Configuration (Keycloak backend)
-	postgres_replicas?: int & >=1
-	postgres_version?: string & !=""            // PostgreSQL version (e.g., "16")
-	postgres_storage_size?: string & !=""       // Storage size (e.g., "10Gi")
-	postgres_password?: string & !=""           // PostgreSQL password (encrypted with SOPS)
+	// Keycloak PostgreSQL Configuration (Keycloak backend)
+	keycloak_postgres_replicas?: int & >=1
+	keycloak_postgres_version?: string & !=""            // Bitnami PostgreSQL version (e.g., "16")
+	keycloak_postgres_storage_size?: string & !=""       // Storage size (e.g., "10Gi")
+	keycloak_postgres_password?: string & !=""           // PostgreSQL password (encrypted with SOPS)
 
 	// Redis Configuration (MCP session state)
 	redis_replicas?: int & >=1

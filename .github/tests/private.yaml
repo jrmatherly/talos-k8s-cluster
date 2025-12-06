@@ -69,10 +69,10 @@ proxmox_csi_token_secret: "fake-secret"
 # keycloak_realm: ""
 # keycloak_admin_password: ""
 # keycloak_oidc_client_secret: ""
-# postgres_replicas: 1
-# postgres_version: ""
-# postgres_storage_size: ""
-# postgres_password: ""
+# keycloak_postgres_replicas: 1
+# keycloak_postgres_version: ""
+# keycloak_postgres_storage_size: ""
+# keycloak_postgres_password: ""
 # redis_replicas: 1
 # redis_version: ""
 # redis_storage_size: ""
