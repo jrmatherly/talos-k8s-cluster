@@ -1,0 +1,150 @@
+#| Keycloak StatefulSet for OAuth 2.1 Authorization Server #|
+#| High-availability deployment with 3 replicas and JGroups clustering #|
+#% if mcp_gateway_enabled %#
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/component: authorization-server
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  replicas: #{ keycloak_replicas | default(3) }#
+  serviceName: keycloak-headless
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        app.kubernetes.io/name: keycloak
+        app.kubernetes.io/component: authorization-server
+        app.kubernetes.io/part-of: mcp-gateway
+    spec:
+      #| Anti-affinity: spread replicas across nodes #|
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - keycloak
+              topologyKey: kubernetes.io/hostname
+
+      #| Pod Security Context for restricted namespace #|
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:#{ keycloak_version | default('26.0.7') }#
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - start
+            - --optimized
+            - --hostname-strict=false
+            - --proxy-headers=xforwarded
+            - --cache-stack=kubernetes
+            - --cache-owners-count=3
+          env:
+            #| Database configuration #|
+            - name: KC_DB
+              value: postgres
+            - name: KC_DB_URL_HOST
+              value: keycloak-postgres.auth-system.svc.cluster.local
+            - name: KC_DB_URL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-postgres-secret
+                  key: database
+            - name: KC_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-postgres-secret
+                  key: username
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-postgres-secret
+                  key: password
+            #| JGroups clustering via DNS discovery #|
+            - name: JAVA_OPTS_APPEND
+              value: >-
+                -Djgroups.dns.query=keycloak-headless.auth-system.svc.cluster.local
+            #| Admin credentials #|
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-secret
+                  key: username
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-secret
+                  key: password
+            #| Hostname configuration #|
+            - name: KC_HOSTNAME
+              value: auth.#{ primary_domain }#
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_METRICS_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            - name: jgroups
+              containerPort: 7800
+              protocol: TCP
+            - name: management
+              containerPort: 9000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+#% endif %#

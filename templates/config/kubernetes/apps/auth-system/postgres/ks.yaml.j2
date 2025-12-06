@@ -1,0 +1,25 @@
+#| PostgreSQL Kustomization for Keycloak backend #|
+#% if mcp_gateway_enabled %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: keycloak-postgres
+spec:
+  dependsOn:
+    - name: csi-proxmox
+      namespace: csi-proxmox
+  interval: 1h
+  path: ./kubernetes/apps/auth-system/postgres/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: auth-system
+  wait: true
+#% endif %#

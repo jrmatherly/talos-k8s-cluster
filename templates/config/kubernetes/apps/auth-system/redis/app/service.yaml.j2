@@ -1,0 +1,22 @@
+#| Redis Service for MCP Gateway session state access #|
+#% if mcp_gateway_enabled %#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-redis
+  labels:
+    app: mcp-redis
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: session-state
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  type: ClusterIP
+  selector:
+    app: mcp-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+#% endif %#

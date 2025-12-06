@@ -505,7 +505,8 @@ oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
 oidc_entra_client_secret: "xxx"
 
-# GitHub OAuth (uses oauth2-proxy ext_authz)
+# GitHub OAuth (via Keycloak identity federation)
+# IMPORTANT: Requires mcp_gateway_enabled=true for Keycloak
 oidc_github_enabled: true
 oidc_github_client_id: "Iv1.xxx"
 oidc_github_client_secret: "xxx"
@@ -525,9 +526,9 @@ oidc_cookie_domain: "example.com"  # Cookie domain for SSO
 |----------|----------|----------------|----------------|
 | Google | OIDC | Native Envoy Gateway | `oidc-google` |
 | Entra ID | OIDC | Native Envoy Gateway | `oidc-entra` |
-| GitHub | OAuth 2.0 | oauth2-proxy (ext_authz) | `oidc-github` |
+| GitHub | OAuth 2.0 | Keycloak Federation | `oidc-github` |
 
-**Why oauth2-proxy for GitHub?** GitHub only supports OAuth 2.0, not OIDC. It lacks ID tokens and `.well-known/openid-configuration`. oauth2-proxy handles the OAuth flow and provides external authorization to Envoy Gateway.
+**GitHub via Keycloak:** GitHub only supports OAuth 2.0, not OIDC. Keycloak handles the GitHub OAuth flow and issues standard OIDC tokens to Envoy Gateway. This requires `mcp_gateway_enabled=true` to deploy Keycloak.
 
 ### Key Files
 
@@ -535,8 +536,8 @@ oidc_cookie_domain: "example.com"  # Cookie domain for SSO
 |------|---------|
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-google.yaml.j2` | Google OIDC SecurityPolicy |
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-entra.yaml.j2` | Entra ID OIDC SecurityPolicy |
-| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-github.yaml.j2` | GitHub ext_authz SecurityPolicy |
-| `templates/config/kubernetes/apps/network/oauth2-proxy/` | oauth2-proxy deployment for GitHub |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-github.yaml.j2` | GitHub via Keycloak SecurityPolicy |
+| `templates/config/kubernetes/apps/auth-system/keycloak/` | Keycloak deployment with GitHub IdP |
 
 ### Testing
 
@@ -545,9 +546,9 @@ oidc_cookie_domain: "example.com"  # Cookie domain for SSO
 kubectl get securitypolicy -n network
 kubectl describe securitypolicy oidc-google -n network
 
-# Check oauth2-proxy for GitHub
-kubectl get pods -n network -l app.kubernetes.io/name=oauth2-proxy
-kubectl logs -n network -l app.kubernetes.io/name=oauth2-proxy
+# For GitHub auth (requires Keycloak)
+kubectl get pods -n auth-system -l app=keycloak
+kubectl logs -n auth-system -l app=keycloak
 
 # Test authentication flow
 # Navigate to a protected app (e.g., https://grafana.<domain>)
@@ -561,7 +562,7 @@ kubectl logs -n network -l app.kubernetes.io/name=oauth2-proxy
 | Redirect loop | Cookie domain mismatch | Verify `oidc_cookie_domain` matches your domain |
 | 403 after login | User not authorized | Check org/team restrictions (GitHub) or app permissions |
 | Callback URL error | Redirect URI not registered | Add exact callback URL in provider settings |
-| oauth2-proxy not starting | Missing secret | Check `oauth2-proxy-secret` exists in network namespace |
+| GitHub auth not working | Keycloak not deployed | Enable `mcp_gateway_enabled=true` in cluster.yaml |
 
 ### Provider Setup Guides
 
@@ -570,6 +571,90 @@ See the detailed setup documentation for each provider:
 - `docs/oidc-entra-setup.md` - Microsoft Entra ID app registration
 - `docs/oidc-github-setup.md` - GitHub OAuth application setup
 - `docs/envoy-gateway-oidc-sso.md` - Overall architecture and implementation
+
+## MCP Authorization Gateway
+
+Optional OAuth 2.1 Authorization Gateway for Model Context Protocol (MCP) servers. Provides centralized authentication, JWT validation, and policy enforcement for MCP tool invocations.
+
+### Architecture
+
+The MCP Gateway implements the full MCP authorization specification with:
+- **Keycloak** - OAuth 2.1 Authorization Server with identity federation (Google, Entra ID, GitHub)
+- **PostgreSQL** - Keycloak persistent storage
+- **Redis** - MCP session state management
+- **Envoy MCP Gateway** - Dedicated gateway with JWT validation and rate limiting
+
+### Configuration in cluster.yaml
+
+```yaml
+# Enable MCP Gateway
+mcp_gateway_enabled: true
+mcp_gateway_addr: "192.168.1.146"  # Unused IP in node_cidr
+mcp_storage_class: "proxmox-csi"   # Storage class for PostgreSQL/Redis
+mcp_request_timeout: "120s"        # Backend timeout for tool calls
+mcp_rate_limit_requests: 100       # Requests per minute per client
+
+# Keycloak Configuration
+keycloak_replicas: 3               # HA deployment
+keycloak_version: "26.0.7"
+keycloak_realm: "k8s-cluster"
+keycloak_admin_password: "secure-password"  # Encrypted with SOPS
+
+# PostgreSQL Configuration
+postgres_replicas: 1
+postgres_version: "16"
+postgres_storage_size: "10Gi"
+postgres_password: "secure-password"  # Encrypted with SOPS
+
+# Redis Configuration
+redis_replicas: 1
+redis_version: "7.4"
+redis_storage_size: "5Gi"
+redis_password: "secure-password"  # Encrypted with SOPS
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `templates/config/kubernetes/apps/auth-system/namespace.yaml.j2` | auth-system namespace |
+| `templates/config/kubernetes/apps/auth-system/keycloak/` | Keycloak StatefulSet, Services, Realm Config |
+| `templates/config/kubernetes/apps/auth-system/postgres/` | PostgreSQL StatefulSet |
+| `templates/config/kubernetes/apps/auth-system/redis/` | Redis StatefulSet |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/envoy.yaml.j2` | envoy-mcp Gateway |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/mcp-securitypolicy.yaml.j2` | JWT validation, rate limiting, CORS |
+
+### Testing
+
+```bash
+# Check MCP Gateway components
+kubectl get pods -n auth-system
+kubectl get gateway envoy-mcp -n network
+kubectl get securitypolicy mcp-jwt-auth -n network
+
+# Test Keycloak OIDC discovery
+curl -s https://auth.<domain>/realms/k8s-cluster/.well-known/openid-configuration | jq
+
+# Test MCP endpoint with JWT
+TOKEN=$(curl -s -X POST "https://auth.<domain>/realms/k8s-cluster/protocol/openid-connect/token" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=mcp-gateway" \
+  -d "client_secret=xxx" | jq -r '.access_token')
+
+curl -s "https://mcp.<domain>/api/v1/tools" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Troubleshooting
+
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| 401 Unauthorized | Invalid or expired JWT | Check token expiry and refresh |
+| 403 Forbidden | Missing audience claim | Verify `aud: mcp-gateway` in token |
+| 503 Service Unavailable | Keycloak not ready | Check PostgreSQL connection and Keycloak pods |
+| Rate limited (429) | Exceeded rate limit | Wait or increase `mcp_rate_limit_requests` |
+
+See `docs/mcp-architecture-k8s-assessment.md` for detailed architecture documentation.
 
 ## Adding New Applications/Templates
 

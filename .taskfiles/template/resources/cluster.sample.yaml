@@ -423,15 +423,15 @@ cloudflare_token: ""
 # ==============================================================================
 # GITHUB OAUTH CONFIGURATION
 # ==============================================================================
-# Configure GitHub as an OAuth provider using oauth2-proxy.
-# NOTE: GitHub does NOT support OIDC, so this uses external authorization (ext_authz)
-# with oauth2-proxy as an intermediary.
+# Configure GitHub as an OAuth provider via Keycloak identity federation.
+# GitHub OAuth credentials are registered in Keycloak, which handles the OAuth flow.
+# IMPORTANT: Requires mcp_gateway_enabled=true for Keycloak deployment.
 # REF: https://github.com/settings/developers
 # REF: docs/oidc-github-setup.md
 
 # -- Enable GitHub OAuth authentication.
 #    (OPTIONAL) / (DEFAULT: false)
-#    NOTE: Requires oauth2-proxy deployment (automatically configured when enabled)
+#    IMPORTANT: Requires mcp_gateway_enabled=true (Keycloak handles GitHub OAuth)
 # oidc_github_enabled: true
 
 # -- GitHub OAuth App Client ID.
@@ -473,6 +473,106 @@ cloudflare_token: ""
 #    Set to parent domain for SSO across subdomains.
 #    Example: "example.com" enables SSO for app1.example.com, app2.example.com
 # oidc_cookie_domain: ""
+
+# ==============================================================================
+# MCP GATEWAY CONFIGURATION (Optional - OAuth 2.1 Authorization Gateway)
+# ==============================================================================
+# Full MCP Authorization Gateway architecture with:
+# - Keycloak as OAuth 2.1 Authorization Server with identity federation
+# - PostgreSQL for Keycloak persistent storage
+# - Redis for MCP session state management
+# - Dedicated Envoy Gateway with JWT validation
+# REF: docs/mcp-architecture-k8s-assessment.md
+
+# -- Enable MCP Gateway deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# mcp_gateway_enabled: true
+
+# -- Load balancer IP for the MCP Gateway.
+#    (REQUIRED if mcp_gateway_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.146"
+# mcp_gateway_addr: ""
+
+# -- Storage class for MCP components (PostgreSQL, Redis).
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# mcp_storage_class: "proxmox-csi"
+
+# -- Backend request timeout for MCP tool calls.
+#    (OPTIONAL) / (DEFAULT: "120s")
+# mcp_request_timeout: "120s"
+
+# -- Rate limit requests per minute per authenticated client.
+#    (OPTIONAL) / (DEFAULT: 100)
+# mcp_rate_limit_requests: 100
+
+# ==============================================================================
+# KEYCLOAK CONFIGURATION (OAuth 2.1 Authorization Server)
+# ==============================================================================
+# Keycloak provides centralized OAuth 2.1 with identity federation.
+# Supports Google, Entra ID, and GitHub as identity providers.
+
+# -- Number of Keycloak replicas for HA.
+#    (OPTIONAL) / (DEFAULT: 3)
+# keycloak_replicas: 3
+
+# -- Keycloak version to deploy.
+#    (OPTIONAL) / (DEFAULT: "26.0.7")
+# keycloak_version: "26.0.7"
+
+# -- Keycloak realm name for the cluster.
+#    (OPTIONAL) / (DEFAULT: "k8s-cluster")
+# keycloak_realm: "k8s-cluster"
+
+# -- Keycloak admin password.
+#    (REQUIRED if mcp_gateway_enabled) - Will be encrypted with SOPS
+# keycloak_admin_password: ""
+
+# -- Keycloak OIDC client secret for Envoy Gateway.
+#    (REQUIRED if oidc_github_enabled with mcp_gateway_enabled) - Will be encrypted with SOPS
+#    Used by SecurityPolicy to authenticate with Keycloak OIDC.
+# keycloak_oidc_client_secret: ""
+
+# ==============================================================================
+# POSTGRESQL CONFIGURATION (Keycloak Backend)
+# ==============================================================================
+# PostgreSQL database for Keycloak persistent storage.
+
+# -- Number of PostgreSQL replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# postgres_replicas: 1
+
+# -- PostgreSQL version to deploy.
+#    (OPTIONAL) / (DEFAULT: "16")
+# postgres_version: "16"
+
+# -- PostgreSQL PVC storage size.
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+# postgres_storage_size: "10Gi"
+
+# -- PostgreSQL password.
+#    (REQUIRED if mcp_gateway_enabled) - Will be encrypted with SOPS
+# postgres_password: ""
+
+# ==============================================================================
+# REDIS CONFIGURATION (MCP Session State)
+# ==============================================================================
+# Redis for MCP session state management and caching.
+
+# -- Number of Redis replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# redis_replicas: 1
+
+# -- Redis version to deploy.
+#    (OPTIONAL) / (DEFAULT: "7.4")
+# redis_version: "7.4"
+
+# -- Redis PVC storage size.
+#    (OPTIONAL) / (DEFAULT: "5Gi")
+# redis_storage_size: "5Gi"
+
+# -- Redis password.
+#    (REQUIRED if mcp_gateway_enabled) - Will be encrypted with SOPS
+# redis_password: ""
 
 # ==============================================================================
 # ONEDEV CONFIGURATION (Optional - Git Server with CI/CD)

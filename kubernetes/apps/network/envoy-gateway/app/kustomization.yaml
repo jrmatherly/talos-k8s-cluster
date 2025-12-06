@@ -9,4 +9,5 @@ resources:
   - ./podmonitor.yaml
   - ./oidc-google.yaml
   - ./oidc-callback.yaml
+  - ./oidc-ratelimit.yaml
   - ./oidc-secrets.sops.yaml

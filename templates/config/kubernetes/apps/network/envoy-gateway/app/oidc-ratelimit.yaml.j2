@@ -1,0 +1,31 @@
+#| Rate limiting policies for OIDC callback endpoints to prevent abuse #|
+#| Protects against token stuffing, replay attacks, and brute force attempts #|
+#% if oidc_enabled and (oidc_google_enabled or oidc_entra_enabled) %#
+#% for domain in cloudflare_domains %#
+---
+#| Rate limit policy for OIDC callback HTTPRoute on #{ domain }# #|
+#| Limits: 30 requests/minute per client IP to prevent OAuth abuse #|
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: oidc-ratelimit-#{ domain | replace('.', '-') }#
+  labels:
+    app.kubernetes.io/component: oidc-ratelimit
+    app.kubernetes.io/part-of: envoy-gateway
+    domain: #{ domain | replace('.', '-') }#
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: oidc-callback-#{ domain | replace('.', '-') }#
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        #| Primary rate limit: 30 requests per minute per client #|
+        #| This is sufficient for normal OAuth flows while blocking abuse #|
+        - limit:
+            requests: 30
+            unit: Minute
+#% endfor %#
+#% endif %#

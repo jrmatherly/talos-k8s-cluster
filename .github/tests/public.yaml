@@ -59,7 +59,7 @@ oidc_entra_enabled: true
 oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
 oidc_entra_client_secret: "fake-entra-secret"
-# GitHub OAuth (uses oauth2-proxy)
+# GitHub OAuth (via Keycloak identity federation - requires mcp_gateway_enabled)
 oidc_github_enabled: true
 oidc_github_client_id: "Iv1.fake-github-client-id"
 oidc_github_client_secret: "fake-github-client-secret-32chars"
@@ -70,6 +70,28 @@ oidc_target_gateways:
   - envoy-internal
   - envoy-external
 oidc_cookie_domain: "example.com"
+# MCP Gateway Configuration (OAuth 2.1 Authorization Gateway)
+mcp_gateway_enabled: true
+mcp_gateway_addr: "10.10.10.146"
+mcp_storage_class: "proxmox-csi"
+mcp_request_timeout: "120s"
+mcp_rate_limit_requests: 100
+# Keycloak Configuration
+keycloak_replicas: 3
+keycloak_version: "26.0.7"
+keycloak_realm: "k8s-cluster"
+keycloak_admin_password: "test-admin-password"
+keycloak_oidc_client_secret: "test-oidc-client-secret"
+# PostgreSQL Configuration (Keycloak backend)
+postgres_replicas: 1
+postgres_version: "16"
+postgres_storage_size: "10Gi"
+postgres_password: "test-postgres-password"
+# Redis Configuration (MCP session state)
+redis_replicas: 1
+redis_version: "7.4"
+redis_storage_size: "5Gi"
+redis_password: "test-redis-password"
 # OneDev Git Server (testing full deployment with external DB)
 onedev_enabled: true
 onedev_admin_password: "test-admin-password"

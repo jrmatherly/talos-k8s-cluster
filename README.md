@@ -549,7 +549,7 @@ See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models
 |----------|----------|----------------|
 | Google | OIDC | Native Envoy Gateway |
 | Microsoft Entra ID | OIDC | Native Envoy Gateway |
-| GitHub | OAuth 2.0 | oauth2-proxy (ext_authz) |
+| GitHub | OAuth 2.0 | Keycloak Federation |
 
 Enable SSO by configuring the following variables in `cluster.yaml`:
 
@@ -568,7 +568,7 @@ oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
 oidc_entra_client_secret: "xxx"
 
-# GitHub OAuth (optional - uses oauth2-proxy)
+# GitHub OAuth (optional - requires mcp_gateway_enabled for Keycloak)
 oidc_github_enabled: true
 oidc_github_client_id: "Iv1.xxx"
 oidc_github_client_secret: "xxx"

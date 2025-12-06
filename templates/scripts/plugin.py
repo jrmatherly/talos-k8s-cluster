@@ -245,6 +245,32 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("oidc_target_gateways", ["envoy-internal"])
         data.setdefault("oidc_cookie_domain", data.get("primary_domain", ""))
 
+        # MCP Gateway defaults (OAuth 2.1 Authorization Gateway)
+        data.setdefault("mcp_gateway_enabled", False)
+        data.setdefault("mcp_gateway_addr", "")
+        data.setdefault("mcp_storage_class", "proxmox-csi")
+        data.setdefault("mcp_request_timeout", "120s")
+        data.setdefault("mcp_rate_limit_requests", 100)
+
+        # Keycloak defaults (OAuth 2.1 Authorization Server)
+        data.setdefault("keycloak_replicas", 3)
+        data.setdefault("keycloak_version", "26.0.7")
+        data.setdefault("keycloak_realm", "k8s-cluster")
+        data.setdefault("keycloak_admin_password", "")
+        data.setdefault("keycloak_oidc_client_secret", "")
+
+        # PostgreSQL defaults (Keycloak backend)
+        data.setdefault("postgres_replicas", 1)
+        data.setdefault("postgres_version", "16")
+        data.setdefault("postgres_storage_size", "10Gi")
+        data.setdefault("postgres_password", "")
+
+        # Redis defaults (MCP session state)
+        data.setdefault("redis_replicas", 1)
+        data.setdefault("redis_version", "7.4")
+        data.setdefault("redis_storage_size", "5Gi")
+        data.setdefault("redis_password", "")
+
         # OneDev defaults (Git Server with CI/CD)
         data.setdefault("onedev_enabled", False)
         data.setdefault("onedev_admin_password", "")

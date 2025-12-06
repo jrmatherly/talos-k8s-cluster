@@ -1,11 +1,11 @@
-#| OAuth2-Proxy Kustomization #|
-#% if oidc_enabled and oidc_github_enabled %#
+#% if mcp_gateway_enabled %#
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./ocirepository.yaml
-  - ./helmrelease.yaml
+  - ./statefulset.yaml
+  - ./service.yaml
   - ./httproute.yaml
+  - ./realm-config.yaml
   - ./secret.sops.yaml
 #% endif %#

@@ -1,16 +1,16 @@
-#| OAuth2-Proxy Kustomization for GitHub authentication #|
-#| Only rendered when oidc_enabled and oidc_github_enabled are true #|
-#% if oidc_enabled and oidc_github_enabled %#
+#| Redis Kustomization for MCP Gateway session state #|
+#% if mcp_gateway_enabled %#
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: oauth2-proxy
+  name: mcp-redis
 spec:
   dependsOn:
-    - name: envoy-gateway
+    - name: csi-proxmox
+      namespace: csi-proxmox
   interval: 1h
-  path: ./kubernetes/apps/network/oauth2-proxy/app
+  path: ./kubernetes/apps/auth-system/redis/app
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -20,6 +20,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: auth-system
   wait: true
 #% endif %#

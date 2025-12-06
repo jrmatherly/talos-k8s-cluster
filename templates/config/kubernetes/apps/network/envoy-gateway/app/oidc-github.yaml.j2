@@ -1,11 +1,14 @@
-#| SecurityPolicy for GitHub OAuth authentication via oauth2-proxy ext_authz #|
-#| Only rendered when oidc_enabled and oidc_github_enabled are true #|
-#% if oidc_enabled and oidc_github_enabled %#
+#| SecurityPolicy for GitHub OAuth authentication via Keycloak identity federation #|
+#| Requires mcp_gateway_enabled for Keycloak deployment #|
+#| GitHub is configured as an identity provider in Keycloak realm #|
+#% if oidc_enabled and oidc_github_enabled and mcp_gateway_enabled %#
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
   name: oidc-github
+  labels:
+    app.kubernetes.io/part-of: mcp-gateway
 spec:
   targetRefs:
 #% for gateway in oidc_target_gateways %#
@@ -13,20 +16,21 @@ spec:
       kind: Gateway
       name: #{ gateway }#
 #% endfor %#
-  extAuth:
-    http:
-      backendRefs:
-        - name: oauth2-proxy
-          namespace: network
-          port: 4180
-      headersToBackend:
-        - Authorization
-        - Cookie
-        - X-Forwarded-For
-        - X-Forwarded-Host
-        - X-Forwarded-Proto
-        - X-Forwarded-Uri
-      headersToExtAuth:
-        - Authorization
-        - Cookie
+  oidc:
+    provider:
+      issuer: https://auth.#{ primary_domain }#/realms/#{ keycloak_realm | default('k8s-cluster') }#
+      authorizationEndpoint: https://auth.#{ primary_domain }#/realms/#{ keycloak_realm | default('k8s-cluster') }#/protocol/openid-connect/auth?kc_idp_hint=github
+      tokenEndpoint: https://auth.#{ primary_domain }#/realms/#{ keycloak_realm | default('k8s-cluster') }#/protocol/openid-connect/token
+    clientID: mcp-gateway
+    clientSecret:
+      name: keycloak-oidc-client-secret
+    redirectURL: https://auth-callback.#{ primary_domain }#/oauth2/callback
+    scopes:
+      - openid
+      - profile
+      - email
+    cookieDomain: #{ oidc_cookie_domain | default(primary_domain) }#
+    cookieNames:
+      accessToken: "_oauth2_access_token_github"
+      idToken: "_oauth2_id_token_github"
 #% endif %#

@@ -171,6 +171,11 @@ spec:
       namespace: network
       sectionName: http
 #% endif %#
+#% if mcp_gateway_enabled %#
+    - name: envoy-mcp
+      namespace: network
+      sectionName: http
+#% endif %#
   rules:
     - filters:
         - type: RequestRedirect
@@ -259,6 +264,108 @@ spec:
   timeout:
     http:
       requestTimeout: 120s
+#% endif %#
+#% if mcp_gateway_enabled %#
+---
+#| MCP Authorization Gateway for Model Context Protocol traffic #|
+#| Provides OAuth 2.1 authorization, JWT validation, and policy enforcement #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-mcp
+  annotations:
+    external-dns.alpha.kubernetes.io/target: mcp.${SECRET_DOMAIN}
+  labels:
+    gateway-type: mcp
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: mcp.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "#{ mcp_gateway_addr }#"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+#% for domain in cloudflare_domains %#
+          - kind: Secret
+            name: #{ domain | replace('.', '-') }#-production-tls
+#% endfor %#
+---
+#| Client traffic policy for MCP Gateway #|
+#| Configured for MCP session payloads and connection handling #|
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: envoy-mcp
+  labels:
+    gateway-type: mcp
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  clientIPDetection:
+    xForwardedFor:
+      numTrustedHops: 1
+  connection:
+    bufferLimit: 8Mi
+  http2:
+    initialStreamWindowSize: 512Ki
+    initialConnectionWindowSize: 8Mi
+    onInvalidMessage: TerminateStream
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-mcp
+  tcpKeepalive: {}
+  timeout:
+    http:
+      #| MCP notification streams can be long-lived #|
+      requestReceivedTimeout: 0s
+  tls:
+    minVersion: "1.2"
+    alpnProtocols:
+      - h2
+      - http/1.1
+---
+#| Backend traffic policy for MCP Gateway #|
+#| Configured for MCP server connections with appropriate timeouts #|
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: envoy-mcp
+  labels:
+    gateway-type: mcp
+    app.kubernetes.io/part-of: mcp-gateway
+spec:
+  compression:
+    - type: Gzip
+  connection:
+    bufferLimit: 8Mi
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-mcp
+  tcpKeepalive: {}
+  timeout:
+    http:
+      #| MCP tool calls can take variable time #|
+      requestTimeout: #{ mcp_request_timeout | default('120s') }#
+  circuitBreaker:
+    maxConnections: 2048
+    maxPendingRequests: 2048
+    maxRequests: 4096
+    maxRetries: 3
 #% endif %#
 ---
 # Service to expose Envoy Gateway Admin Console

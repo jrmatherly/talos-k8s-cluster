@@ -111,6 +111,32 @@ import (
 	oidc_target_gateways?: [...string & !=""]   // Gateway names to protect (e.g., ["envoy-internal", "envoy-external"])
 	oidc_cookie_domain?: string & !=""          // Cookie domain for cross-subdomain SSO
 
+	// MCP Gateway Configuration (OAuth 2.1 Authorization Gateway for Model Context Protocol)
+	mcp_gateway_enabled?: bool
+	mcp_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
+	mcp_storage_class?: string & !=""           // Storage class for PostgreSQL/Redis (e.g., "proxmox-csi")
+	mcp_request_timeout?: string & !=""         // Backend request timeout (e.g., "120s")
+	mcp_rate_limit_requests?: int & >=1         // Rate limit requests per minute per client
+
+	// Keycloak Configuration (OAuth 2.1 Authorization Server)
+	keycloak_replicas?: int & >=1               // Number of Keycloak replicas for HA
+	keycloak_version?: string & !=""            // Keycloak version (e.g., "26.0.7")
+	keycloak_realm?: string & !=""              // Keycloak realm name (e.g., "k8s-cluster")
+	keycloak_admin_password?: string & !=""     // Keycloak admin password (encrypted with SOPS)
+	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway (encrypted with SOPS)
+
+	// PostgreSQL Configuration (Keycloak backend)
+	postgres_replicas?: int & >=1
+	postgres_version?: string & !=""            // PostgreSQL version (e.g., "16")
+	postgres_storage_size?: string & !=""       // Storage size (e.g., "10Gi")
+	postgres_password?: string & !=""           // PostgreSQL password (encrypted with SOPS)
+
+	// Redis Configuration (MCP session state)
+	redis_replicas?: int & >=1
+	redis_version?: string & !=""               // Redis version (e.g., "7.4")
+	redis_storage_size?: string & !=""          // Storage size (e.g., "5Gi")
+	redis_password?: string & !=""              // Redis password (encrypted with SOPS)
+
 	// OneDev Configuration (Git Server with CI/CD)
 	onedev_enabled?: bool
 	onedev_admin_password?: string & !=""

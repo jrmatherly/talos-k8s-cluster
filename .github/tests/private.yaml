@@ -58,6 +58,25 @@ proxmox_csi_token_secret: "fake-secret"
 # oidc_github_client_secret: ""
 # oidc_github_org: ""
 # oidc_github_team: ""
+# MCP Gateway Configuration (disabled for private repo testing)
+# mcp_gateway_enabled: false
+# mcp_gateway_addr: ""
+# mcp_storage_class: ""
+# mcp_request_timeout: ""
+# mcp_rate_limit_requests: 100
+# keycloak_replicas: 3
+# keycloak_version: ""
+# keycloak_realm: ""
+# keycloak_admin_password: ""
+# keycloak_oidc_client_secret: ""
+# postgres_replicas: 1
+# postgres_version: ""
+# postgres_storage_size: ""
+# postgres_password: ""
+# redis_replicas: 1
+# redis_version: ""
+# redis_storage_size: ""
+# redis_password: ""
 # OneDev Git Server (disabled for private repo testing)
 # onedev_enabled: false
 # onedev_admin_password: ""
