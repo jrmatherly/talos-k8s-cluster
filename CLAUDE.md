@@ -587,6 +587,20 @@ curl -s https://auth.<domain>/realms/k8s-cluster/.well-known/openid-configuratio
 # You should be redirected to Keycloak, then choose your identity provider
 ```
 
+### Callback URL Configuration
+
+When setting up identity providers in their respective portals, register these callback URLs:
+
+| Provider | Callback URL (Register in Provider Portal) |
+|----------|-------------------------------------------|
+| **Google** | `https://auth.<domain>/realms/k8s-cluster/broker/google/endpoint` |
+| **Entra ID** | `https://auth.<domain>/realms/k8s-cluster/broker/microsoft/endpoint` |
+| **GitHub** | `https://auth.<domain>/realms/k8s-cluster/broker/github/endpoint` |
+
+These URLs point to Keycloak's identity broker endpoints. The IdP alias names (`google`, `microsoft`, `github`) are defined in `realm-config.yaml.j2`.
+
+**Note:** The Envoy Gateway callback URLs (`auth-internal.<domain>/oauth2/callback`, `auth-external.<domain>/oauth2/callback`) are internal to the cluster and do NOT need to be registered in provider portals.
+
 ### Troubleshooting
 
 | Issue | Cause | Solution |

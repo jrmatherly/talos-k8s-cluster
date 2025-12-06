@@ -46,6 +46,27 @@ data:
             "oauth2.token.exchange.grant.enabled": "true",
             "use.resource.indicators": "true"
           }
+        },
+        {
+          "clientId": "envoy-gateway",
+          "name": "Envoy Gateway OIDC Client",
+          "description": "OIDC client for Envoy Gateway SecurityPolicy authentication",
+          "enabled": true,
+          "publicClient": false,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": false,
+          "redirectUris": [
+            "https://auth-internal.matherly.net/oauth2/callback",
+            "https://auth-external.matherly.net/oauth2/callback"
+          ],
+          "webOrigins": [
+            "https://*.matherly.net"
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://*.matherly.net/*"
+          }
         }
       ],
       "identityProviders": [
