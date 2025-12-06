@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/part-of: mcp-gateway
 spec:
   parentRefs:
-    - name: envoy-internal
+    - name: envoy-external
       namespace: network
       sectionName: https
   hostnames:

@@ -12,8 +12,9 @@ metadata:
     app.kubernetes.io/part-of: mcp-gateway
 spec:
   parentRefs:
-    #| Attach to internal gateway for admin console access #|
-    - name: envoy-internal
+    #| Attach to external gateway - Keycloak must NOT have OIDC policy applied #|
+    #| (OIDC policy on envoy-internal interferes with Keycloak's own login flow) #|
+    - name: envoy-external
       namespace: network
       sectionName: https
   hostnames:
