@@ -596,15 +596,15 @@ mcp_rate_limit_requests: 100       # Requests per minute per client
 
 # Keycloak Configuration
 keycloak_replicas: 3               # HA deployment
-keycloak_version: "26.0.7"
+keycloak_version: "26.4.7"
 keycloak_realm: "k8s-cluster"
 keycloak_admin_password: "secure-password"  # Encrypted with SOPS
 
-# PostgreSQL Configuration
-postgres_replicas: 1
-postgres_version: "16"
-postgres_storage_size: "10Gi"
-postgres_password: "secure-password"  # Encrypted with SOPS
+# PostgreSQL Configuration (CloudNativePG in database namespace)
+keycloak_postgres_replicas: 1
+keycloak_postgres_version: "17"
+keycloak_postgres_storage_size: "10Gi"
+keycloak_postgres_password: "secure-password"  # Encrypted with SOPS
 
 # Redis Configuration
 redis_replicas: 1
@@ -619,7 +619,7 @@ redis_password: "secure-password"  # Encrypted with SOPS
 |------|---------|
 | `templates/config/kubernetes/apps/auth-system/namespace.yaml.j2` | auth-system namespace |
 | `templates/config/kubernetes/apps/auth-system/keycloak/` | Keycloak StatefulSet, Services, Realm Config |
-| `templates/config/kubernetes/apps/auth-system/postgres/` | PostgreSQL StatefulSet |
+| `templates/config/kubernetes/apps/database/keycloak-postgres/` | CloudNativePG PostgreSQL Cluster |
 | `templates/config/kubernetes/apps/auth-system/redis/` | Redis StatefulSet |
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/envoy.yaml.j2` | envoy-mcp Gateway |
 | `templates/config/kubernetes/apps/network/envoy-gateway/app/mcp-securitypolicy.yaml.j2` | JWT validation, rate limiting, CORS |
