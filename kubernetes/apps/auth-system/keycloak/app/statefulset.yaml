@@ -60,7 +60,6 @@ spec:
             - --hostname-strict=false
             - --proxy-headers=xforwarded
             - --cache-stack=kubernetes
-            - --cache-owners-count=3
           env:
             - name: KC_DB
               value: postgres
