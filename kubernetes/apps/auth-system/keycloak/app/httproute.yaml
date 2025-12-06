@@ -7,10 +7,10 @@ metadata:
     app: keycloak
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/component: authorization-server
-    app.kubernetes.io/part-of: mcp-gateway
+    app.kubernetes.io/part-of: auth-system
 spec:
   parentRefs:
-    - name: envoy-external
+    - name: envoy-auth
       namespace: network
       sectionName: https
   hostnames:

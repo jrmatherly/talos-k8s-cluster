@@ -365,44 +365,45 @@ cloudflare_token: ""
 # traceloop_anthropic_api_key: ""
 
 # ==============================================================================
-# OIDC SSO CONFIGURATION (Optional - Gateway Authentication)
+# OIDC SSO CONFIGURATION (Keycloak-based Authentication)
 # ==============================================================================
-# Enable Single Sign-On (SSO) authentication for Envoy Gateway using OIDC.
-# Supports Google and Microsoft Entra ID identity providers.
+# Enable Single Sign-On (SSO) authentication via Keycloak for all Gateways.
+# Keycloak provides unified OIDC with identity federation for multiple providers.
+# IMPORTANT: Requires mcp_gateway_enabled=true for Keycloak deployment.
 # REF: docs/envoy-gateway-oidc-sso.md
 
 # -- Enable OIDC SSO integration.
 #    (OPTIONAL) / (DEFAULT: false)
+#    NOTE: Requires mcp_gateway_enabled=true - Keycloak is the OIDC provider
 # oidc_enabled: true
 
 # ==============================================================================
-# GOOGLE OIDC CONFIGURATION
+# KEYCLOAK IDENTITY FEDERATION - GOOGLE
 # ==============================================================================
-# Configure Google as an OIDC identity provider.
-# Requires a Google Cloud OAuth 2.0 Client ID.
+# Configure Google as an identity provider in Keycloak.
+# Credentials are registered in Keycloak for identity brokering.
 # REF: https://console.cloud.google.com/apis/credentials
 
-# -- Enable Google OIDC authentication.
+# -- Enable Google identity federation via Keycloak.
 #    (OPTIONAL) / (DEFAULT: false)
 # oidc_google_enabled: true
 
-# -- Google OAuth 2.0 Client ID.
+# -- Google OAuth 2.0 Client ID for Keycloak identity brokering.
 #    (REQUIRED if oidc_google_enabled) - From Google Cloud Console
 #    Example: "123456789-abcdefg.apps.googleusercontent.com"
 # oidc_google_client_id: ""
 
-# -- Google OAuth 2.0 Client Secret.
+# -- Google OAuth 2.0 Client Secret for Keycloak.
 #    (REQUIRED if oidc_google_enabled) - From Google Cloud Console
 # oidc_google_client_secret: ""
 
 # ==============================================================================
-# MICROSOFT ENTRA ID (AZURE AD) OIDC CONFIGURATION
+# KEYCLOAK IDENTITY FEDERATION - MICROSOFT ENTRA ID
 # ==============================================================================
-# Configure Microsoft Entra ID as an OIDC identity provider.
-# Requires an Azure App Registration.
+# Configure Microsoft Entra ID as an identity provider in Keycloak.
 # REF: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps
 
-# -- Enable Microsoft Entra ID OIDC authentication.
+# -- Enable Microsoft Entra ID identity federation via Keycloak.
 #    (OPTIONAL) / (DEFAULT: false)
 # oidc_entra_enabled: true
 
@@ -416,30 +417,28 @@ cloudflare_token: ""
 #    Example: "87654321-4321-4321-4321-cba987654321"
 # oidc_entra_client_id: ""
 
-# -- Azure Client Secret.
+# -- Azure Client Secret for Keycloak.
 #    (REQUIRED if oidc_entra_enabled) - From App Registration > Certificates & secrets
 # oidc_entra_client_secret: ""
 
 # ==============================================================================
-# GITHUB OAUTH CONFIGURATION
+# KEYCLOAK IDENTITY FEDERATION - GITHUB
 # ==============================================================================
-# Configure GitHub as an OAuth provider via Keycloak identity federation.
-# GitHub OAuth credentials are registered in Keycloak, which handles the OAuth flow.
-# IMPORTANT: Requires mcp_gateway_enabled=true for Keycloak deployment.
+# Configure GitHub as an identity provider in Keycloak.
+# GitHub only supports OAuth 2.0, Keycloak handles the conversion to OIDC.
 # REF: https://github.com/settings/developers
 # REF: docs/oidc-github-setup.md
 
-# -- Enable GitHub OAuth authentication.
+# -- Enable GitHub identity federation via Keycloak.
 #    (OPTIONAL) / (DEFAULT: false)
-#    IMPORTANT: Requires mcp_gateway_enabled=true (Keycloak handles GitHub OAuth)
 # oidc_github_enabled: true
 
-# -- GitHub OAuth App Client ID.
+# -- GitHub OAuth App Client ID for Keycloak.
 #    (REQUIRED if oidc_github_enabled) - From GitHub Developer Settings
 #    Example: "Iv1.abc123def456"
 # oidc_github_client_id: ""
 
-# -- GitHub OAuth App Client Secret.
+# -- GitHub OAuth App Client Secret for Keycloak.
 #    (REQUIRED if oidc_github_enabled) - From GitHub Developer Settings
 # oidc_github_client_secret: ""
 
@@ -455,24 +454,21 @@ cloudflare_token: ""
 # oidc_github_team: ""
 
 # ==============================================================================
-# OIDC TARGET CONFIGURATION
+# OIDC COOKIE CONFIGURATION
 # ==============================================================================
-
-# -- Target Gateways for OIDC protection.
-#    (OPTIONAL) / (DEFAULT: ["envoy-internal"])
-#    The Gateways that will require OIDC authentication.
-#    Options: "envoy-internal", "envoy-external", "envoy-ai"
-#    Single gateway example: ["envoy-internal"]
-#    Multiple gateways example: ["envoy-internal", "envoy-external"]
-# oidc_target_gateways:
-#   - envoy-internal
-#   - envoy-external
 
 # -- Cookie domain for cross-subdomain SSO.
 #    (OPTIONAL) / (DEFAULT: primary_domain)
 #    Set to parent domain for SSO across subdomains.
 #    Example: "example.com" enables SSO for app1.example.com, app2.example.com
 # oidc_cookie_domain: ""
+
+# -- Load balancer IP for the Auth Gateway (Keycloak).
+#    This gateway serves auth.<domain> for Keycloak login UI.
+#    Requires mcp_gateway_enabled=true.
+#    (REQUIRED if oidc_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.147"
+# auth_gateway_addr: ""
 
 # ==============================================================================
 # MCP GATEWAY CONFIGURATION (Optional - OAuth 2.1 Authorization Gateway)

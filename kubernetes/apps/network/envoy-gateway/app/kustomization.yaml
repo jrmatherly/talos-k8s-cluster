@@ -7,8 +7,6 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./podmonitor.yaml
-  - ./oidc-google.yaml
-  - ./oidc-callback.yaml
-  - ./oidc-ratelimit.yaml
-  - ./oidc-secrets.sops.yaml
+  - ./oidc-keycloak.yaml
+  - ./oidc-keycloak-secret.sops.yaml
   - ./mcp-securitypolicy.yaml

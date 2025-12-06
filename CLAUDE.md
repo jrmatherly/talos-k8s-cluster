@@ -486,90 +486,123 @@ kubectl rollout restart deployment/envoy-gateway -n network
 
 ## OIDC SSO Integration
 
-Optional Single Sign-On (SSO) authentication for cluster applications via Envoy Gateway SecurityPolicy. Supports multiple identity providers with flexible gateway targeting.
+Unified Single Sign-On (SSO) authentication for cluster applications via Keycloak and Envoy Gateway SecurityPolicy. All identity providers (Google, Entra ID, GitHub) are federated through Keycloak.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Identity Providers                            │
+│  ┌──────────┐    ┌───────────┐    ┌──────────┐                      │
+│  │  Google  │    │ Entra ID  │    │  GitHub  │                      │
+│  └────┬─────┘    └─────┬─────┘    └────┬─────┘                      │
+│       └────────────────┼───────────────┘                            │
+│                        ▼                                             │
+│               ┌────────────────┐                                     │
+│               │    Keycloak    │  auth.<domain> via envoy-auth      │
+│               │  (OAuth 2.1)   │  (NO OIDC SecurityPolicy)          │
+│               └────────┬───────┘                                     │
+│                        │                                             │
+│         ┌──────────────┼──────────────┐                             │
+│         ▼              │              ▼                              │
+│  ┌─────────────┐       │       ┌─────────────┐                      │
+│  │envoy-internal│       │       │envoy-external│                      │
+│  │oidc-keycloak│       │       │oidc-keycloak│                      │
+│  │  -internal  │       │       │  -external  │                      │
+│  └─────────────┘       │       └─────────────┘                      │
+│  Callback:             │       Callback:                            │
+│  auth-internal.<domain>│       auth-external.<domain>               │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ### Configuration in cluster.yaml
 
 ```yaml
-# Enable OIDC SSO integration
+# Enable OIDC SSO integration (requires mcp_gateway_enabled=true for Keycloak)
 oidc_enabled: true
+mcp_gateway_enabled: true
 
-# Google OIDC (native Envoy Gateway OIDC)
+# Auth Gateway (dedicated IP for Keycloak - no OIDC policy applied)
+auth_gateway_addr: "192.168.1.155"  # Unused IP in node_cidr
+
+# Keycloak OIDC client secret (for Envoy Gateway SecurityPolicy)
+keycloak_oidc_client_secret: "xxx"
+
+# Google identity provider (federated via Keycloak)
 oidc_google_enabled: true
 oidc_google_client_id: "123456789-xxx.apps.googleusercontent.com"
 oidc_google_client_secret: "GOCSPX-xxx"
 
-# Microsoft Entra ID (native Envoy Gateway OIDC)
+# Microsoft Entra ID identity provider (federated via Keycloak)
 oidc_entra_enabled: true
 oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
 oidc_entra_client_secret: "xxx"
 
-# GitHub OAuth (via Keycloak identity federation)
-# IMPORTANT: Requires mcp_gateway_enabled=true for Keycloak
+# GitHub identity provider (federated via Keycloak)
 oidc_github_enabled: true
 oidc_github_client_id: "Iv1.xxx"
 oidc_github_client_secret: "xxx"
 oidc_github_org: "my-org"          # Optional: restrict to org members
 oidc_github_team: "devs,admins"    # Optional: restrict to specific teams
 
-# Target gateways to protect
-oidc_target_gateways:
-  - envoy-internal
-  # - envoy-external  # Uncomment if needed
-oidc_cookie_domain: "example.com"  # Cookie domain for SSO
+# Cookie domain for SSO
+oidc_cookie_domain: "example.com"
 ```
 
-### Architecture
+### Gateway Configuration
 
-| Provider | Protocol | Implementation | SecurityPolicy |
-|----------|----------|----------------|----------------|
-| Google | OIDC | Native Envoy Gateway | `oidc-google` |
-| Entra ID | OIDC | Native Envoy Gateway | `oidc-entra` |
-| GitHub | OAuth 2.0 | Keycloak Federation | `oidc-github` |
-
-**GitHub via Keycloak:** GitHub only supports OAuth 2.0, not OIDC. Keycloak handles the GitHub OAuth flow and issues standard OIDC tokens to Envoy Gateway. This requires `mcp_gateway_enabled=true` to deploy Keycloak.
+| Gateway | IP Address | Purpose | OIDC Policy |
+|---------|------------|---------|-------------|
+| `envoy-auth` | `auth_gateway_addr` | Keycloak login UI at `auth.<domain>` | None (prevents login loop) |
+| `envoy-internal` | `cluster_gateway_addr` | Internal apps (split DNS) | `oidc-keycloak-internal` |
+| `envoy-external` | `cloudflare_gateway_addr` | External apps (Cloudflare) | `oidc-keycloak-external` |
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-google.yaml.j2` | Google OIDC SecurityPolicy |
-| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-entra.yaml.j2` | Entra ID OIDC SecurityPolicy |
-| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-github.yaml.j2` | GitHub via Keycloak SecurityPolicy |
-| `templates/config/kubernetes/apps/auth-system/keycloak/` | Keycloak deployment with GitHub IdP |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/envoy.yaml.j2` | Gateway definitions including envoy-auth |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-keycloak.yaml.j2` | Unified OIDC SecurityPolicies for internal/external |
+| `templates/config/kubernetes/apps/network/envoy-gateway/app/oidc-keycloak-secret.sops.yaml.j2` | OIDC client secret |
+| `templates/config/kubernetes/apps/auth-system/keycloak/` | Keycloak deployment with identity federation |
 
 ### Testing
 
 ```bash
-# Check SecurityPolicy status
+# Check OIDC SecurityPolicies
 kubectl get securitypolicy -n network
-kubectl describe securitypolicy oidc-google -n network
+kubectl describe securitypolicy oidc-keycloak-internal -n network
+kubectl describe securitypolicy oidc-keycloak-external -n network
 
-# For GitHub auth (requires Keycloak)
+# Check Keycloak and auth gateway
 kubectl get pods -n auth-system -l app=keycloak
-kubectl logs -n auth-system -l app=keycloak
+kubectl get gateway envoy-auth -n network
+
+# Test Keycloak OIDC discovery
+curl -s https://auth.<domain>/realms/k8s-cluster/.well-known/openid-configuration | jq
 
 # Test authentication flow
 # Navigate to a protected app (e.g., https://grafana.<domain>)
-# You should be redirected to the identity provider
+# You should be redirected to Keycloak, then choose your identity provider
 ```
 
 ### Troubleshooting
 
 | Issue | Cause | Solution |
 |-------|-------|----------|
-| Redirect loop | Cookie domain mismatch | Verify `oidc_cookie_domain` matches your domain |
-| 403 after login | User not authorized | Check org/team restrictions (GitHub) or app permissions |
-| Callback URL error | Redirect URI not registered | Add exact callback URL in provider settings |
-| GitHub auth not working | Keycloak not deployed | Enable `mcp_gateway_enabled=true` in cluster.yaml |
+| Redirect loop | Keycloak behind OIDC-protected gateway | Verify Keycloak uses envoy-auth (not envoy-external) |
+| Cookie domain mismatch | Wrong oidc_cookie_domain | Set `oidc_cookie_domain` to your primary domain |
+| 403 after login | User not authorized | Check Keycloak realm roles/groups |
+| Callback URL error | Redirect URI not registered | Add callback URLs to Keycloak client settings |
+| IdP not showing | Identity provider not enabled | Enable `oidc_*_enabled` in cluster.yaml |
 
 ### Provider Setup Guides
 
 See the detailed setup documentation for each provider:
-- `docs/oidc-google-setup.md` - Google Cloud Console OAuth setup
-- `docs/oidc-entra-setup.md` - Microsoft Entra ID app registration
-- `docs/oidc-github-setup.md` - GitHub OAuth application setup
+- `docs/oidc-google-setup.md` - Google Cloud Console OAuth setup for Keycloak federation
+- `docs/oidc-entra-setup.md` - Microsoft Entra ID app registration for Keycloak federation
+- `docs/oidc-github-setup.md` - GitHub OAuth application setup for Keycloak federation
 - `docs/envoy-gateway-oidc-sso.md` - Overall architecture and implementation
 
 ## MCP Authorization Gateway

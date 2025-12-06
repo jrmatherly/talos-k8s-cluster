@@ -86,30 +86,36 @@ import (
 	traceloop_openai_api_key?: string & !=""
 	traceloop_anthropic_api_key?: string & !=""
 
-	// OIDC SSO Configuration (optional - for Gateway authentication)
+	// OIDC SSO Configuration (Keycloak-based authentication for all Gateways)
+	// Keycloak handles identity federation for all providers (Google, Entra ID, GitHub)
 	oidc_enabled?: bool
 
-	// Google OIDC Configuration
+	// Keycloak Identity Provider Federation Configuration
+	// These credentials are configured in Keycloak for identity brokering
+
+	// Google Identity Provider (optional - federated via Keycloak)
 	oidc_google_enabled?: bool
 	oidc_google_client_id?: string & !=""
 	oidc_google_client_secret?: string & !=""
 
-	// Microsoft Entra ID OIDC Configuration
+	// Microsoft Entra ID Identity Provider (optional - federated via Keycloak)
 	oidc_entra_enabled?: bool
 	oidc_entra_tenant_id?: string & !=""        // UUID format tenant ID
 	oidc_entra_client_id?: string & !=""        // Application (client) ID
 	oidc_entra_client_secret?: string & !=""
 
-	// GitHub OAuth Configuration (uses oauth2-proxy for ext_authz)
+	// GitHub Identity Provider (optional - federated via Keycloak)
 	oidc_github_enabled?: bool
 	oidc_github_client_id?: string & !=""
 	oidc_github_client_secret?: string & !=""
 	oidc_github_org?: string & !=""             // Restrict to GitHub organization members
 	oidc_github_team?: string & !=""            // Restrict to specific teams (comma-separated)
 
-	// OIDC Target Configuration
-	oidc_target_gateways?: [...string & !=""]   // Gateway names to protect (e.g., ["envoy-internal", "envoy-external"])
+	// OIDC Cookie Configuration
 	oidc_cookie_domain?: string & !=""          // Cookie domain for cross-subdomain SSO
+
+	// Auth Gateway Configuration (Keycloak OAuth 2.1 Authorization Server)
+	auth_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
 
 	// MCP Gateway Configuration (OAuth 2.1 Authorization Gateway for Model Context Protocol)
 	mcp_gateway_enabled?: bool

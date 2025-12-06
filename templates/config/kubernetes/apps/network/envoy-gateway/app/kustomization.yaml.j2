@@ -7,20 +7,10 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./podmonitor.yaml
-#% if oidc_enabled and oidc_google_enabled %#
-  - ./oidc-google.yaml
-#% endif %#
-#% if oidc_enabled and oidc_entra_enabled %#
-  - ./oidc-entra.yaml
-#% endif %#
-#% if oidc_enabled and oidc_github_enabled and mcp_gateway_enabled %#
-  - ./oidc-github.yaml
+#| Unified Keycloak OIDC authentication for all gateways #|
+#% if oidc_enabled and mcp_gateway_enabled %#
+  - ./oidc-keycloak.yaml
   - ./oidc-keycloak-secret.sops.yaml
-#% endif %#
-#% if oidc_enabled and (oidc_google_enabled or oidc_entra_enabled) %#
-  - ./oidc-callback.yaml
-  - ./oidc-ratelimit.yaml
-  - ./oidc-secrets.sops.yaml
 #% endif %#
 #% if mcp_gateway_enabled %#
   - ./mcp-securitypolicy.yaml

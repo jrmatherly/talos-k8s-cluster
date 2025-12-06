@@ -1,0 +1,151 @@
+#| Unified OIDC SecurityPolicy using Keycloak as the identity provider #|
+#| All identity providers (Google, Entra, GitHub) are federated through Keycloak #|
+#| Requires mcp_gateway_enabled=true for Keycloak deployment #|
+#|                                                                               #|
+#| Architecture:                                                                 #|
+#| - Keycloak UI accessible at auth.<domain> via envoy-auth (no OIDC policy)     #|
+#| - envoy-internal protected apps use auth-internal.<domain> for callbacks      #|
+#| - envoy-external protected apps use auth-external.<domain> for callbacks      #|
+#% if oidc_enabled and mcp_gateway_enabled %#
+---
+#| ============================================================================ #|
+#| ENVOY-INTERNAL OIDC CONFIGURATION                                            #|
+#| ============================================================================ #|
+#| SecurityPolicy for envoy-internal gateway #|
+#| Protects all apps on envoy-internal with Keycloak OIDC authentication #|
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: oidc-keycloak-internal
+  labels:
+    app.kubernetes.io/part-of: auth-system
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-internal
+  oidc:
+    provider:
+      issuer: https://auth.#{ primary_domain }#/realms/#{ keycloak_realm | default('k8s-cluster') }#
+    clientID: envoy-gateway
+    clientSecret:
+      name: keycloak-oidc-client-secret
+    #| Callback URL on envoy-internal - user is redirected here after Keycloak login #|
+    redirectURL: https://auth-internal.#{ primary_domain }#/oauth2/callback
+    logoutPath: /logout
+    scopes:
+      - openid
+      - profile
+      - email
+    refreshToken: true
+    forwardAccessToken: true
+    cookieDomain: #{ oidc_cookie_domain | default(primary_domain) }#
+---
+#| HTTPRoute for OIDC callback on envoy-internal #|
+#| Envoy Gateway intercepts /oauth2/callback and handles the token exchange #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: oidc-callback-internal
+  annotations:
+    #| Prevent external-dns from creating external records #|
+    #| auth-internal is handled by split DNS pointing to internal gateway #|
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  hostnames:
+    - auth-internal.#{ primary_domain }#
+  rules:
+    #| Match all paths - OAuth2 filter will intercept /oauth2/* requests #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        #| Placeholder backend - requests never reach this; OIDC filter intercepts #|
+        - name: oidc-callback-placeholder
+          port: 80
+---
+#| ============================================================================ #|
+#| ENVOY-EXTERNAL OIDC CONFIGURATION                                            #|
+#| ============================================================================ #|
+#| SecurityPolicy for envoy-external gateway #|
+#| Protects all apps on envoy-external with Keycloak OIDC authentication #|
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: oidc-keycloak-external
+  labels:
+    app.kubernetes.io/part-of: auth-system
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-external
+  oidc:
+    provider:
+      issuer: https://auth.#{ primary_domain }#/realms/#{ keycloak_realm | default('k8s-cluster') }#
+    clientID: envoy-gateway
+    clientSecret:
+      name: keycloak-oidc-client-secret
+    #| Callback URL on envoy-external - user is redirected here after Keycloak login #|
+    #| This endpoint is accessible via Cloudflare tunnel for external clients #|
+    redirectURL: https://auth-external.#{ primary_domain }#/oauth2/callback
+    logoutPath: /logout
+    scopes:
+      - openid
+      - profile
+      - email
+    refreshToken: true
+    forwardAccessToken: true
+    cookieDomain: #{ oidc_cookie_domain | default(primary_domain) }#
+---
+#| HTTPRoute for OIDC callback on envoy-external #|
+#| Envoy Gateway intercepts /oauth2/callback and handles the token exchange #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: oidc-callback-external
+  annotations:
+    #| External DNS creates record pointing to external gateway #|
+    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+spec:
+  parentRefs:
+    - name: envoy-external
+      namespace: network
+      sectionName: https
+  hostnames:
+    - auth-external.#{ primary_domain }#
+  rules:
+    #| Match all paths - OAuth2 filter will intercept /oauth2/* requests #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        #| Placeholder backend - requests never reach this; OIDC filter intercepts #|
+        - name: oidc-callback-placeholder
+          port: 80
+---
+#| ============================================================================ #|
+#| SHARED PLACEHOLDER SERVICE                                                    #|
+#| ============================================================================ #|
+#| Placeholder service for OIDC callback routes #|
+#| The OAuth2 filter intercepts callback requests before they reach any backend #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: oidc-callback-placeholder
+  labels:
+    app.kubernetes.io/part-of: auth-system
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+#% endif %#

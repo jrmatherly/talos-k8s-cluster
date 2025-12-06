@@ -48,28 +48,27 @@ grafana_admin_password: "test-password"
 # Traceloop Full Platform (LLM Observability)
 traceloop_enabled: true
 traceloop_hub_enabled: true
-# OIDC SSO Configuration (testing full deployment with both providers)
+# OIDC SSO Configuration (Keycloak-based authentication with all identity providers)
 oidc_enabled: true
-# Google OIDC
+# Google identity federation (via Keycloak)
 oidc_google_enabled: true
 oidc_google_client_id: "123456789-test.apps.googleusercontent.com"
 oidc_google_client_secret: "fake-google-secret"
-# Microsoft Entra ID OIDC
+# Microsoft Entra ID identity federation (via Keycloak)
 oidc_entra_enabled: true
 oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
 oidc_entra_client_secret: "fake-entra-secret"
-# GitHub OAuth (via Keycloak identity federation - requires mcp_gateway_enabled)
+# GitHub identity federation (via Keycloak - requires mcp_gateway_enabled)
 oidc_github_enabled: true
 oidc_github_client_id: "Iv1.fake-github-client-id"
 oidc_github_client_secret: "fake-github-client-secret-32chars"
 oidc_github_org: "test-org"
 oidc_github_team: "developers,admins"
-# OIDC target configuration
-oidc_target_gateways:
-  - envoy-internal
-  - envoy-external
+# OIDC cookie configuration
 oidc_cookie_domain: "example.com"
+# Auth Gateway IP (for Keycloak)
+auth_gateway_addr: "10.10.10.147"
 # MCP Gateway Configuration (OAuth 2.1 Authorization Gateway)
 mcp_gateway_enabled: true
 mcp_gateway_addr: "10.10.10.146"

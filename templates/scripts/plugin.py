@@ -224,26 +224,27 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("traceloop_openai_api_key", "")
         data.setdefault("traceloop_anthropic_api_key", "")
 
-        # OIDC SSO defaults (Gateway Authentication)
+        # OIDC SSO defaults (Keycloak-based authentication for all gateways)
         data.setdefault("oidc_enabled", False)
-        # Google OIDC defaults
+        # Google identity provider defaults (federated via Keycloak)
         data.setdefault("oidc_google_enabled", False)
         data.setdefault("oidc_google_client_id", "")
         data.setdefault("oidc_google_client_secret", "")
-        # Microsoft Entra ID OIDC defaults
+        # Microsoft Entra ID identity provider defaults (federated via Keycloak)
         data.setdefault("oidc_entra_enabled", False)
         data.setdefault("oidc_entra_tenant_id", "")
         data.setdefault("oidc_entra_client_id", "")
         data.setdefault("oidc_entra_client_secret", "")
-        # GitHub OAuth defaults (uses oauth2-proxy)
+        # GitHub identity provider defaults (federated via Keycloak)
         data.setdefault("oidc_github_enabled", False)
         data.setdefault("oidc_github_client_id", "")
         data.setdefault("oidc_github_client_secret", "")
         data.setdefault("oidc_github_org", "")
         data.setdefault("oidc_github_team", "")
-        # OIDC target configuration defaults
-        data.setdefault("oidc_target_gateways", ["envoy-internal"])
+        # OIDC cookie configuration
         data.setdefault("oidc_cookie_domain", data.get("primary_domain", ""))
+        # Auth Gateway address (for Keycloak)
+        data.setdefault("auth_gateway_addr", "")
 
         # MCP Gateway defaults (OAuth 2.1 Authorization Gateway)
         data.setdefault("mcp_gateway_enabled", False)

@@ -76,6 +76,41 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
+  name: envoy-auth
+  annotations:
+    external-dns.alpha.kubernetes.io/target: auth.${SECRET_DOMAIN}
+  labels:
+    gateway-type: auth
+    app.kubernetes.io/part-of: auth-system
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: auth.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "192.168.22.155"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: matherly-net-production-tls
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
   name: envoy-internal
   annotations:
     external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
@@ -170,6 +205,9 @@ spec:
       namespace: network
       sectionName: http
     - name: envoy-mcp
+      namespace: network
+      sectionName: http
+    - name: envoy-auth
       namespace: network
       sectionName: http
   rules:
