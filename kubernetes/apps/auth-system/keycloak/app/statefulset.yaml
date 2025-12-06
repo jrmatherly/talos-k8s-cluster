@@ -77,12 +77,12 @@ spec:
             - name: JAVA_OPTS_APPEND
               value: >-
                 -Djgroups.dns.query=keycloak-headless.auth-system.svc.cluster.local
-            - name: KEYCLOAK_ADMIN
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: keycloak-admin-secret
                   key: username
-            - name: KEYCLOAK_ADMIN_PASSWORD
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-admin-secret
