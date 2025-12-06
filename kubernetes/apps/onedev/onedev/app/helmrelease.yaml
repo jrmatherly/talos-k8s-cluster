@@ -1,0 +1,58 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: onedev
+spec:
+  chart:
+    spec:
+      chart: onedev
+      version: "13.1.2"
+      sourceRef:
+        kind: HelmRepository
+        name: onedev
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Initial Settings
+    # ============================================================
+    initSettings:
+      password: "MM2V21w69y5bNKpP9CMtQ"
+
+    # ============================================================
+    # Persistence
+    # ============================================================
+    persistence:
+      enabled: true
+      storageClass: "proxmox-csi"
+      size: "100Gi"
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      httpPort: 6610
+      sshPort: 6611
+
+    # ============================================================
+    # Resource Limits
+    # ============================================================
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "2Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+
+
+    # ============================================================
+    # Kubernetes Integration (CI/CD builds as pods)
+    # ============================================================
+    clusterRole:
+      create: true
+
+    serviceAccount:
+      create: true

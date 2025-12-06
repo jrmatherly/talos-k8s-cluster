@@ -1,0 +1,8 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: onedev
+spec:
+  interval: 1h
+  url: https://code.onedev.io/onedev/~helm
