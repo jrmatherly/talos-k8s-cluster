@@ -1,0 +1,21 @@
+#| CloudNativePG Operator Helm Chart OCI Repository #|
+#| Reference: https://github.com/cloudnative-pg/charts #|
+#% if mcp_gateway_enabled %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: cloudnative-pg
+  annotations:
+    renovate.datasource: docker
+    renovate.registryUrl: ghcr.io
+    renovate.package: cloudnative-pg/charts/cloudnative-pg
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.26.1
+  url: oci://ghcr.io/cloudnative-pg/charts/cloudnative-pg
+#% endif %#

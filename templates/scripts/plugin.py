@@ -254,14 +254,14 @@ class Plugin(makejinja.plugin.Plugin):
 
         # Keycloak defaults (OAuth 2.1 Authorization Server)
         data.setdefault("keycloak_replicas", 3)
-        data.setdefault("keycloak_version", "26.0.7")
+        data.setdefault("keycloak_version", "26.4.7")
         data.setdefault("keycloak_realm", "k8s-cluster")
         data.setdefault("keycloak_admin_password", "")
         data.setdefault("keycloak_oidc_client_secret", "")
 
-        # Keycloak PostgreSQL defaults (Keycloak backend)
+        # Keycloak PostgreSQL defaults (CloudNativePG managed, in database namespace)
         data.setdefault("keycloak_postgres_replicas", 1)
-        data.setdefault("keycloak_postgres_version", "16")
+        data.setdefault("keycloak_postgres_version", "17")
         data.setdefault("keycloak_postgres_storage_size", "10Gi")
         data.setdefault("keycloak_postgres_password", "")
 

@@ -64,22 +64,17 @@ spec:
           env:
             - name: KC_DB
               value: postgres
-            - name: KC_DB_URL_HOST
-              value: keycloak-postgres.auth-system.svc.cluster.local
-            - name: KC_DB_URL_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-postgres-secret
-                  key: database
+            - name: KC_DB_URL
+              value: jdbc:postgresql://keycloak-postgres-rw.database.svc.cluster.local:5432/keycloak
             - name: KC_DB_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-postgres-secret
+                  name: keycloak-db-credentials
                   key: username
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-postgres-secret
+                  name: keycloak-db-credentials
                   key: password
             - name: JAVA_OPTS_APPEND
               value: >-

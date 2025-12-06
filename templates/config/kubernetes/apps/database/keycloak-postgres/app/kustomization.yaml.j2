@@ -1,0 +1,10 @@
+#| CloudNativePG PostgreSQL Cluster for Keycloak #|
+#| CNPG automatically creates services: keycloak-postgres-rw, keycloak-postgres-ro, keycloak-postgres-r #|
+#% if mcp_gateway_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./cluster.yaml
+  - ./secret.sops.yaml
+#% endif %#

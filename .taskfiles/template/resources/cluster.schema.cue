@@ -120,14 +120,14 @@ import (
 
 	// Keycloak Configuration (OAuth 2.1 Authorization Server)
 	keycloak_replicas?: int & >=1               // Number of Keycloak replicas for HA
-	keycloak_version?: string & !=""            // Keycloak version (e.g., "26.0.7")
+	keycloak_version?: string & !=""            // Keycloak version (e.g., "26.4.7")
 	keycloak_realm?: string & !=""              // Keycloak realm name (e.g., "k8s-cluster")
 	keycloak_admin_password?: string & !=""     // Keycloak admin password (encrypted with SOPS)
 	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway (encrypted with SOPS)
 
-	// Keycloak PostgreSQL Configuration (Keycloak backend)
+	// Keycloak PostgreSQL Configuration (CloudNativePG managed, in database namespace)
 	keycloak_postgres_replicas?: int & >=1
-	keycloak_postgres_version?: string & !=""            // Bitnami PostgreSQL version (e.g., "16")
+	keycloak_postgres_version?: string & !=""            // CloudNativePG PostgreSQL version (e.g., "17")
 	keycloak_postgres_storage_size?: string & !=""       // Storage size (e.g., "10Gi")
 	keycloak_postgres_password?: string & !=""           // PostgreSQL password (encrypted with SOPS)
 

@@ -1,0 +1,15 @@
+#| Database Namespace Kustomization #|
+#| Hosts shared PostgreSQL clusters managed by CloudNativePG #|
+#% if mcp_gateway_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: database
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./keycloak-postgres/ks.yaml
+#% endif %#

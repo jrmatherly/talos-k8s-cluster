@@ -78,13 +78,13 @@ mcp_request_timeout: "120s"
 mcp_rate_limit_requests: 100
 # Keycloak Configuration
 keycloak_replicas: 3
-keycloak_version: "26.0.7"
+keycloak_version: "26.4.7"
 keycloak_realm: "k8s-cluster"
 keycloak_admin_password: "test-admin-password"
 keycloak_oidc_client_secret: "test-oidc-client-secret"
 # Keycloak PostgreSQL Configuration (Keycloak backend)
 keycloak_postgres_replicas: 1
-keycloak_postgres_version: "16"
+keycloak_postgres_version: "17"
 keycloak_postgres_storage_size: "10Gi"
 keycloak_postgres_password: "test-postgres-password"
 # Redis Configuration (MCP session state)

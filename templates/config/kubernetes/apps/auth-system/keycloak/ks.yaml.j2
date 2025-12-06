@@ -7,9 +7,9 @@ metadata:
   name: keycloak
 spec:
   dependsOn:
-    #| PostgreSQL and Redis must be ready before Keycloak #|
+    #| PostgreSQL (in database namespace) and Redis must be ready before Keycloak #|
     - name: keycloak-postgres
-      namespace: auth-system
+      namespace: database
     - name: mcp-redis
       namespace: auth-system
     - name: cert-manager-issuers

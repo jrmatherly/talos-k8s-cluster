@@ -516,8 +516,8 @@ cloudflare_token: ""
 # keycloak_replicas: 3
 
 # -- Keycloak version to deploy.
-#    (OPTIONAL) / (DEFAULT: "26.0.7")
-# keycloak_version: "26.0.7"
+#    (OPTIONAL) / (DEFAULT: "26.4.7")
+# keycloak_version: "26.4.7"
 
 # -- Keycloak realm name for the cluster.
 #    (OPTIONAL) / (DEFAULT: "k8s-cluster")
@@ -533,18 +533,19 @@ cloudflare_token: ""
 # keycloak_oidc_client_secret: ""
 
 # ==============================================================================
-# KEYCLOAK POSTGRESQL CONFIGURATION (Keycloak Backend)
+# KEYCLOAK POSTGRESQL CONFIGURATION (CloudNativePG Managed)
 # ==============================================================================
-# Bitnami PostgreSQL database for Keycloak persistent storage.
-# Uses non-root operation for restricted Pod Security Standards.
+# PostgreSQL database for Keycloak persistent storage.
+# Managed by CloudNativePG operator in the "database" namespace.
+# Provides production-ready PostgreSQL with automatic failover, backups, and HA.
 
 # -- Number of PostgreSQL replicas for Keycloak.
-#    (OPTIONAL) / (DEFAULT: 1)
+#    (OPTIONAL) / (DEFAULT: 1) - Use 3 for production HA
 # keycloak_postgres_replicas: 1
 
-# -- Bitnami PostgreSQL version to deploy.
-#    (OPTIONAL) / (DEFAULT: "16")
-# keycloak_postgres_version: "16"
+# -- CloudNativePG PostgreSQL version to deploy.
+#    (OPTIONAL) / (DEFAULT: "17")
+# keycloak_postgres_version: "17"
 
 # -- PostgreSQL PVC storage size for Keycloak.
 #    (OPTIONAL) / (DEFAULT: "10Gi")
