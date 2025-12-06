@@ -13,6 +13,14 @@
   dependencyDashboardTitle: "Renovate Dashboard 🤖",
   schedule: ["every weekend"],
   ignorePaths: ["**/*.sops.*"],
+  // ghcr.io requires explicit hostRules for reliable OCI package lookups
+  // Ref: https://github.com/renovatebot/renovate/discussions/18544
+  hostRules: [
+    {
+      matchHost: "ghcr.io",
+      hostType: "docker",
+    },
+  ],
   flux: {
     managerFilePatterns: ["/(^|/)kubernetes/.+\\.ya?ml(?:\\.j2)?$/"],
   },
