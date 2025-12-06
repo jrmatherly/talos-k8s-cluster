@@ -56,7 +56,6 @@ spec:
                 - ALL
           args:
             - start
-            - --optimized
             - --hostname-strict=false
             - --proxy-headers=xforwarded
             - --cache-stack=kubernetes
