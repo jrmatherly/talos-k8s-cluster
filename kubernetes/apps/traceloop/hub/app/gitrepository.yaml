@@ -7,7 +7,7 @@ spec:
   interval: 1h
   url: https://github.com/traceloop/hub
   ref:
-    tag: v0.7.2
+    tag: v0.7.3
   ignore: |
     /*
     !/helm/
