@@ -10,6 +10,15 @@ spec:
     name: kube-prometheus-stack
   interval: 1h
   timeout: 15m
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
   values:
     # ============================================================
     # Global Settings
@@ -17,10 +26,12 @@ spec:
     fullnameOverride: prometheus
 
     # ============================================================
-    # CRDs - Managed by the chart
+    # CRDs - Managed by the chart with automatic upgrades
     # ============================================================
     crds:
       enabled: true
+      upgradeJob:
+        enabled: true
 
     # ============================================================
     # Alertmanager
@@ -133,10 +144,8 @@ spec:
         scrapeConfigSelectorNilUsesHelmValues: false
         enableAdminAPI: true
         walCompression: true
-        enableFeatures:
-          - auto-gomemlimit
-          - memory-snapshot-on-shutdown
-          - new-service-discovery-manager
+        # Note: auto-gomemlimit, memory-snapshot-on-shutdown, and new-service-discovery-manager
+        # are now default behavior in Prometheus 3.0 and their feature flags were removed
         retention: #{ prometheus_retention | default('7d') }#
         retentionSize: #{ prometheus_retention_size | default('45GB') }#
         resources:
