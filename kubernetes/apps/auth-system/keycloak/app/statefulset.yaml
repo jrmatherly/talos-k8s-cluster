@@ -92,8 +92,8 @@ spec:
                 secretKeyRef:
                   name: keycloak-admin-secret
                   key: password
-            - name: KC_HOSTNAME
-              value: auth.matherly.net
+            - name: KC_HOSTNAME_URL
+              value: https://auth.matherly.net
             - name: KC_HTTP_ENABLED
               value: "true"
             - name: KC_HEALTH_ENABLED

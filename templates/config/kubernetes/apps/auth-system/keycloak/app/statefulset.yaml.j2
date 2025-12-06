@@ -100,9 +100,9 @@ spec:
                 secretKeyRef:
                   name: keycloak-admin-secret
                   key: password
-            #| Hostname configuration #|
-            - name: KC_HOSTNAME
-              value: auth.#{ primary_domain }#
+            #| Hostname configuration - use full URL for correct issuer in OIDC discovery #|
+            - name: KC_HOSTNAME_URL
+              value: https://auth.#{ primary_domain }#
             - name: KC_HTTP_ENABLED
               value: "true"
             - name: KC_HEALTH_ENABLED
