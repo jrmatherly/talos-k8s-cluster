@@ -57,6 +57,16 @@ spec:
         - uri-blocker
         - traffic-split
 
+      # Admin API configuration (under apisix section)
+      admin:
+        allow:
+          # Allow access from pod network (Envoy Gateway proxy)
+          ipList:
+            - "127.0.0.1/24"
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+
     # Disable embedded etcd chart (using external StatefulSet)
     etcd:
       enabled: false
@@ -85,7 +95,7 @@ spec:
         servicePort: 443
         containerPort: 9443
 
-    # Admin API (internal only)
+    # Admin API service (internal only)
     admin:
       enabled: true
       type: ClusterIP
@@ -93,11 +103,6 @@ spec:
       credentials:
         admin: ""  # Will be set via secret
         viewer: ""  # Will be set via secret
-      allow:
-        ipList:
-          - "10.0.0.0/8"
-          - "172.16.0.0/12"
-          - "192.168.0.0/16"
 
     # Disable ingress controller (using declarative config)
     ingressController:
