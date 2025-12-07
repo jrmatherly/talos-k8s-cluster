@@ -83,7 +83,7 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: proxmox-data-xfs
+        storageClassName: proxmox-csi
         resources:
           requests:
             storage: 10Gi

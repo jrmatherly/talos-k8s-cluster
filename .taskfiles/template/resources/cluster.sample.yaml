@@ -461,6 +461,11 @@ cloudflare_token: ""
 #    (REQUIRED if apisix_enabled) - Will be encrypted with SOPS
 # apisix_viewer_key: "your-secure-viewer-key"
 
+# -- StorageClass for APISIX etcd PVCs.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+#    Available: "proxmox-csi", "proxmox-csi-retain"
+# apisix_etcd_storage_class: "proxmox-csi"
+
 # ==============================================================================
 # WORKOS AUTHKIT (Optional - OAuth 2.1 / MCP Authentication)
 # ==============================================================================

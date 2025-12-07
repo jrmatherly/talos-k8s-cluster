@@ -108,6 +108,7 @@ import (
 	apisix_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr
 	apisix_admin_key?: string & !=""
 	apisix_viewer_key?: string & !=""
+	apisix_etcd_storage_class?: string & !=""   // StorageClass for etcd PVCs, default "proxmox-csi"
 
 	// WorkOS AuthKit Configuration (OAuth 2.1 / MCP authentication)
 	workos_client_id?: string & !=""

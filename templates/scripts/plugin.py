@@ -246,6 +246,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("apisix_gateway_addr", "")
         data.setdefault("apisix_admin_key", "")
         data.setdefault("apisix_viewer_key", "")
+        data.setdefault("apisix_etcd_storage_class", "proxmox-csi")
 
         # WorkOS AuthKit defaults (OAuth 2.1 / MCP authentication)
         data.setdefault("workos_client_id", "")

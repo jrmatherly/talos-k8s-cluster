@@ -61,6 +61,7 @@ proxmox_csi_token_secret: "fake-secret"
 # apisix_gateway_addr: ""
 # apisix_admin_key: ""
 # apisix_viewer_key: ""
+# apisix_etcd_storage_class: "proxmox-csi"
 # WorkOS AuthKit (disabled for private repo testing)
 # workos_client_id: ""
 # workos_client_secret: ""
