@@ -42,6 +42,7 @@ spec:
 
       # Enable required plugins
       plugins:
+        - ai-proxy           # LLM gateway for Azure OpenAI
         - openid-connect
         - proxy-rewrite
         - redirect
@@ -70,8 +71,8 @@ spec:
         - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
       user: ""
 
-    # Gateway service
-    gateway:
+    # Gateway service (per chart: service.type, not gateway.type)
+    service:
       type: LoadBalancer
       annotations:
         io.cilium/lb-ipam-ips: "#{ apisix_gateway_addr }#"
