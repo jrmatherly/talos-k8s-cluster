@@ -62,12 +62,13 @@ spec:
       prefix: "/apisix"
       timeout: 30
 
-    # External etcd connection settings
+    # External etcd connection settings (no auth - etcd runs without RBAC)
     externalEtcd:
       host:
         - "http://etcd-0.etcd-headless.apisix-system.svc.cluster.local:2379"
         - "http://etcd-1.etcd-headless.apisix-system.svc.cluster.local:2379"
         - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
+      user: ""
 
     # Gateway service
     gateway:
