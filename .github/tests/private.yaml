@@ -56,3 +56,14 @@ proxmox_csi_token_secret: "fake-secret"
 # onedev_database_user: ""
 # onedev_database_password: ""
 # onedev_ssh_port: 6611
+# APISIX Gateway (disabled for private repo testing)
+# apisix_enabled: false
+# apisix_gateway_addr: ""
+# apisix_admin_key: ""
+# apisix_viewer_key: ""
+# WorkOS AuthKit (disabled for private repo testing)
+# workos_client_id: ""
+# workos_client_secret: ""
+# workos_subdomain: ""
+# MCP Gateway (disabled for private repo testing)
+# mcp_gateway_enabled: false

@@ -1,0 +1,18 @@
+#% if apisix_enabled %#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd
+  namespace: apisix-system
+  labels:
+    app.kubernetes.io/name: etcd
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: etcd
+  ports:
+    - name: client
+      port: 2379
+      targetPort: 2379
+#% endif %#

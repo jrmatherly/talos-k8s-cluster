@@ -436,3 +436,61 @@ cloudflare_token: ""
 # onedev_memory_limit: "4Gi"
 # onedev_cpu_request: "500m"
 # onedev_memory_request: "2Gi"
+
+# ==============================================================================
+# APISIX GATEWAY (Optional - API Gateway with MCP support)
+# ==============================================================================
+# APISIX provides API gateway, authentication, and MCP Gateway capabilities.
+# Integrates with WorkOS AuthKit for OAuth 2.1 / MCP 2025-11-25 compliance.
+# REF: docs/apisix-workos-mcp-implementation-guide.md
+
+# -- Enable APISIX API Gateway.
+#    (OPTIONAL) / (DEFAULT: false)
+# apisix_enabled: true
+
+# -- Load balancer IP for the APISIX Gateway.
+#    (REQUIRED if apisix_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.146"
+# apisix_gateway_addr: ""
+
+# -- APISIX Admin API key (for configuration management).
+#    (REQUIRED if apisix_enabled) - Will be encrypted with SOPS
+# apisix_admin_key: "your-secure-admin-key"
+
+# -- APISIX Viewer API key (for read-only access).
+#    (REQUIRED if apisix_enabled) - Will be encrypted with SOPS
+# apisix_viewer_key: "your-secure-viewer-key"
+
+# ==============================================================================
+# WORKOS AUTHKIT (Optional - OAuth 2.1 / MCP Authentication)
+# ==============================================================================
+# WorkOS AuthKit provides MCP 2025-11-25 compliant authorization.
+# Supports CIMD, RFC 8707, Cross App Access, and enterprise SSO.
+# REF: https://workos.com/docs/authkit/mcp
+
+# -- WorkOS Client ID (from WorkOS Dashboard).
+#    (REQUIRED for WorkOS integration)
+# workos_client_id: "client_xxx"
+
+# -- WorkOS Client Secret (from WorkOS Dashboard).
+#    (REQUIRED for WorkOS integration) - Will be encrypted with SOPS
+# workos_client_secret: "sk_live_xxx"
+
+# -- WorkOS AuthKit subdomain (your-subdomain.authkit.app).
+#    (REQUIRED for WorkOS integration)
+#    Example: "mycompany" for mycompany.authkit.app
+# workos_subdomain: ""
+
+# ==============================================================================
+# MCP GATEWAY (Optional - Model Context Protocol)
+# ==============================================================================
+# MCP Gateway enables hosting MCP servers behind APISIX with SSE support.
+# REF: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization
+
+# -- Enable MCP Gateway functionality.
+#    (OPTIONAL) / (DEFAULT: false)
+# mcp_gateway_enabled: true
+
+# -- MCP session timeout in seconds.
+#    (OPTIONAL) / (DEFAULT: 3600 - 1 hour)
+# mcp_session_timeout: 3600

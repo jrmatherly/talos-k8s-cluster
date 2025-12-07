@@ -102,6 +102,21 @@ import (
 	onedev_memory_limit?: string & !=""
 	onedev_cpu_request?: string & !=""
 	onedev_memory_request?: string & !=""
+
+	// APISIX Gateway Configuration (API Gateway with MCP support)
+	apisix_enabled?: bool
+	apisix_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr
+	apisix_admin_key?: string & !=""
+	apisix_viewer_key?: string & !=""
+
+	// WorkOS AuthKit Configuration (OAuth 2.1 / MCP authentication)
+	workos_client_id?: string & !=""
+	workos_client_secret?: string & !=""
+	workos_subdomain?: string & !=""            // e.g., "your-subdomain" for your-subdomain.authkit.app
+
+	// MCP Gateway Configuration (Model Context Protocol)
+	mcp_gateway_enabled?: bool
+	mcp_session_timeout?: int & >=60            // Session timeout in seconds, default 3600
 }
 
 #Config

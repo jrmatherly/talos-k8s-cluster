@@ -1,0 +1,115 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: apisix
+  namespace: apisix-system
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: apisix
+      version: "2.12.x"
+      sourceRef:
+        kind: HelmRepository
+        name: apisix
+        namespace: apisix-system
+  values:
+    apisix:
+      enabled: true
+      replicaCount: 3
+
+      # Pod anti-affinity for HA
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: apisix
+                topologyKey: kubernetes.io/hostname
+
+      # Resources
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "200m"
+        limits:
+          memory: "1Gi"
+          cpu: "1000m"
+
+      # Enable required plugins
+      plugins:
+        - openid-connect
+        - proxy-rewrite
+        - redirect
+        - limit-req
+        - limit-conn
+        - limit-count
+        - prometheus
+        - http-logger
+        - cors
+        - response-rewrite
+        - request-validation
+        - uri-blocker
+        - traffic-split
+
+    # Disable embedded etcd (using external StatefulSet)
+    etcd:
+      enabled: false
+      host:
+        - "http://etcd-0.etcd-headless.apisix-system.svc.cluster.local:2379"
+        - "http://etcd-1.etcd-headless.apisix-system.svc.cluster.local:2379"
+        - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
+      prefix: "/apisix"
+      timeout: 30
+
+    # Gateway service
+    gateway:
+      type: LoadBalancer
+      annotations:
+        io.cilium/lb-ipam-ips: "192.168.22.165"
+      http:
+        enabled: true
+        servicePort: 80
+        containerPort: 9080
+      tls:
+        enabled: true
+        servicePort: 443
+        containerPort: 9443
+
+    # Admin API (internal only)
+    admin:
+      enabled: true
+      type: ClusterIP
+      port: 9180
+      credentials:
+        admin: ""  # Will be set via secret
+        viewer: ""  # Will be set via secret
+      allow:
+        ipList:
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"
+
+    # Disable ingress controller (using declarative config)
+    ingressController:
+      enabled: false
+
+    # Service Monitor for Prometheus
+    serviceMonitor:
+      enabled: true
+      namespace: apisix-system
+      interval: 30s
+
+  # Patch admin credentials from secret
+  valuesFrom:
+    - kind: Secret
+      name: apisix-credentials
+      valuesKey: admin-key
+      targetPath: admin.credentials.admin
+    - kind: Secret
+      name: apisix-credentials
+      valuesKey: viewer-key
+      targetPath: admin.credentials.viewer

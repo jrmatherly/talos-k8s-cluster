@@ -1,0 +1,9 @@
+#% if apisix_enabled %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: apisix-system
+  labels:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+#% endif %#

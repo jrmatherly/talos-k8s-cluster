@@ -1,0 +1,11 @@
+#% if apisix_enabled %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: apisix
+  namespace: apisix-system
+spec:
+  interval: 2h
+  url: https://charts.apiseven.com
+#% endif %#
