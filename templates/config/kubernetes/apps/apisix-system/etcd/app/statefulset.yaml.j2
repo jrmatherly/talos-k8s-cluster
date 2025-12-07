@@ -11,6 +11,7 @@ metadata:
 spec:
   serviceName: etcd-headless
   replicas: 3
+  podManagementPolicy: Parallel  # Required for etcd bootstrap - all nodes must start together
   selector:
     matchLabels:
       app.kubernetes.io/name: etcd
