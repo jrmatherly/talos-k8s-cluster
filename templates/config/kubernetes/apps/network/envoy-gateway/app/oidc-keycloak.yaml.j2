@@ -111,7 +111,7 @@ metadata:
   name: oidc-callback-external
   annotations:
     #| External DNS creates record pointing to external gateway #|
-    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+    external-dns.alpha.kubernetes.io/target: external.#{ primary_domain }#
 spec:
   parentRefs:
     - name: envoy-external

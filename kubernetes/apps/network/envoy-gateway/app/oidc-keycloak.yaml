@@ -80,7 +80,7 @@ kind: HTTPRoute
 metadata:
   name: oidc-callback-external
   annotations:
-    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+    external-dns.alpha.kubernetes.io/target: external.matherly.net
 spec:
   parentRefs:
     - name: envoy-external
