@@ -30,8 +30,6 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    hmac:
-      name: envoy-oidc-hmac
     #| Callback URL on envoy-internal - user is redirected here after Keycloak login #|
     #| Internal clients (local network) use auth-internal for callbacks #|
     redirectURL: https://auth-internal.#{ primary_domain }#/oauth2/callback
@@ -94,8 +92,6 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    hmac:
-      name: envoy-oidc-hmac
     #| Callback URL on envoy-external - user is redirected here after Keycloak login #|
     #| External clients (via cloudflared) use auth.<domain> for callbacks #|
     redirectURL: https://auth.#{ primary_domain }#/oauth2/callback

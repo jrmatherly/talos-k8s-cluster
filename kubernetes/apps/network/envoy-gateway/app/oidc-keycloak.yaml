@@ -16,8 +16,6 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    hmac:
-      name: envoy-oidc-hmac
     redirectURL: https://auth-internal.matherly.net/oauth2/callback
     logoutPath: /logout
     scopes:
@@ -67,8 +65,6 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    hmac:
-      name: envoy-oidc-hmac
     redirectURL: https://auth.matherly.net/oauth2/callback
     logoutPath: /logout
     scopes:
