@@ -1,5 +1,5 @@
 ---
-# HTTPRoute to expose APISIX via Envoy Gateway
+# HTTPRoute to expose APISIX Gateway and Admin UI via Envoy Gateway
 # This provides TLS termination via cert-manager certificates
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -14,6 +14,23 @@ spec:
   hostnames:
     - "api.matherly.net"
   rules:
+    # Admin UI at /ui/ (must be before catch-all)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /ui
+      backendRefs:
+        - name: apisix-admin
+          port: 9180
+    # Admin API at /apisix/admin/ for programmatic access
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /apisix/admin
+      backendRefs:
+        - name: apisix-admin
+          port: 9180
+    # Gateway API (catch-all for routed traffic)
     - matches:
         - path:
             type: PathPrefix
