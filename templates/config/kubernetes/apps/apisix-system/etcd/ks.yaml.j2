@@ -4,21 +4,21 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: apisix-system-etcd
-  namespace: flux-system
 spec:
-  targetNamespace: apisix-system
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: etcd
   dependsOn:
-    - name: kube-system-cilium
+    - name: cilium
+      namespace: kube-system
+  interval: 1h
   path: ./kubernetes/apps/apisix-system/etcd/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
+  targetNamespace: apisix-system
   wait: true
-  interval: 30m
-  retryInterval: 1m
-  timeout: 5m
 #% endif %#
