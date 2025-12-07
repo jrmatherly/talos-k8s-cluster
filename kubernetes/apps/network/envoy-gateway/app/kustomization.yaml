@@ -7,6 +7,3 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./podmonitor.yaml
-  - ./oidc-keycloak.yaml
-  - ./oidc-keycloak-secret.sops.yaml
-  - ./mcp-securitypolicy.yaml

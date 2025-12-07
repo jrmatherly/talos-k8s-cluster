@@ -86,63 +86,6 @@ import (
 	traceloop_openai_api_key?: string & !=""
 	traceloop_anthropic_api_key?: string & !=""
 
-	// OIDC SSO Configuration (Keycloak-based authentication for all Gateways)
-	// Keycloak handles identity federation for all providers (Google, Entra ID, GitHub)
-	oidc_enabled?: bool
-
-	// Keycloak Identity Provider Federation Configuration
-	// These credentials are configured in Keycloak for identity brokering
-
-	// Google Identity Provider (optional - federated via Keycloak)
-	oidc_google_enabled?: bool
-	oidc_google_client_id?: string & !=""
-	oidc_google_client_secret?: string & !=""
-
-	// Microsoft Entra ID Identity Provider (optional - federated via Keycloak)
-	oidc_entra_enabled?: bool
-	oidc_entra_tenant_id?: string & !=""        // UUID format tenant ID
-	oidc_entra_client_id?: string & !=""        // Application (client) ID
-	oidc_entra_client_secret?: string & !=""
-
-	// GitHub Identity Provider (optional - federated via Keycloak)
-	oidc_github_enabled?: bool
-	oidc_github_client_id?: string & !=""
-	oidc_github_client_secret?: string & !=""
-	oidc_github_org?: string & !=""             // Restrict to GitHub organization members
-	oidc_github_team?: string & !=""            // Restrict to specific teams (comma-separated)
-
-	// OIDC Cookie Configuration
-	oidc_cookie_domain?: string & !=""          // Cookie domain for cross-subdomain SSO
-
-	// Auth Gateway Configuration (Keycloak OAuth 2.1 Authorization Server)
-	auth_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
-
-	// MCP Gateway Configuration (OAuth 2.1 Authorization Gateway for Model Context Protocol)
-	mcp_gateway_enabled?: bool
-	mcp_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
-	mcp_storage_class?: string & !=""           // Storage class for PostgreSQL/Redis (e.g., "proxmox-csi")
-	mcp_request_timeout?: string & !=""         // Backend request timeout (e.g., "120s")
-	mcp_rate_limit_requests?: int & >=1         // Rate limit requests per minute per client
-
-	// Keycloak Configuration (OAuth 2.1 Authorization Server)
-	keycloak_replicas?: int & >=1               // Number of Keycloak replicas for HA
-	keycloak_version?: string & !=""            // Keycloak version (e.g., "26.4.7")
-	keycloak_realm?: string & !=""              // Keycloak realm name (e.g., "k8s-cluster")
-	keycloak_admin_password?: string & !=""     // Keycloak admin password (encrypted with SOPS)
-	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway (encrypted with SOPS)
-
-	// Keycloak PostgreSQL Configuration (CloudNativePG managed, in database namespace)
-	keycloak_postgres_replicas?: int & >=1
-	keycloak_postgres_version?: string & !=""            // CloudNativePG PostgreSQL version (e.g., "17")
-	keycloak_postgres_storage_size?: string & !=""       // Storage size (e.g., "10Gi")
-	keycloak_postgres_password?: string & !=""           // PostgreSQL password (encrypted with SOPS)
-
-	// Redis Configuration (MCP session state)
-	redis_replicas?: int & >=1
-	redis_version?: string & !=""               // Redis version (e.g., "7.4")
-	redis_storage_size?: string & !=""          // Storage size (e.g., "5Gi")
-	redis_password?: string & !=""              // Redis password (encrypted with SOPS)
-
 	// OneDev Configuration (Git Server with CI/CD)
 	onedev_enabled?: bool
 	onedev_admin_password?: string & !=""

@@ -48,49 +48,6 @@ grafana_admin_password: "test-password"
 # Traceloop Full Platform (LLM Observability)
 traceloop_enabled: true
 traceloop_hub_enabled: true
-# OIDC SSO Configuration (Keycloak-based authentication with all identity providers)
-oidc_enabled: true
-# Google identity federation (via Keycloak)
-oidc_google_enabled: true
-oidc_google_client_id: "123456789-test.apps.googleusercontent.com"
-oidc_google_client_secret: "fake-google-secret"
-# Microsoft Entra ID identity federation (via Keycloak)
-oidc_entra_enabled: true
-oidc_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
-oidc_entra_client_id: "87654321-4321-4321-4321-cba987654321"
-oidc_entra_client_secret: "fake-entra-secret"
-# GitHub identity federation (via Keycloak - requires mcp_gateway_enabled)
-oidc_github_enabled: true
-oidc_github_client_id: "Iv1.fake-github-client-id"
-oidc_github_client_secret: "fake-github-client-secret-32chars"
-oidc_github_org: "test-org"
-oidc_github_team: "developers,admins"
-# OIDC cookie configuration
-oidc_cookie_domain: "example.com"
-# Auth Gateway IP (for Keycloak)
-auth_gateway_addr: "10.10.10.147"
-# MCP Gateway Configuration (OAuth 2.1 Authorization Gateway)
-mcp_gateway_enabled: true
-mcp_gateway_addr: "10.10.10.146"
-mcp_storage_class: "proxmox-csi"
-mcp_request_timeout: "120s"
-mcp_rate_limit_requests: 100
-# Keycloak Configuration
-keycloak_replicas: 3
-keycloak_version: "26.4.7"
-keycloak_realm: "k8s-cluster"
-keycloak_admin_password: "test-admin-password"
-keycloak_oidc_client_secret: "test-oidc-client-secret"
-# Keycloak PostgreSQL Configuration (Keycloak backend)
-keycloak_postgres_replicas: 1
-keycloak_postgres_version: "17"
-keycloak_postgres_storage_size: "10Gi"
-keycloak_postgres_password: "test-postgres-password"
-# Redis Configuration (MCP session state)
-redis_replicas: 1
-redis_version: "7.4"
-redis_storage_size: "5Gi"
-redis_password: "test-redis-password"
 # OneDev Git Server (testing full deployment with external DB)
 onedev_enabled: true
 onedev_admin_password: "test-admin-password"
