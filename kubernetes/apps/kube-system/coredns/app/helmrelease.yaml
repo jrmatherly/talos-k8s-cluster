@@ -21,17 +21,6 @@ spec:
     replicaCount: 2
     servers:
       - zones:
-          - zone: matherly.net
-          - zone: spoonsofsalt.org
-        port: 53
-        plugins:
-          - name: errors
-          - name: log
-          - name: cache
-            parameters: 30
-          - name: forward
-            parameters: . 192.168.22.135
-      - zones:
           - zone: .
             scheme: dns://
             use_tcp: true

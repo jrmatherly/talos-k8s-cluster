@@ -20,21 +20,6 @@ spec:
       clusterIP: "#{ cluster_svc_cidr | nthhost(10) }#"
     replicaCount: 2
     servers:
-      #| Split DNS: Forward domain queries to k8s-gateway for internal resolution #|
-      #| This enables Envoy Gateway controller to reach Keycloak via auth.<domain> #|
-      - zones:
-#% for domain in cloudflare_domains %#
-          - zone: #{ domain }#
-#% endfor %#
-        port: 53
-        plugins:
-          - name: errors
-          - name: log
-          - name: cache
-            parameters: 30
-          - name: forward
-            parameters: . #{ cluster_dns_gateway_addr }#
-      #| Default server: Handle all other DNS queries #|
       - zones:
           - zone: .
             scheme: dns://
