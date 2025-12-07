@@ -55,18 +55,18 @@ spec:
         - uri-blocker
         - traffic-split
 
-      # External etcd connection settings (etcd deployed separately via StatefulSet)
-      etcd:
-        host:
-          - "http://etcd-0.etcd-headless.apisix-system.svc.cluster.local:2379"
-          - "http://etcd-1.etcd-headless.apisix-system.svc.cluster.local:2379"
-          - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
-        prefix: "/apisix"
-        timeout: 30
-
     # Disable embedded etcd chart (using external StatefulSet)
     etcd:
       enabled: false
+      prefix: "/apisix"
+      timeout: 30
+
+    # External etcd connection settings
+    externalEtcd:
+      host:
+        - "http://etcd-0.etcd-headless.apisix-system.svc.cluster.local:2379"
+        - "http://etcd-1.etcd-headless.apisix-system.svc.cluster.local:2379"
+        - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
 
     # Gateway service
     gateway:
