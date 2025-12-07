@@ -15,30 +15,31 @@ spec:
         name: apisix
         namespace: apisix-system
   values:
+    # Deployment settings (root level per chart structure)
+    replicaCount: 3
+
+    # Pod anti-affinity for HA
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: apisix
+              topologyKey: kubernetes.io/hostname
+
+    # Resources
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+
+    # APISIX configuration
     apisix:
-      enabled: true
-      replicaCount: 3
-
-      # Pod anti-affinity for HA
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app.kubernetes.io/name: apisix
-                topologyKey: kubernetes.io/hostname
-
-      # Resources
-      resources:
-        requests:
-          memory: "256Mi"
-          cpu: "200m"
-        limits:
-          memory: "1Gi"
-          cpu: "1000m"
-
       # Enable required plugins
       plugins:
         - ai-proxy           # LLM gateway for Azure OpenAI
