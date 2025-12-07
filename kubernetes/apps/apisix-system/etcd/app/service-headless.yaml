@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/name: etcd
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true  # Critical: allows DNS resolution before pods are Ready
   selector:
     app.kubernetes.io/name: etcd
   ports:
