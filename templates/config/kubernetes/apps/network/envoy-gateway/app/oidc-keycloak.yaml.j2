@@ -3,9 +3,9 @@
 #| Requires mcp_gateway_enabled=true for Keycloak deployment #|
 #|                                                                               #|
 #| Architecture:                                                                 #|
-#| - Keycloak UI accessible at auth.<domain> via envoy-external (cloudflared)    #|
-#| - envoy-external protected apps use auth.<domain> for callbacks               #|
-#| - envoy-internal protected apps use auth-internal.<domain> for callbacks      #|
+#| - Keycloak UI accessible at auth.<domain> via envoy-auth gateway              #|
+#| - Both envoy-internal and envoy-external use auth.<domain> for callbacks      #|
+#| - Split DNS routes internal clients to envoy-internal, external via cloudflare#|
 #% if oidc_enabled and mcp_gateway_enabled %#
 ---
 #| ============================================================================ #|
@@ -30,9 +30,8 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    #| Callback URL on envoy-internal - user is redirected here after Keycloak login #|
-    #| Internal clients (local network) use auth-internal for callbacks #|
-    redirectURL: https://auth-internal.#{ primary_domain }#/oauth2/callback
+    #| Callback URL - same hostname for both gateways, split DNS handles routing #|
+    redirectURL: https://auth.#{ primary_domain }#/oauth2/callback
     logoutPath: /logout
     scopes:
       - openid
@@ -44,13 +43,14 @@ spec:
 ---
 #| HTTPRoute for OIDC callback on envoy-internal #|
 #| Envoy Gateway intercepts /oauth2/callback and handles the token exchange #|
+#| Split DNS routes internal clients to this gateway for auth.<domain> #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: oidc-callback-internal
   annotations:
     #| Prevent external-dns from creating external records #|
-    #| auth-internal is handled by split DNS pointing to internal gateway #|
+    #| auth.<domain> is handled by split DNS pointing to internal gateway #|
     external-dns.alpha.kubernetes.io/controller: none
 spec:
   parentRefs:
@@ -58,13 +58,13 @@ spec:
       namespace: network
       sectionName: https
   hostnames:
-    - auth-internal.#{ primary_domain }#
+    - auth.#{ primary_domain }#
   rules:
-    #| Match all paths - OAuth2 filter will intercept /oauth2/* requests #|
+    #| Match /oauth2/* paths - OIDC filter intercepts these #|
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: /oauth2/
       backendRefs:
         #| Placeholder backend - requests never reach this; OIDC filter intercepts #|
         - name: oidc-callback-placeholder
@@ -92,8 +92,7 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    #| Callback URL on envoy-external - user is redirected here after Keycloak login #|
-    #| External clients (via cloudflared) use auth.<domain> for callbacks #|
+    #| Callback URL - same hostname for both gateways, cloudflared routes external #|
     redirectURL: https://auth.#{ primary_domain }#/oauth2/callback
     logoutPath: /logout
     scopes:
@@ -106,7 +105,7 @@ spec:
 ---
 #| HTTPRoute for OIDC callback on envoy-external #|
 #| Handles /oauth2/* paths for external OIDC callback #|
-#| This is on auth.<domain> which is accessible via cloudflared #|
+#| External clients reach this via cloudflared tunnel #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

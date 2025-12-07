@@ -16,7 +16,7 @@ spec:
     clientID: envoy-gateway
     clientSecret:
       name: keycloak-oidc-client-secret
-    redirectURL: https://auth-internal.matherly.net/oauth2/callback
+    redirectURL: https://auth.matherly.net/oauth2/callback
     logoutPath: /logout
     scopes:
       - openid
@@ -38,12 +38,12 @@ spec:
       namespace: network
       sectionName: https
   hostnames:
-    - auth-internal.matherly.net
+    - auth.matherly.net
   rules:
     - matches:
         - path:
             type: PathPrefix
-            value: /
+            value: /oauth2/
       backendRefs:
         - name: oidc-callback-placeholder
           port: 80
