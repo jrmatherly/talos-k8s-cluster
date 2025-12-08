@@ -43,7 +43,9 @@ spec:
     apisix:
       # Enable required plugins
       plugins:
-        - ai-proxy           # LLM gateway for Azure OpenAI
+        - ai-proxy           # LLM gateway for Azure OpenAI (single backend)
+        - ai-proxy-multi     # LLM gateway with load balancing/failover
+        - proxy-buffering    # Disable buffering for SSE streaming
         - openid-connect
         - proxy-rewrite
         - redirect
