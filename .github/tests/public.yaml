@@ -64,12 +64,6 @@ onedev_cpu_limit: "2000m"
 onedev_memory_limit: "4Gi"
 onedev_cpu_request: "500m"
 onedev_memory_request: "2Gi"
-# APISIX Gateway Configuration (API Gateway with MCP support)
-apisix_enabled: true
-apisix_gateway_addr: "10.10.10.146"
-apisix_admin_key: "test-admin-key-change-me"
-apisix_viewer_key: "test-viewer-key-change-me"
-apisix_etcd_storage_class: "proxmox-csi"
 # WorkOS AuthKit Configuration (OAuth 2.1 / MCP authentication)
 workos_client_id: "client_test123"
 workos_client_secret: "sk_test_fake_secret"

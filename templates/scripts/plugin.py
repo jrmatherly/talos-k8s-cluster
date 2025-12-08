@@ -241,13 +241,6 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("onedev_cpu_request", "500m")
         data.setdefault("onedev_memory_request", "2Gi")
 
-        # APISIX Gateway defaults (API Gateway with MCP support)
-        data.setdefault("apisix_enabled", False)
-        data.setdefault("apisix_gateway_addr", "")
-        data.setdefault("apisix_admin_key", "")
-        data.setdefault("apisix_viewer_key", "")
-        data.setdefault("apisix_etcd_storage_class", "proxmox-csi")
-
         # WorkOS AuthKit defaults (OAuth 2.1 / MCP authentication)
         data.setdefault("workos_client_id", "")
         data.setdefault("workos_client_secret", "")
