@@ -124,14 +124,14 @@ repository_name: ""
 #    Can be a single domain string or an array of domains.
 #    First domain is primary (used for flux-webhook, internal infrastructure).
 #    (REQUIRED)
-#    Single domain example: "example.com"
+#    Single domain example: ["example.com"]
 #    Multiple domains example: ["example.com", "example.org"]
 #
 #    In templates, domains are available as:
 #      ${SECRET_DOMAIN}   - Primary domain (first in list)
 #      ${SECRET_DOMAIN_2} - Second domain
 #      ${SECRET_DOMAIN_3} - Third domain, etc.
-cloudflare_domain: ""
+cloudflare_domains: []
 
 # -- Cloudflare API Token with required permissions.
 #    (REQUIRED) - See README "Stage 3: Cloudflare configuration" for creation steps.
@@ -244,6 +244,20 @@ cloudflare_token: ""
 #    (REQUIRED if envoy_ai_gateway_enabled) - Must be an UNUSED IP within node_cidr
 #    Example: "192.168.1.145"
 # envoy_ai_gateway_addr: ""
+
+# ==============================================================================
+# MCP GATEWAY (Optional - Model Context Protocol)
+# ==============================================================================
+# MCP Gateway enables hosting MCP servers with SSE support.
+# REF: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization
+
+# -- Enable MCP Gateway functionality.
+#    (OPTIONAL) / (DEFAULT: false)
+# mcp_gateway_enabled: true
+
+# -- MCP session timeout in seconds.
+#    (OPTIONAL) / (DEFAULT: 3600 - 1 hour)
+# mcp_session_timeout: 3600
 
 # ==============================================================================
 # AZURE OPENAI - US EAST REGION
@@ -415,17 +429,3 @@ cloudflare_token: ""
 #    (REQUIRED for WorkOS integration)
 #    Example: "mycompany" for mycompany.authkit.app
 # workos_subdomain: ""
-
-# ==============================================================================
-# MCP GATEWAY (Optional - Model Context Protocol)
-# ==============================================================================
-# MCP Gateway enables hosting MCP servers with SSE support.
-# REF: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization
-
-# -- Enable MCP Gateway functionality.
-#    (OPTIONAL) / (DEFAULT: false)
-# mcp_gateway_enabled: true
-
-# -- MCP session timeout in seconds.
-#    (OPTIONAL) / (DEFAULT: 3600 - 1 hour)
-# mcp_session_timeout: 3600
