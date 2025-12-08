@@ -115,17 +115,88 @@ data:
         }
       ],
       "scopeMappings": [],
-      "clientScopeMappings": {}
+      "clientScopeMappings": {},
+      "identityProviders": [
+        {
+          "alias": "entra-id",
+          "displayName": "Microsoft Entra ID",
+          "providerId": "oidc",
+          "enabled": true,
+          "trustEmail": true,
+          "storeToken": false,
+          "addReadTokenRoleOnCreate": false,
+          "linkOnly": false,
+          "firstBrokerLoginFlowAlias": "first broker login",
+          "config": {
+            "useJwksUrl": "true",
+            "syncMode": "FORCE",
+            "clientAuthMethod": "client_secret_post",
+            "authorizationUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/token",
+            "jwksUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/discovery/v2.0/keys",
+            "userInfoUrl": "https://graph.microsoft.com/oidc/userinfo",
+            "logoutUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/logout",
+            "issuer": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/v2.0",
+            "clientId": "5a39e93b-5781-4305-b6c5-848ec1369957",
+            "clientSecret": "$(env:ENTRA_ID_CLIENT_SECRET)",
+            "defaultScope": "openid profile email",
+            "validateSignature": "true",
+            "pkceEnabled": "true",
+            "pkceMethod": "S256"
+          }
+        }
+      ],
+      "identityProviderMappers": [
+        {
+          "name": "email",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "email",
+            "user.attribute": "email"
+          }
+        },
+        {
+          "name": "first-name",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "given_name",
+            "user.attribute": "firstName"
+          }
+        },
+        {
+          "name": "last-name",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "family_name",
+            "user.attribute": "lastName"
+          }
+        },
+        {
+          "name": "username",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-username-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "template": "${CLAIM.preferred_username}"
+          }
+        }
+      ]
     }
 ---
 # Job to import the realm configuration using keycloak-config-cli
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v3
+  name: keycloak-realm-import-v4
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "3"
+    config-version: "4"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -150,7 +221,12 @@ spec:
             - name: KEYCLOAK_AVAILABILITYCHECK_TIMEOUT
               value: "120s"
             - name: IMPORT_VARSUBSTITUTION_ENABLED
-              value: "false"
+              value: "true"
+            - name: ENTRA_ID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: entra-id-client-secret
             - name: IMPORT_MANAGED_CLIENT
               value: "full"
             - name: IMPORT_MANAGED_GROUP

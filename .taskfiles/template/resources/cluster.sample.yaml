@@ -503,3 +503,37 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULTs shown)
 # keycloak_cpu_limit: "1000m"
 # keycloak_memory_limit: "1Gi"
+
+# ==============================================================================
+# KEYCLOAK ENTRA ID IDENTITY PROVIDER (Optional - Federation with Microsoft)
+# ==============================================================================
+# Configure Microsoft Entra ID as an external identity provider in Keycloak.
+# Users will be able to "Sign in with Microsoft" using their organizational accounts.
+# REF: https://blog.ght1pc9kc.fr/en/2023/configure-azure-entra-id-as-idp-on-keycloak/
+
+# -- Enable Microsoft Entra ID as an identity provider.
+#    (OPTIONAL) / (DEFAULT: false)
+#    When enabled, users will see a "Microsoft Entra ID" button on the Keycloak login page.
+# keycloak_entra_id_enabled: true
+
+# -- Azure Entra ID Tenant ID (Directory ID).
+#    (REQUIRED if keycloak_entra_id_enabled) - From Azure Portal → Entra ID → Overview
+#    Format: GUID (e.g., "12345678-1234-1234-1234-123456789abc")
+# keycloak_entra_id_tenant_id: ""
+
+# -- Azure App Registration Client ID (Application ID).
+#    (REQUIRED if keycloak_entra_id_enabled) - From Azure Portal → App Registrations
+#    NOTE: Create a new app registration:
+#      1. Go to Azure Portal → Microsoft Entra ID → App Registrations → New Registration
+#      2. Name: "Keycloak" (or your preferred name)
+#      3. Supported account types: "Accounts in this organizational directory only"
+#      4. Redirect URI: https://auth.<your-domain>/realms/k8s-cluster/broker/entra-id/endpoint
+#    Format: GUID (e.g., "12345678-1234-1234-1234-123456789abc")
+# keycloak_entra_id_client_id: ""
+
+# -- Azure App Registration Client Secret.
+#    (REQUIRED if keycloak_entra_id_enabled) - Will be encrypted with SOPS
+#    NOTE: Create client secret:
+#      1. In your app registration → Certificates & secrets → New client secret
+#      2. Copy the Value (NOT the Secret ID) immediately - it's only shown once!
+# keycloak_entra_id_client_secret: ""

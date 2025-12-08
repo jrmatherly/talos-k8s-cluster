@@ -116,17 +116,89 @@ data:
         }
       ],
       "scopeMappings": [],
-      "clientScopeMappings": {}
+      "clientScopeMappings": {}#% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#,
+      "identityProviders": [
+        {
+          "alias": "entra-id",
+          "displayName": "Microsoft Entra ID",
+          "providerId": "oidc",
+          "enabled": true,
+          "trustEmail": true,
+          "storeToken": false,
+          "addReadTokenRoleOnCreate": false,
+          "linkOnly": false,
+          "firstBrokerLoginFlowAlias": "first broker login",
+          "config": {
+            "useJwksUrl": "true",
+            "syncMode": "FORCE",
+            "clientAuthMethod": "client_secret_post",
+            "authorizationUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/token",
+            "jwksUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/discovery/v2.0/keys",
+            "userInfoUrl": "https://graph.microsoft.com/oidc/userinfo",
+            "logoutUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/logout",
+            "issuer": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/v2.0",
+            "clientId": "#{keycloak_entra_id_client_id}#",
+            "clientSecret": "$(env:ENTRA_ID_CLIENT_SECRET)",
+            "defaultScope": "openid profile email",
+            "validateSignature": "true",
+            "pkceEnabled": "true",
+            "pkceMethod": "S256"
+          }
+        }
+      ],
+      "identityProviderMappers": [
+        {
+          "name": "email",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "email",
+            "user.attribute": "email"
+          }
+        },
+        {
+          "name": "first-name",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "given_name",
+            "user.attribute": "firstName"
+          }
+        },
+        {
+          "name": "last-name",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "family_name",
+            "user.attribute": "lastName"
+          }
+        },
+        {
+          "name": "username",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "oidc-username-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "template": "${CLAIM.preferred_username}"
+          }
+        }
+      ]
+#% endif %#
     }
 ---
 # Job to import the realm configuration using keycloak-config-cli
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v3
+  name: keycloak-realm-import-v4
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "3"
+    config-version: "4"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -151,7 +223,14 @@ spec:
             - name: KEYCLOAK_AVAILABILITYCHECK_TIMEOUT
               value: "120s"
             - name: IMPORT_VARSUBSTITUTION_ENABLED
-              value: "false"
+              value: "true"
+#% if keycloak_entra_id_enabled and keycloak_entra_id_client_secret %#
+            - name: ENTRA_ID_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: entra-id-client-secret
+#% endif %#
             - name: IMPORT_MANAGED_CLIENT
               value: "full"
             - name: IMPORT_MANAGED_GROUP

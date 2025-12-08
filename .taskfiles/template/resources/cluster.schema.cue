@@ -115,6 +115,12 @@ import (
 	keycloak_postgresql_storage_size?: string & !=""  // e.g., "10Gi"
 	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway integration
 	keycloak_oidc_cookie_domain?: string & !="" // Cookie domain for SSO across subdomains (optional)
+
+	// Keycloak Entra ID Identity Provider (optional - federation with Microsoft Entra ID)
+	keycloak_entra_id_enabled?: bool            // Enable Microsoft Entra ID as identity provider
+	keycloak_entra_id_tenant_id?: string & !="" // Azure Entra ID tenant ID (GUID)
+	keycloak_entra_id_client_id?: string & !="" // Azure App Registration client ID (GUID)
+	keycloak_entra_id_client_secret?: string & !="" // Azure App Registration client secret
 }
 
 #Config

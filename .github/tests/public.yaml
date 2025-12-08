@@ -78,3 +78,8 @@ keycloak_postgresql_enabled: true
 keycloak_postgresql_replicas: 3
 keycloak_postgresql_storage_size: "10Gi"
 keycloak_oidc_client_secret: "test-oidc-secret"
+# Keycloak Entra ID Identity Provider (Microsoft Entra ID federation)
+keycloak_entra_id_enabled: true
+keycloak_entra_id_tenant_id: "12345678-1234-1234-1234-123456789abc"
+keycloak_entra_id_client_id: "87654321-4321-4321-4321-cba987654321"
+keycloak_entra_id_client_secret: "test-entra-id-client-secret"

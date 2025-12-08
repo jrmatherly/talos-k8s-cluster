@@ -254,6 +254,12 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_oidc_client_secret", "")
         data.setdefault("keycloak_oidc_cookie_domain", "")
 
+        # Keycloak Entra ID Identity Provider defaults
+        data.setdefault("keycloak_entra_id_enabled", False)
+        data.setdefault("keycloak_entra_id_tenant_id", "")
+        data.setdefault("keycloak_entra_id_client_id", "")
+        data.setdefault("keycloak_entra_id_client_secret", "")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:
