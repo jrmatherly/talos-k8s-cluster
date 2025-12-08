@@ -41,11 +41,19 @@ spec:
 
     # APISIX configuration
     apisix:
+      # DNS resolver for external domains (Azure OpenAI, etc.)
+      # Uses cluster DNS (kube-dns) with Cloudflare as fallback
+      dns_resolver:
+        - "10.43.0.10"    # kube-dns ClusterIP
+        - "1.1.1.1"       # Cloudflare DNS (fallback)
+        - "8.8.8.8"       # Google DNS (fallback)
+      dns_resolver_valid: 30
+      resolver_timeout: 5
+
       # Enable required plugins
       plugins:
         - ai-proxy           # LLM gateway for Azure OpenAI (single backend)
         - ai-proxy-multi     # LLM gateway with load balancing/failover
-        - proxy-buffering    # Disable buffering for SSE streaming
         - openid-connect
         - proxy-rewrite
         - redirect
