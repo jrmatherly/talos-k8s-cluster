@@ -69,15 +69,15 @@ spec:
             name: keycloak-secret
             key: admin-password
       - name: KC_HOSTNAME
-        value: "https://auth.${SECRET_DOMAIN}"
+        value: "auth.${SECRET_DOMAIN}"
       - name: KC_HOSTNAME_ADMIN
-        value: "https://auth.${SECRET_DOMAIN}"
+        value: "auth.${SECRET_DOMAIN}"
       - name: KC_HOSTNAME_STRICT
         value: "false"
-      - name: KC_HOSTNAME_STRICT_HTTPS
-        value: "true"
       - name: KC_HOSTNAME_STRICT_BACKCHANNEL
         value: "false"
+      - name: KC_PROXY
+        value: "edge"
       - name: KC_PROXY_HEADERS
         value: "xforwarded"
       - name: KC_HTTP_ENABLED

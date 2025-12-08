@@ -185,6 +185,24 @@ data:
             "syncMode": "INHERIT",
             "template": "$${CLAIM.preferred_username}"
           }
+        },
+        {
+          "name": "manage-account-role",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.manage-account"
+          }
+        },
+        {
+          "name": "view-profile-role",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.view-profile"
+          }
         }
       ]
     }
@@ -193,10 +211,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v5
+  name: keycloak-realm-import-v6
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "5"
+    config-version: "6"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
