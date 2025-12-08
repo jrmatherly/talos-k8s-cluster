@@ -100,6 +100,21 @@ import (
 	mcp_gateway_enabled?: bool
 	mcp_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr
 	mcp_session_timeout?: int & >=60            // Session timeout in seconds, default 3600
+
+	// Keycloak Configuration (OIDC Authentication Provider)
+	keycloak_enabled?: bool
+	keycloak_admin_password?: string & !=""
+	keycloak_db_password?: string & !=""
+	keycloak_replicas?: int & >=1               // Number of Keycloak replicas (default: 2)
+	keycloak_cpu_request?: string & !=""        // e.g., "250m"
+	keycloak_memory_request?: string & !=""     // e.g., "512Mi"
+	keycloak_cpu_limit?: string & !=""          // e.g., "1000m"
+	keycloak_memory_limit?: string & !=""       // e.g., "1Gi"
+	keycloak_postgresql_enabled?: bool          // Enable built-in CloudNativePG PostgreSQL (default: true)
+	keycloak_postgresql_replicas?: int & >=1    // PostgreSQL replicas (default: 3)
+	keycloak_postgresql_storage_size?: string & !=""  // e.g., "10Gi"
+	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway integration
+	keycloak_oidc_cookie_domain?: string & !="" // Cookie domain for SSO across subdomains (optional)
 }
 
 #Config

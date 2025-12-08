@@ -8,3 +8,6 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./podmonitor.yaml
+#% if keycloak_enabled %#
+  - ./securitypolicy.yaml
+#% endif %#

@@ -1,0 +1,139 @@
+#% if keycloak_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: keycloak
+spec:
+  chart:
+    spec:
+      chart: keycloak
+      version: "24.4.4"
+      sourceRef:
+        kind: OCIRepository
+        name: keycloak
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Image Configuration - Use official Keycloak image
+    # (Bitnami images require commercial subscription since Aug 2025)
+    # ============================================================
+    image:
+      registry: quay.io
+      repository: keycloak/keycloak
+      tag: "26.4"
+
+    # ============================================================
+    # Replicas for HA
+    # ============================================================
+    replicaCount: #{ keycloak_replicas | default(2) }#
+
+    # ============================================================
+    # Authentication
+    # ============================================================
+    auth:
+      adminUser: admin
+      existingSecret: keycloak-secret
+      passwordSecretKey: admin-password
+
+    # ============================================================
+    # Production Mode
+    # ============================================================
+    production: true
+
+    # ============================================================
+    # Proxy Configuration (behind Envoy Gateway)
+    # ============================================================
+    proxy: edge
+    httpRelativePath: "/"
+
+    # ============================================================
+    # PostgreSQL Database Configuration
+    # ============================================================
+    postgresql:
+      enabled: false
+
+    externalDatabase:
+      host: keycloak-db-rw.keycloak.svc.cluster.local
+      port: 5432
+      user: keycloak
+      database: keycloak
+      existingSecret: keycloak-db-secret
+      existingSecretPasswordKey: password
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      ports:
+        http: 8080
+        https: 8443
+
+    # ============================================================
+    # Resource Limits
+    # ============================================================
+    resources:
+      requests:
+        cpu: "#{ keycloak_cpu_request | default('250m') }#"
+        memory: "#{ keycloak_memory_request | default('512Mi') }#"
+      limits:
+        cpu: "#{ keycloak_cpu_limit | default('1000m') }#"
+        memory: "#{ keycloak_memory_limit | default('1Gi') }#"
+
+    # ============================================================
+    # Metrics for Prometheus
+    # ============================================================
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        namespace: keycloak
+        labels:
+          release: kube-prometheus-stack
+
+    # ============================================================
+    # Startup/Liveness/Readiness Probes
+    # ============================================================
+    startupProbe:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 30
+      successThreshold: 1
+
+    livenessProbe:
+      enabled: true
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+      successThreshold: 1
+
+    readinessProbe:
+      enabled: true
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+      successThreshold: 1
+
+    # ============================================================
+    # Extra environment variables
+    # ============================================================
+    extraEnvVars:
+      - name: KC_HOSTNAME
+        value: "auth.${SECRET_DOMAIN}"
+      - name: KC_HOSTNAME_STRICT
+        value: "false"
+      - name: KC_PROXY_HEADERS
+        value: "xforwarded"
+      - name: KC_HTTP_ENABLED
+        value: "true"
+      - name: KC_HEALTH_ENABLED
+        value: "true"
+      - name: KC_METRICS_ENABLED
+        value: "true"
+#% endif %#

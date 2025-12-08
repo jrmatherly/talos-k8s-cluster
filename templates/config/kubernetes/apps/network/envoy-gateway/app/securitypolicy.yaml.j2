@@ -1,0 +1,44 @@
+#% if keycloak_enabled %#
+---
+# Secret containing the Keycloak OIDC client secret
+# This secret must be created manually after Keycloak realm/client setup:
+#   1. Login to Keycloak admin: https://auth.${SECRET_DOMAIN}
+#   2. Create realm "k8s-cluster"
+#   3. Create client "envoy-gateway" (confidential)
+#   4. Copy client secret to this Kubernetes secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-oidc-client-secret
+type: Opaque
+stringData:
+  client-secret: "#{ keycloak_oidc_client_secret }#"
+---
+# SecurityPolicy for MCP Gateway OIDC authentication
+# Protects MCP routes by requiring Keycloak authentication
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: keycloak-oidc-mcp
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-context7
+  oidc:
+    provider:
+      issuer: "https://auth.${SECRET_DOMAIN}/realms/k8s-cluster"
+    clientID: "envoy-gateway"
+    clientSecret:
+      name: keycloak-oidc-client-secret
+    redirectURL: "https://mcp.${SECRET_DOMAIN}/oauth2/callback"
+    logoutPath: "/logout"
+    scopes:
+      - openid
+      - profile
+      - email
+    forwardAccessToken: true
+#% if keycloak_oidc_cookie_domain %#
+    cookieDomain: "#{ keycloak_oidc_cookie_domain }#"
+#% endif %#
+#% endif %#
