@@ -15,7 +15,7 @@ stringData:
   client-secret: "#{ keycloak_oidc_client_secret }#"
 ---
 # SecurityPolicy for MCP Gateway OIDC authentication
-# Protects MCP routes by requiring Keycloak authentication
+# Protects ALL routes through the MCP gateway by requiring Keycloak authentication
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -23,8 +23,8 @@ metadata:
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: mcp-context7
+      kind: Gateway
+      name: envoy-mcp
   oidc:
     provider:
       issuer: "https://auth.${SECRET_DOMAIN}/realms/k8s-cluster"
