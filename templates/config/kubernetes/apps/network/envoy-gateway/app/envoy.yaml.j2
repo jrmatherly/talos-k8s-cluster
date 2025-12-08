@@ -115,9 +115,13 @@ spec:
     - type: Gzip
   connection:
     bufferLimit: 8Mi
-  targetSelectors:
+  targetRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
+      name: envoy-external
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-internal
   tcpKeepalive: {}
   timeout:
     http:
@@ -143,9 +147,13 @@ spec:
     initialConnectionWindowSize: 8Mi
     onInvalidMessage: TerminateStream
   http3: {}
-  targetSelectors:
+  targetRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
+      name: envoy-external
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-internal
   tcpKeepalive: {}
   timeout:
     http:
