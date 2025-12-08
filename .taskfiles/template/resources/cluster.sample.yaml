@@ -96,6 +96,16 @@ cluster_gateway_addr: ""
 #    (REQUIRED) - Must be an UNUSED IP within node_cidr
 cloudflare_gateway_addr: ""
 
+# -- Load balancer IP for the AI Gateway.
+#    (REQUIRED if envoy_ai_gateway_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.145"
+# envoy_ai_gateway_addr: ""
+
+# -- Load balancer IP for the MCP Gateway.
+#    (REQUIRED if mcp_gateway_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.146"
+# mcp_gateway_addr: ""
+
 # ==============================================================================
 # GITHUB REPOSITORY SETTINGS
 # ==============================================================================
@@ -240,15 +250,11 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: false)
 # envoy_ai_gateway_enabled: true
 
-# -- Load balancer IP for the AI Gateway.
-#    (REQUIRED if envoy_ai_gateway_enabled) - Must be an UNUSED IP within node_cidr
-#    Example: "192.168.1.145"
-# envoy_ai_gateway_addr: ""
-
 # ==============================================================================
 # MCP GATEWAY (Optional - Model Context Protocol)
 # ==============================================================================
-# MCP Gateway enables hosting MCP servers with SSE support.
+# MCP Gateway enables hosting MCP servers with SSE/WebSocket transport.
+# Creates a dedicated Gateway at mcp.<domain> for MCP server routing.
 # REF: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization
 
 # -- Enable MCP Gateway functionality.
@@ -256,6 +262,7 @@ cloudflare_token: ""
 # mcp_gateway_enabled: true
 
 # -- MCP session timeout in seconds.
+#    Controls connection idle and max duration timeouts for long-running MCP operations.
 #    (OPTIONAL) / (DEFAULT: 3600 - 1 hour)
 # mcp_session_timeout: 3600
 

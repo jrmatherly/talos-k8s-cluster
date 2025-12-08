@@ -175,6 +175,11 @@ spec:
       namespace: network
       sectionName: http
 #% endif %#
+#% if mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
+    - name: envoy-mcp
+      namespace: network
+      sectionName: http
+#% endif %#
   rules:
     - filters:
         - type: RequestRedirect

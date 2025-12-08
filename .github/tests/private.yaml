@@ -59,3 +59,4 @@ proxmox_csi_token_secret: "fake-secret"
 # workos_subdomain: ""
 # MCP Gateway (disabled for private repo testing)
 # mcp_gateway_enabled: false
+# mcp_gateway_addr: ""

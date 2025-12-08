@@ -5,3 +5,4 @@ metadata:
   name: ai-system
   labels:
     pod-security.kubernetes.io/enforce: baseline
+    gateway/mcp: "true"

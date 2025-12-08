@@ -67,4 +67,5 @@ workos_client_secret: "sk_test_fake_secret"
 workos_subdomain: "test-subdomain"
 # MCP Gateway Configuration
 mcp_gateway_enabled: true
+mcp_gateway_addr: "10.10.10.146"
 mcp_session_timeout: 3600

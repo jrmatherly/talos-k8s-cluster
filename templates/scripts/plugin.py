@@ -236,6 +236,7 @@ class Plugin(makejinja.plugin.Plugin):
 
         # MCP Gateway defaults (Model Context Protocol)
         data.setdefault("mcp_gateway_enabled", False)
+        data.setdefault("mcp_gateway_addr", "")
         data.setdefault("mcp_session_timeout", 3600)
 
         return data

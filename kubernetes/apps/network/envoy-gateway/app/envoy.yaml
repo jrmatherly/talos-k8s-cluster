@@ -173,6 +173,9 @@ spec:
     - name: envoy-ai
       namespace: network
       sectionName: http
+    - name: envoy-mcp
+      namespace: network
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect

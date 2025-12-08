@@ -98,6 +98,7 @@ import (
 
 	// MCP Gateway Configuration (Model Context Protocol)
 	mcp_gateway_enabled?: bool
+	mcp_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr
 	mcp_session_timeout?: int & >=60            // Session timeout in seconds, default 3600
 }
 

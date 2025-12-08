@@ -1,0 +1,89 @@
+---
+# MCP Gateway for Model Context Protocol routing
+# Uses Envoy AI Gateway's native MCPRoute CRD for tool multiplexing
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-mcp
+  annotations:
+    external-dns.alpha.kubernetes.io/target: mcp.${SECRET_DOMAIN}
+spec:
+  gatewayClassName: envoy
+  infrastructure:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: mcp.${SECRET_DOMAIN}
+      lbipam.cilium.io/ips: "192.168.22.146"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway/mcp: "true"
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: matherly-net-production-tls
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
+---
+# Client traffic policy for MCP Gateway with larger buffer for MCP payloads
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: envoy-mcp
+spec:
+  clientIPDetection:
+    xForwardedFor:
+      numTrustedHops: 1
+  connection:
+    bufferLimit: 50Mi
+  http1:
+    enableTrailers: true
+  http2:
+    initialStreamWindowSize: 1Mi
+    initialConnectionWindowSize: 16Mi
+    onInvalidMessage: TerminateStream
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-mcp
+  tcpKeepalive: {}
+  timeout:
+    http:
+      requestReceivedTimeout: 0s
+  tls:
+    minVersion: "1.2"
+    alpnProtocols:
+      - h2
+      - http/1.1
+---
+# Backend traffic policy for MCP Gateway with extended timeouts for long-running tool calls
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: envoy-mcp
+spec:
+  compression:
+    - type: Gzip
+  connection:
+    bufferLimit: 50Mi
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-mcp
+  tcpKeepalive: {}
+  timeout:
+    http:
+      connectionIdleTimeout: 3600s
+      maxConnectionDuration: 3600s
+      requestTimeout: 300s
