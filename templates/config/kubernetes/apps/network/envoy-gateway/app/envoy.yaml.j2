@@ -134,6 +134,10 @@ spec:
   connection:
     bufferLimit: 4Mi
     maxAcceptPerSocketEvent: 0
+  headers:
+    # Allow headers with underscores (e.g., from APISIX Admin API responses)
+    # Default is RejectRequest which causes ERR_HTTP2_PROTOCOL_ERROR
+    withUnderscoresAction: Allow
   http2:
     initialStreamWindowSize: 512Ki
     initialConnectionWindowSize: 8Mi
