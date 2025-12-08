@@ -139,7 +139,7 @@ data:
             "logoutUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/logout",
             "issuer": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/v2.0",
             "clientId": "#{keycloak_entra_id_client_id}#",
-            "clientSecret": "$(env:ENTRA_ID_CLIENT_SECRET)",
+            "clientSecret": "$$(env:ENTRA_ID_CLIENT_SECRET)",
             "defaultScope": "openid profile email",
             "validateSignature": "true",
             "pkceEnabled": "true",

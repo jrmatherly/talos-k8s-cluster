@@ -138,7 +138,7 @@ data:
             "logoutUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/logout",
             "issuer": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/v2.0",
             "clientId": "5a39e93b-5781-4305-b6c5-848ec1369957",
-            "clientSecret": "$(env:ENTRA_ID_CLIENT_SECRET)",
+            "clientSecret": "$$(env:ENTRA_ID_CLIENT_SECRET)",
             "defaultScope": "openid profile email",
             "validateSignature": "true",
             "pkceEnabled": "true",
