@@ -123,10 +123,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v2
+  name: keycloak-realm-import-v3
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "2"
+    config-version: "3"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -158,12 +158,12 @@ spec:
               value: "full"
             - name: IMPORT_MANAGED_ROLE
               value: "full"
+            - name: IMPORT_FILES_LOCATIONS
+              value: "/config/*"
           volumeMounts:
             - name: realm-config
               mountPath: /config
               readOnly: true
-          args:
-            - "--import.path=/config"
       volumes:
         - name: realm-config
           configMap:
