@@ -250,7 +250,7 @@ spec:
       - h2
       - http/1.1
 ---
-# Backend traffic policy for AI Gateway with longer timeouts
+# Backend traffic policy for AI Gateway with longer timeouts, retry, and health checking
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:
@@ -268,6 +268,28 @@ spec:
   timeout:
     http:
       requestTimeout: 120s
+  # Retry configuration for transient failures
+  retry:
+    numRetries: 2
+    perRetry:
+      backOff:
+        baseInterval: 1s
+        maxInterval: 10s
+      timeout: 30s
+    retryOn:
+      httpStatusCodes:
+        - 502  # Bad Gateway
+        - 503  # Service Unavailable
+        - 504  # Gateway Timeout
+      triggers:
+        - connect-failure
+        - retriable-status-codes
+  # Passive health checking (outlier detection) for automatic backend ejection
+  healthCheck:
+    passive:
+      baseEjectionTime: 30s           # How long to eject unhealthy backends
+      consecutive5XxErrors: 5         # Eject after 5 consecutive 5xx errors
+      consecutiveGatewayErrors: 3     # Eject after 3 consecutive gateway errors (502/503/504)
 #% endif %#
 ---
 # Service to expose Envoy Gateway Admin Console
