@@ -69,12 +69,24 @@ spec:
           secretKeyRef:
             name: keycloak-secret
             key: admin-password
+      #| Hostname config for Cloudflare tunnel/reverse proxy - include https:// scheme #|
       - name: KC_HOSTNAME
-        value: "auth.${SECRET_DOMAIN}"
+        value: "https://auth.${SECRET_DOMAIN}"
+      - name: KC_HOSTNAME_ADMIN
+        value: "https://auth.${SECRET_DOMAIN}"
+      - name: KC_HOSTNAME_STRICT
+        value: "false"
+      - name: KC_HOSTNAME_STRICT_HTTPS
+        value: "true"
+      - name: KC_HOSTNAME_STRICT_BACKCHANNEL
+        value: "false"
       - name: KC_PROXY_HEADERS
         value: "xforwarded"
       - name: KC_HTTP_ENABLED
         value: "true"
+      #| Disable route attachment - using Envoy session persistence instead #|
+      - name: KC_SPI_STICKY_SESSION_ENCODER_INFINISPAN_SHOULD_ATTACH_ROUTE
+        value: "false"
       - name: KC_HEALTH_ENABLED
         value: "true"
       - name: KC_METRICS_ENABLED
