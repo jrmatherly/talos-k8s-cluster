@@ -12,6 +12,14 @@ spec:
   timeout: 15m
   values:
     # ============================================================
+    # Global Settings - Allow non-Bitnami images
+    # (Required to use official Keycloak image with Bitnami chart)
+    # ============================================================
+    global:
+      security:
+        allowInsecureImages: true
+
+    # ============================================================
     # Image Configuration - Use official Keycloak image
     # (Bitnami images require commercial subscription since Aug 2025)
     # ============================================================
