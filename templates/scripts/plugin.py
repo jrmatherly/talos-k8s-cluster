@@ -212,18 +212,6 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("alertmanager_storage_size", "5Gi")
         data.setdefault("grafana_storage_size", "10Gi")
 
-        # Traceloop Full Platform defaults (LLM Observability)
-        data.setdefault("traceloop_enabled", False)
-        data.setdefault("traceloop_hub_enabled", False)
-        data.setdefault("traceloop_hub_version", "v0.7.2")
-        data.setdefault("traceloop_hub_replicas", 2)
-        data.setdefault("traceloop_hub_cpu_limit", "500m")
-        data.setdefault("traceloop_hub_cpu_request", "100m")
-        data.setdefault("traceloop_hub_memory_limit", "512Mi")
-        data.setdefault("traceloop_hub_memory_request", "256Mi")
-        data.setdefault("traceloop_openai_api_key", "")
-        data.setdefault("traceloop_anthropic_api_key", "")
-
         # OneDev defaults (Git Server with CI/CD)
         data.setdefault("onedev_enabled", False)
         data.setdefault("onedev_admin_password", "")

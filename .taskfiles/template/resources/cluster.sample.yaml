@@ -289,7 +289,6 @@ cloudflare_token: ""
 # OBSERVABILITY STACK (Optional - Prometheus/Grafana for K8s metrics)
 # ==============================================================================
 # Kubernetes infrastructure metrics with Prometheus and Grafana dashboards.
-# LLM observability is handled by Traceloop Full Platform.
 
 # -- Enable the observability stack.
 #    (OPTIONAL) / (DEFAULT: false)
@@ -323,46 +322,6 @@ cloudflare_token: ""
 # -- Number of Prometheus replicas.
 #    (OPTIONAL) / (DEFAULT: 1)
 # prometheus_replicas: 1
-
-# ==============================================================================
-# TRACELOOP FULL PLATFORM (Optional - LLM Observability)
-# ==============================================================================
-# Traceloop provides comprehensive LLM observability with:
-# - Traceloop Hub: High-performance LLM Gateway (Rust)
-# - OpenLLMetry SDK support for LLM instrumentation
-# - Token usage tracking and cost analytics
-# - Prompt/response logging and evaluation
-# REF: https://www.traceloop.com/docs/self-host/full-deployment
-
-# -- Enable Traceloop Full Platform.
-#    (OPTIONAL) / (DEFAULT: false)
-# traceloop_enabled: true
-
-# -- Enable Traceloop Hub (LLM Gateway).
-#    Can be enabled separately for Phase 1 migration.
-#    (OPTIONAL) / (DEFAULT: false)
-# traceloop_hub_enabled: true
-
-# -- Traceloop Hub version (git tag from traceloop/hub repo).
-#    (OPTIONAL) / (DEFAULT: "v0.7.2")
-# traceloop_hub_version: "v0.7.2"
-
-# -- Number of Hub replicas.
-#    (OPTIONAL) / (DEFAULT: 2)
-# traceloop_hub_replicas: 2
-
-# -- Hub resource limits.
-#    (OPTIONAL) / (DEFAULT: 500m CPU, 512Mi memory)
-# traceloop_hub_cpu_limit: "500m"
-# traceloop_hub_memory_limit: "512Mi"
-
-# -- Direct OpenAI API key (optional - if not using Azure).
-#    (OPTIONAL)
-# traceloop_openai_api_key: ""
-
-# -- Direct Anthropic API key (optional - if not using Azure).
-#    (OPTIONAL)
-# traceloop_anthropic_api_key: ""
 
 # ==============================================================================
 # ONEDEV CONFIGURATION (Optional - Git Server with CI/CD)

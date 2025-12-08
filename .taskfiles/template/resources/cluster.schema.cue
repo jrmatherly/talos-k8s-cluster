@@ -74,18 +74,6 @@ import (
 	alertmanager_storage_size?: string & !=""
 	grafana_storage_size?: string & !=""
 
-	// Traceloop Full Platform Configuration (LLM Observability)
-	traceloop_enabled?: bool
-	traceloop_hub_enabled?: bool
-	traceloop_hub_version?: string & !=""       // e.g., "v0.7.2"
-	traceloop_hub_replicas?: int & >=1
-	traceloop_hub_cpu_limit?: string & !=""
-	traceloop_hub_cpu_request?: string & !=""
-	traceloop_hub_memory_limit?: string & !=""
-	traceloop_hub_memory_request?: string & !=""
-	traceloop_openai_api_key?: string & !=""
-	traceloop_anthropic_api_key?: string & !=""
-
 	// OneDev Configuration (Git Server with CI/CD)
 	onedev_enabled?: bool
 	onedev_admin_password?: string & !=""

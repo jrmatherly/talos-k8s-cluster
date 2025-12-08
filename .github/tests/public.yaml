@@ -45,9 +45,6 @@ azure_openai_us_east2_resource_name: "ets-east-us2"
 # Observability Stack (Prometheus/Grafana for K8s metrics)
 observability_enabled: true
 grafana_admin_password: "test-password"
-# Traceloop Full Platform (LLM Observability)
-traceloop_enabled: true
-traceloop_hub_enabled: true
 # OneDev Git Server (testing full deployment with external DB)
 onedev_enabled: true
 onedev_admin_password: "test-admin-password"

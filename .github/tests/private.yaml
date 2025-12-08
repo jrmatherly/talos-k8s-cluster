@@ -41,9 +41,6 @@ proxmox_csi_token_secret: "fake-secret"
 # Observability Stack (disabled for private repo testing)
 # observability_enabled: false
 # grafana_admin_password: ""
-# Traceloop Full Platform (disabled for private repo testing)
-# traceloop_enabled: false
-# traceloop_hub_enabled: false
 # OneDev Git Server (disabled for private repo testing)
 # onedev_enabled: false
 # onedev_admin_password: ""
