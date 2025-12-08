@@ -195,10 +195,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v4
+  name: keycloak-realm-import-v5
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "4"
+    config-version: "5"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -231,12 +231,13 @@ spec:
                   name: keycloak-secret
                   key: entra-id-client-secret
 #% endif %#
+            #| Use no-delete to preserve built-in clients (account, account-console) #|
             - name: IMPORT_MANAGED_CLIENT
-              value: "full"
+              value: "no-delete"
             - name: IMPORT_MANAGED_GROUP
-              value: "full"
+              value: "no-delete"
             - name: IMPORT_MANAGED_ROLE
-              value: "full"
+              value: "no-delete"
             - name: IMPORT_FILES_LOCATIONS
               value: "/config/*"
           volumeMounts:
