@@ -37,3 +37,4 @@ spec:
       - profile
       - email
     forwardAccessToken: true
+    cookieDomain: "matherly.net"

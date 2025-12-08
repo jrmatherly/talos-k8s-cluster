@@ -69,3 +69,12 @@ workos_subdomain: "test-subdomain"
 mcp_gateway_enabled: true
 mcp_gateway_addr: "10.10.10.146"
 mcp_session_timeout: 3600
+# Keycloak Configuration (OIDC Authentication Provider)
+keycloak_enabled: true
+keycloak_admin_password: "test-admin-password"
+keycloak_db_password: "test-db-password"
+keycloak_replicas: 2
+keycloak_postgresql_enabled: true
+keycloak_postgresql_replicas: 3
+keycloak_postgresql_storage_size: "10Gi"
+keycloak_oidc_client_secret: "test-oidc-secret"

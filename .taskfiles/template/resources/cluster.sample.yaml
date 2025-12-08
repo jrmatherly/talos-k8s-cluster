@@ -436,3 +436,70 @@ cloudflare_token: ""
 #    (REQUIRED for WorkOS integration)
 #    Example: "mycompany" for mycompany.authkit.app
 # workos_subdomain: ""
+
+# ==============================================================================
+# KEYCLOAK CONFIGURATION (Optional - OIDC Authentication Provider)
+# ==============================================================================
+# Keycloak provides enterprise-grade identity and access management.
+# Integrates with Envoy Gateway via SecurityPolicy for OIDC authentication.
+# REF: docs/keycloak-envoy-gateway-integration-research.md
+
+# -- Enable Keycloak deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# keycloak_enabled: true
+
+# -- Keycloak admin password.
+#    (REQUIRED if keycloak_enabled) - Will be encrypted with SOPS
+# keycloak_admin_password: "your-secure-password"
+
+# -- PostgreSQL database password for Keycloak.
+#    (REQUIRED if keycloak_enabled) - Will be encrypted with SOPS
+# keycloak_db_password: "your-db-password"
+
+# -- Number of Keycloak replicas for HA.
+#    (OPTIONAL) / (DEFAULT: 2)
+# keycloak_replicas: 2
+
+# -- OIDC client secret for Envoy Gateway integration.
+#    (REQUIRED if keycloak_enabled) - Will be created in Keycloak after deployment
+#    NOTE: Generate this value after configuring Keycloak realm and client.
+#    Leave as placeholder until Keycloak is running and client is configured.
+# keycloak_oidc_client_secret: "REPLACE_AFTER_KEYCLOAK_SETUP"
+
+# -- Cookie domain for SSO across subdomains.
+#    (OPTIONAL) - Set to "yourdomain.com" for cross-subdomain SSO
+#    NOTE: Do NOT include leading dot - modern browsers treat both identically
+#    Example: "example.com" to share sessions across *.example.com
+# keycloak_oidc_cookie_domain: "example.com"
+
+# ==============================================================================
+# KEYCLOAK POSTGRESQL CONFIGURATION
+# ==============================================================================
+
+# -- Enable built-in CloudNativePG PostgreSQL for Keycloak.
+#    (OPTIONAL) / (DEFAULT: true)
+#    Set to false if using external PostgreSQL.
+# keycloak_postgresql_enabled: true
+
+# -- Number of PostgreSQL replicas.
+#    (OPTIONAL) / (DEFAULT: 3)
+#    NOTE: Use odd numbers for quorum (1, 3, 5)
+# keycloak_postgresql_replicas: 3
+
+# -- PostgreSQL storage size.
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+# keycloak_postgresql_storage_size: "10Gi"
+
+# ==============================================================================
+# KEYCLOAK RESOURCE LIMITS
+# ==============================================================================
+
+# -- Keycloak resource requests.
+#    (OPTIONAL) / (DEFAULTs shown)
+# keycloak_cpu_request: "250m"
+# keycloak_memory_request: "512Mi"
+
+# -- Keycloak resource limits.
+#    (OPTIONAL) / (DEFAULTs shown)
+# keycloak_cpu_limit: "1000m"
+# keycloak_memory_limit: "1Gi"

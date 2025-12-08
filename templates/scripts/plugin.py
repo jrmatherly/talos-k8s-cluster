@@ -239,6 +239,21 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("mcp_gateway_addr", "")
         data.setdefault("mcp_session_timeout", 3600)
 
+        # Keycloak defaults (OIDC Authentication Provider)
+        data.setdefault("keycloak_enabled", False)
+        data.setdefault("keycloak_admin_password", "")
+        data.setdefault("keycloak_db_password", "")
+        data.setdefault("keycloak_replicas", 2)
+        data.setdefault("keycloak_cpu_request", "250m")
+        data.setdefault("keycloak_memory_request", "512Mi")
+        data.setdefault("keycloak_cpu_limit", "1000m")
+        data.setdefault("keycloak_memory_limit", "1Gi")
+        data.setdefault("keycloak_postgresql_enabled", True)
+        data.setdefault("keycloak_postgresql_replicas", 3)
+        data.setdefault("keycloak_postgresql_storage_size", "10Gi")
+        data.setdefault("keycloak_oidc_client_secret", "")
+        data.setdefault("keycloak_oidc_cookie_domain", "")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

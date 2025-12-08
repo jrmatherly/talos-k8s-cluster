@@ -8,6 +8,10 @@ spec:
   dependsOn:
     - name: cilium
       namespace: kube-system
+#% if keycloak_postgresql_enabled | default(true) %#
+    - name: cloudnative-pg
+      namespace: cnpg-system
+#% endif %#
 #% if proxmox_csi_token_id and proxmox_csi_token_secret %#
     - name: proxmox-csi
       namespace: csi-proxmox

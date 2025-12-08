@@ -60,3 +60,7 @@ proxmox_csi_token_secret: "fake-secret"
 # MCP Gateway (disabled for private repo testing)
 # mcp_gateway_enabled: false
 # mcp_gateway_addr: ""
+# Keycloak (disabled for private repo testing)
+# keycloak_enabled: false
+# keycloak_admin_password: ""
+# keycloak_db_password: ""
