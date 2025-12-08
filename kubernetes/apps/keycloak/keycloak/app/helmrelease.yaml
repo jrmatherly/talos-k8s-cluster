@@ -32,7 +32,6 @@ spec:
     command:
       - "/opt/keycloak/bin/kc.sh"
       - "start"
-      - "--hostname-strict=false"
       - "--http-enabled=true"
       - "--cache-stack=kubernetes"
 
@@ -69,15 +68,7 @@ spec:
             name: keycloak-secret
             key: admin-password
       - name: KC_HOSTNAME
-        value: "auth.${SECRET_DOMAIN}"
-      - name: KC_HOSTNAME_ADMIN
-        value: "auth.${SECRET_DOMAIN}"
-      - name: KC_HOSTNAME_STRICT
-        value: "false"
-      - name: KC_HOSTNAME_STRICT_BACKCHANNEL
-        value: "false"
-      - name: KC_PROXY
-        value: "edge"
+        value: "https://auth.${SECRET_DOMAIN}"
       - name: KC_PROXY_HEADERS
         value: "xforwarded"
       - name: KC_HTTP_ENABLED
