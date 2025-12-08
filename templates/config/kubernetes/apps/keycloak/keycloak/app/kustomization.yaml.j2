@@ -10,4 +10,7 @@ resources:
 #% if keycloak_postgresql_enabled | default(true) %#
   - ./postgresql.yaml
 #% endif %#
+#% if keycloak_realm_config_enabled | default(true) %#
+  - ./realm-config.yaml
+#% endif %#
 #% endif %#

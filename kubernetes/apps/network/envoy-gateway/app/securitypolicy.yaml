@@ -11,7 +11,7 @@ metadata:
   name: keycloak-oidc-client-secret
 type: Opaque
 stringData:
-  client-secret: "REPLACE_AFTER_KEYCLOAK_SETUP"
+  client-secret: "FBzeqO/AtSLZqIP+dMHZXV9NapLL5iUKUghSiZElgXA="
 ---
 # SecurityPolicy for MCP Gateway OIDC authentication
 # Protects MCP routes by requiring Keycloak authentication

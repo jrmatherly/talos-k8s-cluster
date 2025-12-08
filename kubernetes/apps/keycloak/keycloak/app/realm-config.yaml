@@ -1,0 +1,169 @@
+---
+# ConfigMap containing the k8s-cluster realm configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-config
+data:
+  k8s-cluster-realm.json: |
+    {
+      "realm": "k8s-cluster",
+      "enabled": true,
+      "displayName": "Kubernetes Cluster",
+      "displayNameHtml": "<strong>Kubernetes Cluster</strong>",
+      "sslRequired": "external",
+      "registrationAllowed": false,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "resetPasswordAllowed": true,
+      "editUsernameAllowed": false,
+      "bruteForceProtected": true,
+      "permanentLockout": false,
+      "maxFailureWaitSeconds": 900,
+      "minimumQuickLoginWaitSeconds": 60,
+      "waitIncrementSeconds": 60,
+      "quickLoginCheckMilliSeconds": 1000,
+      "maxDeltaTimeSeconds": 43200,
+      "failureFactor": 5,
+      "defaultSignatureAlgorithm": "RS256",
+      "accessTokenLifespan": 300,
+      "accessTokenLifespanForImplicitFlow": 900,
+      "ssoSessionIdleTimeout": 1800,
+      "ssoSessionMaxLifespan": 36000,
+      "offlineSessionIdleTimeout": 2592000,
+      "accessCodeLifespan": 60,
+      "accessCodeLifespanUserAction": 300,
+      "accessCodeLifespanLogin": 1800,
+      "actionTokenGeneratedByAdminLifespan": 43200,
+      "actionTokenGeneratedByUserLifespan": 300,
+      "clients": [
+        {
+          "clientId": "envoy-gateway",
+          "name": "Envoy Gateway OIDC Client",
+          "description": "OIDC client for Envoy Gateway SecurityPolicy authentication",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "FBzeqO/AtSLZqIP+dMHZXV9NapLL5iUKUghSiZElgXA=",
+          "redirectUris": [
+            "https://*.matherly.net/oauth2/callback",
+            "https://*.matherly.net/*"
+          ],
+          "webOrigins": [
+            "https://*.matherly.net"
+          ],
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": false,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access"
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://*.matherly.net/*"
+          }
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "admin",
+            "description": "Cluster administrator with full access",
+            "composite": false
+          },
+          {
+            "name": "developer",
+            "description": "Developer with limited cluster access",
+            "composite": false
+          },
+          {
+            "name": "viewer",
+            "description": "Read-only access to cluster resources",
+            "composite": false
+          }
+        ]
+      },
+      "groups": [
+        {
+          "name": "cluster-admins",
+          "path": "/cluster-admins",
+          "realmRoles": ["admin"]
+        },
+        {
+          "name": "developers",
+          "path": "/developers",
+          "realmRoles": ["developer"]
+        },
+        {
+          "name": "viewers",
+          "path": "/viewers",
+          "realmRoles": ["viewer"]
+        }
+      ],
+      "scopeMappings": [],
+      "clientScopeMappings": {}
+    }
+---
+# Job to import the realm configuration using keycloak-config-cli
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-realm-import
+  annotations:
+    # Allow re-running the job by incrementing this annotation
+    config-version: "1"
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: keycloak-config-cli
+          image: quay.io/adorsys/keycloak-config-cli:6.3.1-26.0.5
+          env:
+            - name: KEYCLOAK_URL
+              value: "http://keycloak-http.keycloak.svc.cluster.local:8080"
+            - name: KEYCLOAK_USER
+              value: "admin"
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: admin-password
+            - name: KEYCLOAK_AVAILABILITYCHECK_ENABLED
+              value: "true"
+            - name: KEYCLOAK_AVAILABILITYCHECK_TIMEOUT
+              value: "120s"
+            - name: IMPORT_VARSUBSTITUTION_ENABLED
+              value: "false"
+            - name: IMPORT_MANAGED_CLIENT
+              value: "full"
+            - name: IMPORT_MANAGED_GROUP
+              value: "full"
+            - name: IMPORT_MANAGED_ROLE
+              value: "full"
+          volumeMounts:
+            - name: realm-config
+              mountPath: /config
+              readOnly: true
+          args:
+            - "--import.path=/config"
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm-config
