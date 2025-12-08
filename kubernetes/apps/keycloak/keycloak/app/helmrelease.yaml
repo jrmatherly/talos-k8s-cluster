@@ -85,15 +85,8 @@ spec:
       type: ClusterIP
       httpPort: 8080
       httpsPort: 8443
+      # Note: Keycloak 26 management port is 9000, but chart defaults to 9990
       httpManagementPort: 9000
-
-    # ============================================================
-    # Extra Ports - Management interface for health checks
-    # ============================================================
-    extraPorts:
-      - name: http-management
-        containerPort: 9000
-        protocol: TCP
 
     # ============================================================
     # Resource Limits
