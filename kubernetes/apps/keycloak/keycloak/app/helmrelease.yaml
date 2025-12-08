@@ -34,6 +34,7 @@ spec:
       - "start"
       - "--hostname-strict=false"
       - "--http-enabled=true"
+      - "--cache-stack=kubernetes"
 
     # ============================================================
     # PostgreSQL Database - Disabled (using external CloudNativePG)
@@ -77,6 +78,9 @@ spec:
         value: "true"
       - name: KC_METRICS_ENABLED
         value: "true"
+      # Clustering - DNS_PING for Kubernetes
+      - name: JAVA_OPTS_APPEND
+        value: "-Djgroups.dns.query=keycloak-headless.keycloak.svc.cluster.local"
 
     # ============================================================
     # Service Configuration
