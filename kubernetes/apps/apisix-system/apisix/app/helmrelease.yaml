@@ -120,15 +120,6 @@ spec:
               proxy_buffer_size: "64k"
               proxy_buffers: "8 64k"
 
-          # etcd configuration
-          etcd:
-            host:
-              - "http://etcd-0.etcd-headless.apisix-system.svc.cluster.local:2379"
-              - "http://etcd-1.etcd-headless.apisix-system.svc.cluster.local:2379"
-              - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
-            prefix: "/apisix"
-            timeout: 30
-
           # Enabled plugins - comprehensive list for AI Gateway
           # Ref: https://apisix.apache.org/docs/apisix/next/plugins/ai-proxy/
           plugins:
@@ -164,6 +155,35 @@ spec:
             - request-id         # Add request ID header
             - serverless-pre-function  # Lua pre-processing
             - serverless-post-function # Lua post-processing
+
+          # Deployment configuration - CRITICAL: etcd must be under deployment
+          deployment:
+            role: traditional
+            role_traditional:
+              config_provider: etcd
+            admin:
+              allow_admin:
+                - "127.0.0.1/24"
+                - "10.0.0.0/8"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+              admin_listen:
+                ip: "0.0.0.0"
+                port: 9180
+              admin_key:
+                - name: "admin"
+                  key: "${{APISIX_ADMIN_KEY}}"
+                  role: admin
+                - name: "viewer"
+                  key: "${{APISIX_VIEWER_KEY}}"
+                  role: viewer
+            etcd:
+              host:
+                - "http://etcd-0.etcd-headless.apisix-system.svc.cluster.local:2379"
+                - "http://etcd-1.etcd-headless.apisix-system.svc.cluster.local:2379"
+                - "http://etcd-2.etcd-headless.apisix-system.svc.cluster.local:2379"
+              prefix: "/apisix"
+              timeout: 30
 
       # Admin API credentials from secret
       admin:
