@@ -1,0 +1,10 @@
+---
+# Using codecentric Helm chart which supports official Keycloak image
+# (Bitnami chart is incompatible with quay.io/keycloak/keycloak)
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: codecentric
+spec:
+  interval: 24h
+  url: https://codecentric.github.io/helm-charts

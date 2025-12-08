@@ -5,75 +5,87 @@ kind: HelmRelease
 metadata:
   name: keycloak
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: keycloak
+  chart:
+    spec:
+      chart: keycloak
+      version: "18.10.0"
+      sourceRef:
+        kind: HelmRepository
+        name: codecentric
   interval: 1h
   timeout: 15m
   values:
     # ============================================================
-    # Global Settings - Allow non-Bitnami images
-    # (Required to use official Keycloak image with Bitnami chart)
-    # ============================================================
-    global:
-      security:
-        allowInsecureImages: true
-
-    # ============================================================
     # Image Configuration - Use official Keycloak image
-    # (Bitnami images require commercial subscription since Aug 2025)
     # ============================================================
     image:
-      registry: quay.io
-      repository: keycloak/keycloak
-      tag: "26.4"
+      repository: quay.io/keycloak/keycloak
+      tag: "26.0.7"
 
     # ============================================================
     # Replicas for HA
     # ============================================================
-    replicaCount: #{ keycloak_replicas | default(2) }#
+    replicas: #{ keycloak_replicas | default(2) }#
 
     # ============================================================
-    # Authentication
+    # Command - Run in production mode
     # ============================================================
-    auth:
-      adminUser: admin
-      existingSecret: keycloak-secret
-      passwordSecretKey: admin-password
+    command:
+      - "/opt/keycloak/bin/kc.sh"
+      - "start"
+      - "--hostname-strict=false"
+      - "--http-enabled=true"
 
     # ============================================================
-    # Production Mode
-    # ============================================================
-    production: true
-
-    # ============================================================
-    # Proxy Configuration (behind Envoy Gateway)
-    # ============================================================
-    proxy: edge
-    httpRelativePath: "/"
-
-    # ============================================================
-    # PostgreSQL Database Configuration
+    # PostgreSQL Database - Disabled (using external CloudNativePG)
     # ============================================================
     postgresql:
       enabled: false
 
-    externalDatabase:
-      host: keycloak-db-rw.keycloak.svc.cluster.local
-      port: 5432
-      user: keycloak
-      database: keycloak
-      existingSecret: keycloak-db-secret
-      existingSecretPasswordKey: password
+    # ============================================================
+    # Database Configuration via Environment Variables
+    # ============================================================
+    extraEnv: |
+      - name: KC_DB
+        value: postgres
+      - name: KC_DB_URL_HOST
+        value: keycloak-db-rw.keycloak.svc.cluster.local
+      - name: KC_DB_URL_PORT
+        value: "5432"
+      - name: KC_DB_URL_DATABASE
+        value: keycloak
+      - name: KC_DB_USERNAME
+        value: keycloak
+      - name: KC_DB_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: keycloak-db-secret
+            key: password
+      - name: KEYCLOAK_ADMIN
+        value: admin
+      - name: KEYCLOAK_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: keycloak-secret
+            key: admin-password
+      - name: KC_HOSTNAME
+        value: "auth.${SECRET_DOMAIN}"
+      - name: KC_PROXY_HEADERS
+        value: "xforwarded"
+      - name: KC_HTTP_ENABLED
+        value: "true"
+      - name: KC_HEALTH_ENABLED
+        value: "true"
+      - name: KC_METRICS_ENABLED
+        value: "true"
 
     # ============================================================
     # Service Configuration
     # ============================================================
     service:
       type: ClusterIP
-      ports:
-        http: 8080
-        https: 8443
+      httpPort: 8080
+      httpsPort: 8443
 
     # ============================================================
     # Resource Limits
@@ -87,57 +99,53 @@ spec:
         memory: "#{ keycloak_memory_limit | default('1Gi') }#"
 
     # ============================================================
-    # Metrics for Prometheus
+    # Startup/Liveness/Readiness Probes (Quarkus health endpoints)
     # ============================================================
-    metrics:
-      enabled: true
-      serviceMonitor:
-        enabled: true
-        namespace: keycloak
-        labels:
-          release: kube-prometheus-stack
-
-    # ============================================================
-    # Startup/Liveness/Readiness Probes
-    # ============================================================
-    startupProbe:
-      enabled: true
+    startupProbe: |
+      httpGet:
+        path: /health/started
+        port: http
       initialDelaySeconds: 30
-      periodSeconds: 10
       timeoutSeconds: 5
+      periodSeconds: 10
       failureThreshold: 30
-      successThreshold: 1
 
-    livenessProbe:
-      enabled: true
+    livenessProbe: |
+      httpGet:
+        path: /health/live
+        port: http
       initialDelaySeconds: 0
-      periodSeconds: 10
       timeoutSeconds: 5
+      periodSeconds: 10
       failureThreshold: 3
-      successThreshold: 1
 
-    readinessProbe:
-      enabled: true
+    readinessProbe: |
+      httpGet:
+        path: /health/ready
+        port: http
       initialDelaySeconds: 10
-      periodSeconds: 10
       timeoutSeconds: 5
+      periodSeconds: 10
       failureThreshold: 3
-      successThreshold: 1
 
     # ============================================================
-    # Extra environment variables
+    # Metrics for Prometheus - ServiceMonitor
     # ============================================================
-    extraEnvVars:
-      - name: KC_HOSTNAME
-        value: "auth.${SECRET_DOMAIN}"
-      - name: KC_HOSTNAME_STRICT
-        value: "false"
-      - name: KC_PROXY_HEADERS
-        value: "xforwarded"
-      - name: KC_HTTP_ENABLED
-        value: "true"
-      - name: KC_HEALTH_ENABLED
-        value: "true"
-      - name: KC_METRICS_ENABLED
-        value: "true"
+    serviceMonitor:
+      enabled: true
+      namespace: keycloak
+      labels:
+        release: kube-prometheus-stack
+      path: /metrics
+      port: http
+
+    # ============================================================
+    # Security Context
+    # ============================================================
+    securityContext:
+      fsGroup: 1000
+
+    podSecurityContext:
+      runAsUser: 1000
+      runAsNonRoot: true
 #% endif %#
