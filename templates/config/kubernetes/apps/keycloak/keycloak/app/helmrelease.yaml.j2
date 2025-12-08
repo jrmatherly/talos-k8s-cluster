@@ -5,13 +5,9 @@ kind: HelmRelease
 metadata:
   name: keycloak
 spec:
-  chart:
-    spec:
-      chart: keycloak
-      version: "24.4.4"
-      sourceRef:
-        kind: OCIRepository
-        name: keycloak
+  chartRef:
+    kind: OCIRepository
+    name: keycloak
   interval: 1h
   timeout: 15m
   values:
