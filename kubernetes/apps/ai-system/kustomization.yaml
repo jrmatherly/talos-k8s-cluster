@@ -10,3 +10,4 @@ resources:
   - ./namespace.yaml
   - ./azure-openai-us-east/ks.yaml
   - ./azure-openai-us-east2/ks.yaml
+  - ./mcp-servers/context7/ks.yaml

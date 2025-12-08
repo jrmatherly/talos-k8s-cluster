@@ -1,0 +1,22 @@
+#% if mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: mcp-context7
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/ai-system/mcp-servers/context7/app
+  dependsOn:
+    - name: ai-gateway
+      namespace: envoy-ai-gateway-system
+    - name: envoy-gateway
+      namespace: network
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: ai-system
+  wait: true
+#% endif %#
