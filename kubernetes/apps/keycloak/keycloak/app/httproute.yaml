@@ -17,3 +17,9 @@ spec:
       timeouts:
         request: 60s
         backendRequest: 60s
+      sessionPersistence:
+        sessionName: KEYCLOAK_ROUTE
+        type: Cookie
+        absoluteTimeout: 3600s
+        cookieConfig:
+          lifetimeType: Permanent
