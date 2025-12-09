@@ -95,7 +95,21 @@ data:
             "description": "Read-only access to cluster resources",
             "composite": false
           }
-        ]
+        ],
+        "client": {
+          "account": [
+            {
+              "name": "manage-account",
+              "description": "Manage account",
+              "composite": false
+            },
+            {
+              "name": "view-profile",
+              "description": "View profile",
+              "composite": false
+            }
+          ]
+        }
       },
       "groups": [
         {
@@ -185,6 +199,33 @@ data:
             "syncMode": "INHERIT",
             "template": "$${CLAIM.preferred_username}"
           }
+        },
+        {
+          "name": "default-group-viewers",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "hardcoded-group-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "group": "/viewers"
+          }
+        },
+        {
+          "name": "account-manage",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.manage-account"
+          }
+        },
+        {
+          "name": "account-view-profile",
+          "identityProviderAlias": "entra-id",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.view-profile"
+          }
         }
       ]
     }
@@ -193,10 +234,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v7
+  name: keycloak-realm-import-v9
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "7"
+    config-version: "9"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
