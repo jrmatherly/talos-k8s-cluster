@@ -1,0 +1,305 @@
+# replicaCount -- The number of Obot server instances to run
+replicaCount: 1
+
+dev:
+  # dev.useEmbeddedDb -- For development/testing use only, enables the use of an postgres database embedded in the obot container. Do not use in production.
+  useEmbeddedDb: false
+
+image:
+  # image.repository -- The name of the docker repository for Obot. `ghcr.io/obot-platform/obot` for open-source or `ghcr.io/obot-platform/obot-enterprise` for enterprise.
+  # Please note that for enterprise you will need to set an `imagePullSecret`
+  repository: ghcr.io/obot-platform/obot
+  # image.tag -- The docker tag to pull for obot. If blank, will default to the chart appVersion
+  tag: ""
+  # image.pullPolicy -- Kubernetes image pullPolicy to use for Obot
+  pullPolicy: IfNotPresent
+
+  # imagePullSecrets -- Configures kubernetes secrets to use for pulling private images. Expects a list of objects.
+  # `imagePullSecrets:[{"name": "fooBar"}]`
+imagePullSecrets: []
+
+# updateStrategy -- Configures what update strategy to use for the deployment (Recreate or RollingUpdate)
+updateStrategy: "RollingUpdate"
+
+# Additional labels that should be applied to all resources
+additionalLabels: {}
+  # app: obot
+
+# -- Extra pod annotations to add.
+podAnnotations: {}
+
+service:
+  # service.type -- Type of Kubernetes service to create
+  type: ClusterIP
+  # service.port -- Port for the Kubernetes service to expose
+  port: 80
+  # service.annotations -- Extra annotations to add to service object
+  annotations: {}
+  # service.spec -- Any extra fields to add to the service object spec
+  spec: {}
+
+ingress:
+  # ingress.enabled -- Enables ingress creation for Obot.
+  enabled: false
+  # ingress.annotations -- Configure annotations to add to the ingress object
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  # ingress.className -- Configures a preexisting ingress class to use.
+  className: ~
+  # className: obot
+  paths:
+    - path: /
+      pathType: Prefix
+  # ingress.extraPaths -- Define complete path objects, will be inserted before regular paths. Can be useful for things like ALB Ingress Controller actions
+  extraPaths: []
+  # ingress.hosts -- List of hostnames to configure the ingress with
+  hosts: []
+  # - chart-example.local
+  # ingress.tls -- List of secrets used to configure TLS for the ingress.
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# config - A key/value object containing configuration variables to configure on the obot deployment. Will be converted to a secret and used via envFrom.
+config:
+  # config.existingSecret -- The name of an existing secret to use for config instead of creating a new one. Must contain keys in env format, just like below.
+  existingSecret: ""
+
+  # config.AWS_ACCESS_KEY_ID -- An AWS access key with permissions for AWS KMS, used for encryption
+  AWS_ACCESS_KEY_ID: ""
+  # config.AWS_REGION -- An AWS region, used to access AWS KMS
+  AWS_REGION: ""
+  # config.AWS_SECRET_ACCESS_KEY -- An AWS secret access key with permissions for AWS KMS, used for encryption
+  AWS_SECRET_ACCESS_KEY: ""
+
+  # config.OBOT_GCP_KMS_KEY_URI -- The URI of a Google Cloud KMS key, used for encryption
+  OBOT_GCP_KMS_KEY_URI: ""
+
+  # config.NAH_THREADINESS -- Advanced - sets the number of concurrent threads that can run in the Obot controller
+  NAH_THREADINESS: "10000"
+  # config.OBOT_SERVER_KNOWLEDGE_FILE_WORKERS -- Advanced - sets the number of workers for knowledge
+  OBOT_SERVER_KNOWLEDGE_FILE_WORKERS: "5"
+
+  # config.KINM_DB_CONNECTIONS -- Advanced - the number of connections in the database pool for kinm
+  KINM_DB_CONNECTIONS: "5"
+
+  # config.GITHUB_AUTH_TOKEN -- A github PAT, used to authenticate catalog and tool pulls to avoid github ratelimiting
+  GITHUB_AUTH_TOKEN: ""
+  # config.OBOT_SERVER_ENABLE_AUTHENTICATION -- Enables authentication for Obot
+  OBOT_SERVER_ENABLE_AUTHENTICATION: false
+  # config.OBOT_SERVER_ENABLE_REGISTRY_AUTH -- Enables authentication for the MCP registry API. When false (default), registry is accessible without authentication and returns only default catalog items with wildcard access control rules.
+  OBOT_SERVER_ENABLE_REGISTRY_AUTH: false
+  # config.OBOT_SERVER_ENCRYPTION_PROVIDER -- Configures an encryption provider for credentials in Obot
+  OBOT_SERVER_ENCRYPTION_PROVIDER: "" # "aws", "gcp", "azure", "custom"
+  # config.OBOT_SERVER_ENCRYPTION_CONFIG_FILE -- The path to a file containing the encryption configuration. Only used if config.OBOT_SERVER_ENCRYPTION_PROVIDER is 'custom'
+  OBOT_SERVER_ENCRYPTION_CONFIG_FILE: ""
+  # config.OBOT_SERVER_ENCRYPTION_KEY -- The key to use for encryption. Only used if config.OBOT_SERVER_ENCRYPTION_PROVIDER is 'custom'. A key can be generated with `openssl rand -base64 32`
+  OBOT_SERVER_ENCRYPTION_KEY: ""
+  # config.OBOT_BOOTSTRAP_TOKEN -- Sets a bootstrap token. If authentication is enabled, one will be autogenerated for you if this is not set.
+  OBOT_BOOTSTRAP_TOKEN: ""
+  # config.OBOT_SERVER_AUTH_OWNER_EMAILS -- A comma separated list of email addresses that will have the Owner role in Obot.
+  OBOT_SERVER_AUTH_OWNER_EMAILS: ""
+  # config.OBOT_SERVER_AUTH_ADMIN_EMAILS -- A comma separated list of email addresses that will have the Admin role in Obot.
+  OBOT_SERVER_AUTH_ADMIN_EMAILS: ""
+  # config.OBOT_SERVER_DSN -- The DSN for your database. For example: postgres://<username>:<password>@<hostname>/<db_name>
+  OBOT_SERVER_DSN: ""
+  # config.OBOT_SERVER_HOSTNAME -- The hostname of your Obot instance, including protocol
+  OBOT_SERVER_HOSTNAME: ""
+  # config.OBOT_SERVER_RETENTION_POLICY_HOURS -- The retention policy for the system. Set to 0 to disable retention. Default is 2160 (90 days) if left blank. This field should just be a number in a string, no `h` suffix.
+  OBOT_SERVER_RETENTION_POLICY_HOURS: ""
+  # config.OPENAI_API_KEY -- An OpenAI API Key used to configure access to OpenAI models, which are the default in Obot.
+  OPENAI_API_KEY: ""
+  # config.ANTHROPIC_API_KEY -- An Anthropic API Key used to configure access to Anthropic models, which can be used as the default in Obot.
+  ANTHROPIC_API_KEY: ""
+
+  # config.OBOT_SERVER_OTEL_BASE_EXPORT_ENDPOINT -- The base export endpoint for OpenTelemetry
+  OBOT_SERVER_OTEL_BASE_EXPORT_ENDPOINT: ""
+  # config.OBOT_SERVER_OTEL_SAMPLE_PROB -- The sampling probability for OpenTelemetry
+  OBOT_SERVER_OTEL_SAMPLE_PROB: ""
+  # config.OBOT_SERVER_OTEL_BEARER_TOKEN -- The bearer token for authentication with OpenTelemetry
+  OBOT_SERVER_OTEL_BEARER_TOKEN: ""
+
+  # config.OBOT_SERVER_AUDIT_LOGS_MODE -- Configures the storage backend for audit logs in Obot. Can be 'off', 'disk', or 's3'
+  OBOT_SERVER_AUDIT_LOGS_MODE: "off"
+  # config.OBOT_SERVER_AUDIT_LOGS_STORE_S3BUCKET -- The name of the S3 bucket to store audit logs in. Only used if config.OBOT_SERVER_AUDIT_LOGS_MODE is 's3'
+  OBOT_SERVER_AUDIT_LOGS_STORE_S3BUCKET: ""
+  # config.OBOT_SERVER_AUDIT_LOGS_STORE_S3ENDPOINT -- If config.OBOT_SERVER_AUDIT_LOGS_MODE is 's3' and you are not using AWS S3, this needs to be set to the S3 api endpoint of your provider.
+  OBOT_SERVER_AUDIT_LOGS_STORE_S3ENDPOINT: ""
+  # config.OBOT_SERVER_AUDIT_LOGS_COMPRESS_FILE -- Whether to compress audit log files
+  OBOT_SERVER_AUDIT_LOGS_COMPRESS_FILE: true
+  # config.OBOT_SERVER_AUDIT_LOGS_USE_PATH_STYLE -- Whether to use path style for S3
+  OBOT_SERVER_AUDIT_LOGS_USE_PATH_STYLE: false
+
+  # config.OBOT_SERVER_MCPBASE_IMAGE -- Deploy MCP servers in the cluster using this base image. OBOT_SERVER_MCPNAMESPACE is automatically added to the secret if config.OBOT_SERVER_MCPBASE_IMAGE is set.
+  OBOT_SERVER_MCPBASE_IMAGE: "ghcr.io/obot-platform/mcp-images/phat:main"
+  # config.OBOT_SERVER_MCPREMOTE_SHIM_BASE_IMAGE -- Deploy MCP remote shim servers in the cluster using this base image.
+  OBOT_SERVER_MCPREMOTE_SHIM_BASE_IMAGE: "ghcr.io/nanobot-ai/nanobot:v0.0.42"
+  # config.OBOT_SERVER_MCPHTTPWEBHOOK_BASE_IMAGE -- Deploy MCP HTTP webhook servers in the cluster using this base image.
+  OBOT_SERVER_MCPHTTPWEBHOOK_BASE_IMAGE: "ghcr.io/obot-platform/mcp-images/http-webhook-converter:main"
+  # config.OBOT_SERVER_MCPCLUSTER_DOMAIN -- The cluster domain to use for MCP services. Defaults to cluster.local. Only matters if the above image is set.
+  OBOT_SERVER_MCPCLUSTER_DOMAIN: ""
+  # config.OBOT_SERVER_DISALLOW_LOCALHOST_MCP -- disallow MCP servers that try to connect to localhost. Defaults to false.
+  OBOT_SERVER_DISALLOW_LOCALHOST_MCP: ""
+  # config.OBOT_SERVER_MCPRUNTIME_BACKEND -- The runtime backend to use for MCP servers. Can be 'docker' or 'kubernetes'. Defaults to 'docker'. Setting this to 'kubernetes' will also create the necessary service account, role and rolebinding.
+  OBOT_SERVER_MCPRUNTIME_BACKEND: "kubernetes"
+
+  # config.OBOT_SERVER_MCPAUDIT_LOG_PERSIST_INTERVAL_SECONDS -- The interval in seconds to persist MCP audit logs to the database. Defaults to 5 seconds.
+  OBOT_SERVER_MCPAUDIT_LOG_PERSIST_INTERVAL_SECONDS: ""
+  # config.OBOT_SERVER_MCPAUDIT_LOGS_PERSIST_BATCH_SIZE -- The batch size to use when persisting MCP audit logs to the database. Defaults to 1000
+  OBOT_SERVER_MCPAUDIT_LOGS_PERSIST_BATCH_SIZE: ""
+
+  # config.OBOT_SERVER_DISABLE_UPDATE_CHECK -- Disable the Obot server update check. Defaults to false.
+  OBOT_SERVER_DISABLE_UPDATE_CHECK: ""
+
+  # config.OBOT_SERVER_TOOL_REGISTRIES -- Comma-separated list of tool registry paths or URLs. Set to include custom auth providers like Entra ID.
+  OBOT_SERVER_TOOL_REGISTRIES: "/obot-tools-custom"
+
+# extraEnv -- A map of additional environment variables to set
+extraEnv: {}
+
+# extraEnvFrom -- A list of additional environment variables to set from a secret
+extraEnvFrom: []
+
+# resources -- Resource requests and limits to use for Obot
+resources: {}
+
+persistence:
+  # persistence.enabled -- Enables persistence using a PVC
+  enabled: true
+  # persistence.path -- The path the volume will be mounted
+  path: /data
+  # persistence.storageClass -- Persistent Volume storage class
+  # If defined, storageClassName: <storageClass>
+  # If set to "-", storageClassName: "", which disables dynamic provisioning
+  # If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
+  storageClass: ""
+  # persistence.accessModes -- Persistent Volume access modes
+  accessModes:
+    - ReadWriteOnce
+  # persistence.size --e Persistent Volume size
+  size: 8Gi
+  existingClaim: ""
+
+# extraVolumes -- A list of additional volumes to create
+extraVolumes: []
+
+# extraVolumeMounts -- A list of additional volume mounts to create
+extraVolumeMounts: []
+
+serviceAccount:
+  # serviceAccount.create - Specifies whether a service account should be created
+  create: true
+  # serviceAccount.annotation - Annotations to add to the service account
+  annotations: {}
+  # serviceAccount.name - The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# mcpImagePullSecrets -- Configuration for creating image pull secrets for MCP containers.
+# Each entry should contain registry credentials that will be used to create Kubernetes secrets.
+mcpImagePullSecrets: []
+# Example:
+# mcpImagePullSecrets:
+#   - name: "my-registry-secret"
+#     registry: "my-registry.com"
+#     username: "myuser"
+#     password: "mypassword"
+#     email: "myemail@example.com"
+
+mcpNamespace:
+  # mcpNamespace.name -- The namespace in which to deploy the MCP servers. Will only be created if config.OBOT_SERVER_MCPBASE_IMAGE image is set. Defaults to {{ .Release.Name }}-mcp
+  name: ""
+  # mcpNamespace.annotation - Annotations to add to the mcp server namespace. Includes ArgoCD sync wave by default.
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+
+# mcpServerDefaults -- Default Kubernetes configuration for all deployed MCP server pods
+mcpServerDefaults:
+  # mcpServerDefaults.affinity -- Affinity rules for MCP server pods (YAML format)
+  # When set via Helm, these settings cannot be updated through the API
+  affinity: {}
+  # Example:
+  # affinity:
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: workload-type
+  #           operator: In
+  #           values:
+  #           - mcp
+  #   podAntiAffinity:
+  #     preferredDuringSchedulingIgnoredDuringExecution:
+  #     - weight: 100
+  #       podAffinityTerm:
+  #         labelSelector:
+  #           matchExpressions:
+  #           - key: mcp-server-name
+  #             operator: Exists
+  #         topologyKey: kubernetes.io/hostname
+
+  # mcpServerDefaults.tolerations -- Tolerations for MCP server pods (YAML list format)
+  # When set via Helm, these settings cannot be updated through the API
+  tolerations: []
+  # Example:
+  # tolerations:
+  #   - key: "mcp-workload"
+  #     operator: "Equal"
+  #     value: "true"
+  #     effect: "NoSchedule"
+  #   - key: "node-role.kubernetes.io/mcp"
+  #     operator: "Exists"
+  #     effect: "NoSchedule"
+
+  # mcpServerDefaults.resources -- Resource requests and limits for MCP server pods
+  # When set via Helm, these settings cannot be updated through the API
+  resources: {}
+  # Example:
+  # resources:
+  #   requests:
+  #     memory: "400Mi"
+  #     cpu: "100m"
+  #   limits:
+  #     memory: "1Gi"
+  #     cpu: "500m"
+
+# nodeSelector -- Configure node selector for pod assignment
+nodeSelector: {}
+
+# tolerations -- Configure tolerations for pod scheduling
+tolerations: []
+# Example:
+# tolerations:
+#   - key: "node-role.kubernetes.io/control-plane"
+#     operator: "Exists"
+#     effect: "NoSchedule"
+#   - key: "dedicated"
+#     operator: "Equal"
+#     value: "obot"
+#     effect: "NoSchedule"
+
+# affinity -- Configure affinity rules for pod scheduling
+affinity: {}
+# Example:
+# affinity:
+#   nodeAffinity:
+#     requiredDuringSchedulingIgnoredDuringExecution:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: node-type
+#           operator: In
+#           values:
+#           - compute
+#   podAntiAffinity:
+#     preferredDuringSchedulingIgnoredDuringExecution:
+#     - weight: 100
+#       podAffinityTerm:
+#         labelSelector:
+#           matchExpressions:
+#           - key: app.kubernetes.io/name
+#             operator: In
+#             values:
+#             - obot
+#         topologyKey: kubernetes.io/hostname

@@ -6,11 +6,12 @@ metadata:
 spec:
   chart:
     spec:
-      chart: obot
-      version: ">=0.1.0"
+      chart: ./kubernetes/apps/obot/obot/chart
       sourceRef:
-        kind: HelmRepository
-        name: obot
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      reconcileStrategy: Revision
   interval: 1h
   timeout: 15m
   values:

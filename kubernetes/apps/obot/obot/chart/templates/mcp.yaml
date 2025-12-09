@@ -1,0 +1,61 @@
+{{- if eq .Values.config.OBOT_SERVER_MCPRUNTIME_BACKEND "kubernetes" }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "obot.config.mcpNamespace" . }}
+  {{- with .Values.mcpNamespace.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "obot.labels" . | nindent 4 }}
+{{- range .Values.mcpImagePullSecrets }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name }}
+  namespace: {{ include "obot.config.mcpNamespace" $ }}
+  labels:
+    {{- include "obot.labels" . | nindent 4 }}
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ printf "{\"auths\":{\"%s\":{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\",\"auth\":\"%s\"}}}" .registry .username .password .email (printf "%s:%s" .username .password | b64enc) | b64enc }}
+{{- end }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ include "obot.config.mcpNamespace" . }}
+  name: obot-mcp-role
+  labels:
+    {{- include "obot.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "services"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: {{ include "obot.config.mcpNamespace" . }}
+  name: obot-mcp-rolebinding
+  labels:
+    {{- include "obot.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "obot.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: obot-mcp-role
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
