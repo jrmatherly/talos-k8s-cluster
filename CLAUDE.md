@@ -484,6 +484,94 @@ kubectl port-forward -n network deploy/envoy-gateway 19000:19000
 kubectl rollout restart deployment/envoy-gateway -n network
 ```
 
+## agentgateway (MCP OAuth Proxy)
+
+Optional MCP 2025-11-25 OAuth-compliant authentication proxy using agentgateway via kgateway. Provides Dynamic Client Registration (DCR), CORS handling, and Protected Resource Metadata (RFC 9728) for MCP tool servers.
+
+### Why agentgateway?
+
+Keycloak is OAuth 2.1 compliant but has CORS and DCR endpoint issues that prevent MCP clients from directly authenticating. agentgateway wraps Keycloak and exposes MCP spec-compliant endpoints.
+
+### Configuration in cluster.yaml
+
+```yaml
+# Enable agentgateway
+agentgateway_enabled: true
+agentgateway_addr: "192.168.22.147"  # Unused IP in node_cidr
+
+# Optional: OAuth scopes (defaults provided)
+agentgateway_scopes:
+  - openid
+  - profile
+  - email
+  - offline_access
+```
+
+### Architecture
+
+```
+MCP Client → agentgateway (kgateway) → Keycloak → MCP Tool Servers
+                    ↓
+            Protected Resource Metadata (RFC 9728)
+            DCR Endpoint Wrapping
+            CORS Handling
+```
+
+### Key Implementation Details
+
+**CRITICAL**: kgateway does NOT use an `MCPRoute` CRD. Instead, it uses:
+
+1. **ConfigMap** with native agentgateway `config.yaml` format
+2. **GatewayParameters** CRD to link ConfigMap to GatewayClass
+3. **TrafficPolicy** CRD for rate limiting
+4. **HTTPListenerPolicy** CRD for access logging
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `templates/config/kubernetes/apps/agentgateway/kgateway/app/gateway.yaml.j2` | Gateway + GatewayClass with parametersRef |
+| `templates/config/kubernetes/apps/agentgateway/kgateway/app/mcproute.yaml.j2` | ConfigMap + GatewayParameters + Policies |
+| `templates/config/kubernetes/apps/keycloak/keycloak/app/realm-config.yaml.j2` | agentgateway-mcp client configuration |
+
+### Endpoints Exposed
+
+- `https://mcp-auth.<domain>/` - MCP authentication endpoint
+- `https://mcp-auth.<domain>/.well-known/oauth-protected-resource` - RFC 9728 metadata
+
+### Separation from Envoy AI Gateway
+
+- **agentgateway**: MCP tool server authentication (OAuth + DCR + CORS)
+- **Envoy AI Gateway**: LLM/AI model routing (separate system in ai-system namespace)
+
+These are completely separate concerns and do not interact.
+
+### Security Warnings
+
+- **NEVER use wildcard `"*"`** in Keycloak client webOrigins - use specific domain patterns like `"https://*.domain.com"`
+- Use specific domain patterns in agentgateway CORS config, not wildcards
+- Rate limiting is configured via TrafficPolicy
+
+### Troubleshooting
+
+```bash
+# Check agentgateway pods
+kubectl get pods -n agentgateway
+kubectl logs -n agentgateway -l app.kubernetes.io/name=kgateway
+
+# Check GatewayClass and Gateway status
+kubectl get gatewayclass agentgateway -o yaml
+kubectl get gateway -n agentgateway agentgateway -o yaml
+
+# Verify ConfigMap
+kubectl get configmap -n agentgateway agentgateway-config -o yaml
+
+# Test Protected Resource Metadata
+curl -s https://mcp-auth.<domain>/.well-known/oauth-protected-resource | jq
+```
+
+See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
+
 ## Adding New Applications/Templates
 
 When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.

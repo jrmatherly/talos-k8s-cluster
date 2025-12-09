@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing), [agentgateway](https://agentgateway.dev/) (MCP OAuth authentication).
 
 **Other features include:**
 
@@ -538,6 +538,47 @@ curl -X POST "https://llms.${cloudflare_domain}/v1/embeddings" \
 ```
 
 See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/REFINED-IMPLEMENTATION-PLAN.md` for detailed implementation notes.
+
+### MCP Authentication (agentgateway)
+
+**Included (optional):** This template includes [agentgateway](https://agentgateway.dev/) via kgateway for MCP 2025-11-25 OAuth-compliant authentication. When enabled, it wraps Keycloak to provide Dynamic Client Registration (DCR), CORS handling, and Protected Resource Metadata (RFC 9728) for MCP tool servers.
+
+Enable it by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# Enable agentgateway
+agentgateway_enabled: true
+agentgateway_addr: "192.168.22.147"  # Unused IP in node_cidr
+
+# Optional: OAuth scopes (defaults provided in plugin.py)
+agentgateway_scopes:
+  - openid
+  - profile
+  - email
+  - offline_access
+```
+
+When enabled, agentgateway provides:
+- MCP authentication endpoint at `mcp-auth.${cloudflare_domain}`
+- Protected Resource Metadata discovery (RFC 9728)
+- DCR proxy wrapping Keycloak
+- CORS handling for MCP clients
+- Integration with existing Keycloak + Entra ID federation
+
+**Key Implementation Note:** kgateway does NOT use an `MCPRoute` CRD. Instead, it uses ConfigMap with native agentgateway config.yaml format, linked via GatewayParameters.
+
+**Verification:**
+
+```sh
+# Test Protected Resource Metadata
+curl -s https://mcp-auth.${cloudflare_domain}/.well-known/oauth-protected-resource | jq
+
+# Check agentgateway resources
+kubectl get gateway,gatewayclass -n agentgateway
+kubectl get configmap agentgateway-config -n agentgateway -o yaml
+```
+
+See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
 
 ### Community Repositories
 
