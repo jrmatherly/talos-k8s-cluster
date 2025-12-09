@@ -163,7 +163,6 @@ data:
             "authorizationUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/authorize",
             "tokenUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/token",
             "jwksUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/discovery/v2.0/keys",
-            "userInfoUrl": "https://graph.microsoft.com/oidc/userinfo",
             "logoutUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/logout",
             "issuer": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/v2.0",
             "clientId": "#{keycloak_entra_id_client_id}#",
@@ -171,60 +170,12 @@ data:
             "defaultScope": "openid profile email",
             "validateSignature": "true",
             "pkceEnabled": "true",
-            "pkceMethod": "S256"
+            "pkceMethod": "S256",
+            "disableUserInfo": "true"
           }
         }
       ],
-      "identityProviderMappers": [
-        {
-          "name": "email",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
-          "config": {
-            "syncMode": "INHERIT",
-            "claim": "email",
-            "user.attribute": "email"
-          }
-        },
-        {
-          "name": "first-name",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
-          "config": {
-            "syncMode": "INHERIT",
-            "claim": "given_name",
-            "user.attribute": "firstName"
-          }
-        },
-        {
-          "name": "last-name",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
-          "config": {
-            "syncMode": "INHERIT",
-            "claim": "family_name",
-            "user.attribute": "lastName"
-          }
-        },
-        {
-          "name": "username",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "oidc-username-idp-mapper",
-          "config": {
-            "syncMode": "INHERIT",
-            "template": "$${CLAIM.preferred_username}"
-          }
-        },
-        {
-          "name": "default-group-viewers",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "hardcoded-group-idp-mapper",
-          "config": {
-            "syncMode": "INHERIT",
-            "group": "/viewers"
-          }
-        }
-      ]
+      "identityProviderMappers": []
 #% endif %#
     }
 ---
@@ -232,10 +183,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v11
+  name: keycloak-realm-import-v13
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "11"
+    config-version: "13"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
