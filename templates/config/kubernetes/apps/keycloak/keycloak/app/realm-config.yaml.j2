@@ -232,10 +232,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v10
+  name: keycloak-realm-import-v11
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "10"
+    config-version: "11"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -275,6 +275,9 @@ spec:
               value: "no-delete"
             - name: IMPORT_MANAGED_ROLE
               value: "no-delete"
+            #| Use full for IDP mappers to clean up old/invalid mappers #|
+            - name: IMPORT_MANAGED_IDENTITY_PROVIDER_MAPPER
+              value: "full"
             - name: IMPORT_FILES_LOCATIONS
               value: "/config/*"
           volumeMounts:
