@@ -38,6 +38,34 @@ data:
       "actionTokenGeneratedByUserLifespan": 300,
       "clients": [
         {
+          "clientId": "account",
+          "name": "Account Management",
+          "enabled": true,
+          "publicClient": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": false,
+          "redirectUris": [
+            "https://auth.matherly.net/realms/k8s-cluster/account/*"
+          ],
+          "webOrigins": ["*"],
+          "attributes": {}
+        },
+        {
+          "clientId": "account-console",
+          "name": "Account Console",
+          "enabled": true,
+          "publicClient": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": false,
+          "redirectUris": [
+            "https://auth.matherly.net/realms/k8s-cluster/account/*"
+          ],
+          "webOrigins": ["*"],
+          "attributes": {
+            "pkce.code.challenge.method": "S256"
+          }
+        },
+        {
           "clientId": "envoy-gateway",
           "name": "Envoy Gateway OIDC Client",
           "description": "OIDC client for Envoy Gateway SecurityPolicy authentication",
@@ -95,21 +123,7 @@ data:
             "description": "Read-only access to cluster resources",
             "composite": false
           }
-        ],
-        "client": {
-          "account": [
-            {
-              "name": "manage-account",
-              "description": "Manage account",
-              "composite": false
-            },
-            {
-              "name": "view-profile",
-              "description": "View profile",
-              "composite": false
-            }
-          ]
-        }
+        ]
       },
       "groups": [
         {
@@ -208,24 +222,6 @@ data:
             "syncMode": "INHERIT",
             "group": "/viewers"
           }
-        },
-        {
-          "name": "account-manage",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "hardcoded-role-idp-mapper",
-          "config": {
-            "syncMode": "FORCE",
-            "role": "account.manage-account"
-          }
-        },
-        {
-          "name": "account-view-profile",
-          "identityProviderAlias": "entra-id",
-          "identityProviderMapper": "hardcoded-role-idp-mapper",
-          "config": {
-            "syncMode": "FORCE",
-            "role": "account.view-profile"
-          }
         }
       ]
     }
@@ -234,10 +230,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v9
+  name: keycloak-realm-import-v10
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "9"
+    config-version: "10"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
