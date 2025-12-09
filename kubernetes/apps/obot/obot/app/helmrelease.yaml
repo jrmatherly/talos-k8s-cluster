@@ -78,7 +78,8 @@ spec:
 
       # Tool Registries - Include both upstream tools and custom EntraID provider
       # Required for EntraID auth provider to be discovered alongside GitHub/Google providers
-      OBOT_SERVER_TOOL_REGISTRIES: "/obot-tools,/obot-tools-custom"
+      # Note: /obot-tools/tools contains the index.yaml, not /obot-tools root
+      OBOT_SERVER_TOOL_REGISTRIES: "/obot-tools/tools,/obot-tools-custom"
 
     # ============================================================
     # Storage Configuration
