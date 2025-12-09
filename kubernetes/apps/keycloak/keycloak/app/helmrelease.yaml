@@ -33,7 +33,6 @@ spec:
       - "/opt/keycloak/bin/kc.sh"
       - "start"
       - "--http-enabled=true"
-      - "--cache-stack=kubernetes"
 
     # ============================================================
     # PostgreSQL Database - Disabled (using external CloudNativePG)
@@ -68,6 +67,8 @@ spec:
             name: keycloak-secret
             key: admin-password
       - name: KC_HOSTNAME
+        value: "https://auth.${SECRET_DOMAIN}"
+      - name: KC_HOSTNAME_ADMIN
         value: "https://auth.${SECRET_DOMAIN}"
       - name: KC_PROXY_HEADERS
         value: "xforwarded"

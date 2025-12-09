@@ -34,7 +34,6 @@ spec:
       - "/opt/keycloak/bin/kc.sh"
       - "start"
       - "--http-enabled=true"
-      - "--cache-stack=kubernetes"
 
     # ============================================================
     # PostgreSQL Database - Disabled (using external CloudNativePG)
@@ -68,11 +67,12 @@ spec:
           secretKeyRef:
             name: keycloak-secret
             key: admin-password
-      #| Hostname config - Keycloak 26 v2 format (full URL required) #|
+      #| Hostname config - Keycloak 26 v2 format (full URLs required) #|
       - name: KC_HOSTNAME
         value: "https://auth.${SECRET_DOMAIN}"
-      #| KC_HOSTNAME_ADMIN removed - defaults to KC_HOSTNAME #|
-      #| Proxy config for reverse proxy (Cloudflare tunnel + Envoy) #|
+      - name: KC_HOSTNAME_ADMIN
+        value: "https://auth.${SECRET_DOMAIN}"
+      #| Proxy config for Cloudflare tunnel/Envoy reverse proxy #|
       - name: KC_PROXY_HEADERS
         value: "xforwarded"
       - name: KC_HTTP_ENABLED
