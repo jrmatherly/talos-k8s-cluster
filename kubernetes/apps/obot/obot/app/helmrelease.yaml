@@ -67,9 +67,11 @@ spec:
       # Per docs/obot-docs/configuration/encryption-providers/custom-provider.md:
       # - OBOT_SERVER_ENCRYPTION_PROVIDER must be "custom"
       # - OBOT_SERVER_ENCRYPTION_KEY via Flux substitution from cluster-secrets
-      # Chart's initContainer reads this from the secret it creates
+      # - OBOT_SERVER_ENCRYPTION_CONFIG_FILE points to the config file created by initContainer
+      # Chart's initContainer creates /config/encryption.yaml from the secret key
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
       OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_SERVER_ENCRYPTION_KEY}"
+      OBOT_SERVER_ENCRYPTION_CONFIG_FILE: "/config/encryption.yaml"
 
       # AI Gateway Integration
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
