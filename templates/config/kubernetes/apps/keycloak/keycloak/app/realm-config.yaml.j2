@@ -147,7 +147,7 @@ data:
       "clientScopeMappings": {}#% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#,
       "identityProviders": [
         {
-          "alias": "microsoft",
+          "alias": "entra-id",
           "displayName": "Microsoft Entra ID",
           "providerId": "oidc",
           "enabled": true,
@@ -181,10 +181,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v15
+  name: keycloak-realm-import-v16
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "15"
+    config-version: "16"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
