@@ -80,7 +80,7 @@ spec:
 #% endif %#
 
       # Encryption Configuration
-#% if obot_encryption_provider | default('custom') == 'custom' %#
+#% if obot_encryption_key | default('') and obot_encryption_provider | default('custom') == 'custom' %#
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
       OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_ENCRYPTION_KEY}"
 #% endif %#
