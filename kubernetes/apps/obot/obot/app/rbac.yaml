@@ -50,7 +50,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: obot-self
-  namespace: obot
 rules:
   # Read secrets (for database credentials lookup)
   - apiGroups: [""]
@@ -71,7 +70,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: obot-self
-  namespace: obot
 subjects:
   - kind: ServiceAccount
     name: obot

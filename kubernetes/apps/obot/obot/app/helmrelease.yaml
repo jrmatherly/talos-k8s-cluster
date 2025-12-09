@@ -3,7 +3,6 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: obot
-  namespace: obot
 spec:
   chart:
     spec:

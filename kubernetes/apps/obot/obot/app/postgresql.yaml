@@ -4,7 +4,6 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: obot-db
-  namespace: obot
 spec:
   instances: 3
 

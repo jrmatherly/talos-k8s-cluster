@@ -5,7 +5,6 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: obot-db
-  namespace: obot
 spec:
   instances: #{ obot_postgresql_replicas | default(3) }#
 
