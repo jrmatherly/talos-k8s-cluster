@@ -5,6 +5,8 @@ metadata:
   name: kgateway
 spec:
   dependsOn:
+    - name: kgateway-crds
+      namespace: agentgateway
     - name: keycloak
       namespace: keycloak
     - name: cilium
