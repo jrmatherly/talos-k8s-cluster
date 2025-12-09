@@ -43,8 +43,8 @@ spec:
       # are automatically set by the chart when OBOT_SERVER_MCPRUNTIME_BACKEND is "kubernetes"
       OBOT_SERVER_MCPRUNTIME_BACKEND: "kubernetes"
 
-      # Authentication
-      OBOT_SERVER_ENABLE_AUTHENTICATION: "true"
+      # Authentication (must be boolean for chart's NOTES.txt template)
+      OBOT_SERVER_ENABLE_AUTHENTICATION: true
 
       # Entra ID OAuth Configuration
       OBOT_SERVER_AUTH_PROVIDER: "entra-id"
