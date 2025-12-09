@@ -58,6 +58,14 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    # Allow Kubernetes API access (for MCP namespace management)
+    # Using ipBlock to reach the kubernetes service at 10.43.0.1
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.1/32
+      ports:
+        - protocol: TCP
+          port: 443
     # Allow PostgreSQL connection to CloudNativePG cluster
     - to:
         - podSelector:
