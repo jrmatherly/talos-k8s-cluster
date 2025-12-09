@@ -1,4 +1,3 @@
-#% if obot_enabled | default(false) %#
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -26,7 +25,7 @@ spec:
     # ============================================================
     # Replicas - Set to 1 for RWO storage
     # ============================================================
-    replicaCount: #{ obot_replicas | default(1) }#
+    replicaCount: 1
 
     # ============================================================
     # Service Configuration
@@ -46,64 +45,45 @@ spec:
     # ============================================================
     config:
       # Database Configuration
-#% if obot_postgres_host | default('') %#
-      OBOT_SERVER_DSN: "postgresql://#{ obot_postgres_user | default('obot') }#:${OBOT_DB_PASSWORD}@#{ obot_postgres_host }#:5432/#{ obot_postgres_db | default('obot') }#?sslmode=require"
-#% else %#
-      OBOT_SERVER_DSN: "postgresql://#{ obot_postgres_user | default('obot') }#:${OBOT_DB_PASSWORD}@obot-db-rw.obot.svc.cluster.local:5432/#{ obot_postgres_db | default('obot') }#?sslmode=require"
-#% endif %#
+      OBOT_SERVER_DSN: "postgresql://obot:${OBOT_DB_PASSWORD}@obot-db-rw.obot.svc.cluster.local:5432/obot?sslmode=require"
 
       # Authentication
       OBOT_SERVER_ENABLE_AUTHENTICATION: "true"
-#% if obot_admin_emails | default('') %#
-      OBOT_SERVER_AUTH_ADMIN_EMAILS: "#{ obot_admin_emails }#"
-#% endif %#
-#% if obot_owner_emails | default('') %#
-      OBOT_SERVER_AUTH_OWNER_EMAILS: "#{ obot_owner_emails }#"
-#% endif %#
-#% if obot_bootstrap_token | default('') %#
-      OBOT_BOOTSTRAP_TOKEN: "${OBOT_BOOTSTRAP_TOKEN}"
-#% endif %#
 
       # Entra ID OAuth Configuration
-#% if obot_entra_tenant_id | default('') %#
       OBOT_SERVER_AUTH_PROVIDER: "entra-id"
-      OBOT_SERVER_AUTH_ENTRA_TENANT_ID: "#{ obot_entra_tenant_id }#"
+      OBOT_SERVER_AUTH_ENTRA_TENANT_ID: "f505346f-75cf-458b-baeb-10708d41967d"
       OBOT_SERVER_AUTH_ENTRA_CLIENT_ID: "${OBOT_ENTRA_CLIENT_ID}"
       OBOT_SERVER_AUTH_ENTRA_CLIENT_SECRET: "${OBOT_ENTRA_CLIENT_SECRET}"
       OBOT_SERVER_AUTH_REDIRECT_URL: "https://obot.${SECRET_DOMAIN}/oauth2/callback"
       # Token audience validation (security hardening - prevents token confusion attacks)
       OBOT_SERVER_AUTH_AUDIENCE: "${OBOT_ENTRA_CLIENT_ID}"
       OBOT_SERVER_AUTH_REQUIRED_CLAIMS: "email,preferred_username"
-#% endif %#
 
       # Encryption Configuration
-#% if obot_encryption_provider | default('custom') == 'custom' %#
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
       OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_ENCRYPTION_KEY}"
-#% endif %#
 
       # MCP Namespace Configuration
-      OBOT_SERVER_MCPNAMESPACE: "#{ obot_mcp_namespace | default('obot-mcp') }#"
+      OBOT_SERVER_MCPNAMESPACE: "obot-mcp"
 
       # AI Gateway Integration
-#% if obot_use_ai_gateway | default(true) %#
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
-#% endif %#
 
     # ============================================================
     # Storage Configuration
     # ============================================================
     persistence:
       enabled: true
-      storageClass: #{ obot_storage_class | default('proxmox-csi') }#
-      size: #{ obot_storage_size | default('20Gi') }#
+      storageClass: proxmox-csi
+      size: 20Gi
       accessMode: ReadWriteOnce
 
     # ============================================================
     # MCP Kubernetes Runtime Settings
     # ============================================================
     mcpNamespace:
-      name: #{ obot_mcp_namespace | default('obot-mcp') }#
+      name: obot-mcp
       create: false  # Created via Flux, not Helm
 
     mcpServerDefaults:
@@ -128,11 +108,11 @@ spec:
     # ============================================================
     resources:
       requests:
-        cpu: "#{ obot_cpu_request | default('500m') }#"
-        memory: "#{ obot_memory_request | default('1Gi') }#"
+        cpu: "500m"
+        memory: "1Gi"
       limits:
-        cpu: "#{ obot_cpu_limit | default('2000m') }#"
-        memory: "#{ obot_memory_limit | default('4Gi') }#"
+        cpu: "2000m"
+        memory: "4Gi"
 
     # ============================================================
     # Security Context
@@ -187,4 +167,3 @@ spec:
     # ============================================================
     rbac:
       create: true
-#% endif %#

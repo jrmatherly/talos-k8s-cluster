@@ -268,22 +268,35 @@ class Plugin(makejinja.plugin.Plugin):
 
         # obot defaults (Multi-tenant MCP Gateway)
         data.setdefault("obot_enabled", False)
-        data.setdefault("obot_db_password", "")
-        data.setdefault("obot_cookie_secret", "")
-        data.setdefault("obot_encryption_key", "")
-        data.setdefault("obot_bootstrap_token", "")
+        data.setdefault("obot_hostname", "obot")
         data.setdefault("obot_entra_tenant_id", "")
         data.setdefault("obot_entra_client_id", "")
         data.setdefault("obot_entra_client_secret", "")
+        # PostgreSQL configuration
+        data.setdefault("obot_postgres_host", "")
+        data.setdefault("obot_postgres_db", "obot")
+        data.setdefault("obot_postgres_user", "obot")
+        data.setdefault("obot_postgres_password", "")
+        data.setdefault("obot_mcp_namespace", "obot-mcp")
+        # Secrets
+        data.setdefault("obot_cookie_secret", "")
+        data.setdefault("obot_encryption_key", "")
+        data.setdefault("obot_bootstrap_token", "")
+        # User management
         data.setdefault("obot_admin_emails", "")
         data.setdefault("obot_owner_emails", "")
+        # Storage
         data.setdefault("obot_storage_size", "20Gi")
         data.setdefault("obot_storage_class", "proxmox-csi")
+        data.setdefault("obot_postgresql_replicas", 3)
+        data.setdefault("obot_postgresql_storage_size", "10Gi")
+        # Resources
         data.setdefault("obot_replicas", 1)
         data.setdefault("obot_cpu_request", "500m")
         data.setdefault("obot_cpu_limit", "2000m")
         data.setdefault("obot_memory_request", "1Gi")
         data.setdefault("obot_memory_limit", "4Gi")
+        # Advanced
         data.setdefault("obot_encryption_provider", "custom")
         data.setdefault("obot_use_ai_gateway", True)
 

@@ -132,17 +132,24 @@ import (
 	// obot Configuration (Multi-tenant MCP Gateway)
 	// Self-hosted AI agent platform with Entra ID authentication
 	obot_enabled?: bool                         // Enable obot MCP gateway
-	obot_db_password?: string & !=""            // PostgreSQL password for obot database
-	obot_cookie_secret?: string & !=""          // Session cookie secret (generate with openssl rand -base64 32)
-	obot_encryption_key?: string & !=""         // Custom encryption key (generate with openssl rand -base64 32)
-	obot_bootstrap_token?: string & !=""        // Initial admin bootstrap token
+	obot_hostname?: string & !=""               // Hostname subdomain (default: obot)
 	obot_entra_tenant_id?: string & !=""        // Azure Entra ID tenant ID (GUID)
 	obot_entra_client_id?: string & !=""        // Azure App Registration client ID (GUID)
 	obot_entra_client_secret?: string & !=""    // Azure App Registration client secret
+	obot_postgres_host?: string                 // PostgreSQL host (empty for CloudNativePG)
+	obot_postgres_db?: string & !=""            // PostgreSQL database name (default: obot)
+	obot_postgres_user?: string & !=""          // PostgreSQL username (default: obot)
+	obot_postgres_password?: string & !=""      // PostgreSQL password for obot database
+	obot_mcp_namespace?: string & !=""          // Namespace for MCP servers (default: obot-mcp)
+	obot_cookie_secret?: string & !=""          // Session cookie secret (generate with openssl rand -base64 32)
+	obot_encryption_key?: string & !=""         // Custom encryption key (generate with openssl rand -base64 32)
+	obot_bootstrap_token?: string & !=""        // Initial admin bootstrap token
 	obot_admin_emails?: string & !=""           // Comma-separated list of admin emails
 	obot_owner_emails?: string & !=""           // Comma-separated list of owner emails
 	obot_storage_size?: string & !=""           // Storage size for obot data (default: 20Gi)
 	obot_storage_class?: string & !=""          // Storage class (default: proxmox-csi)
+	obot_postgresql_replicas?: int & >=1        // PostgreSQL replicas (default: 3)
+	obot_postgresql_storage_size?: string & !="" // PostgreSQL storage size (default: 10Gi)
 	obot_replicas?: int & >=1                   // Number of replicas (default: 1 for RWO storage)
 	obot_cpu_request?: string & !=""            // CPU request (default: 500m)
 	obot_cpu_limit?: string & !=""              // CPU limit (default: 2000m)

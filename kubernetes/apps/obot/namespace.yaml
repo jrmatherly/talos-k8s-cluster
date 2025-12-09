@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: obot
+  labels:
+    app.kubernetes.io/name: obot
+    app.kubernetes.io/component: mcp-gateway
+    kustomize.toolkit.fluxcd.io/prune: disabled

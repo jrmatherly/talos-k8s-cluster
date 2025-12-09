@@ -20,6 +20,8 @@ data:
               issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
               # JWKS endpoint for JWT token validation
               jwksUrl: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
+              # Token audience validation (security hardening - prevents token confusion)
+              audience: "agentgateway-mcp"
               # Keycloak provider - handles DCR wrapping and CORS
               provider:
                 keycloak: {}

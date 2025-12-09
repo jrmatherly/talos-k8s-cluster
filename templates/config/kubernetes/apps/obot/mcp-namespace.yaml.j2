@@ -3,10 +3,10 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: obot-mcp
+  name: #{ obot_mcp_namespace | default('obot-mcp') }#
   labels:
     app.kubernetes.io/name: obot
     app.kubernetes.io/component: mcp-server
-    kubernetes.io/metadata.name: obot-mcp
+    kubernetes.io/metadata.name: #{ obot_mcp_namespace | default('obot-mcp') }#
     kustomize.toolkit.fluxcd.io/prune: disabled
 #% endif %#

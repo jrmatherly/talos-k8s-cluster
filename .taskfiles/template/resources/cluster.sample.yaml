@@ -574,10 +574,43 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: false)
 # obot_enabled: true
 
+# -- Obot hostname (subdomain).
+#    (OPTIONAL) / (DEFAULT: "obot")
+#    Results in obot.<primary_domain>
+# obot_hostname: "obot"
+
+# ==============================================================================
+# OBOT POSTGRESQL CONFIGURATION
+# ==============================================================================
+
+# -- PostgreSQL host for obot.
+#    (OPTIONAL) - Leave empty to use CloudNativePG (recommended)
+# obot_postgres_host: ""
+
+# -- PostgreSQL database name.
+#    (OPTIONAL) / (DEFAULT: "obot")
+# obot_postgres_db: "obot"
+
+# -- PostgreSQL username.
+#    (OPTIONAL) / (DEFAULT: "obot")
+# obot_postgres_user: "obot"
+
 # -- PostgreSQL password for obot database.
 #    (REQUIRED if obot_enabled) - Will be encrypted with SOPS
 #    Generate with: openssl rand -base64 24
-# obot_db_password: ""
+# obot_postgres_password: ""
+
+# ==============================================================================
+# OBOT MCP SERVER CONFIGURATION
+# ==============================================================================
+
+# -- Namespace for dynamically created MCP servers.
+#    (OPTIONAL) / (DEFAULT: "obot-mcp")
+# obot_mcp_namespace: "obot-mcp"
+
+# ==============================================================================
+# OBOT SECRETS
+# ==============================================================================
 
 # -- Session cookie secret (32 bytes base64).
 #    (REQUIRED if obot_enabled) - Will be encrypted with SOPS

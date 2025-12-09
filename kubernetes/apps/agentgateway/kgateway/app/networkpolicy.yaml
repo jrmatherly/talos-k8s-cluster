@@ -1,0 +1,113 @@
+---
+# NetworkPolicy for agentgateway - ingress rules
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agentgateway-ingress
+  namespace: agentgateway
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kgateway
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from envoy-gateway proxies for external MCP clients
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-namespace: network
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 15000
+    # Allow from within agentgateway namespace (for health checks)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+    # Allow Cilium LoadBalancer traffic (external MCP clients)
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 443
+---
+# NetworkPolicy for agentgateway - egress rules
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agentgateway-egress
+  namespace: agentgateway
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kgateway
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS queries
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow to Keycloak for OAuth validation
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: keycloak
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 443
+    # Allow to obot namespace for MCP server backend proxying
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow to obot-mcp namespace for direct MCP server access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot-mcp
+      ports:
+        - protocol: TCP
+          port: 80
+    # Allow to envoy-ai gateway for LLM requests (authenticated)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-ai
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow external HTTPS (for Entra ID validation via Keycloak OIDC)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

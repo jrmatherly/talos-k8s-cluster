@@ -1,0 +1,181 @@
+---
+# NetworkPolicy for obot namespace - allow ingress from envoy-gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obot-ingress
+  namespace: obot
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: obot
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from envoy-gateway proxies
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-namespace: network
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from within obot namespace (for health checks, etc.)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+    # Allow from agentgateway for MCP-proxied requests
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# NetworkPolicy for obot namespace - egress rules
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obot-egress
+  namespace: obot
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: obot
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS queries
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow PostgreSQL connection to CloudNativePG cluster
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: obot-db
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow to obot-mcp namespace for MCP server management
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot-mcp
+      ports:
+        - protocol: TCP
+          port: 80
+    # Allow to envoy-ai gateway for LLM requests
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-ai
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# NetworkPolicy for MCP namespace - isolate MCP servers
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-server-isolation
+  namespace: obot-mcp
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only allow ingress from obot namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 80
+  egress:
+    # Allow DNS queries to kube-system
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow HTTPS to external services (MCP servers may need internet)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+    # Allow to obot namespace (for callbacks)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 8080
+    # When agentgateway is enabled: route LLM requests through agentgateway
+    # (security hardening - all LLM traffic goes through authenticated proxy)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 443
+---
+# ResourceQuota for MCP namespace to prevent resource exhaustion
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mcp-resource-quota
+  namespace: obot-mcp
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: "8Gi"
+    limits.cpu: "8"
+    limits.memory: "16Gi"
+    pods: "20"
+---
+# LimitRange for MCP namespace default resources
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mcp-limit-range
+  namespace: obot-mcp
+spec:
+  limits:
+    - default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "256Mi"
+      type: Container

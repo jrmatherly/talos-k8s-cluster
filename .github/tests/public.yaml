@@ -93,21 +93,33 @@ agentgateway_scopes:
   - offline_access
 # obot Configuration (Multi-Tenant MCP Gateway)
 obot_enabled: true
-obot_db_password: "test-db-password"
-obot_cookie_secret: "test-cookie-secret-32-bytes-here"
-obot_encryption_key: "test-encryption-key-32-bytes-here"
-obot_bootstrap_token: "test-bootstrap-token"
+obot_hostname: "obot"
 obot_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 obot_entra_client_id: "obot-client-id-12345678"
 obot_entra_client_secret: "obot-client-secret-here"
+# PostgreSQL
+obot_postgres_db: "obot"
+obot_postgres_user: "obot"
+obot_postgres_password: "test-db-password"
+obot_mcp_namespace: "obot-mcp"
+# Secrets
+obot_cookie_secret: "test-cookie-secret-32-bytes-here"
+obot_encryption_key: "test-encryption-key-32-bytes-here"
+obot_bootstrap_token: "test-bootstrap-token"
+# User management
 obot_admin_emails: "admin@example.com"
 obot_owner_emails: "owner@example.com"
+# Storage
 obot_storage_size: "20Gi"
 obot_storage_class: "proxmox-csi"
+obot_postgresql_replicas: 3
+obot_postgresql_storage_size: "10Gi"
+# Resources
 obot_replicas: 1
 obot_cpu_request: "500m"
 obot_cpu_limit: "2000m"
 obot_memory_request: "1Gi"
 obot_memory_limit: "4Gi"
+# Advanced
 obot_encryption_provider: "custom"
 obot_use_ai_gateway: true
