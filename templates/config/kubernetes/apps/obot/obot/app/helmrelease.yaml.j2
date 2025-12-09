@@ -80,9 +80,13 @@ spec:
 #% endif %#
 
       # Encryption Configuration
+      # Per docs/obot-docs/configuration/encryption-providers/custom-provider.md:
+      # - OBOT_SERVER_ENCRYPTION_PROVIDER must be "custom"
+      # - OBOT_SERVER_ENCRYPTION_KEY via Flux substitution from cluster-secrets
+      # Chart's initContainer reads this from the secret it creates
 #% if obot_encryption_key | default('') and obot_encryption_provider | default('custom') == 'custom' %#
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
-      OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_ENCRYPTION_KEY}"
+      OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_SERVER_ENCRYPTION_KEY}"
 #% endif %#
 
       # AI Gateway Integration
@@ -169,11 +173,6 @@ spec:
       periodSeconds: 10
       failureThreshold: 3
       timeoutSeconds: 5
-
-    # ============================================================
-    # Existing Secret for Sensitive Configuration
-    # ============================================================
-    existingSecret: obot-config-secret
 
     # ============================================================
     # Service Account

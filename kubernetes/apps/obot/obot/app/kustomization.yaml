@@ -8,6 +8,5 @@ resources:
   - ./httproute.yaml
   - ./networkpolicy.yaml
   - ./rbac.yaml
-  - ./secret.sops.yaml
   - ./db-secret.sops.yaml
   - ./postgresql.yaml

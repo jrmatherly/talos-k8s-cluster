@@ -64,8 +64,12 @@ spec:
       OBOT_SERVER_AUTH_REQUIRED_CLAIMS: "email,preferred_username"
 
       # Encryption Configuration
+      # Per docs/obot-docs/configuration/encryption-providers/custom-provider.md:
+      # - OBOT_SERVER_ENCRYPTION_PROVIDER must be "custom"
+      # - OBOT_SERVER_ENCRYPTION_KEY via Flux substitution from cluster-secrets
+      # Chart's initContainer reads this from the secret it creates
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
-      OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_ENCRYPTION_KEY}"
+      OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_SERVER_ENCRYPTION_KEY}"
 
       # AI Gateway Integration
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
@@ -149,11 +153,6 @@ spec:
       periodSeconds: 10
       failureThreshold: 3
       timeoutSeconds: 5
-
-    # ============================================================
-    # Existing Secret for Sensitive Configuration
-    # ============================================================
-    existingSecret: obot-config-secret
 
     # ============================================================
     # Service Account
