@@ -12,13 +12,6 @@ spec:
   timeout: 15m
   values:
     # ============================================================
-    # Image Configuration
-    # ============================================================
-    image:
-      repository: ghcr.io/jrmatherly/obot-entraid
-      pullPolicy: IfNotPresent
-
-    # ============================================================
     # Replicas - Set to 1 for RWO storage
     # ============================================================
     replicaCount: #{ obot_replicas | default(1) }#
