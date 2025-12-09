@@ -56,9 +56,9 @@ spec:
 #% endif %#
 
       # MCP Runtime Configuration
+      # Note: OBOT_SERVER_MCPNAMESPACE, OBOT_SERVER_SERVICE_NAME, and OBOT_SERVER_SERVICE_NAMESPACE
+      # are automatically set by the chart when OBOT_SERVER_MCPRUNTIME_BACKEND is "kubernetes"
       OBOT_SERVER_MCPRUNTIME_BACKEND: "kubernetes"
-      OBOT_SERVER_SERVICE_NAME: "obot"
-      OBOT_SERVER_SERVICE_NAMESPACE: "obot"
 
       # Authentication
       OBOT_SERVER_ENABLE_AUTHENTICATION: "true"
@@ -89,9 +89,6 @@ spec:
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
       OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_ENCRYPTION_KEY}"
 #% endif %#
-
-      # MCP Namespace Configuration
-      OBOT_SERVER_MCPNAMESPACE: "#{ obot_mcp_namespace | default('obot-mcp') }#"
 
       # AI Gateway Integration
 #% if obot_use_ai_gateway | default(true) %#

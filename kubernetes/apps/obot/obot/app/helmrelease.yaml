@@ -51,9 +51,9 @@ spec:
       OBOT_SERVER_DSN: "postgresql://obot:${OBOT_DB_PASSWORD}@obot-db-rw.obot.svc.cluster.local:5432/obot?sslmode=require"
 
       # MCP Runtime Configuration
+      # Note: OBOT_SERVER_MCPNAMESPACE, OBOT_SERVER_SERVICE_NAME, and OBOT_SERVER_SERVICE_NAMESPACE
+      # are automatically set by the chart when OBOT_SERVER_MCPRUNTIME_BACKEND is "kubernetes"
       OBOT_SERVER_MCPRUNTIME_BACKEND: "kubernetes"
-      OBOT_SERVER_SERVICE_NAME: "obot"
-      OBOT_SERVER_SERVICE_NAMESPACE: "obot"
 
       # Authentication
       OBOT_SERVER_ENABLE_AUTHENTICATION: "true"
@@ -71,9 +71,6 @@ spec:
       # Encryption Configuration
       OBOT_SERVER_ENCRYPTION_PROVIDER: "custom"
       OBOT_SERVER_ENCRYPTION_KEY: "${OBOT_ENCRYPTION_KEY}"
-
-      # MCP Namespace Configuration
-      OBOT_SERVER_MCPNAMESPACE: "obot-mcp"
 
       # AI Gateway Integration
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
