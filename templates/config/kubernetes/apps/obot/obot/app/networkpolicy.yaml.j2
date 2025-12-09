@@ -29,6 +29,16 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot
+#% if agentgateway_enabled | default(false) %#
+    # Allow from agentgateway for MCP-proxied requests
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 8080
+#% endif %#
 ---
 # NetworkPolicy for obot namespace - egress rules
 apiVersion: networking.k8s.io/v1
@@ -131,7 +141,20 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
-    # Allow to network namespace (for LLM requests via envoy-ai)
+#% if agentgateway_enabled | default(false) %#
+    # When agentgateway is enabled: route LLM requests through agentgateway
+    # (security hardening - all LLM traffic goes through authenticated proxy)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 443
+#% else %#
+    # When agentgateway is not enabled: direct access to envoy-ai
     - to:
         - namespaceSelector:
             matchLabels:
@@ -139,6 +162,7 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+#% endif %#
 ---
 # ResourceQuota for MCP namespace to prevent resource exhaustion
 apiVersion: v1

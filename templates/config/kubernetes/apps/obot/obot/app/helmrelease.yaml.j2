@@ -67,6 +67,9 @@ spec:
       OBOT_SERVER_AUTH_ENTRA_CLIENT_ID: "${OBOT_ENTRA_CLIENT_ID}"
       OBOT_SERVER_AUTH_ENTRA_CLIENT_SECRET: "${OBOT_ENTRA_CLIENT_SECRET}"
       OBOT_SERVER_AUTH_REDIRECT_URL: "https://obot.${SECRET_DOMAIN}/oauth2/callback"
+      # Token audience validation (security hardening - prevents token confusion attacks)
+      OBOT_SERVER_AUTH_AUDIENCE: "${OBOT_ENTRA_CLIENT_ID}"
+      OBOT_SERVER_AUTH_REQUIRED_CLAIMS: "email,preferred_username"
 #% endif %#
 
       # Encryption Configuration

@@ -113,8 +113,10 @@ spec:
     name: agentgateway
   rateLimit:
     local:
-      requests: 100
-      unit: MINUTE
+      tokenBucket:
+        maxTokens: 100
+        tokensPerFill: 100
+        fillInterval: "60s"
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: HTTPListenerPolicy
