@@ -16,7 +16,7 @@ spec:
     # ============================================================
     image:
       repository: ghcr.io/jrmatherly/obot-entraid
-      tag: v0.2.5
+      tag: v0.2.6
 
     # ============================================================
     # Replicas - Set to 1 for RWO storage
@@ -100,6 +100,9 @@ spec:
       # Required for EntraID auth provider to be discovered alongside GitHub/Google providers
       # Note: /obot-tools/tools contains the index.yaml, not /obot-tools root
       OBOT_SERVER_TOOL_REGISTRIES: "/obot-tools/tools,/obot-tools-custom"
+
+      # Disable update check - using forked repo, upstream version checks are not relevant
+      OBOT_SERVER_DISABLE_UPDATE_CHECK: "true"
 
     # ============================================================
     # Storage Configuration
