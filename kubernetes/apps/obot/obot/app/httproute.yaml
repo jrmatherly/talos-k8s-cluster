@@ -12,5 +12,5 @@ spec:
       sectionName: https
   rules:
     - backendRefs:
-        - name: obot
+        - name: obot-obot
           port: 8080
