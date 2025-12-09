@@ -50,17 +50,8 @@ spec:
       cpu: "1000m"
       memory: "2Gi"
 
-  # Anti-affinity for HA
+  # Anti-affinity for HA (CNPG enables this by default)
   affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-                - key: cnpg.io/cluster
-                  operator: In
-                  values:
-                    - obot-db
-            topologyKey: kubernetes.io/hostname
+    enablePodAntiAffinity: true
+    podAntiAffinityType: preferred
 #% endif %#
