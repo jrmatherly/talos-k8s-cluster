@@ -15,15 +15,15 @@ spec:
   wait: true
   dependsOn:
     - name: cilium
-      namespace: flux-system
+      namespace: kube-system
     - name: cloudnative-pg
-      namespace: flux-system
-    - name: cert-manager-issuers
-      namespace: flux-system
+      namespace: cnpg-system
+    - name: cert-manager
+      namespace: cert-manager
     - name: envoy-gateway
-      namespace: flux-system
+      namespace: network
     - name: proxmox-csi
-      namespace: flux-system
+      namespace: csi-proxmox
   postBuild:
     substituteFrom:
       - kind: Secret

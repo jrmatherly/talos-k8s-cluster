@@ -44,8 +44,16 @@ spec:
     # Configuration - All environment variables in one section
     # ============================================================
     config:
+      # Server Hostname (CRITICAL: Required for OAuth callbacks and LLM proxying)
+      OBOT_SERVER_HOSTNAME: "https://obot.${SECRET_DOMAIN}"
+
       # Database Configuration
       OBOT_SERVER_DSN: "postgresql://obot:${OBOT_DB_PASSWORD}@obot-db-rw.obot.svc.cluster.local:5432/obot?sslmode=require"
+
+      # MCP Runtime Configuration
+      OBOT_SERVER_MCPRUNTIME_BACKEND: "kubernetes"
+      OBOT_SERVER_SERVICE_NAME: "obot"
+      OBOT_SERVER_SERVICE_NAMESPACE: "obot"
 
       # Authentication
       OBOT_SERVER_ENABLE_AUTHENTICATION: "true"

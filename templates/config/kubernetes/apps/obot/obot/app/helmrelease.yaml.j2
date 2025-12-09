@@ -45,12 +45,20 @@ spec:
     # Configuration - All environment variables in one section
     # ============================================================
     config:
+      # Server Hostname (CRITICAL: Required for OAuth callbacks and LLM proxying)
+      OBOT_SERVER_HOSTNAME: "https://#{ obot_hostname | default('obot') }#.${SECRET_DOMAIN}"
+
       # Database Configuration
 #% if obot_postgres_host | default('') %#
       OBOT_SERVER_DSN: "postgresql://#{ obot_postgres_user | default('obot') }#:${OBOT_DB_PASSWORD}@#{ obot_postgres_host }#:5432/#{ obot_postgres_db | default('obot') }#?sslmode=require"
 #% else %#
       OBOT_SERVER_DSN: "postgresql://#{ obot_postgres_user | default('obot') }#:${OBOT_DB_PASSWORD}@obot-db-rw.obot.svc.cluster.local:5432/#{ obot_postgres_db | default('obot') }#?sslmode=require"
 #% endif %#
+
+      # MCP Runtime Configuration
+      OBOT_SERVER_MCPRUNTIME_BACKEND: "kubernetes"
+      OBOT_SERVER_SERVICE_NAME: "obot"
+      OBOT_SERVER_SERVICE_NAMESPACE: "obot"
 
       # Authentication
       OBOT_SERVER_ENABLE_AUTHENTICATION: "true"
@@ -70,7 +78,7 @@ spec:
       OBOT_SERVER_AUTH_ENTRA_TENANT_ID: "#{ obot_entra_tenant_id }#"
       OBOT_SERVER_AUTH_ENTRA_CLIENT_ID: "${OBOT_ENTRA_CLIENT_ID}"
       OBOT_SERVER_AUTH_ENTRA_CLIENT_SECRET: "${OBOT_ENTRA_CLIENT_SECRET}"
-      OBOT_SERVER_AUTH_REDIRECT_URL: "https://obot.${SECRET_DOMAIN}/oauth2/callback"
+      OBOT_SERVER_AUTH_REDIRECT_URL: "https://#{ obot_hostname | default('obot') }#.${SECRET_DOMAIN}/oauth2/callback"
       # Token audience validation (security hardening - prevents token confusion attacks)
       OBOT_SERVER_AUTH_AUDIENCE: "${OBOT_ENTRA_CLIENT_ID}"
       OBOT_SERVER_AUTH_REQUIRED_CLAIMS: "email,preferred_username"
