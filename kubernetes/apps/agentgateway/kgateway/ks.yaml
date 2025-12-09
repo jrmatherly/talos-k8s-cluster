@@ -3,8 +3,12 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: kgateway
-  namespace: flux-system
 spec:
+  dependsOn:
+    - name: keycloak
+      namespace: keycloak
+    - name: cilium
+      namespace: kube-system
   interval: 1h
   timeout: 10m
   path: ./kubernetes/apps/agentgateway/kgateway/app
@@ -12,12 +16,9 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+    namespace: flux-system
+  targetNamespace: agentgateway
   wait: true
-  dependsOn:
-    - name: keycloak
-      namespace: flux-system
-    - name: cilium
-      namespace: flux-system
   postBuild:
     substituteFrom:
       - kind: Secret
