@@ -1,0 +1,15 @@
+#% if obot_enabled | default(false) %#
+---
+# ResourceQuota for MCP namespace to prevent resource exhaustion
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mcp-resource-quota
+spec:
+  hard:
+    requests.cpu: "4"
+    requests.memory: "8Gi"
+    limits.cpu: "8"
+    limits.memory: "16Gi"
+    pods: "20"
+#% endif %#

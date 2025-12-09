@@ -1,0 +1,17 @@
+#% if obot_enabled | default(false) %#
+---
+# LimitRange for MCP namespace default resources
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mcp-limit-range
+spec:
+  limits:
+    - default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "256Mi"
+      type: Container
+#% endif %#

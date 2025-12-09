@@ -9,3 +9,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./obot/ks.yaml
+  - ./obot-mcp-policies/ks.yaml
