@@ -104,8 +104,51 @@ data:
             "pkce.code.challenge.method": "S256",
             "post.logout.redirect.uris": "https://*.matherly.net/*"
           }
-        }
-      ],
+        },
+        {
+          "clientId": "agentgateway-mcp",
+          "name": "agentgateway MCP OAuth Client",
+          "description": "OAuth client for agentgateway MCP authentication proxy",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "",
+          "redirectUris": [
+            "https://mcp-auth.matherly.net/*",
+            "http://localhost:*"
+          ],
+          "webOrigins": [
+            "https://mcp-auth.matherly.net",
+            "https://*.matherly.net"
+          ],
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email",
+            "offline_access"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone"
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://mcp-auth.matherly.net/*",
+            "oauth2.device.authorization.grant.enabled": "true",
+            "backchannel.logout.session.required": "true",
+            "display.on.consent.screen": "false"
+          }
+        }      ],
       "roles": {
         "realm": [
           {

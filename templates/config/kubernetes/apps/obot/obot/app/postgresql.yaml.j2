@@ -1,0 +1,67 @@
+#% if obot_enabled | default(false) %#
+---
+# CloudNativePG Cluster for Obot
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: obot-db
+  namespace: obot
+spec:
+  instances: #{ obot_postgresql_replicas | default(3) }#
+
+  # Storage Configuration
+  storage:
+    size: #{ obot_postgresql_storage_size | default('10Gi') }#
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+    storageClass: proxmox-csi
+#% endif %#
+
+  # PostgreSQL Configuration
+  postgresql:
+    parameters:
+      max_connections: "200"
+      shared_buffers: "256MB"
+      effective_cache_size: "1GB"
+      maintenance_work_mem: "64MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "5242kB"
+
+  # Bootstrap Configuration
+  bootstrap:
+    initdb:
+      database: obot
+      owner: obot
+      secret:
+        name: obot-db-secret
+
+  # Monitoring
+  monitoring:
+    enablePodMonitor: #{ observability_enabled | default(false) | lower }#
+
+  # Resources
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+
+  # Anti-affinity for HA
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: cnpg.io/cluster
+                  operator: In
+                  values:
+                    - obot-db
+            topologyKey: kubernetes.io/hostname
+#% endif %#

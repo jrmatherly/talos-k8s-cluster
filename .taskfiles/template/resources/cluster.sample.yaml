@@ -537,3 +537,146 @@ cloudflare_token: ""
 #      1. In your app registration → Certificates & secrets → New client secret
 #      2. Copy the Value (NOT the Secret ID) immediately - it's only shown once!
 # keycloak_entra_id_client_secret: ""
+
+# ==============================================================================
+# AGENTGATEWAY CONFIGURATION (Optional - MCP 2025-11-25 OAuth Proxy)
+# ==============================================================================
+# agentgateway wraps Keycloak to provide MCP spec-compliant OAuth.
+# Required for MCP clients that need DCR/CIMD support.
+# REF: https://agentgateway.dev/docs/mcp/mcp-authn/
+
+# -- Enable agentgateway for MCP authentication.
+#    (OPTIONAL) / (DEFAULT: false)
+# agentgateway_enabled: true
+
+# -- Load balancer IP for agentgateway.
+#    (REQUIRED if agentgateway_enabled) - Must be an UNUSED IP within node_cidr
+#    Example: "192.168.1.147"
+# agentgateway_addr: ""
+
+# -- agentgateway MCP scopes.
+#    (OPTIONAL) / (DEFAULT: ["openid", "profile", "email", "offline_access"])
+# agentgateway_scopes:
+#   - openid
+#   - profile
+#   - email
+#   - offline_access
+
+# ==============================================================================
+# OBOT CONFIGURATION (Optional - Multi-Tenant MCP Gateway)
+# ==============================================================================
+# obot is a self-hosted AI agent platform that provides a multi-tenant MCP gateway.
+# It integrates directly with Microsoft Entra ID for authentication.
+# REF: https://github.com/jrmatherly/obot-entraid
+# REF: docs/obot-entraid-implementation-guide.md
+
+# -- Enable obot MCP gateway deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# obot_enabled: true
+
+# -- PostgreSQL password for obot database.
+#    (REQUIRED if obot_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 24
+# obot_db_password: ""
+
+# -- Session cookie secret (32 bytes base64).
+#    (REQUIRED if obot_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 32
+# obot_cookie_secret: ""
+
+# -- Custom encryption key for data at rest (32 bytes base64).
+#    (OPTIONAL) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 32
+# obot_encryption_key: ""
+
+# -- Initial admin bootstrap token.
+#    (OPTIONAL) - For initial setup without SSO
+#    Generate with: openssl rand -hex 16
+# obot_bootstrap_token: ""
+
+# ==============================================================================
+# OBOT ENTRA ID AUTHENTICATION
+# ==============================================================================
+# Configure Microsoft Entra ID for native obot authentication.
+# NOTE: This creates a separate Azure App Registration from Keycloak's.
+
+# -- Azure Entra ID Tenant ID for obot.
+#    (REQUIRED if obot_enabled)
+#    Format: GUID (e.g., "12345678-1234-1234-1234-123456789abc")
+# obot_entra_tenant_id: ""
+
+# -- Azure App Registration Client ID for obot.
+#    (REQUIRED if obot_enabled)
+#    NOTE: Create app registration with:
+#      - Redirect URI: https://obot.<domain>/oauth2/callback
+#      - API Permissions: Microsoft Graph → User.Read, email, openid, profile
+# obot_entra_client_id: ""
+
+# -- Azure App Registration Client Secret for obot.
+#    (REQUIRED if obot_enabled) - Will be encrypted with SOPS
+# obot_entra_client_secret: ""
+
+# ==============================================================================
+# OBOT USER MANAGEMENT
+# ==============================================================================
+
+# -- Comma-separated list of admin email addresses.
+#    (OPTIONAL) - Users with full administrative access
+#    Example: "admin@example.com,devops@example.com"
+# obot_admin_emails: ""
+
+# -- Comma-separated list of owner email addresses.
+#    (OPTIONAL) - Users with owner-level access (above admin)
+#    Example: "cto@example.com"
+# obot_owner_emails: ""
+
+# ==============================================================================
+# OBOT STORAGE CONFIGURATION
+# ==============================================================================
+
+# -- Storage size for obot data PVC.
+#    (OPTIONAL) / (DEFAULT: "20Gi")
+# obot_storage_size: "20Gi"
+
+# -- Storage class for obot PVC.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# obot_storage_class: "proxmox-csi"
+
+# ==============================================================================
+# OBOT RESOURCE LIMITS
+# ==============================================================================
+
+# -- Number of obot replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+#    NOTE: Limited to 1 when using RWO storage
+# obot_replicas: 1
+
+# -- CPU request for obot container.
+#    (OPTIONAL) / (DEFAULT: "500m")
+# obot_cpu_request: "500m"
+
+# -- CPU limit for obot container.
+#    (OPTIONAL) / (DEFAULT: "2000m")
+# obot_cpu_limit: "2000m"
+
+# -- Memory request for obot container.
+#    (OPTIONAL) / (DEFAULT: "1Gi")
+# obot_memory_request: "1Gi"
+
+# -- Memory limit for obot container.
+#    (OPTIONAL) / (DEFAULT: "4Gi")
+# obot_memory_limit: "4Gi"
+
+# ==============================================================================
+# OBOT ADVANCED CONFIGURATION
+# ==============================================================================
+
+# -- Encryption provider for data at rest.
+#    (OPTIONAL) / (DEFAULT: "custom")
+#    Options: "custom", "azure-keyvault", "aws-kms", "gcp-kms"
+# obot_encryption_provider: "custom"
+
+# -- Use existing envoy-ai gateway for LLM requests.
+#    (OPTIONAL) / (DEFAULT: true)
+#    Set to false if configuring model providers directly in obot
+# obot_use_ai_gateway: true

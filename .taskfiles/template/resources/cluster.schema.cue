@@ -121,6 +121,35 @@ import (
 	keycloak_entra_id_tenant_id?: string & !="" // Azure Entra ID tenant ID (GUID)
 	keycloak_entra_id_client_id?: string & !="" // Azure App Registration client ID (GUID)
 	keycloak_entra_id_client_secret?: string & !="" // Azure App Registration client secret
+
+	// agentgateway Configuration (MCP 2025-11-25 OAuth Proxy)
+	// Wraps Keycloak for MCP spec-compliant authentication (DCR, CIMD, Protected Resource Metadata)
+	agentgateway_enabled?: bool                 // Enable agentgateway for MCP authentication
+	agentgateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr & !=mcp_gateway_addr
+	agentgateway_scopes?: [...string]           // OAuth scopes (default: openid, profile, email, offline_access)
+	keycloak_agentgateway_client_secret?: string & !="" // Client secret for agentgateway (defaults to keycloak_oidc_client_secret)
+
+	// obot Configuration (Multi-tenant MCP Gateway)
+	// Self-hosted AI agent platform with Entra ID authentication
+	obot_enabled?: bool                         // Enable obot MCP gateway
+	obot_db_password?: string & !=""            // PostgreSQL password for obot database
+	obot_cookie_secret?: string & !=""          // Session cookie secret (generate with openssl rand -base64 32)
+	obot_encryption_key?: string & !=""         // Custom encryption key (generate with openssl rand -base64 32)
+	obot_bootstrap_token?: string & !=""        // Initial admin bootstrap token
+	obot_entra_tenant_id?: string & !=""        // Azure Entra ID tenant ID (GUID)
+	obot_entra_client_id?: string & !=""        // Azure App Registration client ID (GUID)
+	obot_entra_client_secret?: string & !=""    // Azure App Registration client secret
+	obot_admin_emails?: string & !=""           // Comma-separated list of admin emails
+	obot_owner_emails?: string & !=""           // Comma-separated list of owner emails
+	obot_storage_size?: string & !=""           // Storage size for obot data (default: 20Gi)
+	obot_storage_class?: string & !=""          // Storage class (default: proxmox-csi)
+	obot_replicas?: int & >=1                   // Number of replicas (default: 1 for RWO storage)
+	obot_cpu_request?: string & !=""            // CPU request (default: 500m)
+	obot_cpu_limit?: string & !=""              // CPU limit (default: 2000m)
+	obot_memory_request?: string & !=""         // Memory request (default: 1Gi)
+	obot_memory_limit?: string & !=""           // Memory limit (default: 4Gi)
+	obot_encryption_provider?: *"custom" | "azure-keyvault" | "aws-kms" | "gcp-kms"  // Encryption provider
+	obot_use_ai_gateway?: *true | bool          // Use existing envoy-ai gateway for LLM requests
 }
 
 #Config

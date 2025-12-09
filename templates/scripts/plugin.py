@@ -260,6 +260,33 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_entra_id_client_id", "")
         data.setdefault("keycloak_entra_id_client_secret", "")
 
+        # agentgateway defaults (MCP 2025-11-25 OAuth Proxy)
+        data.setdefault("agentgateway_enabled", False)
+        data.setdefault("agentgateway_addr", "")
+        data.setdefault("agentgateway_scopes", ["openid", "profile", "email", "offline_access"])
+        data.setdefault("keycloak_agentgateway_client_secret", "")
+
+        # obot defaults (Multi-tenant MCP Gateway)
+        data.setdefault("obot_enabled", False)
+        data.setdefault("obot_db_password", "")
+        data.setdefault("obot_cookie_secret", "")
+        data.setdefault("obot_encryption_key", "")
+        data.setdefault("obot_bootstrap_token", "")
+        data.setdefault("obot_entra_tenant_id", "")
+        data.setdefault("obot_entra_client_id", "")
+        data.setdefault("obot_entra_client_secret", "")
+        data.setdefault("obot_admin_emails", "")
+        data.setdefault("obot_owner_emails", "")
+        data.setdefault("obot_storage_size", "20Gi")
+        data.setdefault("obot_storage_class", "proxmox-csi")
+        data.setdefault("obot_replicas", 1)
+        data.setdefault("obot_cpu_request", "500m")
+        data.setdefault("obot_cpu_limit", "2000m")
+        data.setdefault("obot_memory_request", "1Gi")
+        data.setdefault("obot_memory_limit", "4Gi")
+        data.setdefault("obot_encryption_provider", "custom")
+        data.setdefault("obot_use_ai_gateway", True)
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

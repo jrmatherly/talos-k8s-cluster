@@ -69,3 +69,13 @@ proxmox_csi_token_secret: "fake-secret"
 # keycloak_entra_id_tenant_id: ""
 # keycloak_entra_id_client_id: ""
 # keycloak_entra_id_client_secret: ""
+# agentgateway (disabled for private repo testing)
+# agentgateway_enabled: false
+# agentgateway_addr: ""
+# obot (disabled for private repo testing)
+# obot_enabled: false
+# obot_db_password: ""
+# obot_cookie_secret: ""
+# obot_entra_tenant_id: ""
+# obot_entra_client_id: ""
+# obot_entra_client_secret: ""

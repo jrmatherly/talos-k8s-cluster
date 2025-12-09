@@ -1,0 +1,34 @@
+#% if obot_enabled | default(false) %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: obot
+  namespace: flux-system
+spec:
+  interval: 1h
+  timeout: 15m
+  path: ./kubernetes/apps/obot/obot/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: true
+  dependsOn:
+    - name: cilium
+      namespace: flux-system
+    - name: cloudnative-pg
+      namespace: flux-system
+    - name: cert-manager-issuers
+      namespace: flux-system
+    - name: envoy-gateway
+      namespace: flux-system
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+    - name: proxmox-csi
+      namespace: flux-system
+#% endif %#
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+#% endif %#

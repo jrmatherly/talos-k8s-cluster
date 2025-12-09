@@ -105,7 +105,51 @@ data:
             "pkce.code.challenge.method": "S256",
             "post.logout.redirect.uris": "https://*.#{primary_domain}#/*"
           }
-        }
+        }#% if agentgateway_enabled %#,
+        {
+          "clientId": "agentgateway-mcp",
+          "name": "agentgateway MCP OAuth Client",
+          "description": "OAuth client for agentgateway MCP authentication proxy",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "#{keycloak_agentgateway_client_secret | default(keycloak_oidc_client_secret)}#",
+          "redirectUris": [
+            "https://mcp-auth.#{primary_domain}#/*",
+            "http://localhost:*"
+          ],
+          "webOrigins": [
+            "https://mcp-auth.#{primary_domain}#",
+            "https://*.#{primary_domain}#"
+          ],
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": true,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email",
+            "offline_access"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone"
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://mcp-auth.#{primary_domain}#/*",
+            "oauth2.device.authorization.grant.enabled": "true",
+            "backchannel.logout.session.required": "true",
+            "display.on.consent.screen": "false"
+          }
+        }#% endif %#
       ],
       "roles": {
         "realm": [

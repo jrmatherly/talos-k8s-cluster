@@ -1,0 +1,81 @@
+#% if agentgateway_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway-crds
+spec:
+  chart:
+    spec:
+      chart: kgateway-crds
+      version: "2.2.0"
+      sourceRef:
+        kind: HelmRepository
+        name: kgateway
+  interval: 1h
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway
+spec:
+  chart:
+    spec:
+      chart: kgateway
+      version: "2.2.0"
+      sourceRef:
+        kind: HelmRepository
+        name: kgateway
+  interval: 1h
+  timeout: 15m
+  dependsOn:
+    - name: kgateway-crds
+  values:
+    # ============================================================
+    # Enable agentgateway for MCP support
+    # ============================================================
+    agentGateway:
+      enabled: true
+      enableAlphaAPIs: true
+
+    # ============================================================
+    # AI Extension (for LLM routing if needed)
+    # ============================================================
+    gateway:
+      aiExtension:
+        enabled: true
+
+    # ============================================================
+    # Controller Configuration
+    # ============================================================
+    controller:
+      logLevel: info
+      replicas: 2
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      extraEnv:
+        - name: KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES
+          value: "true"
+
+    # ============================================================
+    # Proxy Configuration
+    # ============================================================
+    proxy:
+      replicas: 2
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+#% endif %#
