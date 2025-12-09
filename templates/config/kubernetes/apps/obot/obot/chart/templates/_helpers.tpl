@@ -1,8 +1,9 @@
 {{/*
 Return the chart name and version.
+Sanitize version to replace + with - for label compliance.
 */}}
 {{- define "obot.chart" -}}
-{{ printf "%s-%s" .Chart.Name .Chart.Version | quote }}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "-" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
