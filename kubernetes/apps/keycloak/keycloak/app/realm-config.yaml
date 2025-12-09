@@ -211,7 +211,7 @@ data:
           "identityProviderMapper": "oidc-username-idp-mapper",
           "config": {
             "syncMode": "INHERIT",
-            "template": "${CLAIM.preferred_username}"
+            "template": "$${CLAIM.preferred_username}"
           }
         },
         {
