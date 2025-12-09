@@ -4,14 +4,9 @@ kind: HelmRelease
 metadata:
   name: obot
 spec:
-  chart:
-    spec:
-      chart: ./kubernetes/apps/obot/obot/chart
-      sourceRef:
-        kind: GitRepository
-        name: flux-system
-        namespace: flux-system
-      reconcileStrategy: Revision
+  chartRef:
+    kind: OCIRepository
+    name: obot
   interval: 1h
   timeout: 15m
   values:
