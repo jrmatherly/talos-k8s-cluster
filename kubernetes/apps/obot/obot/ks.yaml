@@ -3,16 +3,7 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: obot
-  namespace: flux-system
 spec:
-  interval: 1h
-  timeout: 15m
-  path: ./kubernetes/apps/obot/obot/app
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  wait: true
   dependsOn:
     - name: cilium
       namespace: kube-system
@@ -24,7 +15,16 @@ spec:
       namespace: network
     - name: proxmox-csi
       namespace: csi-proxmox
+  interval: 1h
+  path: ./kubernetes/apps/obot/obot/app
   postBuild:
     substituteFrom:
-      - kind: Secret
-        name: cluster-secrets
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: obot
+  wait: true
