@@ -146,9 +146,9 @@ data:
       "clientScopeMappings": {},
       "identityProviders": [
         {
-          "alias": "entra-id",
+          "alias": "microsoft",
           "displayName": "Microsoft Entra ID",
-          "providerId": "oidc",
+          "providerId": "microsoft",
           "enabled": true,
           "trustEmail": true,
           "storeToken": false,
@@ -156,21 +156,11 @@ data:
           "linkOnly": false,
           "firstBrokerLoginFlowAlias": "first broker login",
           "config": {
-            "useJwksUrl": "true",
             "syncMode": "FORCE",
-            "clientAuthMethod": "client_secret_post",
-            "authorizationUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/authorize",
-            "tokenUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/token",
-            "jwksUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/discovery/v2.0/keys",
-            "logoutUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/logout",
-            "issuer": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/v2.0",
             "clientId": "5a39e93b-5781-4305-b6c5-848ec1369957",
             "clientSecret": "$$(env:ENTRA_ID_CLIENT_SECRET)",
-            "defaultScope": "openid profile email",
-            "validateSignature": "true",
-            "pkceEnabled": "true",
-            "pkceMethod": "S256",
-            "disableUserInfo": "true"
+            "defaultScope": "openid profile email User.Read",
+            "tenant": "f505346f-75cf-458b-baeb-10708d41967d"
           }
         }
       ],
@@ -181,10 +171,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v13
+  name: keycloak-realm-import-v14
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "13"
+    config-version: "14"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
