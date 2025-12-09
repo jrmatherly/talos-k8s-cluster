@@ -149,7 +149,7 @@ data:
         {
           "alias": "microsoft",
           "displayName": "Microsoft Entra ID",
-          "providerId": "microsoft",
+          "providerId": "oidc",
           "enabled": true,
           "trustEmail": true,
           "storeToken": false,
@@ -160,8 +160,16 @@ data:
             "syncMode": "FORCE",
             "clientId": "#{keycloak_entra_id_client_id}#",
             "clientSecret": "$$(env:ENTRA_ID_CLIENT_SECRET)",
-            "defaultScope": "openid profile email User.Read",
-            "tenant": "#{keycloak_entra_id_tenant_id}#"
+            "defaultScope": "openid profile email",
+            "authorizationUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/token",
+            "logoutUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/oauth2/v2.0/logout",
+            "jwksUrl": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/discovery/v2.0/keys",
+            "issuer": "https://login.microsoftonline.com/#{keycloak_entra_id_tenant_id}#/v2.0",
+            "validateSignature": "true",
+            "useJwksUrl": "true",
+            "pkceEnabled": "true",
+            "disableUserInfo": "true"
           }
         }
       ],
@@ -173,10 +181,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v14
+  name: keycloak-realm-import-v15
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "14"
+    config-version: "15"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3

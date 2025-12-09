@@ -148,7 +148,7 @@ data:
         {
           "alias": "microsoft",
           "displayName": "Microsoft Entra ID",
-          "providerId": "microsoft",
+          "providerId": "oidc",
           "enabled": true,
           "trustEmail": true,
           "storeToken": false,
@@ -159,8 +159,16 @@ data:
             "syncMode": "FORCE",
             "clientId": "5a39e93b-5781-4305-b6c5-848ec1369957",
             "clientSecret": "$$(env:ENTRA_ID_CLIENT_SECRET)",
-            "defaultScope": "openid profile email User.Read",
-            "tenant": "f505346f-75cf-458b-baeb-10708d41967d"
+            "defaultScope": "openid profile email",
+            "authorizationUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/token",
+            "logoutUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/oauth2/v2.0/logout",
+            "jwksUrl": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/discovery/v2.0/keys",
+            "issuer": "https://login.microsoftonline.com/f505346f-75cf-458b-baeb-10708d41967d/v2.0",
+            "validateSignature": "true",
+            "useJwksUrl": "true",
+            "pkceEnabled": "true",
+            "disableUserInfo": "true"
           }
         }
       ],
@@ -171,10 +179,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v14
+  name: keycloak-realm-import-v15
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "14"
+    config-version: "15"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
