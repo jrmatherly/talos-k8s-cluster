@@ -1,4 +1,23 @@
 ---
+# CiliumNetworkPolicy for obot - allow egress to kube-apiserver
+# Required because standard NetworkPolicy ipBlock rules don't work with
+# Cilium's kube-proxy replacement and reserved entity handling
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: obot-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: obot
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
 # NetworkPolicy for obot namespace - allow ingress from envoy-gateway
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -58,20 +77,6 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow Kubernetes API access (for MCP namespace management)
-    # Service IP (10.43.0.1:443) and control plane endpoints (node_cidr:6443)
-    - to:
-        - ipBlock:
-            cidr: 10.43.0.1/32
-      ports:
-        - protocol: TCP
-          port: 443
-    - to:
-        - ipBlock:
-            cidr: 192.168.20.0/22
-      ports:
-        - protocol: TCP
-          port: 6443
     # Allow PostgreSQL connection to CloudNativePG cluster
     - to:
         - podSelector:
