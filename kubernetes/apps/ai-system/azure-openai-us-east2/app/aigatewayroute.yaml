@@ -12,12 +12,21 @@ spec:
       kind: Gateway
       group: gateway.networking.k8s.io
   rules:
-    # Chat models (gpt-5, gpt-5-nano) - 120s timeout
+    # Chat models (gpt-5) - 120s timeout
+    # NOTE: gpt-5 is a standard model, temperature 0-2 is supported
     - matches:
         - headers:
             - type: Exact
               name: x-ai-eg-model
               value: "gpt-5"
+      backendRefs:
+        - name: azure-openai-us-east2-chat
+          namespace: ai-system
+      timeouts:
+        request: 120s
+    # Reasoning model (gpt-5-nano) - 120s timeout
+    # NOTE: gpt-5-nano is a reasoning model - temperature must be 1.0
+    - matches:
         - headers:
             - type: Exact
               name: x-ai-eg-model
@@ -25,6 +34,10 @@ spec:
       backendRefs:
         - name: azure-openai-us-east2-chat
           namespace: ai-system
+          bodyMutation:
+            set:
+              - path: "temperature"
+                value: "1"
       timeouts:
         request: 120s
     # Chat models with thinking (gpt-5-chat, gpt-5.1-chat) - 300s timeout
