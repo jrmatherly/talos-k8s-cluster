@@ -541,7 +541,7 @@ See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models
 
 ### MCP Authentication (agentgateway)
 
-**Included (optional):** This template includes [agentgateway](https://agentgateway.dev/) via kgateway for MCP 2025-11-25 OAuth-compliant authentication. When enabled, it wraps Keycloak to provide Dynamic Client Registration (DCR), CORS handling, and Protected Resource Metadata (RFC 9728) for MCP tool servers.
+**Included (optional):** This template includes [agentgateway](https://agentgateway.dev/) via [kgateway](https://kgateway.dev/) for MCP 2025-11-25 OAuth-compliant authentication. When enabled, it wraps Keycloak to provide Dynamic Client Registration (DCR), CORS handling, and Protected Resource Metadata (RFC 9728) for MCP tool servers.
 
 Enable it by configuring the following variables in `cluster.yaml`:
 
@@ -559,23 +559,29 @@ agentgateway_scopes:
 ```
 
 When enabled, agentgateway provides:
-- MCP authentication endpoint at `mcp-auth.${cloudflare_domain}`
+- MCP authentication endpoint at `mcp-auth.${cloudflare_domain}` (via Cloudflare Tunnel)
 - Protected Resource Metadata discovery (RFC 9728)
 - DCR proxy wrapping Keycloak
 - CORS handling for MCP clients
 - Integration with existing Keycloak + Entra ID federation
 
-**Key Implementation Note:** kgateway does NOT use an `MCPRoute` CRD. Instead, it uses ConfigMap with native agentgateway config.yaml format, linked via GatewayParameters.
+**Key Implementation Notes:**
+- kgateway does NOT use an `MCPRoute` CRD. Instead, it uses `AgentgatewayParameters` CRD with `rawConfig` for MCP route configuration
+- The GatewayClass MUST use `controllerName: kgateway.dev/agentgateway` (NOT `kgateway.dev/kgateway`)
+- Cloudflare Tunnel routes `mcp-auth.<domain>` directly to agentgateway before the wildcard rule
 
 **Verification:**
 
 ```sh
-# Test Protected Resource Metadata
-curl -s https://mcp-auth.${cloudflare_domain}/.well-known/oauth-protected-resource | jq
-
-# Check agentgateway resources
+# Check agentgateway deployment status
+kubectl get pods -n agentgateway
 kubectl get gateway,gatewayclass -n agentgateway
-kubectl get configmap agentgateway-config -n agentgateway -o yaml
+
+# Verify xDS connectivity (should show clients:1)
+kubectl logs -n agentgateway -l app.kubernetes.io/name=kgateway | grep "XDS: Pushing"
+
+# Test external access
+curl -I https://mcp-auth.${cloudflare_domain}/
 ```
 
 See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.

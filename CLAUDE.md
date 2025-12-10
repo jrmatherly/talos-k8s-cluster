@@ -510,19 +510,38 @@ agentgateway_scopes:
 ### Architecture
 
 ```
-MCP Client → agentgateway (kgateway) → Keycloak → MCP Tool Servers
-                    ↓
-            Protected Resource Metadata (RFC 9728)
-            DCR Endpoint Wrapping
-            CORS Handling
+MCP Client → Cloudflare Tunnel → agentgateway (kgateway) → Keycloak → MCP Tool Servers
+                                        ↓
+                                Protected Resource Metadata (RFC 9728)
+                                DCR Endpoint Wrapping
+                                CORS Handling
 ```
+
+### Critical: GatewayClass controllerName
+
+**The GatewayClass MUST use `kgateway.dev/agentgateway` as controllerName, NOT `kgateway.dev/kgateway`.**
+
+The kgateway controller uses different controller names for different data planes:
+- `kgateway.dev/kgateway` - Standard Envoy data plane
+- `kgateway.dev/agentgateway` - agentgateway data plane with MCP/AI features
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: agentgateway
+spec:
+  controllerName: kgateway.dev/agentgateway  # NOT kgateway.dev/kgateway!
+```
+
+**Note**: `spec.controllerName` is **immutable** - you must delete and recreate the GatewayClass to change it.
 
 ### Key Implementation Details
 
 **CRITICAL**: kgateway does NOT use an `MCPRoute` CRD. Instead, it uses:
 
-1. **ConfigMap** with native agentgateway `config.yaml` format
-2. **GatewayParameters** CRD to link ConfigMap to GatewayClass
+1. **AgentgatewayParameters** CRD with `rawConfig` for MCP route/policy configuration
+2. **GatewayParameters** CRD to configure Kubernetes deployment/service settings
 3. **TrafficPolicy** CRD for rate limiting
 4. **HTTPListenerPolicy** CRD for access logging
 
@@ -530,14 +549,32 @@ MCP Client → agentgateway (kgateway) → Keycloak → MCP Tool Servers
 
 | File | Purpose |
 |------|---------|
-| `templates/config/kubernetes/apps/agentgateway/kgateway/app/gateway.yaml.j2` | Gateway + GatewayClass with parametersRef |
-| `templates/config/kubernetes/apps/agentgateway/kgateway/app/mcproute.yaml.j2` | ConfigMap + GatewayParameters + Policies |
+| `templates/config/kubernetes/apps/agentgateway/kgateway/app/gateway.yaml.j2` | Gateway + GatewayClass (controllerName: kgateway.dev/agentgateway) |
+| `templates/config/kubernetes/apps/agentgateway/kgateway/app/mcproute.yaml.j2` | AgentgatewayParameters + GatewayParameters + Policies |
+| `templates/config/kubernetes/apps/agentgateway/kgateway/app/networkpolicy.yaml.j2` | NetworkPolicy + CiliumNetworkPolicy for xDS |
 | `templates/config/kubernetes/apps/keycloak/keycloak/app/realm-config.yaml.j2` | agentgateway-mcp client configuration |
+| `templates/config/kubernetes/apps/network/cloudflare-tunnel/app/helmrelease.yaml.j2` | Cloudflare Tunnel routing for mcp-auth |
+
+### Cloudflare Tunnel Routing
+
+For external access, Cloudflare Tunnel routes `mcp-auth.<domain>` directly to agentgateway:
+
+```yaml
+# In cloudflare-tunnel helmrelease.yaml.j2
+ingress:
+  # Specific route BEFORE wildcard
+  - hostname: "mcp-auth.<domain>"
+    service: https://agentgateway.agentgateway.svc.cluster.local:443
+  # Wildcard routes after
+  - hostname: "*.<domain>"
+    service: https://envoy-external.network.svc.cluster.local:443
+```
 
 ### Endpoints Exposed
 
-- `https://mcp-auth.<domain>/` - MCP authentication endpoint
+- `https://mcp-auth.<domain>/` - MCP authentication endpoint (404 on root is expected)
 - `https://mcp-auth.<domain>/.well-known/oauth-protected-resource` - RFC 9728 metadata
+- Port 3000 (internal) - MCP SSE listener for tool servers
 
 ### Separation from Envoy AI Gateway
 
@@ -558,17 +595,27 @@ These are completely separate concerns and do not interact.
 # Check agentgateway pods
 kubectl get pods -n agentgateway
 kubectl logs -n agentgateway -l app.kubernetes.io/name=kgateway
+kubectl logs -n agentgateway -l app.kubernetes.io/name=agentgateway
 
 # Check GatewayClass and Gateway status
 kubectl get gatewayclass agentgateway -o yaml
 kubectl get gateway -n agentgateway agentgateway -o yaml
 
-# Verify ConfigMap
-kubectl get configmap -n agentgateway agentgateway-config -o yaml
+# Verify xDS connectivity (kgateway should show clients:1)
+kubectl logs -n agentgateway -l app.kubernetes.io/name=kgateway | grep "XDS: Pushing"
 
-# Test Protected Resource Metadata
-curl -s https://mcp-auth.<domain>/.well-known/oauth-protected-resource | jq
+# Test external access
+curl -I https://mcp-auth.<domain>/
 ```
+
+### Common Issues
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Gateway "Waiting for controller" | Wrong controllerName | Delete GatewayClass, recreate with `kgateway.dev/agentgateway` |
+| xDS fetch timeout | NetworkPolicy blocking or wrong controllerName | Check NetworkPolicies, verify controllerName |
+| 404 on HTTPS | No HTTPRoutes for HTTPS listener | Expected - MCP routes are on port 3000 |
+| clients:0 in kgateway logs | agentgateway not connecting | Check controllerName and NetworkPolicies |
 
 See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
 
