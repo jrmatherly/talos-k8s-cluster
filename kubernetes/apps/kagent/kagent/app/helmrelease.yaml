@@ -1,0 +1,175 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kagent
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kagent
+  interval: 1h
+  timeout: 15m
+  dependsOn:
+    - name: kagent-crds
+  values:
+    # ============================================================
+    # Global Configuration
+    # ============================================================
+    imagePullPolicy: IfNotPresent
+
+    # ============================================================
+    # Controller Configuration
+    # ============================================================
+    controller:
+      replicas: 1
+      loglevel: "info"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: "2"
+          memory: 512Mi
+
+    # ============================================================
+    # UI Configuration
+    # ============================================================
+    ui:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+      service:
+        type: ClusterIP
+        ports:
+          port: 8080
+          targetPort: 8080
+
+    # ============================================================
+    # LLM Provider Configuration
+    # ============================================================
+    providers:
+      default: "openai"
+      openAI:
+        provider: OpenAI
+        model: "gpt-5-mini"
+        apiKeySecretRef: kagent-provider-secret
+        apiKeySecretKey: OPENAI_API_KEY
+        config:
+          baseURL: "https://ai-gateway.matherly.net"
+
+    # ============================================================
+    # Pre-built Agents Configuration
+    # ============================================================
+    agents:
+      k8s-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      helm-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      observability-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      cilium_debug-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      cilium_manager-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      cilium_policy-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      kgateway-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+
+    # ============================================================
+    # kmcp Controller (MCP Server Lifecycle Management)
+    # ============================================================
+    kmcp:
+      enabled: true
+
+    # ============================================================
+    # Database Configuration
+    # ============================================================
+    database:
+      type: "postgresql"
+      postgres:
+        # CNPG creates kagent-db-rw service for read-write connections
+        url: "postgres://kagent:BzJfIhaKiEin085Zr2ifDQj3@kagent-db-rw.kagent.svc.cluster.local:5432/kagent?sslmode=require"
+
+    # ============================================================
+    # Observability Configuration (OpenTelemetry)
+    # ============================================================
+    otel:
+      tracing:
+        enabled: true
+        exporter:
+          otlp:
+            endpoint: "http://jaeger-collector.jaeger.svc.cluster.local:4317"
+            insecure: true
+            timeout: 15
+      logging:
+        enabled: false
+
+    # ============================================================
+    # Tools Configuration
+    # ============================================================
+    tools:
+      grafana-mcp:
+        enabled: true
+      querydoc:
+        enabled: true
+
+    kagent-tools:
+      enabled: true
+      replicaCount: 1
+      tools:
+        loglevel: "info"

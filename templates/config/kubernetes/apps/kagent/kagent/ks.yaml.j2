@@ -1,0 +1,33 @@
+#% if kagent_enabled %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kagent
+spec:
+  dependsOn:
+    - name: kagent-crds
+      namespace: kagent
+    - name: cilium
+      namespace: kube-system
+#% if kagent_otlp_enabled %#
+    # Note: Depends on tracing backend (Jaeger), not kube-prometheus-stack
+    # kube-prometheus-stack does NOT expose OTLP natively
+    - name: jaeger
+      namespace: jaeger
+#% endif %#
+  interval: 1h
+  timeout: 15m
+  path: ./kubernetes/apps/kagent/kagent/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: kagent
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+#% endif %#

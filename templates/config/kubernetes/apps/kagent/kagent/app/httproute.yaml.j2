@@ -1,0 +1,18 @@
+#% if kagent_enabled and kagent_ui_enabled %#
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kagent-ui
+spec:
+  hostnames:
+    - "kagent.${SECRET_DOMAIN}"
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  rules:
+    - backendRefs:
+        - name: kagent-ui
+          port: 8080
+#% endif %#

@@ -1,0 +1,194 @@
+#% if kagent_enabled %#
+---
+# NetworkPolicy for kagent controller
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kagent-controller
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: controller
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from kagent UI
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kagent
+              app.kubernetes.io/component: ui
+      ports:
+        - protocol: TCP
+          port: 8083
+    # Allow from agent pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kagent
+      ports:
+        - protocol: TCP
+          port: 8083
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Kubernetes API
+    - to:
+        - ipBlock:
+            cidr: #{ cluster_api_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 6443
+    # LLM Provider (external)
+    # TODO: Reassess egress rules for production - consider restricting to specific
+    # LLM provider IP ranges (Anthropic, OpenAI, Azure) instead of allowing all external
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+#% if kagent_otlp_enabled %#
+    # OTLP endpoint (Jaeger)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: jaeger
+      ports:
+        - protocol: TCP
+          port: 4317
+#% endif %#
+#% if envoy_ai_gateway_enabled %#
+    # Envoy AI Gateway (internal LLM routing)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ai-system
+      ports:
+        - protocol: TCP
+          port: 443
+#% endif %#
+---
+# NetworkPolicy for kagent UI
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kagent-ui
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: ui
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from Envoy Gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # kagent controller
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kagent
+              app.kubernetes.io/component: controller
+      ports:
+        - protocol: TCP
+          port: 8083
+---
+# NetworkPolicy for kagent agent pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kagent-agents
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: agent
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from controller
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kagent
+              app.kubernetes.io/component: controller
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Kubernetes API (for k8s-agent, helm-agent, etc.)
+    - to:
+        - ipBlock:
+            cidr: #{ cluster_api_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 6443
+    # Controller communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kagent
+              app.kubernetes.io/component: controller
+      ports:
+        - protocol: TCP
+          port: 8083
+    # MCP Servers (within kagent namespace)
+    - to:
+        - podSelector:
+            matchLabels:
+              kagent.dev/mcpserver: "true"
+      ports:
+        - protocol: TCP
+          port: 3000
+#% if observability_enabled %#
+    # Prometheus (for observability-agent, promql-agent)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9090
+#% endif %#
+#% endif %#

@@ -1,0 +1,164 @@
+#% if kagent_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kagent
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kagent
+  interval: 1h
+  timeout: 15m
+  dependsOn:
+    - name: kagent-crds
+  values:
+    # ============================================================
+    # Global Configuration
+    # ============================================================
+    imagePullPolicy: IfNotPresent
+
+    # ============================================================
+    # Controller Configuration
+    # ============================================================
+    controller:
+      replicas: #{ kagent_controller_replicas }#
+      loglevel: "#{ kagent_controller_log_level }#"
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: "2"
+          memory: 512Mi
+
+    # ============================================================
+    # UI Configuration
+    # ============================================================
+    ui:
+      replicas: #{ kagent_ui_replicas }#
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+      service:
+        type: ClusterIP
+        ports:
+          port: 8080
+          targetPort: 8080
+
+    # ============================================================
+    # LLM Provider Configuration
+    # ============================================================
+    providers:
+      default: "#{ kagent_provider }#"
+#% if kagent_provider == 'anthropic' %#
+      anthropic:
+        provider: Anthropic
+        model: "#{ kagent_default_model }#"
+        apiKeySecretRef: kagent-provider-secret
+        apiKeySecretKey: ANTHROPIC_API_KEY
+#% elif kagent_provider == 'openai' %#
+      openAI:
+        provider: OpenAI
+        model: "#{ kagent_default_model }#"
+        apiKeySecretRef: kagent-provider-secret
+        apiKeySecretKey: OPENAI_API_KEY
+#% if kagent_openai_api_base %#
+        config:
+          baseURL: "#{ kagent_openai_api_base }#"
+#% endif %#
+#% elif kagent_provider == 'azure' %#
+      azureOpenAI:
+        provider: AzureOpenAI
+        model: "#{ kagent_default_model }#"
+        apiKeySecretRef: kagent-provider-secret
+        apiKeySecretKey: AZUREOPENAI_API_KEY
+        config:
+          apiVersion: "2023-05-15"
+          azureEndpoint: "#{ kagent_azure_endpoint | default('') }#"
+          azureDeployment: "#{ kagent_azure_deployment | default('') }#"
+#% elif kagent_provider == 'gemini' %#
+      gemini:
+        provider: Gemini
+        model: "#{ kagent_default_model }#"
+        apiKeySecretRef: kagent-provider-secret
+        apiKeySecretKey: GOOGLE_API_KEY
+#% elif kagent_provider == 'ollama' %#
+      ollama:
+        provider: Ollama
+        model: "#{ kagent_default_model }#"
+        config:
+          host: "#{ kagent_ollama_host | default('ollama.ollama.svc.cluster.local:11434') }#"
+#% endif %#
+
+    # ============================================================
+    # Pre-built Agents Configuration
+    # ============================================================
+    agents:
+#% for agent in kagent_agents_enabled %#
+      #{ agent | replace('-', '_') | replace(' ', '_') }#-agent:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+#% endfor %#
+
+    # ============================================================
+    # kmcp Controller (MCP Server Lifecycle Management)
+    # ============================================================
+    kmcp:
+      enabled: #{ kagent_kmcp_enabled | lower }#
+
+    # ============================================================
+    # Database Configuration
+    # ============================================================
+    database:
+      type: "#{ kagent_database_type }#"
+#% if kagent_database_type == 'sqlite' %#
+      sqlite:
+        databaseName: "kagent.db"
+#% elif kagent_database_type == 'postgresql' %#
+      postgres:
+        # CNPG creates kagent-db-rw service for read-write connections
+        url: "postgres://#{ kagent_postgres_user | default('kagent') }#:#{ kagent_postgres_password }#@kagent-db-rw.kagent.svc.cluster.local:5432/kagent?sslmode=require"
+#% endif %#
+
+    # ============================================================
+    # Observability Configuration (OpenTelemetry)
+    # ============================================================
+#% if kagent_otlp_enabled %#
+    otel:
+      tracing:
+        enabled: true
+        exporter:
+          otlp:
+            endpoint: "#{ kagent_otlp_endpoint }#"
+            insecure: true
+            timeout: 15
+      logging:
+        enabled: false
+#% endif %#
+
+    # ============================================================
+    # Tools Configuration
+    # ============================================================
+    tools:
+      grafana-mcp:
+        enabled: #{ (observability_enabled and kagent_kmcp_enabled) | lower }#
+      querydoc:
+        enabled: true
+
+    kagent-tools:
+      enabled: true
+      replicaCount: 1
+      tools:
+        loglevel: "#{ kagent_controller_log_level }#"
+#% endif %#

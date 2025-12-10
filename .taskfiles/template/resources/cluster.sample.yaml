@@ -713,3 +713,158 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: true)
 #    Set to false if configuring model providers directly in obot
 # obot_use_ai_gateway: true
+
+# ==============================================================================
+# KAGENT CONFIGURATION (Optional - Kubernetes-native AI Agent Framework)
+# ==============================================================================
+# kagent is a CNCF sandbox project for building, deploying, and managing AI agents
+# in Kubernetes. It provides declarative Agent/ModelConfig CRDs, pre-built agents
+# (k8s, helm, cilium, observability), and MCP server orchestration via kmcp.
+# REF: https://kagent.dev/docs/kagent/
+# REF: docs/kagent-implementation-guide.md
+
+# -- Enable kagent deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# kagent_enabled: true
+
+# -- LLM provider for kagent agents.
+#    (OPTIONAL) / (DEFAULT: "anthropic")
+#    Options: "anthropic", "openai", "azure", "gemini", "ollama"
+# kagent_provider: "anthropic"
+
+# -- Default model name for agents.
+#    (OPTIONAL) / (DEFAULT: "claude-3-5-haiku")
+#    Examples: "claude-3-5-haiku", "gpt-4o", "gemini-pro"
+# kagent_default_model: "claude-3-5-haiku"
+
+# -- Anthropic API key (required if kagent_provider=anthropic).
+#    (REQUIRED if using Anthropic) - Will be encrypted with SOPS
+# kagent_anthropic_api_key: "sk-ant-xxx"
+
+# -- OpenAI API key (required if kagent_provider=openai).
+#    (REQUIRED if using OpenAI) - Will be encrypted with SOPS
+# kagent_openai_api_key: "sk-xxx"
+
+# -- OpenAI-compatible API base URL (for routing through Envoy AI Gateway).
+#    (OPTIONAL) - Use this to route kagent requests through the AI Gateway
+#    Example: "https://llms.<your-domain>/v1"
+# kagent_openai_api_base: ""
+
+# -- Google Gemini API key (required if kagent_provider=gemini).
+#    (REQUIRED if using Gemini) - Will be encrypted with SOPS
+# kagent_gemini_api_key: ""
+
+# -- Azure OpenAI endpoint (required if kagent_provider=azure).
+#    (REQUIRED if using Azure) - Your Azure OpenAI resource endpoint
+#    Example: "https://your-resource.openai.azure.com"
+# kagent_azure_endpoint: ""
+
+# -- Azure OpenAI deployment name (required if kagent_provider=azure).
+#    (REQUIRED if using Azure) - The deployment name for your model
+# kagent_azure_deployment: ""
+
+# -- Ollama host URL (required if kagent_provider=ollama).
+#    (OPTIONAL) / (DEFAULT: "ollama.ollama.svc.cluster.local:11434")
+#    Example: "http://localhost:11434" for local Ollama
+# kagent_ollama_host: "ollama.ollama.svc.cluster.local:11434"
+
+# ==============================================================================
+# KAGENT UI CONFIGURATION
+# ==============================================================================
+
+# -- Enable kagent web UI.
+#    (OPTIONAL) / (DEFAULT: true)
+#    The UI provides chat interface and agent management at kagent.<domain>
+# kagent_ui_enabled: true
+
+# -- Number of UI replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# kagent_ui_replicas: 1
+
+# ==============================================================================
+# KAGENT CONTROLLER CONFIGURATION
+# ==============================================================================
+
+# -- Number of controller replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# kagent_controller_replicas: 1
+
+# -- Controller log level.
+#    (OPTIONAL) / (DEFAULT: "info")
+#    Options: "debug", "info", "warn", "error"
+# kagent_controller_log_level: "info"
+
+# ==============================================================================
+# KAGENT PRE-BUILT AGENTS
+# ==============================================================================
+
+# -- List of pre-built agents to enable.
+#    (OPTIONAL) / (DEFAULT: ["k8s", "helm", "observability"])
+#    Available agents: k8s, helm, cilium-debug, cilium-policy, cilium-manager,
+#                      istio, kgateway, observability, promql, argo-rollouts
+# kagent_agents_enabled:
+#   - k8s
+#   - helm
+#   - observability
+
+# -- Enable write operations for k8s-agent.
+#    (OPTIONAL) / (DEFAULT: false)
+#    WARNING: When true, k8s-agent can delete pods, patch deployments, etc.
+#    Only enable this if you trust the agent's judgment for remediation actions.
+# kagent_write_operations_enabled: false
+
+# ==============================================================================
+# KAGENT OBSERVABILITY (OpenTelemetry Tracing)
+# ==============================================================================
+
+# -- Enable OpenTelemetry tracing for agent operations.
+#    (OPTIONAL) / (DEFAULT: false)
+#    NOTE: Requires a tracing backend (Jaeger, Tempo, or OpenTelemetry Collector)
+# kagent_otlp_enabled: false
+
+# -- OTLP endpoint for trace collection.
+#    (OPTIONAL) - Only used if kagent_otlp_enabled=true
+#    Example with Jaeger: "http://jaeger-collector.jaeger.svc.cluster.local:4317"
+#    Example with Tempo: "http://tempo.observability.svc.cluster.local:4317"
+#    NOTE: kube-prometheus-stack does NOT natively expose OTLP - use Jaeger or Tempo
+# kagent_otlp_endpoint: "http://jaeger-collector.jaeger.svc.cluster.local:4317"
+
+# ==============================================================================
+# KAGENT DATABASE CONFIGURATION
+# ==============================================================================
+
+# -- Database type for kagent.
+#    (OPTIONAL) / (DEFAULT: "sqlite")
+#    Options: "sqlite", "postgresql"
+#    NOTE: When "postgresql" is selected, a CloudNativePG cluster is deployed
+#    automatically. No external database is required.
+# kagent_database_type: "sqlite"
+
+# -- PostgreSQL database user (if kagent_database_type=postgresql).
+#    (OPTIONAL) / (DEFAULT: "kagent")
+#    The CNPG bootstrap process uses this for the database owner.
+# kagent_postgres_user: "kagent"
+
+# -- PostgreSQL database password (if kagent_database_type=postgresql).
+#    (REQUIRED if postgresql) - Will be encrypted with SOPS
+#    Password for the kagent PostgreSQL user.
+# kagent_postgres_password: ""
+
+# -- CNPG PostgreSQL cluster replicas (if kagent_database_type=postgresql).
+#    (OPTIONAL) / (DEFAULT: 3)
+#    Number of PostgreSQL instances in the CNPG cluster for HA.
+# kagent_postgresql_replicas: 3
+
+# -- CNPG PostgreSQL storage size (if kagent_database_type=postgresql).
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+#    Storage size for each PostgreSQL instance.
+# kagent_postgresql_storage_size: "10Gi"
+
+# ==============================================================================
+# KAGENT MCP SERVER CONTROLLER (kmcp)
+# ==============================================================================
+
+# -- Enable kmcp controller for MCPServer CRD management.
+#    (OPTIONAL) / (DEFAULT: true)
+#    kmcp deploys and manages MCP servers declaratively via MCPServer CRD
+# kagent_kmcp_enabled: true

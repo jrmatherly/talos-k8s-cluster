@@ -1,0 +1,59 @@
+#% if kagent_enabled and kagent_database_type == 'postgresql' %#
+---
+# CloudNativePG Cluster for kagent
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: kagent-db
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:17-bookworm
+
+  instances: #{ kagent_postgresql_replicas | default(3) }#
+
+  # Storage Configuration
+  storage:
+    size: #{ kagent_postgresql_storage_size | default('10Gi') }#
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+    storageClass: proxmox-csi
+#% endif %#
+
+  # PostgreSQL Configuration
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+      effective_cache_size: "512MB"
+      maintenance_work_mem: "32MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "8MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "200"
+      work_mem: "2621kB"
+
+  # Bootstrap Configuration
+  bootstrap:
+    initdb:
+      database: kagent
+      owner: kagent
+      secret:
+        name: kagent-db-secret
+
+  # Monitoring
+  monitoring:
+    enablePodMonitor: #{ observability_enabled | default(false) | lower }#
+
+  # Resources
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+  # Anti-affinity for HA
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: preferred
+#% endif %#

@@ -123,3 +123,33 @@ obot_memory_limit: "4Gi"
 # Advanced
 obot_encryption_provider: "custom"
 obot_use_ai_gateway: true
+# kagent Configuration (Kubernetes-native AI Agent Framework)
+kagent_enabled: true
+kagent_provider: "anthropic"
+kagent_default_model: "claude-3-5-haiku"
+kagent_anthropic_api_key: "sk-ant-test-fake-key"
+kagent_openai_api_key: ""
+kagent_openai_api_base: ""
+kagent_gemini_api_key: ""
+kagent_azure_endpoint: ""
+kagent_azure_deployment: ""
+kagent_ollama_host: "ollama.ollama.svc.cluster.local:11434"
+kagent_ui_enabled: true
+kagent_ui_replicas: 1
+kagent_controller_replicas: 1
+kagent_controller_log_level: "info"
+kagent_agents_enabled:
+  - k8s
+  - helm
+  - cilium-debug
+  - observability
+  - promql
+kagent_otlp_enabled: true
+kagent_otlp_endpoint: "http://jaeger-collector.jaeger.svc.cluster.local:4317"
+kagent_database_type: "postgresql"
+kagent_postgres_user: "kagent"
+kagent_postgres_password: "test-kagent-db-password"
+kagent_postgresql_replicas: 3
+kagent_postgresql_storage_size: "10Gi"
+kagent_kmcp_enabled: true
+kagent_write_operations_enabled: false

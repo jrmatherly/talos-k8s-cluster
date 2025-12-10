@@ -1,0 +1,12 @@
+#% if kagent_enabled %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: kagent
+spec:
+  interval: 1h
+  url: oci://ghcr.io/kagent-dev/kagent/helm/kagent
+  ref:
+    tag: "v0.7.6"
+#% endif %#

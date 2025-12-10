@@ -157,6 +157,34 @@ import (
 	obot_memory_limit?: string & !=""           // Memory limit (default: 4Gi)
 	obot_encryption_provider?: *"custom" | "azure-keyvault" | "aws-kms" | "gcp-kms"  // Encryption provider
 	obot_use_ai_gateway?: *true | bool          // Use existing envoy-ai gateway for LLM requests
+
+	// kagent Configuration (Kubernetes-native AI Agent Framework)
+	// Cloud Native Computing Foundation (CNCF) sandbox project for AI agents
+	kagent_enabled?: bool                       // Enable kagent deployment
+	kagent_provider?: *"anthropic" | "openai" | "azure" | "gemini" | "ollama"  // LLM provider
+	kagent_default_model?: string & !=""        // Default model name (e.g., claude-3-5-haiku, gpt-4o)
+	kagent_anthropic_api_key?: string & !=""    // Anthropic API key (if provider=anthropic)
+	kagent_openai_api_key?: string & !=""       // OpenAI API key (if provider=openai)
+	kagent_openai_api_base?: string & !=""      // OpenAI-compatible API base URL (for AI Gateway routing)
+	kagent_ui_enabled?: *true | bool            // Enable kagent web UI
+	kagent_ui_replicas?: int & >=1              // Number of UI replicas (default: 1)
+	kagent_controller_replicas?: int & >=1      // Number of controller replicas (default: 1)
+	kagent_controller_log_level?: *"info" | "debug" | "warn" | "error"  // Controller log level
+	kagent_agents_enabled?: [...string]         // List of pre-built agents to enable (e.g., k8s, helm, observability)
+	kagent_otlp_enabled?: bool                  // Enable OpenTelemetry tracing
+	kagent_otlp_endpoint?: string & !=""        // OTLP endpoint (e.g., jaeger-collector.jaeger.svc:4317)
+	kagent_database_type?: *"sqlite" | "postgresql"  // Database type
+	kagent_postgres_url?: string & !=""         // PostgreSQL connection URL (if database_type=postgresql) - DEPRECATED, use CNPG
+	kagent_postgres_user?: string & !=""        // PostgreSQL user (if database_type=postgresql, CNPG bootstrap)
+	kagent_postgres_password?: string & !=""    // PostgreSQL password (if database_type=postgresql, CNPG bootstrap)
+	kagent_postgresql_replicas?: int & >=1      // CNPG PostgreSQL replicas (default: 3)
+	kagent_postgresql_storage_size?: string & !=""  // CNPG PostgreSQL storage size (default: 10Gi)
+	kagent_kmcp_enabled?: *true | bool          // Enable kmcp MCP server controller
+	kagent_write_operations_enabled?: bool      // Enable write operations for k8s-agent (default: false for safety)
+	kagent_gemini_api_key?: string & !=""       // Google Gemini API key (if provider=gemini)
+	kagent_azure_endpoint?: string & !=""       // Azure OpenAI endpoint (if provider=azure)
+	kagent_azure_deployment?: string & !=""     // Azure OpenAI deployment name (if provider=azure)
+	kagent_ollama_host?: string & !=""          // Ollama host (if provider=ollama, default: ollama.ollama.svc.cluster.local:11434)
 }
 
 #Config

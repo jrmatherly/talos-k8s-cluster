@@ -1,0 +1,9 @@
+#% if kagent_enabled %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kagent
+  labels:
+    app.kubernetes.io/name: kagent
+#% endif %#

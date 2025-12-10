@@ -1,0 +1,109 @@
+---
+# PodMonitor for kagent controller metrics
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kagent-controller
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobLabel: kagent-controller
+  namespaceSelector:
+    matchNames:
+      - kagent
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: controller
+---
+# PodMonitor for kagent agent pods (k8s-agent, helm-agent, etc.)
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kagent-agents
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobLabel: kagent-agents
+  namespaceSelector:
+    matchNames:
+      - kagent
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      honorLabels: true
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_label_kagent_dev_agent_name]
+          targetLabel: agent_name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: agent
+---
+# PrometheusRule for kagent alerting
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kagent-alerts
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: kagent.rules
+      rules:
+        # Alert when kagent controller is down
+        - alert: KagentControllerDown
+          expr: |
+            absent(up{job="kagent-controller"}) == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "kagent controller is down"
+            description: "The kagent controller has been unavailable for more than 5 minutes"
+
+        # Alert when agent pods are failing
+        - alert: KagentAgentPodFailing
+          expr: |
+            kube_pod_status_phase{namespace="kagent", phase=~"Failed|Unknown"} > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "kagent agent pod {{ $labels.pod }} is failing"
+            description: "Pod {{ $labels.pod }} has been in {{ $labels.phase }} state for 5 minutes"
+
+        # Alert on high LLM API error rate (if metrics available)
+        - alert: KagentHighLLMErrorRate
+          expr: |
+            sum(rate(kagent_llm_requests_total{status="error"}[5m])) by (agent)
+            /
+            sum(rate(kagent_llm_requests_total[5m])) by (agent)
+            > 0.1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High LLM error rate for agent {{ $labels.agent }}"
+            description: "Agent {{ $labels.agent }} has {{ $value | humanizePercentage }} LLM API errors"
+
+        # Alert when agent request latency is high
+        - alert: KagentHighAgentLatency
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(kagent_agent_request_duration_seconds_bucket[5m])) by (le, agent)
+            ) > 60
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High latency for kagent agent {{ $labels.agent }}"
+            description: "P99 latency is {{ $value | humanizeDuration }} for agent {{ $labels.agent }}"

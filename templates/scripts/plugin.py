@@ -300,6 +300,34 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_encryption_provider", "custom")
         data.setdefault("obot_use_ai_gateway", True)
 
+        # kagent defaults (Kubernetes-native AI Agent Framework)
+        data.setdefault("kagent_enabled", False)
+        data.setdefault("kagent_provider", "anthropic")
+        data.setdefault("kagent_default_model", "claude-3-5-haiku")
+        data.setdefault("kagent_anthropic_api_key", "")
+        data.setdefault("kagent_openai_api_key", "")
+        data.setdefault("kagent_openai_api_base", "")
+        data.setdefault("kagent_gemini_api_key", "")
+        data.setdefault("kagent_azure_endpoint", "")
+        data.setdefault("kagent_azure_deployment", "")
+        data.setdefault("kagent_ollama_host", "ollama.ollama.svc.cluster.local:11434")
+        data.setdefault("kagent_ui_enabled", True)
+        data.setdefault("kagent_ui_replicas", 1)
+        data.setdefault("kagent_controller_replicas", 1)
+        data.setdefault("kagent_controller_log_level", "info")
+        data.setdefault("kagent_agents_enabled", ["k8s", "helm", "observability"])
+        data.setdefault("kagent_otlp_enabled", False)
+        data.setdefault("kagent_otlp_endpoint", "")
+        data.setdefault("kagent_database_type", "sqlite")
+        data.setdefault("kagent_postgres_url", "")
+        data.setdefault("kagent_kmcp_enabled", True)
+        data.setdefault("kagent_write_operations_enabled", False)
+        # kagent CloudNativePG (CNPG) PostgreSQL settings
+        data.setdefault("kagent_postgresql_replicas", 3)
+        data.setdefault("kagent_postgresql_storage_size", "10Gi")
+        data.setdefault("kagent_postgres_user", "kagent")
+        data.setdefault("kagent_postgres_password", "")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:
