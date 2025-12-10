@@ -69,6 +69,14 @@ spec:
         data:
           config.yaml: |-
             ingress:
+#% if agentgateway_enabled | default(false) %#
+              #| Route mcp-auth specifically to agentgateway before wildcard match #|
+              - hostname: "mcp-auth.#{ primary_domain }#"
+                originRequest:
+                  http2Origin: true
+                  originServerName: mcp-auth.#{ primary_domain }#
+                service: https://agentgateway.agentgateway.svc.cluster.local:443
+#% endif %#
 #% for domain in cloudflare_domains %#
               - hostname: "*.#{ domain }#"
                 originRequest:

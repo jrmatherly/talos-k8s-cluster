@@ -69,6 +69,11 @@ spec:
         data:
           config.yaml: |-
             ingress:
+              - hostname: "mcp-auth.matherly.net"
+                originRequest:
+                  http2Origin: true
+                  originServerName: mcp-auth.matherly.net
+                service: https://agentgateway.agentgateway.svc.cluster.local:443
               - hostname: "*.matherly.net"
                 originRequest:
                   http2Origin: true
