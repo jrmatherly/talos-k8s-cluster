@@ -70,6 +70,14 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+    # PostgreSQL database (CNPG)
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: kagent-db
+      ports:
+        - protocol: TCP
+          port: 5432
 ---
 # NetworkPolicy for kagent UI
 apiVersion: networking.k8s.io/v1

@@ -10,11 +10,16 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow all ports from obot namespace (MCP servers use various ports: 8099, etc.)
+    # Allow from obot namespace on MCP server port
+    # Each MCP server pod exposes port 8099 (nanobot default) via named port "http"
+    # Webhook sidecars use localhost ports within the pod, not exposed externally
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 8099
   egress:
     # Allow DNS queries to kube-system
     - to:
