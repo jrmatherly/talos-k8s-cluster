@@ -1,10 +1,10 @@
 #% if agentgateway_enabled %#
 ---
-# NetworkPolicy for agentgateway - ingress rules
+# NetworkPolicy for kgateway controller - ingress rules
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: agentgateway-ingress
+  name: kgateway-controller-ingress
   namespace: agentgateway
 spec:
   podSelector:
@@ -22,39 +22,22 @@ spec:
           port: 9093  # Health/readiness probe port
         - protocol: TCP
           port: 9092  # Metrics port
-    # Allow from envoy-gateway proxies for external MCP clients
+    # Allow xDS connections from agentgateway data plane pods
     - from:
-        - namespaceSelector:
+        - podSelector:
             matchLabels:
-              kubernetes.io/metadata.name: network
-          podSelector:
-            matchLabels:
-              gateway.envoyproxy.io/owning-gateway-namespace: network
+              app.kubernetes.io/name: agentgateway
       ports:
         - protocol: TCP
-          port: 3000
+          port: 9977  # xDS gRPC
         - protocol: TCP
-          port: 15000
-    # Allow from within agentgateway namespace (for health checks)
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agentgateway
-    # Allow Cilium LoadBalancer traffic (external MCP clients)
-    - from:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-      ports:
-        - protocol: TCP
-          port: 3000
-        - protocol: TCP
-          port: 443
+          port: 9978  # xDS REST
 ---
-# NetworkPolicy for agentgateway - egress rules
+# NetworkPolicy for kgateway controller - egress rules
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: agentgateway-egress
+  name: kgateway-controller-egress
   namespace: agentgateway
 spec:
   podSelector:
@@ -73,7 +56,92 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow to Keycloak for OAuth validation
+---
+# NetworkPolicy for agentgateway data plane - ingress rules
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agentgateway-dataplane-ingress
+  namespace: agentgateway
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow kubelet health probes from node network
+    - from:
+        - ipBlock:
+            cidr: #{ node_cidr }#
+      ports:
+        - protocol: TCP
+          port: 8080   # Health probe port
+        - protocol: TCP
+          port: 8443   # Health probe port (TLS)
+        - protocol: TCP
+          port: 19000  # Envoy admin (localhost only but kubelet may check)
+    # Allow from envoy-gateway proxies for external MCP clients
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-namespace: network
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 3000
+    # Allow Cilium LoadBalancer traffic (external MCP clients)
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 3000
+---
+# NetworkPolicy for agentgateway data plane - egress rules
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agentgateway-dataplane-egress
+  namespace: agentgateway
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS queries
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow xDS connection to kgateway controller
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kgateway
+      ports:
+        - protocol: TCP
+          port: 9977  # xDS gRPC
+        - protocol: TCP
+          port: 9978  # xDS REST
+    # Allow to Keycloak for OAuth/JWT validation
     - to:
         - namespaceSelector:
             matchLabels:
