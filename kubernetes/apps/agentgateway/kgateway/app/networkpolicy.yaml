@@ -62,21 +62,6 @@ spec:
   policyTypes:
     - Egress
   egress:
-    # Allow to Kubernetes API server (required for kgateway controller)
-    # The API server is accessible via the kubernetes.default.svc service
-    - to:
-        - ipBlock:
-            cidr: 10.43.0.1/32  # Kubernetes API service IP
-      ports:
-        - protocol: TCP
-          port: 443
-    # Also allow via the actual API server endpoints (control plane nodes)
-    - to:
-        - ipBlock:
-            cidr: 192.168.20.0/22
-      ports:
-        - protocol: TCP
-          port: 6443  # Kubernetes API port
     # Allow DNS queries
     - to:
         - namespaceSelector:
@@ -135,3 +120,22 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+---
+# CiliumNetworkPolicy for Kubernetes API access
+# Required because Cilium uses special entity handling for kube-apiserver
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kgateway-kube-api-egress
+  namespace: agentgateway
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kgateway
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
