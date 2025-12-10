@@ -24,6 +24,12 @@ spec:
     replicaCount: #{ obot_replicas | default(1) }#
 
     # ============================================================
+    # Deployment Strategy - Use Recreate for RWO PVC compatibility
+    # RollingUpdate fails with RWO volumes due to Multi-Attach errors
+    # ============================================================
+    updateStrategy: Recreate
+
+    # ============================================================
     # Service Configuration
     # ============================================================
     service:
