@@ -33,6 +33,7 @@ spec:
       timeouts:
         request: 120s
     # Reasoning models (o3, o4-mini) - 300s timeout for extended thinking
+    # NOTE: These are reasoning models - temperature must be 1.0
     - matches:
         - headers:
             - type: Exact
@@ -45,6 +46,10 @@ spec:
       backendRefs:
         - name: azure-openai-us-east-reasoning
           namespace: ai-system
+          bodyMutation:
+            set:
+              - path: "temperature"
+                value: "1"
       timeouts:
         request: 300s
     # Embedding models (text-embedding-3-small, text-embedding-ada-002) - 60s timeout

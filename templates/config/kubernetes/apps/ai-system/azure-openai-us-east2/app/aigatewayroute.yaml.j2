@@ -29,6 +29,7 @@ spec:
       timeouts:
         request: 120s
     # Chat models with thinking (gpt-5-chat, gpt-5.1-chat) - 300s timeout
+    # NOTE: gpt-5.1-chat is a reasoning model - temperature must be 1.0
     - matches:
         - headers:
             - type: Exact
@@ -41,9 +42,14 @@ spec:
       backendRefs:
         - name: azure-openai-us-east2-chat-thinking
           namespace: ai-system
+          bodyMutation:
+            set:
+              - path: "temperature"
+                value: "1"
       timeouts:
         request: 300s
     # Chat models April preview (gpt-5-mini, gpt-5.1) - 120s timeout
+    # NOTE: These are reasoning models - temperature must be 1.0
     - matches:
         - headers:
             - type: Exact
@@ -56,9 +62,14 @@ spec:
       backendRefs:
         - name: azure-openai-us-east2-chat-apr
           namespace: ai-system
+          bodyMutation:
+            set:
+              - path: "temperature"
+                value: "1"
       timeouts:
         request: 120s
     # Codex models (gpt-5.1-codex, gpt-5.1-codex-mini) - 180s timeout
+    # NOTE: These are reasoning models - temperature must be 1.0
     - matches:
         - headers:
             - type: Exact
@@ -71,6 +82,10 @@ spec:
       backendRefs:
         - name: azure-openai-us-east2-codex
           namespace: ai-system
+          bodyMutation:
+            set:
+              - path: "temperature"
+                value: "1"
       timeouts:
         request: 180s
     # Audio models (gpt-audio, gpt-audio-mini) - 180s timeout
