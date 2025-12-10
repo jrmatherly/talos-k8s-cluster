@@ -12,6 +12,15 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    # Allow kubelet health probes from node network
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 9093  # Health/readiness probe port
+        - protocol: TCP
+          port: 9092  # Metrics port
     # Allow from envoy-gateway proxies for external MCP clients
     - from:
         - namespaceSelector:
@@ -53,6 +62,21 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # Allow to Kubernetes API server (required for kgateway controller)
+    # The API server is accessible via the kubernetes.default.svc service
+    - to:
+        - ipBlock:
+            cidr: 10.43.0.1/32  # Kubernetes API service IP
+      ports:
+        - protocol: TCP
+          port: 443
+    # Also allow via the actual API server endpoints (control plane nodes)
+    - to:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 6443  # Kubernetes API port
     # Allow DNS queries
     - to:
         - namespaceSelector:
