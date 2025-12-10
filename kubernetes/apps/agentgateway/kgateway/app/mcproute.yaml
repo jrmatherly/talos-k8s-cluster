@@ -61,32 +61,6 @@ spec:
                   cmd: echo
                   args: ["MCP backend not configured"]
 ---
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: agentgateway-ui
-spec:
-  parentRefs:
-  - name: agentgateway
-    namespace: agentgateway
-    sectionName: https
-  hostnames:
-  - "mcp-auth.matherly.net"
-  rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /ui
-    backendRefs:
-    - name: agentgateway
-      port: 15000
-  - matches:
-    - path:
-        type: Exact
-        value: /healthz
-    backendRefs:
-    - name: agentgateway
-      port: 15000
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy

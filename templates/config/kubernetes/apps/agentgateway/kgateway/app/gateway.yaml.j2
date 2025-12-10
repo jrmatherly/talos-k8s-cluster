@@ -21,10 +21,12 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: agentgateway
-  annotations:
-    lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
 spec:
   gatewayClassName: agentgateway
+  #| Infrastructure annotations propagate to Service #|
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
   listeners:
     #| HTTP listener for redirect to HTTPS #|
     - name: http
