@@ -31,10 +31,13 @@ spec:
 
     # ============================================================
     # Service Configuration
+    # Note: port 80 is required because MCP server token exchange URLs
+    # are generated without explicit ports (defaulting to HTTP port 80)
+    # The service routes port 80 -> targetPort 8080 (container port)
     # ============================================================
     service:
       type: ClusterIP
-      port: 8080
+      port: 80
 
     # ============================================================
     # Ingress - Disabled (using Gateway API HTTPRoute instead)

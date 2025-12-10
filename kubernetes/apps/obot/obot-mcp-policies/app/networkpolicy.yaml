@@ -42,14 +42,16 @@ spec:
       ports:
         - protocol: TCP
           port: 443
-    # Allow to obot namespace (for callbacks)
+    # Allow to obot namespace (for OAuth token exchange callbacks)
+    # MCP servers call http://obot-obot.obot.svc.cluster.local/oauth/token
+    # The URL defaults to port 80 (no explicit port in generated URLs)
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot
       ports:
         - protocol: TCP
-          port: 8080
+          port: 80
     # When agentgateway is enabled: route LLM requests through agentgateway
     # (security hardening - all LLM traffic goes through authenticated proxy)
     - to:
