@@ -11,14 +11,11 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Only allow ingress from obot namespace
+    # Allow all ports from obot namespace (MCP servers use various ports: 8099, etc.)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot
-      ports:
-        - protocol: TCP
-          port: 80
   egress:
     # Allow DNS queries to kube-system
     - to:
