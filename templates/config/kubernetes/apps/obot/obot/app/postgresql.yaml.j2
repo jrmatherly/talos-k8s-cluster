@@ -36,6 +36,9 @@ spec:
       owner: obot
       secret:
         name: obot-db-secret
+      # Enable pgvector extension for RAG/knowledge functionality
+      postInitSQL:
+        - CREATE EXTENSION IF NOT EXISTS vector
 
   # Monitoring
   monitoring:
