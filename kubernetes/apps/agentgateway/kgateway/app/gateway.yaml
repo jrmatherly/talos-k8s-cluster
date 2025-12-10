@@ -4,7 +4,7 @@ kind: GatewayClass
 metadata:
   name: agentgateway
 spec:
-  controllerName: kgateway.dev/kgateway
+  controllerName: kgateway.dev/agentgateway
   description: "agentgateway for MCP protocol support with OAuth authentication"
   parametersRef:
     group: gateway.kgateway.dev
