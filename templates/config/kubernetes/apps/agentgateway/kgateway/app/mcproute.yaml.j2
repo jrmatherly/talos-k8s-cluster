@@ -1,31 +1,39 @@
 #% if agentgateway_enabled %#
 ---
-apiVersion: v1
-kind: ConfigMap
+#| GatewayParameters for deployment settings (gateway.kgateway.dev API) #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
 metadata:
-  name: agentgateway-config
-data:
-  config.yaml: |
-    # Listener binds for agentgateway
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+---
+#| AgentgatewayParameters for MCP config (agentgateway.dev API) #|
+#| This uses rawConfig to pass native agentgateway configuration #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayParameters
+metadata:
+  name: agentgateway-mcp-config
+spec:
+  #| Native agentgateway configuration via rawConfig #|
+  rawConfig:
     binds:
     - port: 3000
       listeners:
       - routes:
         - name: mcp-authenticated
-          # MCP Authentication Configuration
-          # Implements MCP Authorization spec (RFC 9728 Protected Resource Metadata)
           policies:
+            #| MCP Authentication with Keycloak (RFC 9728) #|
             mcpAuthentication:
-              # Keycloak issuer URL (realm endpoint)
               issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-              # JWKS endpoint for JWT token validation
               jwksUrl: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
-              # Token audience validation (security hardening - prevents token confusion)
               audience: "agentgateway-mcp"
-              # Keycloak provider - handles DCR wrapping and CORS
               provider:
                 keycloak: {}
-              # Protected Resource Metadata (RFC 9728)
               resourceMetadata:
                 resource: "https://mcp-auth.#{ primary_domain }#/mcp"
                 scopesSupported:
@@ -36,9 +44,7 @@ data:
                 - header
                 - body
                 - query
-                resourceDocumentation: "https://mcp-auth.#{ primary_domain }#/docs"
-                resourcePolicyUri: "https://mcp-auth.#{ primary_domain }#/policies"
-            # CORS policy for MCP clients
+            #| CORS policy for MCP clients #|
             cors:
               allowOrigins:
               - "https://*.#{ primary_domain }#"
@@ -53,31 +59,14 @@ data:
               - OPTIONS
               exposeHeaders:
               - mcp-session-id
-          # MCP Backend Targets
+          #| MCP Backend Targets (placeholder) #|
           backends:
           - mcp:
               targets:
-              # Placeholder for MCP tool servers
-              # Users should add their MCP servers here
               - name: example-tools
                 stdio:
                   cmd: echo
                   args: ["MCP backend not configured"]
----
-#| GatewayParameters to configure agentgateway with our config #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
-metadata:
-  name: agentgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 2
-    service:
-      type: LoadBalancer
-    agentgateway:
-      #| Reference the ConfigMap for agentgateway configuration #|
-      customConfigMapName: agentgateway-config
 ---
 #| HTTPRoute for web traffic to the agentgateway UI #|
 apiVersion: gateway.networking.k8s.io/v1

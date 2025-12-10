@@ -1,30 +1,33 @@
 ---
-apiVersion: v1
-kind: ConfigMap
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
 metadata:
-  name: agentgateway-config
-data:
-  config.yaml: |
-    # Listener binds for agentgateway
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayParameters
+metadata:
+  name: agentgateway-mcp-config
+spec:
+  rawConfig:
     binds:
     - port: 3000
       listeners:
       - routes:
         - name: mcp-authenticated
-          # MCP Authentication Configuration
-          # Implements MCP Authorization spec (RFC 9728 Protected Resource Metadata)
           policies:
             mcpAuthentication:
-              # Keycloak issuer URL (realm endpoint)
               issuer: "https://auth.matherly.net/realms/k8s-cluster"
-              # JWKS endpoint for JWT token validation
               jwksUrl: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
-              # Token audience validation (security hardening - prevents token confusion)
               audience: "agentgateway-mcp"
-              # Keycloak provider - handles DCR wrapping and CORS
               provider:
                 keycloak: {}
-              # Protected Resource Metadata (RFC 9728)
               resourceMetadata:
                 resource: "https://mcp-auth.matherly.net/mcp"
                 scopesSupported:
@@ -36,9 +39,6 @@ data:
                 - header
                 - body
                 - query
-                resourceDocumentation: "https://mcp-auth.matherly.net/docs"
-                resourcePolicyUri: "https://mcp-auth.matherly.net/policies"
-            # CORS policy for MCP clients
             cors:
               allowOrigins:
               - "https://*.matherly.net"
@@ -53,29 +53,13 @@ data:
               - OPTIONS
               exposeHeaders:
               - mcp-session-id
-          # MCP Backend Targets
           backends:
           - mcp:
               targets:
-              # Placeholder for MCP tool servers
-              # Users should add their MCP servers here
               - name: example-tools
                 stdio:
                   cmd: echo
                   args: ["MCP backend not configured"]
----
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
-metadata:
-  name: agentgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 2
-    service:
-      type: LoadBalancer
-    agentgateway:
-      customConfigMapName: agentgateway-config
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
