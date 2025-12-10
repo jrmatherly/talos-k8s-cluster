@@ -181,6 +181,8 @@ import (
 	kagent_postgresql_storage_size?: string & !=""  // CNPG PostgreSQL storage size (default: 10Gi)
 	kagent_kmcp_enabled?: *true | bool          // Enable kmcp MCP server controller
 	kagent_write_operations_enabled?: bool      // Enable write operations for k8s-agent (default: false for safety)
+	kagent_grafana_url?: string & !=""          // Grafana URL for grafana-mcp tool (default: cluster Grafana)
+	kagent_grafana_api_key?: string & !=""      // Grafana API key for grafana-mcp tool (optional)
 	kagent_gemini_api_key?: string & !=""       // Google Gemini API key (if provider=gemini)
 	kagent_azure_endpoint?: string & !=""       // Azure OpenAI endpoint (if provider=azure)
 	kagent_azure_deployment?: string & !=""     // Azure OpenAI deployment name (if provider=azure)

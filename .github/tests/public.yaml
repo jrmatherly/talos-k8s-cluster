@@ -153,3 +153,5 @@ kagent_postgresql_replicas: 3
 kagent_postgresql_storage_size: "10Gi"
 kagent_kmcp_enabled: true
 kagent_write_operations_enabled: false
+kagent_grafana_url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
+kagent_grafana_api_key: "test-grafana-api-key"

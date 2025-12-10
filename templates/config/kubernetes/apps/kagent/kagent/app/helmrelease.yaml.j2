@@ -157,6 +157,14 @@ spec:
       querydoc:
         enabled: true
 
+    # grafana-mcp configuration - connects to existing cluster Grafana
+    grafana-mcp:
+      grafana:
+        url: "#{ kagent_grafana_url }#"
+#% if kagent_grafana_api_key %#
+        apiKey: "#{ kagent_grafana_api_key }#"
+#% endif %#
+
     kagent-tools:
       enabled: true
       replicaCount: 1

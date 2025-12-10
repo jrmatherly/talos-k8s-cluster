@@ -158,6 +158,11 @@ spec:
       querydoc:
         enabled: true
 
+    # grafana-mcp configuration - connects to existing cluster Grafana
+    grafana-mcp:
+      grafana:
+        url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
+
     kagent-tools:
       enabled: true
       replicaCount: 1

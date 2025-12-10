@@ -322,6 +322,9 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("kagent_postgres_url", "")
         data.setdefault("kagent_kmcp_enabled", True)
         data.setdefault("kagent_write_operations_enabled", False)
+        # kagent Grafana MCP settings (uses existing cluster Grafana)
+        data.setdefault("kagent_grafana_url", "http://kube-prometheus-stack-grafana.observability.svc:80/api")
+        data.setdefault("kagent_grafana_api_key", "")
         # kagent CloudNativePG (CNPG) PostgreSQL settings
         data.setdefault("kagent_postgresql_replicas", 3)
         data.setdefault("kagent_postgresql_storage_size", "10Gi")
