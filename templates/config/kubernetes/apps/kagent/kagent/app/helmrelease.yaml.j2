@@ -54,7 +54,8 @@ spec:
     # LLM Provider Configuration
     # ============================================================
     providers:
-      default: "#{ kagent_provider }#"
+      #| Map user-friendly provider names to chart's expected key names #|
+      default: "#{ 'openAI' if kagent_provider == 'openai' else ('azureOpenAI' if kagent_provider == 'azure' else kagent_provider) }#"
 #% if kagent_provider == 'anthropic' %#
       anthropic:
         provider: Anthropic

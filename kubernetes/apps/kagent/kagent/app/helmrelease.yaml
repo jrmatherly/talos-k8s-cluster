@@ -53,7 +53,7 @@ spec:
     # LLM Provider Configuration
     # ============================================================
     providers:
-      default: "openai"
+      default: "openAI"
       openAI:
         provider: OpenAI
         model: "gpt-5-mini"
