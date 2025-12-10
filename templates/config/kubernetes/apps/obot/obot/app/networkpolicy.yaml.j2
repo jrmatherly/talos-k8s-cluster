@@ -88,14 +88,11 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    # Allow to obot-mcp namespace for MCP server management
+    # Allow to obot-mcp namespace for MCP server management (all ports - MCP servers use 8099, etc.)
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: #{ obot_mcp_namespace | default('obot-mcp') }#
-      ports:
-        - protocol: TCP
-          port: 80
     # Allow to envoy-ai gateway for LLM requests via internal service
     # Note: envoy-ai pods listen on 10443 (targetPort), not 443 (service port)
     - to:

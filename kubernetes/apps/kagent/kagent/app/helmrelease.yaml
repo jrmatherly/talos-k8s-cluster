@@ -140,7 +140,7 @@ spec:
     # Database Configuration
     # ============================================================
     database:
-      type: "postgresql"
+      type: "postgres"
       postgres:
         # CNPG creates kagent-db-rw service for read-write connections
         url: "postgres://kagent:BzJfIhaKiEin085Zr2ifDQj3@kagent-db-rw.kagent.svc.cluster.local:5432/kagent?sslmode=require"

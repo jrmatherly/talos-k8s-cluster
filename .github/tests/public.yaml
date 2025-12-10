@@ -146,7 +146,7 @@ kagent_agents_enabled:
   - promql
 kagent_otlp_enabled: true
 kagent_otlp_endpoint: "http://jaeger-collector.jaeger.svc.cluster.local:4317"
-kagent_database_type: "postgresql"
+kagent_database_type: "postgres"
 kagent_postgres_user: "kagent"
 kagent_postgres_password: "test-kagent-db-password"
 kagent_postgresql_replicas: 3

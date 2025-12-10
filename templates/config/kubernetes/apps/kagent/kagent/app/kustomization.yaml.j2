@@ -6,7 +6,7 @@ resources:
   - ocirepository.yaml
   - helmrelease.yaml
   - secret.sops.yaml
-#% if kagent_database_type == 'postgresql' %#
+#% if kagent_database_type == 'postgres' %#
   - db-secret.sops.yaml
   - postgresql.yaml
 #% endif %#

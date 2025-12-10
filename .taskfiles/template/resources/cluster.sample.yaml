@@ -835,27 +835,27 @@ cloudflare_token: ""
 
 # -- Database type for kagent.
 #    (OPTIONAL) / (DEFAULT: "sqlite")
-#    Options: "sqlite", "postgresql"
-#    NOTE: When "postgresql" is selected, a CloudNativePG cluster is deployed
+#    Options: "sqlite", "postgres"
+#    NOTE: When "postgres" is selected, a CloudNativePG cluster is deployed
 #    automatically. No external database is required.
 # kagent_database_type: "sqlite"
 
-# -- PostgreSQL database user (if kagent_database_type=postgresql).
+# -- PostgreSQL database user (if kagent_database_type=postgres).
 #    (OPTIONAL) / (DEFAULT: "kagent")
 #    The CNPG bootstrap process uses this for the database owner.
 # kagent_postgres_user: "kagent"
 
-# -- PostgreSQL database password (if kagent_database_type=postgresql).
-#    (REQUIRED if postgresql) - Will be encrypted with SOPS
+# -- PostgreSQL database password (if kagent_database_type=postgres).
+#    (REQUIRED if postgres) - Will be encrypted with SOPS
 #    Password for the kagent PostgreSQL user.
 # kagent_postgres_password: ""
 
-# -- CNPG PostgreSQL cluster replicas (if kagent_database_type=postgresql).
+# -- CNPG PostgreSQL cluster replicas (if kagent_database_type=postgres).
 #    (OPTIONAL) / (DEFAULT: 3)
 #    Number of PostgreSQL instances in the CNPG cluster for HA.
 # kagent_postgresql_replicas: 3
 
-# -- CNPG PostgreSQL storage size (if kagent_database_type=postgresql).
+# -- CNPG PostgreSQL storage size (if kagent_database_type=postgres).
 #    (OPTIONAL) / (DEFAULT: "10Gi")
 #    Storage size for each PostgreSQL instance.
 # kagent_postgresql_storage_size: "10Gi"

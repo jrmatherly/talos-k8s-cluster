@@ -173,10 +173,10 @@ import (
 	kagent_agents_enabled?: [...string]         // List of pre-built agents to enable (e.g., k8s, helm, observability)
 	kagent_otlp_enabled?: bool                  // Enable OpenTelemetry tracing
 	kagent_otlp_endpoint?: string & !=""        // OTLP endpoint (e.g., jaeger-collector.jaeger.svc:4317)
-	kagent_database_type?: *"sqlite" | "postgresql"  // Database type
-	kagent_postgres_url?: string & !=""         // PostgreSQL connection URL (if database_type=postgresql) - DEPRECATED, use CNPG
-	kagent_postgres_user?: string & !=""        // PostgreSQL user (if database_type=postgresql, CNPG bootstrap)
-	kagent_postgres_password?: string & !=""    // PostgreSQL password (if database_type=postgresql, CNPG bootstrap)
+	kagent_database_type?: *"sqlite" | "postgres"  // Database type (sqlite or postgres)
+	kagent_postgres_url?: string & !=""         // PostgreSQL connection URL (if database_type=postgres) - DEPRECATED, use CNPG
+	kagent_postgres_user?: string & !=""        // PostgreSQL user (if database_type=postgres, CNPG bootstrap)
+	kagent_postgres_password?: string & !=""    // PostgreSQL password (if database_type=postgres, CNPG bootstrap)
 	kagent_postgresql_replicas?: int & >=1      // CNPG PostgreSQL replicas (default: 3)
 	kagent_postgresql_storage_size?: string & !=""  // CNPG PostgreSQL storage size (default: 10Gi)
 	kagent_kmcp_enabled?: *true | bool          // Enable kmcp MCP server controller
