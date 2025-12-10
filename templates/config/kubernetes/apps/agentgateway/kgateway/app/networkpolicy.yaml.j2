@@ -131,9 +131,13 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow xDS connection to kgateway controller
+    # Allow xDS connection to kgateway controller (via Service ClusterIP)
+    # Using namespaceSelector to allow traffic via Service - podSelector alone doesn't work
     - to:
-        - podSelector:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+          podSelector:
             matchLabels:
               app.kubernetes.io/name: kgateway
       ports:
@@ -207,5 +211,38 @@ spec:
       toPorts:
         - ports:
             - port: "6443"
+              protocol: TCP
+---
+# CiliumNetworkPolicy for agentgateway data plane -> kgateway controller xDS
+# Required because Cilium may handle Service traffic differently than standard NetworkPolicy
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: agentgateway-xds-egress
+  namespace: agentgateway
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+  egress:
+    # Allow xDS connection to kgateway controller
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: kgateway
+      toPorts:
+        - ports:
+            - port: "9977"
+              protocol: TCP
+            - port: "9978"
+              protocol: TCP
+    # Allow DNS
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
               protocol: TCP
 #% endif %#
