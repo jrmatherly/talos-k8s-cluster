@@ -18,25 +18,18 @@ spec:
     - name: kgateway-crds
   values:
     # ============================================================
-    # Enable agentgateway for MCP support
+    # Enable agentgateway integration (lowercase per chart schema)
+    # Note: agentgateway.enabled is already true by default
     # ============================================================
-    agentGateway:
+    agentgateway:
       enabled: true
-      enableAlphaAPIs: true
-
-    # ============================================================
-    # AI Extension (for LLM routing if needed)
-    # ============================================================
-    gateway:
-      aiExtension:
-        enabled: true
 
     # ============================================================
     # Controller Configuration
     # ============================================================
     controller:
       logLevel: info
-      replicas: 2
+      replicaCount: 1
       resources:
         requests:
           cpu: 100m
@@ -44,20 +37,24 @@ spec:
         limits:
           cpu: 500m
           memory: 512Mi
+      # NOTE: extraEnv must be a map, not an array of objects
       extraEnv:
-        - name: KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES
-          value: "true"
+        KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
 
     # ============================================================
-    # Proxy Configuration
+    # Namespace Discovery
+    # Allow kgateway to discover resources in agentgateway namespace
     # ============================================================
-    proxy:
-      replicas: 2
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
-        limits:
-          cpu: 500m
-          memory: 512Mi
+    discoveryNamespaceSelectors:
+      - matchLabels:
+          kubernetes.io/metadata.name: agentgateway
+
+    # ============================================================
+    # GatewayClass Parameters Reference
+    # Link our GatewayParameters to the agentgateway GatewayClass
+    # ============================================================
+    gatewayClassParametersRefs:
+      agentgateway:
+        name: agentgateway-params
+        namespace: agentgateway
 #% endif %#
