@@ -94,6 +94,7 @@ spec:
         - protocol: TCP
           port: 80
     # Allow to envoy-ai gateway for LLM requests
+    # Note: envoy-ai pods listen on 10443 (targetPort), not 443 (service port)
     - to:
         - namespaceSelector:
             matchLabels:
@@ -103,7 +104,7 @@ spec:
               gateway.envoyproxy.io/owning-gateway-name: envoy-ai
       ports:
         - protocol: TCP
-          port: 443
+          port: 10443
     # Allow external internet access (GitHub for tools, MCP catalogs, etc.)
     # Excludes private IP ranges (RFC 1918)
     - to:
