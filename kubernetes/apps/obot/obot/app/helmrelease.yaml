@@ -15,7 +15,7 @@ spec:
     # ============================================================
     image:
       repository: ghcr.io/jrmatherly/obot-entraid
-      tag: v0.2.8
+      tag: v0.2.9
 
     # ============================================================
     # Replicas - Set to 1 for RWO storage
@@ -76,10 +76,9 @@ spec:
       # AI Gateway Integration
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
 
-      # Tool Registries - Include both upstream tools and custom EntraID provider
-      # Required for EntraID auth provider to be discovered alongside GitHub/Google providers
-      # Note: /obot-tools/tools contains the index.yaml, not /obot-tools root
-      OBOT_SERVER_TOOL_REGISTRIES: "/obot-tools/tools,/obot-tools-custom"
+      # Tool Registries - Unified path containing all auth providers (upstream + custom)
+      # The Docker build merges GitHub, Google, EntraID, and Keycloak providers into single index.yaml
+      OBOT_SERVER_TOOL_REGISTRIES: "/obot-tools/tools"
 
       # Disable update check - using forked repo, upstream version checks are not relevant
       OBOT_SERVER_DISABLE_UPDATE_CHECK: "true"
