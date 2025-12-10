@@ -619,6 +619,99 @@ curl -I https://mcp-auth.<domain>/
 
 See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
 
+## ImageVolume Feature Gate (CloudNativePG Managed Extensions)
+
+The Kubernetes ImageVolume feature gate is required for CloudNativePG managed extensions (e.g., pgvector for RAG/knowledge functionality). This feature allows mounting OCI images as read-only volumes in pods.
+
+### Why ImageVolume?
+
+CloudNativePG's modern approach to PostgreSQL extensions uses ImageVolume to:
+- Mount extension binaries from OCI images directly into PostgreSQL containers
+- Decouple extensions from the base PostgreSQL image
+- Enable extension version management independent of PostgreSQL version
+- Support PostgreSQL 18's `extension_control_path` for external extension directories
+
+### Configuration
+
+ImageVolume must be enabled on both kubelet (all nodes) and kube-apiserver (control plane):
+
+**Kubelet** (`templates/config/talos/patches/global/machine-kubelet.yaml.j2`):
+```yaml
+machine:
+  kubelet:
+    extraArgs:
+      feature-gates: ImageVolume=true
+```
+
+**API Server** (`templates/config/talos/patches/controller/cluster.yaml.j2`):
+```yaml
+cluster:
+  apiServer:
+    extraArgs:
+      feature-gates: ImageVolume=true
+```
+
+### Applying Changes
+
+```bash
+# 1. Edit template patches (or they're already configured)
+# 2. Render templates
+task configure -y
+
+# 3. Generate node configs
+task talos:generate-config
+
+# 4. Apply to each node (workers first, then control plane)
+task talos:apply-node IP=192.168.22.111 MODE=auto  # worker 1
+task talos:apply-node IP=192.168.22.112 MODE=auto  # worker 2
+task talos:apply-node IP=192.168.22.113 MODE=auto  # worker 3
+task talos:apply-node IP=192.168.22.101 MODE=auto  # cp 1
+task talos:apply-node IP=192.168.22.102 MODE=auto  # cp 2
+task talos:apply-node IP=192.168.22.103 MODE=auto  # cp 3
+```
+
+### Verification
+
+```bash
+# Check kubelet feature gates
+kubectl get --raw /api/v1/nodes/talos-wrkr-001/proxy/configz | jq '.kubeletconfig.featureGates'
+# Should show: { "ImageVolume": true, ... }
+
+# Check API server feature gates
+kubectl get pods -n kube-system -l component=kube-apiserver -o jsonpath='{.items[0].spec.containers[0].command}' | tr ',' '\n' | grep feature
+# Should show: "--feature-gates=ImageVolume=true"
+```
+
+### CloudNativePG Extension Configuration
+
+With ImageVolume enabled, configure extensions in the Cluster resource:
+
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+  postgresql:
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.1-18-trixie
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+spec:
+  extensions:
+    - name: vector  # Extension name in PostgreSQL (not 'pgvector')
+```
+
+### Troubleshooting
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| `permission denied to create extension "vector"` | ImageVolume not enabled, trying to create extension manually | Enable ImageVolume feature gate, use CNPG managed extensions |
+| `extension "vector" is not available` | ImageVolume not enabled or not propagated | Check `/extensions/` dir exists in pod: `kubectl exec obot-db-1 -- ls /extensions/` |
+| Database resource `applied: false` | Extension not available or ImageVolume issue | Delete and recreate cluster after enabling ImageVolume |
+
 ## Adding New Applications/Templates
 
 When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.

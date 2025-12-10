@@ -484,6 +484,58 @@ If your workloads require other storage solutions with features like replication
 
 These tools offer a variety of solutions to meet your persistent storage needs, whether you're using cloud-native or self-hosted infrastructures.
 
+### CloudNativePG with Managed Extensions
+
+**Included:** This template includes [CloudNativePG](https://cloudnative-pg.io/) for highly-available PostgreSQL clusters. For applications requiring vector similarity search (RAG/knowledge systems), the template supports pgvector via CloudNativePG's managed extensions system.
+
+**Prerequisites:** The Kubernetes **ImageVolume** feature gate must be enabled for managed extensions. This template pre-configures ImageVolume in the Talos patches:
+
+```yaml
+# templates/config/talos/patches/global/machine-kubelet.yaml.j2
+machine:
+  kubelet:
+    extraArgs:
+      feature-gates: ImageVolume=true
+
+# templates/config/talos/patches/controller/cluster.yaml.j2
+cluster:
+  apiServer:
+    extraArgs:
+      feature-gates: ImageVolume=true
+```
+
+**Configuration Example (obot with pgvector):**
+
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+spec:
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+  postgresql:
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.1-18-trixie
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+spec:
+  extensions:
+    - name: vector
+```
+
+**Verification:**
+
+```sh
+# Check ImageVolume is enabled
+kubectl get --raw /api/v1/nodes/<node>/proxy/configz | jq '.kubeletconfig.featureGates'
+
+# Check extension is installed
+kubectl exec -n <namespace> <cluster>-1 -- psql -U postgres -d <db> -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
+```
+
+See `CLAUDE.md` for detailed ImageVolume configuration and troubleshooting.
+
 ### AI Gateway (Envoy AI Gateway)
 
 **Included (optional):** This template includes [Envoy AI Gateway](https://aigateway.envoyproxy.io/) for intelligent AI/LLM traffic routing. When enabled, it extends Envoy Gateway with AI-specific capabilities including request routing to Azure OpenAI backends.
