@@ -1,5 +1,43 @@
 #% if kagent_enabled %#
 ---
+# CiliumNetworkPolicy for kagent controller - allow egress to kube-apiserver
+# Required because standard NetworkPolicy ipBlock rules don't work with
+# Cilium's kube-proxy replacement and reserved entity handling
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kagent-controller-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: controller
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+# CiliumNetworkPolicy for kagent agents - allow egress to kube-apiserver
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kagent-agents-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: kagent
+      app.kubernetes.io/component: agent
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
 # NetworkPolicy for kagent controller
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -40,13 +78,6 @@ spec:
       ports:
         - protocol: UDP
           port: 53
-    # Kubernetes API
-    - to:
-        - ipBlock:
-            cidr: #{ cluster_api_addr }#/32
-      ports:
-        - protocol: TCP
-          port: 6443
     # LLM Provider (external)
     # TODO: Reassess egress rules for production - consider restricting to specific
     # LLM provider IP ranges (Anthropic, OpenAI, Azure) instead of allowing all external
@@ -167,13 +198,7 @@ spec:
       ports:
         - protocol: UDP
           port: 53
-    # Kubernetes API (for k8s-agent, helm-agent, etc.)
-    - to:
-        - ipBlock:
-            cidr: #{ cluster_api_addr }#/32
-      ports:
-        - protocol: TCP
-          port: 6443
+    # Note: Kubernetes API access is handled by CiliumNetworkPolicy kagent-agents-kube-api-egress
     # Controller communication
     - to:
         - podSelector:

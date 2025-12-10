@@ -47,14 +47,20 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: obot
     # Allow from obot-mcp namespace for OAuth token exchange callbacks
-    # MCP servers call back to obot for token exchange during initialization
+    # Ports: 80 (service), 443 (HTTPS), 8080 (obot pod), 8099 (MCP pod)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot-mcp
       ports:
         - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
           port: 8080
+        - protocol: TCP
+          port: 8099
     # Allow from agentgateway for MCP-proxied requests
     - from:
         - namespaceSelector:
@@ -95,13 +101,18 @@ spec:
         - protocol: TCP
           port: 5432
     # Allow to obot-mcp namespace for MCP server management
-    # Each MCP server pod exposes port 8099 (nanobot default) via named port "http"
-    # Webhook sidecars use localhost ports within the pod, not exposed externally
+    # Ports: 80 (service), 443 (HTTPS), 8080 (obot pod), 8099 (MCP pod)
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot-mcp
       ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
         - protocol: TCP
           port: 8099
     # Allow to envoy-ai gateway for LLM requests via internal service

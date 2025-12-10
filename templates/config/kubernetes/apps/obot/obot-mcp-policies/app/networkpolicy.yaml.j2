@@ -11,14 +11,19 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from obot namespace on MCP server port
-    # Each MCP server pod exposes port 8099 (nanobot default) via named port "http"
-    # Webhook sidecars use localhost ports within the pod, not exposed externally
+    # Allow from obot namespace for MCP server management
+    # Ports: 80 (service), 443 (HTTPS), 8080 (obot pod), 8099 (MCP pod)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: obot
       ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
         - protocol: TCP
           port: 8099
   egress:
@@ -44,8 +49,7 @@ spec:
         - protocol: TCP
           port: 443
     # Allow to obot namespace (for OAuth token exchange callbacks)
-    # MCP servers call http://obot-obot.obot.svc.cluster.local/oauth/token
-    # The URL defaults to port 80 (no explicit port in generated URLs)
+    # Ports: 80 (service), 443 (HTTPS), 8080 (obot pod), 8099 (MCP pod)
     - to:
         - namespaceSelector:
             matchLabels:
@@ -53,6 +57,12 @@ spec:
       ports:
         - protocol: TCP
           port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8099
 #% if agentgateway_enabled | default(false) %#
     # When agentgateway is enabled: route LLM requests through agentgateway
     # (security hardening - all LLM traffic goes through authenticated proxy)
