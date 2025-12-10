@@ -30,6 +30,9 @@ spec:
     controller:
       logLevel: info
       replicaCount: 1
+      # For dev builds (v2.2.0-main), use Always to get latest images
+      image:
+        pullPolicy: Always
       resources:
         requests:
           cpu: 100m
