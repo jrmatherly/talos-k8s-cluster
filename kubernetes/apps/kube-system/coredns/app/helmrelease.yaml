@@ -39,6 +39,8 @@ spec:
           - name: autopath
             parameters: "@kubernetes"
           - name: forward
+            parameters:  
+          - name: forward
             parameters: . /etc/resolv.conf
           - name: cache
             configBlock: |-

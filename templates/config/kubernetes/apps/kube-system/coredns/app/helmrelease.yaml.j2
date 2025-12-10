@@ -39,6 +39,8 @@ spec:
           - name: autopath
             parameters: "@kubernetes"
           - name: forward
+            parameters: #{ secret_domain }# #{ k8s_gateway_ip }#
+          - name: forward
             parameters: . /etc/resolv.conf
           - name: cache
             configBlock: |-
