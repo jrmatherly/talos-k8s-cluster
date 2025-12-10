@@ -24,8 +24,6 @@ A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/t
 - Dependency automation w/ [Renovate](https://www.mend.io/renovate)
 - Flux `HelmRelease` and `Kustomization` diffs w/ [flux-local](https://github.com/allenporter/flux-local)
 
-Does this sound cool to you? If so, continue to read on! 👇
-
 ## 🚀 Let's Go
 
 There are **5 stages** outlined below for completing this project, make sure you follow the stages in order.
