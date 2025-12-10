@@ -7,8 +7,6 @@ spec:
   dependsOn:
     - name: kgateway-crds
       namespace: agentgateway
-    - name: keycloak
-      namespace: keycloak
     - name: cilium
       namespace: kube-system
   interval: 1h

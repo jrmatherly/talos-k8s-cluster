@@ -23,8 +23,14 @@ metadata:
   name: agentgateway
 spec:
   gatewayClassName: agentgateway
-  #| Infrastructure annotations propagate to Service #|
+  #| Infrastructure settings for the Gateway #|
   infrastructure:
+    #| Reference GatewayParameters for deployment settings #|
+    parametersRef:
+      name: agentgateway-params
+      group: gateway.kgateway.dev
+      kind: GatewayParameters
+    #| Annotations propagate to Service #|
     annotations:
       lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
   listeners:
