@@ -39,7 +39,7 @@ spec:
           - name: autopath
             parameters: "@kubernetes"
           - name: forward
-            parameters:  
+            parameters: matherly.net 192.168.22.135
           - name: forward
             parameters: . /etc/resolv.conf
           - name: cache
