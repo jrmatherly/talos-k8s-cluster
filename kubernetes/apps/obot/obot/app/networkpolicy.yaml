@@ -93,7 +93,7 @@ spec:
       ports:
         - protocol: TCP
           port: 80
-    # Allow to envoy-ai gateway for LLM requests
+    # Allow to envoy-ai gateway for LLM requests via internal service
     # Note: envoy-ai pods listen on 10443 (targetPort), not 443 (service port)
     - to:
         - namespaceSelector:
@@ -105,6 +105,14 @@ spec:
       ports:
         - protocol: TCP
           port: 10443
+    # Allow to envoy-ai LoadBalancer IP for LLM requests via external hostname (llms.matherly.net)
+    # Required because TLS cert is valid for *.matherly.net, not internal service name
+    - to:
+        - ipBlock:
+            cidr: 192.168.22.145/32
+      ports:
+        - protocol: TCP
+          port: 443
     # Allow external internet access (GitHub for tools, MCP catalogs, etc.)
     # Excludes private IP ranges (RFC 1918)
     - to:
