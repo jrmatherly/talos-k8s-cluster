@@ -19,10 +19,6 @@ metadata:
 spec:
   gatewayClassName: agentgateway
   infrastructure:
-    parametersRef:
-      name: agentgateway-params
-      group: gateway.kgateway.dev
-      kind: GatewayParameters
     annotations:
       lbipam.cilium.io/ips: "192.168.22.147"
   listeners:
