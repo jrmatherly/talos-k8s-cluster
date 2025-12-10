@@ -1,11 +1,15 @@
 #% if obot_enabled | default(false) %#
 ---
 # CloudNativePG Cluster for Obot
+# Uses PostgreSQL 18 minimal image with pgvector extension via ImageVolume
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: obot-db
 spec:
+  # Use PostgreSQL 18 minimal image for extension_control_path support
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+
   instances: #{ obot_postgresql_replicas | default(3) }#
 
   # Storage Configuration
@@ -15,7 +19,7 @@ spec:
     storageClass: proxmox-csi
 #% endif %#
 
-  # PostgreSQL Configuration
+  # PostgreSQL Configuration with pgvector extension
   postgresql:
     parameters:
       max_connections: "200"
@@ -28,6 +32,11 @@ spec:
       random_page_cost: "1.1"
       effective_io_concurrency: "200"
       work_mem: "5242kB"
+    # pgvector extension for RAG/knowledge functionality
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.1-18-trixie
 
   # Bootstrap Configuration
   bootstrap:
@@ -36,9 +45,6 @@ spec:
       owner: obot
       secret:
         name: obot-db-secret
-      # Enable pgvector extension for RAG/knowledge functionality
-      postInitSQL:
-        - CREATE EXTENSION IF NOT EXISTS vector
 
   # Monitoring
   monitoring:
@@ -57,4 +63,17 @@ spec:
   affinity:
     enablePodAntiAffinity: true
     podAntiAffinityType: preferred
+---
+# Database resource to declaratively manage obot database with pgvector extension
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: obot-db-obot
+spec:
+  name: obot
+  owner: obot
+  cluster:
+    name: obot-db
+  extensions:
+    - name: vector
 #% endif %#
