@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing), [agentgateway](https://agentgateway.dev/) (MCP OAuth authentication).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing), [agentgateway](https://agentgateway.dev/) (MCP OAuth authentication), [kagent](https://kagent.dev/) (Kubernetes AI agents).
 
 **Other features include:**
 
@@ -635,6 +635,108 @@ curl -I https://mcp-auth.${cloudflare_domain}/
 ```
 
 See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
+
+### kagent (Kubernetes AI Agent Framework)
+
+**Included (optional):** This template includes [kagent](https://kagent.dev/) for Kubernetes-native AI agent workflows. When enabled, it provides a controller that manages specialized AI agents for cluster operations, monitoring, and debugging tasks.
+
+Enable it by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# Enable kagent
+kagent_enabled: true
+kagent_provider: "anthropic"  # or "openai", "azure", "gemini", "ollama"
+kagent_default_model: "claude-3-5-haiku"
+kagent_anthropic_api_key: "<api-key>"  # Required for anthropic provider
+
+# Optional: Enable specific agents
+kagent_agents_enabled:
+  - k8s        # Kubernetes cluster operations
+  - helm       # Helm chart management
+  - cilium-debug  # Cilium CNI debugging
+  - observability # Prometheus/Grafana integration
+  - promql     # PromQL query assistance
+
+# Optional: PostgreSQL backend (default: sqlite)
+kagent_database_type: "postgres"
+kagent_postgres_password: "<password>"
+
+# Optional: OTLP tracing
+kagent_otlp_enabled: true
+kagent_otlp_endpoint: "http://jaeger-collector.jaeger.svc.cluster.local:4317"
+```
+
+When enabled, kagent provides:
+- Controller pod managing agent lifecycle
+- Specialized AI agents (k8s, helm, cilium-debug, observability, promql)
+- Optional UI at `kagent.${cloudflare_domain}` (internal)
+- CloudNativePG PostgreSQL backend for persistence
+- OTLP tracing integration with Jaeger
+
+**Critical: CiliumNetworkPolicy Required**
+
+kagent requires CiliumNetworkPolicy for Kubernetes API access when using Cilium CNI. Standard NetworkPolicy ipBlock rules do NOT work with Cilium's kube-proxy replacement. See `CLAUDE.md` for the CiliumNetworkPolicy pattern.
+
+**Verification:**
+
+```sh
+# Check kagent deployment status
+kubectl get pods -n kagent
+kubectl get ciliumnetworkpolicy -n kagent
+
+# Check controller logs
+kubectl logs -n kagent -l app.kubernetes.io/component=controller
+
+# Check agent pods
+kubectl get pods -n kagent -l app.kubernetes.io/component=agent
+```
+
+### obot MCP Gateway (with Entra ID Authentication)
+
+**Included (optional):** This template supports [obot](https://github.com/obot-platform/obot) as an MCP (Model Context Protocol) Gateway. The included deployment uses a fork ([obot-entraid](https://github.com/jrmatherly/obot-entraid)) with custom Microsoft Entra ID authentication support.
+
+Enable it by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# Enable obot
+obot_enabled: true
+obot_entra_client_id: "<from-azure>"
+obot_entra_client_secret: "<sops-encrypted>"
+obot_entra_tenant_id: "<tenant-id>"
+obot_db_password: "<sops-encrypted>"
+obot_cookie_secret: "<sops-encrypted>"
+obot_encryption_key: "<sops-encrypted>"
+```
+
+**Critical: NetworkPolicy Configuration**
+
+obot deploys MCP servers in a separate namespace (`obot-mcp`) with strict network isolation. The following networking requirements are essential:
+
+1. **Service port must be 80** - MCP servers generate token exchange URLs without explicit ports (defaulting to HTTP port 80)
+2. **Multi-port NetworkPolicies** - Traffic between `obot` and `obot-mcp` namespaces requires ports 80, 443, 8080, and 8099
+
+| Issue | Symptom | Root Cause |
+|-------|---------|------------|
+| MCP server 503 | Health check timeout | NetworkPolicy blocking obot→MCP |
+| Token exchange timeout | 500 error on /tools | NetworkPolicy blocking MCP→obot |
+| External access 502 | Bad Gateway | HTTPRoute port mismatch |
+
+**Verification:**
+
+```sh
+# Check obot and MCP deployments
+kubectl get pods -n obot
+kubectl get pods -n obot-mcp
+
+# Check service ports (should be 80)
+kubectl get svc -n obot obot-obot -o jsonpath='{.spec.ports[0].port}'
+
+# Check NetworkPolicies
+kubectl get networkpolicy -n obot -o wide
+kubectl get networkpolicy -n obot-mcp -o wide
+```
+
+See `CLAUDE.md` for detailed NetworkPolicy configuration and `.serena/memories/obot-entraid-deployment.md` for complete deployment documentation.
 
 ### Community Repositories
 

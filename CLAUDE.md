@@ -712,6 +712,209 @@ spec:
 | `extension "vector" is not available` | ImageVolume not enabled or not propagated | Check `/extensions/` dir exists in pod: `kubectl exec obot-db-1 -- ls /extensions/` |
 | Database resource `applied: false` | Extension not available or ImageVolume issue | Delete and recreate cluster after enabling ImageVolume |
 
+## CiliumNetworkPolicy for Kubernetes API Access
+
+**CRITICAL**: When using Cilium CNI with kube-proxy replacement, standard Kubernetes NetworkPolicy `ipBlock` rules **DO NOT WORK** for accessing the Kubernetes API server. Cilium handles the kube-apiserver as a reserved entity.
+
+### The Problem
+
+This approach **DOES NOT WORK** with Cilium:
+```yaml
+# WRONG - Standard NetworkPolicy ipBlock for K8s API
+egress:
+  - to:
+      - ipBlock:
+          cidr: 192.168.22.100/32  # VIP
+    ports:
+      - protocol: TCP
+        port: 6443
+```
+
+### The Solution
+
+Use `CiliumNetworkPolicy` with `toEntities: kube-apiserver`:
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: <app>-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: <app>
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+```
+
+### Pattern for NetworkPolicy Templates
+
+When creating `networkpolicy.yaml.j2` for apps that need Kubernetes API access:
+
+1. **Add CiliumNetworkPolicy first** (for K8s API egress)
+2. **Add standard NetworkPolicy** for all other traffic (DNS, inter-pod, external)
+3. **Comment the standard NetworkPolicy** to document the Cilium dependency
+
+Example structure:
+```yaml
+#% if myapp_enabled %#
+---
+# CiliumNetworkPolicy for myapp - allow egress to kube-apiserver
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: myapp-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+# Standard NetworkPolicy for other traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: myapp
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Note: Kubernetes API access is handled by CiliumNetworkPolicy myapp-kube-api-egress
+#% endif %#
+```
+
+### Applications Using This Pattern
+
+| Application | Components | Template File |
+|-------------|------------|---------------|
+| kagent | controller, agent pods | `kagent/app/networkpolicy.yaml.j2` |
+| obot | main pod | `obot/app/networkpolicy.yaml.j2` |
+| agentgateway | kgateway, agentgateway | `agentgateway/kgateway/app/networkpolicy.yaml.j2` |
+
+### Symptoms When CiliumNetworkPolicy is Missing
+
+- Controllers: CrashLoopBackOff with logs stopping at "Watching all namespaces"
+- Operators: Hang during initialization, fail to start watches
+- Agents: Cannot list/get/watch resources despite having RBAC
+
+### Debugging
+
+```bash
+# Check CiliumNetworkPolicies exist and are VALID
+kubectl get ciliumnetworkpolicy -n <namespace>
+
+# Verify pod labels match selector
+kubectl get pod <pod> -n <namespace> --show-labels
+
+# Test API connectivity from pod
+kubectl exec -n <namespace> <pod> -- wget -qO- --timeout=5 https://kubernetes.default.svc:443/healthz
+```
+
+## obot MCP Server Networking
+
+obot deploys MCP (Model Context Protocol) servers in a separate namespace (`obot-mcp`) with strict network isolation. Understanding the port architecture and NetworkPolicy requirements is critical for proper operation.
+
+### Port Architecture
+
+**CRITICAL**: NetworkPolicies operate at the **pod level**, not the service level. When a Service maps port A to targetPort B, the policy must allow traffic on the actual port(s) involved.
+
+| Component | Service Port | Pod Port | Notes |
+|-----------|--------------|----------|-------|
+| obot service | 80 | 8080 | Service port 80 required - MCP URLs default to port 80 |
+| MCP server services | 80 | 8099 | Each MCP server pod listens on 8099 |
+| HTTPRoute | 80 | - | Must match obot service port |
+
+### Why Port 80?
+
+The obot code generates token exchange URLs **without explicit ports**:
+```
+http://obot-obot.obot.svc.cluster.local/oauth/token
+```
+
+This defaults to port 80. The HelmRelease must configure the service accordingly:
+```yaml
+# helmrelease.yaml.j2
+service:
+  type: ClusterIP
+  port: 80  # REQUIRED: MCP URLs default to port 80
+```
+
+### Traffic Flows
+
+1. **External → obot**: Gateway → HTTPRoute (80) → obot service (80) → obot pod (8080)
+2. **obot → MCP**: obot pod → MCP service (80) → MCP pod (8099)
+3. **MCP → obot**: MCP pod → obot service (80) → obot pod (8080) [for OAuth token exchange]
+
+### NetworkPolicy Configuration
+
+**Both egress AND ingress policies must allow traffic.** Traffic is checked at both source and destination namespaces.
+
+Required policies for obot↔obot-mcp communication:
+
+| Policy | Namespace | Direction | Ports |
+|--------|-----------|-----------|-------|
+| `obot-egress` | obot | obot → obot-mcp | 80, 443, 8080, 8099 |
+| `obot-ingress` | obot | obot-mcp → obot | 80, 443, 8080, 8099 |
+| `mcp-server-isolation` ingress | obot-mcp | obot → obot-mcp | 80, 443, 8080, 8099 |
+| `mcp-server-isolation` egress | obot-mcp | obot-mcp → obot | 80, 443, 8080, 8099 |
+
+### Template Files
+
+| File | Purpose |
+|------|---------|
+| `obot/app/networkpolicy.yaml.j2` | `obot-ingress`, `obot-egress` policies |
+| `obot/app/helmrelease.yaml.j2` | Service port configuration (port: 80) |
+| `obot/app/httproute.yaml.j2` | HTTPRoute (port 80) |
+| `obot-mcp-policies/app/networkpolicy.yaml.j2` | `mcp-server-isolation` policy |
+
+### Common Issues
+
+| Issue | Symptom | Root Cause | Fix |
+|-------|---------|------------|-----|
+| MCP server 503 | Health check timeout at ~80% | obot→MCP blocked | Allow ports 80,8099 in obot-egress |
+| Token exchange timeout | 500 error on /tools endpoint | MCP→obot blocked | Allow ports 80,8080 in mcp-server-isolation egress |
+| External access broken | 502 Bad Gateway | HTTPRoute/service port mismatch | Ensure both use port 80 |
+
+### Verification
+
+```bash
+# Check service ports
+kubectl get svc -n obot obot-obot -o jsonpath='{.spec.ports[0].port}'  # Should be 80
+kubectl get svc -n obot-mcp  # Service port 80 → targetPort 8099
+
+# Check NetworkPolicies
+kubectl get networkpolicy -n obot -o wide
+kubectl get networkpolicy -n obot-mcp -o wide
+
+# Test connectivity (from obot to MCP)
+kubectl exec -n obot deploy/obot-obot -- curl -sv --connect-timeout 5 http://<mcp-svc>.obot-mcp.svc.cluster.local/healthz
+
+# Test connectivity (from MCP to obot)
+kubectl exec -n obot-mcp <mcp-pod> -- curl -sv --connect-timeout 5 http://obot-obot.obot.svc.cluster.local/api/healthz
+```
+
+See `.serena/memories/obot-entraid-deployment.md` for complete deployment documentation.
+
 ## Adding New Applications/Templates
 
 When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.
@@ -735,3 +938,5 @@ When adding new application templates to this project, multiple files must be up
 6. **Helm chart extraZonePlugins/extraConfig** often REPLACES defaults rather than extending - include all required plugins explicitly
 7. **Flux Kustomization dependsOn** namespaces must match where the dependency actually runs (e.g., `cilium` is in `kube-system`, not `flux-system`)
 8. **Adding new templates** requires updating multiple config files first - see checklist above
+9. **obot service port must be 80** - MCP servers generate token exchange URLs without explicit ports (defaulting to 80). Using port 8080 will cause token exchange timeouts.
+10. **NetworkPolicies require ports on BOTH sides** - Traffic between namespaces must be allowed by both egress (source) AND ingress (destination) policies
