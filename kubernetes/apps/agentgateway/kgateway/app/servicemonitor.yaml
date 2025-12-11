@@ -2,6 +2,48 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
+  name: kgateway-control-plane
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobLabel: kgateway
+  namespaceSelector:
+    matchNames:
+      - agentgateway
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    honorLabels: true
+    relabelings:
+      - sourceLabels: [__meta_kubernetes_namespace]
+        targetLabel: namespace
+      - sourceLabels: [__meta_kubernetes_pod_name]
+        targetLabel: pod
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kgateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kgateway-metrics
+  labels:
+    app.kubernetes.io/name: kgateway
+spec:
+  selector:
+    app.kubernetes.io/name: kgateway
+  ports:
+  - name: metrics
+    port: 9092
+    targetPort: 9092
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
   name: agentgateway
   labels:
     release: kube-prometheus-stack

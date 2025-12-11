@@ -20,6 +20,8 @@ spec:
               protocol: TCP
 ---
 # CiliumNetworkPolicy for kagent agents - allow egress to kube-apiserver
+# Note: kagent-managed agent pods use labels: app=kagent, app.kubernetes.io/part-of=kagent
+# They do NOT have app.kubernetes.io/component=agent
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -27,8 +29,8 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: kagent
-      app.kubernetes.io/component: agent
+      app: kagent
+      app.kubernetes.io/part-of: kagent
   egress:
     - toEntities:
         - kube-apiserver
@@ -119,6 +121,16 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    # A2A (Agent-to-Agent) communication - controller to agent pods
+    # Agent pods are labeled: app=kagent, app.kubernetes.io/part-of=kagent
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kagent
+              app.kubernetes.io/part-of: kagent
+      ports:
+        - protocol: TCP
+          port: 8080
     # MCP Tool Servers (kagent-tools, grafana-mcp, querydoc)
     # Required for controller to fetch tools from RemoteMCPServer and MCP-labeled services
     - to:
@@ -185,6 +197,8 @@ spec:
           port: 8083
 ---
 # NetworkPolicy for kagent agent pods
+# Note: kagent-managed agent pods use labels: app=kagent, app.kubernetes.io/part-of=kagent
+# They do NOT have app.kubernetes.io/component=agent
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -192,13 +206,13 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: kagent
-      app.kubernetes.io/component: agent
+      app: kagent
+      app.kubernetes.io/part-of: kagent
   policyTypes:
     - Ingress
     - Egress
   ingress:
-    # Allow from controller
+    # Allow from controller (A2A communication)
     - from:
         - podSelector:
             matchLabels:

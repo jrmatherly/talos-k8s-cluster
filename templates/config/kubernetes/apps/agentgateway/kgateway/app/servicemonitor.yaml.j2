@@ -1,8 +1,61 @@
 #% if agentgateway_enabled and observability_enabled %#
 ---
-#| ServiceMonitor for agentgateway metrics (Phase 1) #|
-#| Scrapes FinOps and observability metrics from agentgateway #|
-#| Metrics include: token usage, cost tracking, request counts, latency #|
+#| ============================================= #|
+#| ServiceMonitor: kgateway Control Plane        #|
+#| ============================================= #|
+#| Scrapes kgateway controller metrics on port 9092 #|
+#| Metrics: reconciliation, xDS, translation, NACKs #|
+#| Key metric: kgateway_agentgateway_xds_rejects_total (NACK detection) #|
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kgateway-control-plane
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobLabel: kgateway
+  namespaceSelector:
+    matchNames:
+      - agentgateway
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    honorLabels: true
+    relabelings:
+      - sourceLabels: [__meta_kubernetes_namespace]
+        targetLabel: namespace
+      - sourceLabels: [__meta_kubernetes_pod_name]
+        targetLabel: pod
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kgateway
+---
+#| Service for kgateway control plane metrics #|
+#| Exposes port 9092 for Prometheus scraping #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: kgateway-metrics
+  labels:
+    app.kubernetes.io/name: kgateway
+spec:
+  selector:
+    app.kubernetes.io/name: kgateway
+  ports:
+  - name: metrics
+    port: 9092
+    targetPort: 9092
+    protocol: TCP
+  type: ClusterIP
+---
+#| ============================================= #|
+#| ServiceMonitor: agentgateway Data Plane       #|
+#| ============================================= #|
+#| Scrapes agentgateway proxy metrics on port 15020 #|
+#| Metrics: gen_ai token usage, request counts, latency #|
+#| Key metric: agentgateway_gen_ai_client_token_usage #|
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
