@@ -65,7 +65,7 @@ spec:
         apiKeySecretRef: kagent-provider-secret
         apiKeySecretKey: OPENAI_API_KEY
         config:
-          baseURL: "https://ai-gateway.matherly.net"
+          baseUrl: "https://ai-gateway.matherly.net"
 
     # ============================================================
     # Pre-built Agents Configuration

@@ -76,8 +76,9 @@ spec:
         apiKeySecretRef: kagent-provider-secret
         apiKeySecretKey: OPENAI_API_KEY
 #% if kagent_openai_api_base %#
+        #| baseUrl (lowercase 'u') maps to ModelConfig CRD spec.openAI.baseUrl #|
         config:
-          baseURL: "#{ kagent_openai_api_base }#"
+          baseUrl: "#{ kagent_openai_api_base }#"
 #% endif %#
 #% elif kagent_provider == 'azure' %#
       azureOpenAI:
