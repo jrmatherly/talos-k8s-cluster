@@ -2,7 +2,6 @@
 ---
 #| GatewayParameters for Kubernetes deployment settings (gateway.kgateway.dev API) #|
 #| Referenced by GatewayClass.parametersRef - controls K8s resources #|
-#| Enhanced with metrics endpoint for observability (Phase 1) #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: GatewayParameters
 metadata:
@@ -19,14 +18,10 @@ spec:
         #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
         - name: ADMIN_ADDR
           value: "0.0.0.0:15000"
-        #| Enable metrics endpoint for Prometheus scraping (Phase 1) #|
-        - name: METRICS_ENABLED
-          value: "true"
-        - name: METRICS_PORT
-          value: "9090"
 ---
-#| Service for agentgateway metrics endpoint (Phase 1) #|
-#| Exposes metrics on port 9090 for Prometheus ServiceMonitor #|
+#| Service for agentgateway stats/metrics endpoint #|
+#| agentgateway binds stats to [::]:15020 by default (not configurable via env) #|
+#| Exposes Prometheus metrics for ServiceMonitor scraping #|
 apiVersion: v1
 kind: Service
 metadata:
@@ -40,8 +35,8 @@ spec:
     gateway.networking.k8s.io/gateway-name: agentgateway
   ports:
   - name: metrics
-    port: 9090
-    targetPort: 9090
+    port: 15020
+    targetPort: 15020
     protocol: TCP
   type: ClusterIP
 ---

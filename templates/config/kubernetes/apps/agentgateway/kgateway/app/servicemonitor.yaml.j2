@@ -53,7 +53,8 @@ spec:
 #| ============================================= #|
 #| ServiceMonitor: agentgateway Data Plane       #|
 #| ============================================= #|
-#| Scrapes agentgateway proxy metrics on port 15020 #|
+#| Scrapes agentgateway proxy stats on port 15020 #|
+#| Metrics path: /stats/prometheus (Envoy-style stats) #|
 #| Metrics: gen_ai token usage, request counts, latency #|
 #| Key metric: agentgateway_gen_ai_client_token_usage #|
 apiVersion: monitoring.coreos.com/v1
@@ -69,7 +70,7 @@ spec:
       - agentgateway
   endpoints:
   - port: metrics
-    path: /metrics
+    path: /stats/prometheus
     interval: 30s
     scrapeTimeout: 10s
     honorLabels: true
