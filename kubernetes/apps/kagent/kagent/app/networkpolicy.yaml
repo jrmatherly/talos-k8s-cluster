@@ -62,11 +62,12 @@ spec:
       ports:
         - protocol: TCP
           port: 8083
-    # Allow from agent pods
+    # Allow from agent pods (kagent-managed agents use app=kagent, app.kubernetes.io/part-of=kagent)
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: kagent
+              app: kagent
+              app.kubernetes.io/part-of: kagent
       ports:
         - protocol: TCP
           port: 8083
