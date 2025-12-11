@@ -85,20 +85,20 @@ spec:
       port: 15000
 ---
 #| MCP Backend for routing to MCP servers #|
-#| Uses placeholder target - configure actual MCP servers as needed #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+#| Uses label selector to dynamically discover MCP server pods #|
+#| Requires Services with appProtocol: kgateway.dev/mcp #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: mcp-backend
 spec:
-  type: MCP
   mcp:
     targets:
-    - name: placeholder
-      static:
-        host: localhost
-        port: 9999
-        protocol: HTTP
+    - name: mcp-servers
+      selector:
+        services:
+          matchLabels:
+            agentgateway.dev/mcp: "true"
 ---
 #| HTTPRoute for MCP traffic on port 8080 listener #|
 apiVersion: gateway.networking.k8s.io/v1
@@ -112,8 +112,8 @@ spec:
     sectionName: mcp
   rules:
   - backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
+    - group: agentgateway.dev
+      kind: AgentgatewayBackend
       name: mcp-backend
 ---
 #| =========================================== #|
