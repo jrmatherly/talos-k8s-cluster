@@ -620,6 +620,14 @@ When enabled, agentgateway provides:
 - Integration with existing Keycloak + Entra ID federation
 - Full observability integration with Prometheus and Grafana
 
+**Azure OpenAI Backends (December 2025):**
+
+13 chat/reasoning backends are configured across two Azure regions:
+- **US East:** gpt-4.1, gpt-4.1-nano, gpt-4o-mini, o3, o4-mini
+- **US East2:** gpt-5, gpt-5-nano, gpt-5-chat, gpt-5.1-chat, gpt-5-mini, gpt-5.1, gpt-5.1-codex, gpt-5.1-codex-mini
+
+**NOT Supported:** Embeddings (agentgateway only supports chat completions API; use direct Azure endpoint for embeddings)
+
 **Key Implementation Notes:**
 - kgateway does NOT use an `MCPRoute` CRD. Key CRDs include:
   - `AgentgatewayBackend` (`agentgateway.dev/v1alpha1`) - AI/LLM providers and MCP backend configuration
@@ -630,6 +638,7 @@ When enabled, agentgateway provides:
 - Cloudflare Tunnel routes `mcp-auth.<domain>` directly to agentgateway before the wildcard rule
 - HTTPRoute `backendRefs` for AgentgatewayBackend must use `group: agentgateway.dev`
 - Azure OpenAI secrets must use `Authorization` as the key name (NOT `api-key`)
+- HTTPRoute rules must use `PathPrefix` matching with longest paths first (to prevent `/azure/gpt5` from matching `/azure/gpt51`)
 
 **Observability:**
 

@@ -121,6 +121,8 @@ See `.serena/memories/adding-new-templates-checklist.md` for complete checklist.
 3. **Run `task talos:generate-config`** after nodes.yaml changes affecting Talos
 4. **Commit before `task configure -y`** - it overwrites generated files
 5. **Helm extraZonePlugins/extraConfig** often REPLACES defaults, not extends
+6. **agentgateway only supports chat completions** - Embeddings API not supported; use direct Azure endpoint
+7. **agentgateway HTTPRoute path ordering** - Longest paths first to prevent path collisions
 
 ## Extended Documentation
 
