@@ -678,20 +678,47 @@ See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation 
 
 ### Observability
 
-agentgateway exposes metrics on two endpoints:
+agentgateway observability is fully integrated with the kube-prometheus-stack via ServiceMonitors, PrometheusRules, and Grafana dashboards.
 
 **Control Plane (kgateway) - Port 9092:**
+
 | Metric | Type | Purpose |
 |--------|------|---------|
 | `kgateway_agentgateway_xds_rejects_total` | Counter | NACK detection |
 | `kgateway_controller_reconciliations_total` | Counter | Reconciliation results |
 | `kgateway_resources_updates_dropped_total` | Counter | **CRITICAL** - restart if >0 |
 | `kgateway_xds_snapshot_syncs_total` | Counter | xDS push operations |
+| `kgateway_resources_managed` | Gauge | Managed resources by type |
+| `kgateway_controller_reconcile_duration_seconds` | Histogram | Reconciliation latency |
 
 **Data Plane (agentgateway) - Port 15020:**
+
 | Metric | Type | Labels |
 |--------|------|--------|
-| `agentgateway_gen_ai_client_token_usage` | Histogram | `gen_ai_token_type`, `gen_ai_system`, `gen_ai_request_model` |
+| `agentgateway_gen_ai_client_token_usage` | Histogram | `gen_ai_token_type`, `gen_ai_system`, `gen_ai_request_model`, `gateway_name` |
+
+**Important:** The stats endpoint is at port 15020 with path `/stats/prometheus` (NOT `/metrics`). The `METRICS_ENABLED` and `METRICS_PORT` environment variables are ineffective.
+
+**FinOps Recording Rules:**
+
+Pre-aggregated cost metrics are available via PrometheusRule `agentgateway-finops-recording-rules`:
+
+| Recording Rule | Description |
+|----------------|-------------|
+| `agentgateway:input_tokens:total` | Total input tokens (5m) |
+| `agentgateway:output_tokens:total` | Total output tokens (5m) |
+| `agentgateway:cost_usd:by_gateway` | Cost per gateway (hourly) |
+| `agentgateway:cost_usd:by_model` | Cost per model (hourly) |
+| `agentgateway:cost_usd:total_daily` | Total daily cost |
+| `agentgateway:cost_usd:total_monthly` | Total monthly cost |
+
+**Grafana Dashboards:**
+
+Two dashboards are deployed to `observability` namespace via a separate Flux Kustomization (`agentgateway-dashboards`):
+- **kgateway Operations** - Control plane metrics, reconciliation latency, xDS health
+- **AgentGateway FinOps** - Cost tracking, token usage, multi-gateway breakdown
+
+Dashboard ConfigMaps must be in the `observability` namespace for Grafana sidecar discovery. They are deployed via `kubernetes/apps/observability/agentgateway-dashboards/` to avoid namespace override from the agentgateway Kustomization.
 
 **NACK Monitoring:**
 ```bash
@@ -701,11 +728,25 @@ kubectl get events -n agentgateway --field-selector=reason=AgentGatewayNackError
 # Check NACK metric (only appears after first NACK)
 kubectl -n agentgateway port-forward deployment/kgateway 9092
 curl -s http://localhost:9092/metrics | grep xds_rejects
+
+# Check recording rules are loaded
+kubectl get prometheusrule -n agentgateway
 ```
 
 **Access Logging CRDs:**
 - `HTTPListenerPolicy` (`gateway.kgateway.dev/v1alpha1`) - Envoy format strings
 - `AgentgatewayPolicy` (`agentgateway.dev/v1alpha1`) - CEL expressions with LLM-specific fields
+
+**Azure OpenAI Secret Key:**
+
+**CRITICAL**: Azure OpenAI backend secrets must use `Authorization` as the key name (NOT `api-key`):
+
+```yaml
+stringData:
+  Authorization: "<api-key>"  # NOT api-key
+```
+
+See: https://kgateway.dev/docs/agentgateway/main/llm/providers/azureopenai/
 
 ## ImageVolume Feature Gate (CloudNativePG Managed Extensions)
 

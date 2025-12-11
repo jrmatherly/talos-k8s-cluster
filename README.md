@@ -614,6 +614,7 @@ When enabled, agentgateway provides:
 - DCR proxy wrapping Keycloak
 - CORS handling for MCP clients
 - Integration with existing Keycloak + Entra ID federation
+- Full observability integration with Prometheus and Grafana
 
 **Key Implementation Notes:**
 - kgateway does NOT use an `MCPRoute` CRD. Key CRDs include:
@@ -624,6 +625,19 @@ When enabled, agentgateway provides:
 - The GatewayClass MUST use `controllerName: kgateway.dev/agentgateway` (NOT `kgateway.dev/kgateway`)
 - Cloudflare Tunnel routes `mcp-auth.<domain>` directly to agentgateway before the wildcard rule
 - HTTPRoute `backendRefs` for AgentgatewayBackend must use `group: agentgateway.dev`
+- Azure OpenAI secrets must use `Authorization` as the key name (NOT `api-key`)
+
+**Observability:**
+
+When `observability_enabled: true`, agentgateway includes:
+- **ServiceMonitors** for Prometheus scraping (kgateway on port 9092, agentgateway on port 15020)
+- **PrometheusRule** with FinOps recording rules for cost/token aggregation
+- **Grafana Dashboards** (kgateway Operations, AgentGateway FinOps)
+
+Key metrics exposed:
+- `kgateway_controller_reconciliations_total` - Reconciliation results
+- `kgateway_resources_updates_dropped_total` - CRITICAL: restart if >0
+- `agentgateway_gen_ai_client_token_usage` - Token usage histogram (input/output by model)
 
 **Verification:**
 
@@ -637,9 +651,13 @@ kubectl logs -n agentgateway -l app.kubernetes.io/name=kgateway | grep "XDS: Pus
 
 # Test external access
 curl -I https://mcp-auth.${cloudflare_domain}/
+
+# Check observability resources
+kubectl get servicemonitor,prometheusrule -n agentgateway
+kubectl get configmap -n observability -l grafana_dashboard=1 | grep agentgateway
 ```
 
-See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
+See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details and `CLAUDE.md` for detailed observability configuration.
 
 ### kagent (Kubernetes AI Agent Framework)
 
