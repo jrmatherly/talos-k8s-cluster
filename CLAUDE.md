@@ -540,10 +540,67 @@ spec:
 
 **CRITICAL**: kgateway does NOT use an `MCPRoute` CRD. Instead, it uses:
 
-1. **AgentgatewayParameters** CRD with `rawConfig` for MCP route/policy configuration
-2. **GatewayParameters** CRD to configure Kubernetes deployment/service settings
-3. **TrafficPolicy** CRD for rate limiting
-4. **HTTPListenerPolicy** CRD for access logging
+1. **AgentgatewayBackend** CRD (`agentgateway.dev/v1alpha1`) for AI/LLM and MCP backend configuration
+2. **GatewayParameters** CRD (`gateway.kgateway.dev/v1alpha1`) to configure K8s deployment/service settings
+3. **TrafficPolicy** CRD (`gateway.kgateway.dev/v1alpha1`) for rate limiting
+4. **HTTPListenerPolicy** CRD (`gateway.kgateway.dev/v1alpha1`) for access logging
+5. **AgentgatewayPolicy** CRD (`agentgateway.dev/v1alpha1`) for RBAC, prompt guards, advanced policies
+
+### CRD Reference
+
+| CRD | apiVersion | Purpose |
+|-----|------------|---------|
+| `AgentgatewayBackend` | `agentgateway.dev/v1alpha1` | LLM providers (Azure OpenAI, etc.) and MCP backends |
+| `GatewayParameters` | `gateway.kgateway.dev/v1alpha1` | K8s deployment/service customization |
+| `TrafficPolicy` | `gateway.kgateway.dev/v1alpha1` | Rate limiting (token bucket) |
+| `HTTPListenerPolicy` | `gateway.kgateway.dev/v1alpha1` | Access logging with Envoy format strings |
+| `AgentgatewayPolicy` | `agentgateway.dev/v1alpha1` | RBAC (CEL expressions), prompt guards, guardrails |
+| `HTTPRoute` | `gateway.networking.k8s.io/v1` | Standard Gateway API routing |
+
+### AgentgatewayBackend Configuration
+
+**For Azure OpenAI backends:**
+```yaml
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-openai-us-east
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "myresource.openai.azure.com"
+        deploymentName: "gpt-4.1"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-secret  # Secret with "Authorization" key
+```
+
+**For MCP backends (dynamic discovery):**
+```yaml
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: mcp-backend
+spec:
+  mcp:
+    targets:
+    - name: mcp-servers
+      selector:
+        services:
+          matchLabels:
+            agentgateway.dev/mcp: "true"
+```
+
+**IMPORTANT:** HTTPRoute `backendRefs` for AgentgatewayBackend must use `group: agentgateway.dev`:
+```yaml
+backendRefs:
+- name: azure-openai-us-east
+  group: agentgateway.dev
+  kind: AgentgatewayBackend
+```
 
 ### Key Files
 

@@ -616,9 +616,14 @@ When enabled, agentgateway provides:
 - Integration with existing Keycloak + Entra ID federation
 
 **Key Implementation Notes:**
-- kgateway does NOT use an `MCPRoute` CRD. Instead, it uses `AgentgatewayParameters` CRD with `rawConfig` for MCP route configuration
+- kgateway does NOT use an `MCPRoute` CRD. Key CRDs include:
+  - `AgentgatewayBackend` (`agentgateway.dev/v1alpha1`) - AI/LLM providers and MCP backend configuration
+  - `GatewayParameters` (`gateway.kgateway.dev/v1alpha1`) - K8s deployment/service settings
+  - `TrafficPolicy` (`gateway.kgateway.dev/v1alpha1`) - Rate limiting
+  - `HTTPListenerPolicy` (`gateway.kgateway.dev/v1alpha1`) - Access logging
 - The GatewayClass MUST use `controllerName: kgateway.dev/agentgateway` (NOT `kgateway.dev/kgateway`)
 - Cloudflare Tunnel routes `mcp-auth.<domain>` directly to agentgateway before the wildcard rule
+- HTTPRoute `backendRefs` for AgentgatewayBackend must use `group: agentgateway.dev`
 
 **Verification:**
 
