@@ -2,6 +2,7 @@
 ---
 #| GatewayParameters for Kubernetes deployment settings (gateway.kgateway.dev API) #|
 #| Referenced by GatewayClass.parametersRef - controls K8s resources #|
+#| Uses agentgateway.env to set ADMIN_ADDR for external admin UI access #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: GatewayParameters
 metadata:
@@ -12,69 +13,12 @@ spec:
       replicas: 1
     service:
       type: LoadBalancer
----
-#| AgentgatewayParameters for agentgateway runtime config (agentgateway.dev API) #|
-#| NOTE: kgateway v2.2.0-main has bugs that prevent referencing AgentgatewayParameters #|
-#| from GatewayClass or Gateway parametersRef. The controller should still watch this #|
-#| resource and apply rawConfig to the generated ConfigMap. #|
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayParameters
-metadata:
-  name: agentgateway-mcp-config
-spec:
-  #| Native agentgateway configuration via rawConfig #|
-  rawConfig:
-    #| Admin UI configuration - bind to all interfaces for external access #|
-    config:
-      adminAddr: "0.0.0.0:15000"
-      logging:
-        level: info
-    binds:
-    - port: 3000
-      listeners:
-      - routes:
-        - name: mcp-authenticated
-          policies:
-            #| MCP Authentication with Keycloak (RFC 9728) #|
-            mcpAuthentication:
-              issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-              jwksUrl: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
-              audience: "agentgateway-mcp"
-              provider:
-                keycloak: {}
-              resourceMetadata:
-                resource: "https://mcp-auth.#{ primary_domain }#/mcp"
-                scopesSupported:
-#% for scope in agentgateway_scopes | default(['openid', 'profile', 'email', 'offline_access']) %#
-                - "#{ scope }#"
-#% endfor %#
-                bearerMethodsSupported:
-                - header
-                - body
-                - query
-            #| CORS policy for MCP clients #|
-            cors:
-              allowOrigins:
-              - "https://*.#{ primary_domain }#"
-              allowHeaders:
-              - mcp-protocol-version
-              - content-type
-              - cache-control
-              - authorization
-              allowMethods:
-              - GET
-              - POST
-              - OPTIONS
-              exposeHeaders:
-              - mcp-session-id
-          #| MCP Backend Targets (placeholder) #|
-          backends:
-          - mcp:
-              targets:
-              - name: example-tools
-                stdio:
-                  cmd: echo
-                  args: ["MCP backend not configured"]
+    #| Configure agentgateway container environment #|
+    agentgateway:
+      env:
+        #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
+        - name: ADMIN_ADDR
+          value: "0.0.0.0:15000"
 ---
 #| Service for agentgateway admin UI (port 15000 is reserved in Gateway) #|
 #| This exposes the admin interface which agentgateway binds to 0.0.0.0:15000 #|

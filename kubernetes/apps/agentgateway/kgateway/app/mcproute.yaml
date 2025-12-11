@@ -9,61 +9,10 @@ spec:
       replicas: 1
     service:
       type: LoadBalancer
----
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayParameters
-metadata:
-  name: agentgateway-mcp-config
-spec:
-  rawConfig:
-    config:
-      adminAddr: "0.0.0.0:15000"
-      logging:
-        level: info
-    binds:
-    - port: 3000
-      listeners:
-      - routes:
-        - name: mcp-authenticated
-          policies:
-            mcpAuthentication:
-              issuer: "https://auth.matherly.net/realms/k8s-cluster"
-              jwksUrl: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
-              audience: "agentgateway-mcp"
-              provider:
-                keycloak: {}
-              resourceMetadata:
-                resource: "https://mcp-auth.matherly.net/mcp"
-                scopesSupported:
-                - "openid"
-                - "profile"
-                - "email"
-                - "offline_access"
-                bearerMethodsSupported:
-                - header
-                - body
-                - query
-            cors:
-              allowOrigins:
-              - "https://*.matherly.net"
-              allowHeaders:
-              - mcp-protocol-version
-              - content-type
-              - cache-control
-              - authorization
-              allowMethods:
-              - GET
-              - POST
-              - OPTIONS
-              exposeHeaders:
-              - mcp-session-id
-          backends:
-          - mcp:
-              targets:
-              - name: example-tools
-                stdio:
-                  cmd: echo
-                  args: ["MCP backend not configured"]
+    agentgateway:
+      env:
+        - name: ADMIN_ADDR
+          value: "0.0.0.0:15000"
 ---
 apiVersion: v1
 kind: Service
