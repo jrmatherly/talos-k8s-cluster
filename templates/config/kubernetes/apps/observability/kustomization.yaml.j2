@@ -10,4 +10,7 @@ components:
 resources:
   - ./namespace.yaml
   - ./kube-prometheus-stack/ks.yaml
+#% if agentgateway_enabled %#
+  - ./agentgateway-dashboards/ks.yaml
+#% endif %#
 #% endif %#

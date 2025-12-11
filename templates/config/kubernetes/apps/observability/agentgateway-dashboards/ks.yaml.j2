@@ -1,0 +1,26 @@
+#% if agentgateway_enabled and observability_enabled %#
+---
+#| Flux Kustomization for agentgateway Grafana dashboards #|
+#| Deploys dashboard ConfigMaps to observability namespace #|
+#| (separate from agentgateway app to avoid namespace override) #|
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: agentgateway-dashboards
+spec:
+  dependsOn:
+    - name: kube-prometheus-stack
+      namespace: observability
+    - name: kgateway
+      namespace: agentgateway
+  interval: 1h
+  timeout: 5m
+  path: ./kubernetes/apps/observability/agentgateway-dashboards/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: observability
+  wait: false
+#% endif %#

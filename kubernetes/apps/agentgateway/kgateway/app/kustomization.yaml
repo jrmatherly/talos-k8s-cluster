@@ -8,4 +8,3 @@ resources:
   - networkpolicy.yaml
   - secret.sops.yaml
   - servicemonitor.yaml
-  - grafana-dashboard.yaml
