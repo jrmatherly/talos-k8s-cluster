@@ -676,6 +676,37 @@ curl -I https://mcp-auth.<domain>/
 
 See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details.
 
+### Observability
+
+agentgateway exposes metrics on two endpoints:
+
+**Control Plane (kgateway) - Port 9092:**
+| Metric | Type | Purpose |
+|--------|------|---------|
+| `kgateway_agentgateway_xds_rejects_total` | Counter | NACK detection |
+| `kgateway_controller_reconciliations_total` | Counter | Reconciliation results |
+| `kgateway_resources_updates_dropped_total` | Counter | **CRITICAL** - restart if >0 |
+| `kgateway_xds_snapshot_syncs_total` | Counter | xDS push operations |
+
+**Data Plane (agentgateway) - Port 15020:**
+| Metric | Type | Labels |
+|--------|------|--------|
+| `agentgateway_gen_ai_client_token_usage` | Histogram | `gen_ai_token_type`, `gen_ai_system`, `gen_ai_request_model` |
+
+**NACK Monitoring:**
+```bash
+# Check NACK events
+kubectl get events -n agentgateway --field-selector=reason=AgentGatewayNackError
+
+# Check NACK metric (only appears after first NACK)
+kubectl -n agentgateway port-forward deployment/kgateway 9092
+curl -s http://localhost:9092/metrics | grep xds_rejects
+```
+
+**Access Logging CRDs:**
+- `HTTPListenerPolicy` (`gateway.kgateway.dev/v1alpha1`) - Envoy format strings
+- `AgentgatewayPolicy` (`agentgateway.dev/v1alpha1`) - CEL expressions with LLM-specific fields
+
 ## ImageVolume Feature Gate (CloudNativePG Managed Extensions)
 
 The Kubernetes ImageVolume feature gate is required for CloudNativePG managed extensions (e.g., pgvector for RAG/knowledge functionality). This feature allows mounting OCI images as read-only volumes in pods.
