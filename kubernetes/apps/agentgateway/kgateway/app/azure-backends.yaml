@@ -99,46 +99,6 @@ spec:
     auth:
       secretRef:
         name: azure-openai-us-east-secret
----
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: azure-embed-3-small
-  labels:
-    provider: azure-openai
-    region: us-east
-    model-type: embedding
-spec:
-  ai:
-    provider:
-      azureopenai:
-        endpoint: "aaronsai.openai.azure.com"
-        deploymentName: "text-embedding-3-small"
-        apiVersion: "2023-05-15"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-us-east-secret
----
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: azure-embed-ada-002
-  labels:
-    provider: azure-openai
-    region: us-east
-    model-type: embedding
-spec:
-  ai:
-    provider:
-      azureopenai:
-        endpoint: "aaronsai.openai.azure.com"
-        deploymentName: "text-embedding-ada-002"
-        apiVersion: "2023-05-15"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-us-east-secret
 
 ---
 apiVersion: agentgateway.dev/v1alpha1
@@ -300,26 +260,6 @@ spec:
     auth:
       secretRef:
         name: azure-openai-us-east2-secret
----
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: azure-embed-3-large
-  labels:
-    provider: azure-openai
-    region: us-east2
-    model-type: embedding
-spec:
-  ai:
-    provider:
-      azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
-        deploymentName: "text-embedding-3-large"
-        apiVersion: "2023-05-15"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-us-east2-secret
 
 ---
 apiVersion: gateway.networking.k8s.io/v1
@@ -389,28 +329,6 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 300s
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /azure/embed-ada-002
-    backendRefs:
-    - name: azure-embed-ada-002
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 60s
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /azure/embed-3-small
-    backendRefs:
-    - name: azure-embed-3-small
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 60s
   - matches:
     - path:
         type: PathPrefix
@@ -499,14 +417,3 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 120s
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /azure/embed-3-large
-    backendRefs:
-    - name: azure-embed-3-large
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 60s

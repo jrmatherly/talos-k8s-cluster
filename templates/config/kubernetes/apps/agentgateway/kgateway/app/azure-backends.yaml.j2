@@ -1,7 +1,8 @@
 #% if agentgateway_enabled %#
 #| =================================================== #|
 #| Azure OpenAI AgentgatewayBackends                   #|
-#| 16 backends for all Azure OpenAI deployments        #|
+#| 13 chat/reasoning backends (embeddings not yet      #|
+#| supported by agentgateway - use direct Azure)       #|
 #| Path pattern: /azure/{model-name}                   #|
 #| =================================================== #|
 
@@ -114,48 +115,16 @@ spec:
     auth:
       secretRef:
         name: azure-openai-us-east-secret
----
-#| text-embedding-3-small - Embedding model #|
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: azure-embed-3-small
-  labels:
-    provider: azure-openai
-    region: us-east
-    model-type: embedding
-spec:
-  ai:
-    provider:
-      azureopenai:
-        endpoint: "#{ azure_openai_us_east_resource_name }#.openai.azure.com"
-        deploymentName: "text-embedding-3-small"
-        apiVersion: "2023-05-15"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-us-east-secret
----
-#| text-embedding-ada-002 - Embedding model #|
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: azure-embed-ada-002
-  labels:
-    provider: azure-openai
-    region: us-east
-    model-type: embedding
-spec:
-  ai:
-    provider:
-      azureopenai:
-        endpoint: "#{ azure_openai_us_east_resource_name }#.openai.azure.com"
-        deploymentName: "text-embedding-ada-002"
-        apiVersion: "2023-05-15"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-us-east-secret
+#| =================================================== #|
+#| Embedding Models - NOT SUPPORTED via agentgateway   #|
+#| TODO: Add embedding backends when agentgateway adds #|
+#| native embedding endpoint support.                  #|
+#| See: https://agentgateway.dev/docs/faqs/            #|
+#| Current limitation: agentgateway only supports chat #|
+#| completions, not embeddings API. Gateway API header #|
+#| modifiers don't support secret refs for API keys.   #|
+#| Use direct Azure endpoint for embeddings until then.#|
+#| =================================================== #|
 #% endif %#
 
 #| =================================================== #|
@@ -330,27 +299,12 @@ spec:
     auth:
       secretRef:
         name: azure-openai-us-east2-secret
----
-#| text-embedding-3-large - Embedding model #|
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayBackend
-metadata:
-  name: azure-embed-3-large
-  labels:
-    provider: azure-openai
-    region: us-east2
-    model-type: embedding
-spec:
-  ai:
-    provider:
-      azureopenai:
-        endpoint: "#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
-        deploymentName: "text-embedding-3-large"
-        apiVersion: "2023-05-15"
-  policies:
-    auth:
-      secretRef:
-        name: azure-openai-us-east2-secret
+#| =================================================== #|
+#| Embedding Models - NOT SUPPORTED via agentgateway   #|
+#| TODO: Add embedding backends when agentgateway adds #|
+#| native embedding endpoint support.                  #|
+#| See: https://agentgateway.dev/docs/faqs/            #|
+#| =================================================== #|
 #% endif %#
 
 #| ============================================= #|
@@ -434,29 +388,8 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 300s
-  #| --- Embedding Models (60s timeout) --- #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /azure/embed-ada-002
-    backendRefs:
-    - name: azure-embed-ada-002
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 60s
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /azure/embed-3-small
-    backendRefs:
-    - name: azure-embed-3-small
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 60s
+  #| --- Embedding Models - NOT SUPPORTED --- #|
+  #| TODO: Add routes when agentgateway supports embeddings API #|
 #% endif %#
   #| =========================================== #|
   #| US East2 Region - ORDERED BY PATH LENGTH   #|
@@ -554,18 +487,8 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 120s
-  #| --- Embedding Models (60s timeout) --- #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /azure/embed-3-large
-    backendRefs:
-    - name: azure-embed-3-large
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 60s
+  #| --- Embedding Models - NOT SUPPORTED --- #|
+  #| TODO: Add routes when agentgateway supports embeddings API #|
 #% endif %#
 #% endif %#
 #% endif %#
