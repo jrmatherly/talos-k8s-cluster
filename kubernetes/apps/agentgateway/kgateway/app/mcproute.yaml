@@ -43,25 +43,7 @@ spec:
   hostnames:
   - "mcp-auth.matherly.net"
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /ui
-    backendRefs:
-    - name: agentgateway-admin
-      port: 15000
-  - matches:
-    - path:
-        type: Exact
-        value: /healthz
-    backendRefs:
-    - name: agentgateway-admin
-      port: 15000
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /api
-    backendRefs:
+  - backendRefs:
     - name: agentgateway-admin
       port: 15000
 ---
