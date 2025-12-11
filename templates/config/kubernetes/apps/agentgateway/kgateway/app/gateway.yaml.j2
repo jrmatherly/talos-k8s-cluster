@@ -2,6 +2,9 @@
 ---
 #| Gateway API GatewayClass for agentgateway #|
 #| Uses kgateway controller with agentgateway data plane #|
+#| NOTE: parametersRef points to AgentgatewayParameters (not GatewayParameters) #|
+#| This is because Gateway.infrastructure.parametersRef has a bug in v2.2.0-main #|
+#| that rejects agentgateway.dev group before it can be handled properly #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
@@ -10,10 +13,11 @@ spec:
   #| Use agentgateway controller (not kgateway) for MCP/AI features #|
   controllerName: kgateway.dev/agentgateway
   description: "agentgateway for MCP protocol support with OAuth authentication"
+  #| Reference AgentgatewayParameters for rawConfig (adminAddr, binds, etc.) #|
   parametersRef:
-    group: gateway.kgateway.dev
-    kind: GatewayParameters
-    name: agentgateway-params
+    group: agentgateway.dev
+    kind: AgentgatewayParameters
+    name: agentgateway-mcp-config
     namespace: agentgateway
 ---
 #| Gateway instance with LoadBalancer #|
@@ -24,15 +28,10 @@ metadata:
   name: agentgateway
 spec:
   gatewayClassName: agentgateway
-  #| Infrastructure annotations and parameters #|
+  #| Infrastructure annotations only (no parametersRef due to kgateway bug) #|
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
-    #| Reference AgentgatewayParameters for rawConfig (adminAddr, binds, etc.) #|
-    parametersRef:
-      group: agentgateway.dev
-      kind: AgentgatewayParameters
-      name: agentgateway-mcp-config
   listeners:
     #| HTTP listener for redirect to HTTPS #|
     - name: http

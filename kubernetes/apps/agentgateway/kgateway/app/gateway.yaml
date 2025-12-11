@@ -7,9 +7,9 @@ spec:
   controllerName: kgateway.dev/agentgateway
   description: "agentgateway for MCP protocol support with OAuth authentication"
   parametersRef:
-    group: gateway.kgateway.dev
-    kind: GatewayParameters
-    name: agentgateway-params
+    group: agentgateway.dev
+    kind: AgentgatewayParameters
+    name: agentgateway-mcp-config
     namespace: agentgateway
 ---
 apiVersion: gateway.networking.k8s.io/v1
@@ -21,10 +21,6 @@ spec:
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: "192.168.22.147"
-    parametersRef:
-      group: agentgateway.dev
-      kind: AgentgatewayParameters
-      name: agentgateway-mcp-config
   listeners:
     - name: http
       protocol: HTTP
