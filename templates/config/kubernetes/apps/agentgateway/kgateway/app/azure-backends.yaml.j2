@@ -355,7 +355,8 @@ spec:
 
 #| ============================================= #|
 #| Consolidated HTTPRoute for all Azure models   #|
-#| Using Exact path matching to avoid collisions #|
+#| Using PathPrefix with longest-match-first     #|
+#| ordering to avoid path collisions             #|
 #| ============================================= #|
 #% if azure_openai_us_east_api_key or azure_openai_us_east2_api_key %#
 ---
@@ -372,23 +373,14 @@ spec:
   - "ai-gw.#{ primary_domain }#"
   rules:
   #| =========================================== #|
-  #| US East Region Chat Models (120s timeout)   #|
+  #| US East Region - ORDERED BY PATH LENGTH    #|
+  #| (longest paths first to avoid collision)   #|
   #| =========================================== #|
 #% if azure_openai_us_east_api_key %#
+  #| --- Chat Models (120s timeout) --- #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt41
-    backendRefs:
-    - name: azure-gpt41
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 120s
-  - matches:
-    - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/gpt41-nano
     backendRefs:
     - name: azure-gpt41-nano
@@ -399,7 +391,18 @@ spec:
       request: 120s
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
+        value: /azure/gpt41
+    backendRefs:
+    - name: azure-gpt41
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: PathPrefix
         value: /azure/gpt4o-mini
     backendRefs:
     - name: azure-gpt4o-mini
@@ -408,23 +411,10 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 120s
-  #| =========================================== #|
-  #| US East Region Reasoning Models (300s)      #|
-  #| =========================================== #|
+  #| --- Reasoning Models (300s timeout) --- #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/o3
-    backendRefs:
-    - name: azure-o3
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 300s
-  - matches:
-    - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/o4-mini
     backendRefs:
     - name: azure-o4-mini
@@ -433,23 +423,21 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 300s
-  #| =========================================== #|
-  #| US East Region Embedding Models (60s)       #|
-  #| =========================================== #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/embed-3-small
+        type: PathPrefix
+        value: /azure/o3
     backendRefs:
-    - name: azure-embed-3-small
+    - name: azure-o3
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 60s
+      request: 300s
+  #| --- Embedding Models (60s timeout) --- #|
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/embed-ada-002
     backendRefs:
     - name: azure-embed-ada-002
@@ -458,53 +446,53 @@ spec:
       kind: AgentgatewayBackend
     timeouts:
       request: 60s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/embed-3-small
+    backendRefs:
+    - name: azure-embed-3-small
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 60s
 #% endif %#
   #| =========================================== #|
-  #| US East2 Region Chat Models (120s timeout)  #|
+  #| US East2 Region - ORDERED BY PATH LENGTH   #|
+  #| (longest paths first to avoid collision)   #|
   #| =========================================== #|
 #% if azure_openai_us_east2_api_key %#
+  #| --- Codex Models (180s timeout) - Longest paths first --- #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt5
+        type: PathPrefix
+        value: /azure/gpt51-codex-mini
     backendRefs:
-    - name: azure-gpt5
+    - name: azure-gpt51-codex-mini
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 120s
+      request: 180s
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt5-mini
+        type: PathPrefix
+        value: /azure/gpt51-codex
     backendRefs:
-    - name: azure-gpt5-mini
+    - name: azure-gpt51-codex
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 120s
+      request: 180s
+  #| --- Thinking/Chat Models (300s timeout) --- #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt51
+        type: PathPrefix
+        value: /azure/gpt51-chat
     backendRefs:
-    - name: azure-gpt51
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 120s
-  #| =========================================== #|
-  #| US East2 Reasoning/Thinking Models (300s)   #|
-  #| =========================================== #|
-  - matches:
-    - path:
-        type: Exact
-        value: /azure/gpt5-nano
-    backendRefs:
-    - name: azure-gpt5-nano
+    - name: azure-gpt51-chat
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
@@ -512,7 +500,7 @@ spec:
       request: 300s
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/gpt5-chat
     backendRefs:
     - name: azure-gpt5-chat
@@ -523,46 +511,53 @@ spec:
       request: 300s
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt51-chat
+        type: PathPrefix
+        value: /azure/gpt5-nano
     backendRefs:
-    - name: azure-gpt51-chat
+    - name: azure-gpt5-nano
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
       request: 300s
-  #| =========================================== #|
-  #| US East2 Codex Models (180s timeout)        #|
-  #| =========================================== #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt51-codex
+        type: PathPrefix
+        value: /azure/gpt5-mini
     backendRefs:
-    - name: azure-gpt51-codex
+    - name: azure-gpt5-mini
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 180s
+      request: 120s
+  #| --- Base Chat Models (120s timeout) - Shorter paths last --- #|
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt51-codex-mini
+        type: PathPrefix
+        value: /azure/gpt51
     backendRefs:
-    - name: azure-gpt51-codex-mini
+    - name: azure-gpt51
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 180s
-  #| =========================================== #|
-  #| US East2 Embedding Models (60s timeout)     #|
-  #| =========================================== #|
+      request: 120s
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
+        value: /azure/gpt5
+    backendRefs:
+    - name: azure-gpt5
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  #| --- Embedding Models (60s timeout) --- #|
+  - matches:
+    - path:
+        type: PathPrefix
         value: /azure/embed-3-large
     backendRefs:
     - name: azure-embed-3-large

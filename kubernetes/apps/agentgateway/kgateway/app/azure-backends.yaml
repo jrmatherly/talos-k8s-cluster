@@ -336,18 +336,7 @@ spec:
   rules:
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt41
-    backendRefs:
-    - name: azure-gpt41
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 120s
-  - matches:
-    - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/gpt41-nano
     backendRefs:
     - name: azure-gpt41-nano
@@ -358,7 +347,18 @@ spec:
       request: 120s
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
+        value: /azure/gpt41
+    backendRefs:
+    - name: azure-gpt41
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: PathPrefix
         value: /azure/gpt4o-mini
     backendRefs:
     - name: azure-gpt4o-mini
@@ -369,18 +369,7 @@ spec:
       request: 120s
   - matches:
     - path:
-        type: Exact
-        value: /azure/o3
-    backendRefs:
-    - name: azure-o3
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 300s
-  - matches:
-    - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/o4-mini
     backendRefs:
     - name: azure-o4-mini
@@ -391,18 +380,18 @@ spec:
       request: 300s
   - matches:
     - path:
-        type: Exact
-        value: /azure/embed-3-small
+        type: PathPrefix
+        value: /azure/o3
     backendRefs:
-    - name: azure-embed-3-small
+    - name: azure-o3
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 60s
+      request: 300s
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/embed-ada-002
     backendRefs:
     - name: azure-embed-ada-002
@@ -413,84 +402,18 @@ spec:
       request: 60s
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt5
+        type: PathPrefix
+        value: /azure/embed-3-small
     backendRefs:
-    - name: azure-gpt5
+    - name: azure-embed-3-small
       namespace: agentgateway
       group: agentgateway.dev
       kind: AgentgatewayBackend
     timeouts:
-      request: 120s
+      request: 60s
   - matches:
     - path:
-        type: Exact
-        value: /azure/gpt5-mini
-    backendRefs:
-    - name: azure-gpt5-mini
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 120s
-  - matches:
-    - path:
-        type: Exact
-        value: /azure/gpt51
-    backendRefs:
-    - name: azure-gpt51
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 120s
-  - matches:
-    - path:
-        type: Exact
-        value: /azure/gpt5-nano
-    backendRefs:
-    - name: azure-gpt5-nano
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 300s
-  - matches:
-    - path:
-        type: Exact
-        value: /azure/gpt5-chat
-    backendRefs:
-    - name: azure-gpt5-chat
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 300s
-  - matches:
-    - path:
-        type: Exact
-        value: /azure/gpt51-chat
-    backendRefs:
-    - name: azure-gpt51-chat
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 300s
-  - matches:
-    - path:
-        type: Exact
-        value: /azure/gpt51-codex
-    backendRefs:
-    - name: azure-gpt51-codex
-      namespace: agentgateway
-      group: agentgateway.dev
-      kind: AgentgatewayBackend
-    timeouts:
-      request: 180s
-  - matches:
-    - path:
-        type: Exact
+        type: PathPrefix
         value: /azure/gpt51-codex-mini
     backendRefs:
     - name: azure-gpt51-codex-mini
@@ -501,7 +424,84 @@ spec:
       request: 180s
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
+        value: /azure/gpt51-codex
+    backendRefs:
+    - name: azure-gpt51-codex
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 180s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/gpt51-chat
+    backendRefs:
+    - name: azure-gpt51-chat
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/gpt5-chat
+    backendRefs:
+    - name: azure-gpt5-chat
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/gpt5-nano
+    backendRefs:
+    - name: azure-gpt5-nano
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/gpt5-mini
+    backendRefs:
+    - name: azure-gpt5-mini
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/gpt51
+    backendRefs:
+    - name: azure-gpt51
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /azure/gpt5
+    backendRefs:
+    - name: azure-gpt5
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: PathPrefix
         value: /azure/embed-3-large
     backendRefs:
     - name: azure-embed-3-large
