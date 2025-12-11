@@ -21,6 +21,10 @@ spec:
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: "192.168.22.147"
+    parametersRef:
+      group: agentgateway.dev
+      kind: AgentgatewayParameters
+      name: agentgateway-mcp-config
   listeners:
     - name: http
       protocol: HTTP

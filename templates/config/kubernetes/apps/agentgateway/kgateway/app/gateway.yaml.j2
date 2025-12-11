@@ -24,10 +24,15 @@ metadata:
   name: agentgateway
 spec:
   gatewayClassName: agentgateway
-  #| Infrastructure annotations propagate to Service #|
+  #| Infrastructure annotations and parameters #|
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
+    #| Reference AgentgatewayParameters for rawConfig (adminAddr, binds, etc.) #|
+    parametersRef:
+      group: agentgateway.dev
+      kind: AgentgatewayParameters
+      name: agentgateway-mcp-config
   listeners:
     #| HTTP listener for redirect to HTTPS #|
     - name: http

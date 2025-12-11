@@ -1,13 +1,27 @@
 #% if agentgateway_enabled %#
 ---
-#| ConfigMap for agentgateway native configuration #|
-#| This is referenced by GatewayParameters via customConfigMapName #|
-apiVersion: v1
-kind: ConfigMap
+#| GatewayParameters for Kubernetes deployment settings (gateway.kgateway.dev API) #|
+#| Referenced by GatewayClass.parametersRef - controls K8s resources #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
 metadata:
-  name: agentgateway-config
-data:
-  config.yaml: |-
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+---
+#| AgentgatewayParameters for agentgateway runtime config (agentgateway.dev API) #|
+#| Referenced by Gateway.infrastructure.parametersRef - controls agentgateway config.yaml #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayParameters
+metadata:
+  name: agentgateway-mcp-config
+spec:
+  #| Native agentgateway configuration via rawConfig #|
+  rawConfig:
     #| Admin UI configuration - bind to all interfaces for external access #|
     config:
       adminAddr: "0.0.0.0:15000"
@@ -59,22 +73,6 @@ data:
                 stdio:
                   cmd: echo
                   args: ["MCP backend not configured"]
----
-#| GatewayParameters for deployment settings (gateway.kgateway.dev API) #|
-#| References ConfigMap via customConfigMapName for agentgateway config #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
-metadata:
-  name: agentgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 1
-    service:
-      type: LoadBalancer
-    agentgateway:
-      enabled: true
-      customConfigMapName: agentgateway-config
 ---
 #| Service for agentgateway admin UI (port 15000 is reserved in Gateway) #|
 #| This exposes the admin interface which agentgateway binds to 0.0.0.0:15000 #|
