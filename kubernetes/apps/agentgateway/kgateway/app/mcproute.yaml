@@ -164,12 +164,6 @@ spec:
     auth:
       secretRef:
         name: azure-openai-us-east-secret
-    ai:
-      routes:
-        "/v1/chat/completions": "Completions"
-        "/v1/embeddings": "Passthrough"
-        "/v1/models": "Models"
-        "*": "Passthrough"
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -208,12 +202,6 @@ spec:
     auth:
       secretRef:
         name: azure-openai-us-east2-secret
-    ai:
-      routes:
-        "/v1/chat/completions": "Completions"
-        "/v1/embeddings": "Passthrough"
-        "/v1/models": "Models"
-        "*": "Passthrough"
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
