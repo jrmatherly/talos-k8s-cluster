@@ -64,6 +64,7 @@ spec:
     sectionName: https
   hostnames:
   - "mcp-gw.matherly.net"
+  - "ai-gw.matherly.net"
   rules:
   - backendRefs:
     - name: agentgateway-admin
@@ -172,6 +173,9 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
+    sectionName: https
+  hostnames:
+  - "ai-gw.matherly.net"
   rules:
   - matches:
     - path:
@@ -210,6 +214,9 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
+    sectionName: https
+  hostnames:
+  - "ai-gw.matherly.net"
   rules:
   - matches:
     - path:

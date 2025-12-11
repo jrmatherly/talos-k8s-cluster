@@ -65,7 +65,7 @@ spec:
   type: ClusterIP
 ---
 #| HTTPRoute for agentgateway admin UI #|
-#| Routes all traffic for mcp-gw hostname to admin interface #|
+#| Routes /ui traffic for both mcp-gw and ai-gw hostnames to admin interface #|
 #| Admin UI calls /config, /config_dump, /ui, /api, etc. at root level #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -78,6 +78,7 @@ spec:
     sectionName: https
   hostnames:
   - "mcp-gw.#{ primary_domain }#"
+  - "ai-gw.#{ primary_domain }#"
   rules:
   #| Route all paths to admin UI service #|
   - backendRefs:
@@ -211,6 +212,9 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
+    sectionName: https
+  hostnames:
+  - "ai-gw.#{ primary_domain }#"
   rules:
   - matches:
     - path:
@@ -258,6 +262,9 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
+    sectionName: https
+  hostnames:
+  - "ai-gw.#{ primary_domain }#"
   rules:
   - matches:
     - path:
