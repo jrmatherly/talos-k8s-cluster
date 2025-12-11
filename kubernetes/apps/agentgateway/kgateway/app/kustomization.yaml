@@ -8,3 +8,4 @@ resources:
   - networkpolicy.yaml
   - secret.sops.yaml
   - servicemonitor.yaml
+  - azure-backends.yaml

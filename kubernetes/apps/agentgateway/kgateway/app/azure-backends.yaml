@@ -1,0 +1,512 @@
+
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt41
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: chat
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "gpt-4.1"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt41-nano
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: chat
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "gpt-4.1-nano"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt4o-mini
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: chat
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "gpt-4o-mini"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-o3
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: reasoning
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "o3"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-o4-mini
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: reasoning
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "o4-mini"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-embed-3-small
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: embedding
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "text-embedding-3-small"
+        apiVersion: "2023-05-15"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-embed-ada-002
+  labels:
+    provider: azure-openai
+    region: us-east
+    model-type: embedding
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "aaronsai.openai.azure.com"
+        deploymentName: "text-embedding-ada-002"
+        apiVersion: "2023-05-15"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt5
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: chat
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt5-nano
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: reasoning
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5-nano"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt5-chat
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: thinking
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5-chat"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt51-chat
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: thinking
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5.1-chat"
+        apiVersion: "2025-01-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt5-mini
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: chat
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5-mini"
+        apiVersion: "2025-04-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt51
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: chat
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5.1"
+        apiVersion: "2025-04-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt51-codex
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: codex
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5.1-codex"
+        apiVersion: "2025-04-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-gpt51-codex-mini
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: codex
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "gpt-5.1-codex-mini"
+        apiVersion: "2025-04-01-preview"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: azure-embed-3-large
+  labels:
+    provider: azure-openai
+    region: us-east2
+    model-type: embedding
+spec:
+  ai:
+    provider:
+      azureopenai:
+        endpoint: "ets-east-us2.openai.azure.com"
+        deploymentName: "text-embedding-3-large"
+        apiVersion: "2023-05-15"
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: azure-openai-route
+spec:
+  parentRefs:
+  - name: agentgateway
+    namespace: agentgateway
+    sectionName: https
+  hostnames:
+  - "ai-gw.matherly.net"
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt41
+    backendRefs:
+    - name: azure-gpt41
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt41-nano
+    backendRefs:
+    - name: azure-gpt41-nano
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt4o-mini
+    backendRefs:
+    - name: azure-gpt4o-mini
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/o3
+    backendRefs:
+    - name: azure-o3
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/o4-mini
+    backendRefs:
+    - name: azure-o4-mini
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/embed-3-small
+    backendRefs:
+    - name: azure-embed-3-small
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 60s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/embed-ada-002
+    backendRefs:
+    - name: azure-embed-ada-002
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 60s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt5
+    backendRefs:
+    - name: azure-gpt5
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt5-mini
+    backendRefs:
+    - name: azure-gpt5-mini
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt51
+    backendRefs:
+    - name: azure-gpt51
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 120s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt5-nano
+    backendRefs:
+    - name: azure-gpt5-nano
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt5-chat
+    backendRefs:
+    - name: azure-gpt5-chat
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt51-chat
+    backendRefs:
+    - name: azure-gpt51-chat
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 300s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt51-codex
+    backendRefs:
+    - name: azure-gpt51-codex
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 180s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/gpt51-codex-mini
+    backendRefs:
+    - name: azure-gpt51-codex-mini
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 180s
+  - matches:
+    - path:
+        type: Exact
+        value: /azure/embed-3-large
+    backendRefs:
+    - name: azure-embed-3-large
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
+    timeouts:
+      request: 60s
