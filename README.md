@@ -122,7 +122,7 @@ There are **5 stages** outlined below for completing this project, make sure you
 3. Template out the kubernetes and talos configuration files, if any issues come up be sure to read the error and adjust your config files accordingly.
 
     ```sh
-    task configure
+    task configure -y
     ```
 
 4. Push your changes to git:
@@ -288,16 +288,16 @@ task talos:reset
 ### ⚙️ Updating Talos node configuration
 
 > [!TIP]
-> To update Talos configuration, edit the source files (`nodes.yaml` for node-specific settings, or templates in `templates/config/talos/patches/` for global patches) and run `task configure` followed by `task talos:generate-config` to regenerate. In some cases you **not only need to apply the configuration but also upgrade Talos** to apply new configuration.
+> To update Talos configuration, edit the source files (`nodes.yaml` for node-specific settings, or templates in `templates/config/talos/patches/` for global patches) and run `task configure -y` followed by `task talos:generate-config` to regenerate. In some cases you **not only need to apply the configuration but also upgrade Talos** to apply new configuration.
 
 ```sh
 # After editing nodes.yaml or template patches:
 
 # Step 1: Render Jinja2 templates (updates talconfig.yaml)
-task configure
+task configure -y
 
 # Step 2: Regenerate individual node configs from talconfig.yaml
-# IMPORTANT: task configure only renders templates - generate-config
+# IMPORTANT: task configure -y only renders templates - generate-config
 # creates the actual node config files in talos/clusterconfig/
 task talos:generate-config
 
@@ -346,7 +346,7 @@ You don't need to re-bootstrap the cluster to add new nodes. Follow these steps:
 
    ```sh
    # Regenerate all configuration files (including talos/talconfig.yaml)
-   task configure
+   task configure -y
 
    # Generate individual node configs from talconfig.yaml
    task talos:generate-config
@@ -368,7 +368,7 @@ The base Renovate configuration in your repository can be viewed at [.renovaterc
 
 ## 🧩 Adding New Applications/Templates
 
-When extending this project with new application templates, multiple configuration files must be updated **before** running `task configure`. This ensures templates render correctly and pass CI validation.
+When extending this project with new application templates, multiple configuration files must be updated **before** running `task configure -y`. This ensures templates render correctly and pass CI validation.
 
 **Files to update (in order):**
 1. `.taskfiles/template/resources/cluster.schema.cue` - Add CUE schema definitions for new fields
@@ -424,7 +424,7 @@ Resolving problems that you have could take some tweaking of your YAML manifests
 
 ## 🧹 Tidy up
 
-Once your cluster is fully configured and you no longer need to run `task configure`, it's a good idea to clean up the repository by removing the [templates](./templates) directory and any files related to the templating process. This will help eliminate unnecessary clutter from the upstream template repository and resolve any "duplicate registry" warnings from Renovate.
+Once your cluster is fully configured and you no longer need to run `task configure -y`, it's a good idea to clean up the repository by removing the [templates](./templates) directory and any files related to the templating process. This will help eliminate unnecessary clutter from the upstream template repository and resolve any "duplicate registry" warnings from Renovate.
 
 1. Tidy up your repository:
 

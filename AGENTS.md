@@ -17,7 +17,7 @@ Deploy a Kubernetes cluster on bare-metal/VMs using:
 task init
 
 # Render templates and validate
-task configure
+task configure -y -y
 
 # Regenerate Talos node configs (after nodes.yaml changes)
 task talos:generate-config
@@ -82,7 +82,7 @@ cluster.yaml + nodes.yaml → makejinja → kubernetes/, talos/, bootstrap/
 
 ```bash
 # Validate templates
-task configure
+task configure -y
 
 # Check Flux status
 flux check
@@ -105,7 +105,7 @@ talosctl -n <node-ip> services
 
 ## Adding New Applications
 
-When adding new application templates, update these files **before** `task configure`:
+When adding new application templates, update these files **before** `task configure -y`:
 1. `.taskfiles/template/resources/cluster.schema.cue` - CUE schema
 2. `cluster.yaml` - Primary config with values
 3. `templates/scripts/plugin.py` - Default values
@@ -117,9 +117,9 @@ See `.serena/memories/adding-new-templates-checklist.md` for complete checklist.
 ## Important Warnings
 
 1. **Never edit generated directories** directly
-2. **Always run `task configure`** after config/template changes
+2. **Always run `task configure -y`** after config/template changes
 3. **Run `task talos:generate-config`** after nodes.yaml changes affecting Talos
-4. **Commit before `task configure`** - it overwrites generated files
+4. **Commit before `task configure -y`** - it overwrites generated files
 5. **Helm extraZonePlugins/extraConfig** often REPLACES defaults, not extends
 
 ## Extended Documentation
