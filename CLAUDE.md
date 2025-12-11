@@ -1003,6 +1003,69 @@ kubectl exec -n obot-mcp <mcp-pod> -- curl -sv --connect-timeout 5 http://obot-o
 
 See `.serena/memories/obot-entraid-deployment.md` for complete deployment documentation.
 
+## kagent A2A (Agent-to-Agent) Networking
+
+kagent uses A2A protocol for communication between the controller and agent pods. The controller proxies user requests to the appropriate agent pods via HTTP on port 8080.
+
+### Critical Configuration Points
+
+**1. Agent Pod Labels**: kagent-managed agent pods use specific labels:
+- Actual labels: `app=kagent`, `app.kubernetes.io/part-of=kagent`
+- They do **NOT** have: `app.kubernetes.io/component=agent`
+
+**2. NetworkPolicy Requirements**:
+
+| Policy | Purpose | Key Selector |
+|--------|---------|--------------|
+| `kagent-agents-kube-api-egress` (CiliumNetworkPolicy) | Agent → kube-apiserver | `app: kagent`, `app.kubernetes.io/part-of: kagent` |
+| `kagent-controller` egress | Controller → Agent pods on port 8080 | Same as above |
+| `kagent-agents` ingress | Allow controller to reach agents | From `app.kubernetes.io/component: controller` |
+
+**3. ModelConfig baseUrl Configuration**:
+
+When routing LLM requests through a gateway (envoy-ai, agentgateway):
+- Provider must be `OpenAI` (regardless of actual backend)
+- `openAI.baseUrl` must point to the gateway URL
+- **Critical**: Use `baseUrl` (lowercase 'u'), NOT `baseURL`
+
+```yaml
+# cluster.yaml
+kagent_provider: "openai"
+kagent_default_model: "gpt-5-mini"
+kagent_openai_api_base: "https://ai-gateway.matherly.net"
+```
+
+Resulting ModelConfig:
+```yaml
+apiVersion: kagent.dev/v1alpha2
+kind: ModelConfig
+spec:
+  provider: OpenAI
+  model: gpt-5-mini
+  openAI:
+    baseUrl: https://ai-gateway.matherly.net
+```
+
+### Troubleshooting
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| A2A timeout `dial tcp :8080: i/o timeout` | NetworkPolicy blocking controller→agent | Verify selectors use `app: kagent` labels |
+| `httpx.ConnectTimeout` in agent logs | Agent can't reach LLM provider | Check `baseUrl` casing and NetworkPolicy egress |
+
+```bash
+# Check agent labels
+kubectl get pods -n kagent -l app=kagent --show-labels
+
+# Check ModelConfig
+kubectl get modelconfig -n kagent default-model-config -o yaml
+
+# Test controller → agent connectivity
+kubectl exec -n kagent deploy/kagent-controller -- curl -sv http://k8s-agent.kagent:8080/health
+```
+
+See `.serena/memories/kagent-a2a-networking.md` for complete documentation.
+
 ## Adding New Applications/Templates
 
 When adding new application templates to this project, multiple files must be updated **before** running `task configure`. See the Serena memory `.serena/memories/adding-new-templates-checklist.md` for the complete checklist.

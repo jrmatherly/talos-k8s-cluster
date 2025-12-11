@@ -137,6 +137,10 @@ spec:
         enabled: true
         storageClassName: #{ prometheus_storage_class | default('proxmox-csi') }#
         size: #{ grafana_storage_size | default('10Gi') }#
+      grafana.ini:
+        server:
+          domain: grafana.#{ primary_domain }#
+          root_url: https://grafana.#{ primary_domain }#
     # ============================================================
     # Prometheus
     # ============================================================
