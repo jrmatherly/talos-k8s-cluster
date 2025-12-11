@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing), [agentgateway](https://agentgateway.dev/) (MCP OAuth authentication), [kagent](https://kagent.dev/) (Kubernetes AI agents).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing - legacy), [agentgateway](https://agentgateway.dev/) (unified AI Gateway + MCP OAuth), [kagent](https://kagent.dev/) (Kubernetes AI agents).
 
 **Other features include:**
 
@@ -589,9 +589,13 @@ curl -X POST "https://llms.${cloudflare_domain}/v1/embeddings" \
 
 See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/REFINED-IMPLEMENTATION-PLAN.md` for detailed implementation notes.
 
-### MCP Authentication (agentgateway)
+### agentgateway (Unified AI Gateway)
 
-**Included (optional):** This template includes [agentgateway](https://agentgateway.dev/) via [kgateway](https://kgateway.dev/) for MCP 2025-11-25 OAuth-compliant authentication. When enabled, it wraps Keycloak to provide Dynamic Client Registration (DCR), CORS handling, and Protected Resource Metadata (RFC 9728) for MCP tool servers.
+**Included (optional):** This template includes [agentgateway](https://agentgateway.dev/) via [kgateway](https://kgateway.dev/) as a **unified AI Gateway** that combines LLM/AI traffic routing with MCP OAuth authentication. It is intended to **replace Envoy AI Gateway** as a single solution providing:
+- **LLM/AI Routing** - Intelligent routing to AI providers (Azure OpenAI, etc.) with model-based backends
+- **MCP OAuth** - MCP 2025-11-25 OAuth-compliant authentication (DCR, CORS, RFC 9728)
+- **RBAC/Guardrails** - CEL expression-based access control and prompt guards
+- **Built-in FinOps** - Native token usage metrics for cost tracking
 
 Enable it by configuring the following variables in `cluster.yaml`:
 

@@ -299,7 +299,7 @@ When adding new application templates to this project, multiple files must be up
 
 For detailed component documentation, see:
 - `docs/ai-context/envoy-ai-gateway.md` - Envoy AI Gateway integration (multi-model routing, Azure OpenAI backends, testing)
-- `docs/ai-context/agentgateway-mcp.md` - agentgateway/kgateway MCP OAuth proxy (DCR, CORS, observability)
+- `docs/ai-context/agentgateway-mcp.md` - agentgateway/kgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy patterns for K8s API access
 - `docs/ai-context/obot-networking.md` - obot MCP server networking (port architecture, NetworkPolicy)
 - `docs/ai-context/kagent-a2a.md` - kagent A2A networking (controller→agent, ModelConfig)
