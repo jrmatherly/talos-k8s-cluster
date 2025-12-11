@@ -117,65 +117,26 @@ spec:
       name: mcp-backend
 ---
 #| =========================================== #|
-#| TrafficPolicy: Token-based Rate Limiting    #|
-#| and Prompt Guards (Phase 2 + Phase 3)       #|
+#| TrafficPolicy: Rate Limiting                #|
 #| =========================================== #|
-#| Comprehensive TrafficPolicy with token-based rate limiting and prompt guards #|
-#| Token limits: 100K burst, 10K/min sustained for general traffic #|
-#| Built-in guards: CREDIT_CARD (mask), SSN (reject), EMAIL (mask) #|
-#| Custom regex: credential patterns (reject) #|
+#| TrafficPolicy with token bucket rate limiting for MCP traffic #|
+#| Limits: 100 requests burst, 50 requests/min sustained #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
 metadata:
-  name: agentgateway-comprehensive
+  name: agentgateway-rate-limit
 spec:
   targetRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
     name: agentgateway
-  #| Phase 2: Token-based rate limiting #|
-  #| Limits token usage for LLM requests (more accurate than request count) #|
+  #| Token bucket rate limiting for MCP requests #|
   rateLimit:
     local:
       tokenBucket:
-        maxTokens: 100000        # Maximum burst capacity
-        tokensPerFill: 10000     # Tokens added per interval
+        maxTokens: 100           # Maximum burst capacity (requests)
+        tokensPerFill: 50        # Requests added per interval
         fillInterval: "60s"      # Refill interval (1 minute)
-  #| Phase 3: Prompt guards for sensitive data protection #|
-  ai:
-    promptGuard:
-      #| Request guards - filter incoming prompts #|
-      request:
-        customResponseMessage: "Request blocked by security policy: contains sensitive data"
-        #| Built-in pattern guards #|
-        builtins:
-          CREDIT_CARD:
-            action: MASK         # Replace with [REDACTED]
-          SSN:
-            action: REJECT       # Block the request
-          EMAIL:
-            action: MASK         # Replace with [REDACTED]
-          PHONE_NUMBER:
-            action: MASK
-          IP_ADDRESS:
-            action: MASK
-        #| Custom regex patterns for credential detection #|
-        matches:
-        - regex: "\\b(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*\\S+"
-          action: REJECT
-          name: "credential-pattern"
-        - regex: "\\b(?:BEGIN|END)\\s+(?:RSA|OPENSSH|PRIVATE)\\s+KEY"
-          action: REJECT
-          name: "private-key-pattern"
-      #| Response guards - filter LLM outputs #|
-      response:
-        builtins:
-          CREDIT_CARD:
-            action: MASK
-          SSN:
-            action: MASK
-          EMAIL:
-            action: MASK
 ---
 #| HTTPListenerPolicy for enhanced access logging #|
 #| Includes AI-specific fields: tokens, cost, prompt guard actions #|
@@ -219,33 +180,35 @@ spec:
 #| ============================================= #|
 #| Azure OpenAI US East AI Backend Configuration #|
 #| ============================================= #|
-#| Backend with type: AI for Azure OpenAI US East #|
+#| AgentgatewayBackend for Azure OpenAI US East #|
 #| Supports chat models (gpt-4.1, gpt-4.1-nano, gpt-4o-mini) #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-us-east
   labels:
     provider: azure-openai
     region: us-east
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
         endpoint: "#{ azure_openai_us_east_resource_name }#.openai.azure.com"
         deploymentName: "gpt-4.1"
         apiVersion: "2025-01-01-preview"
-      authToken:
-        kind: SecretRef
-        secretRef:
-          name: azure-openai-us-east-secret
-      authHeader:
-        headerName: api-key
-        prefix: ""
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east-secret
+    ai:
+      routes:
+        "/v1/chat/completions": "completions"
+        "/v1/embeddings": "passthrough"
+        "/v1/models": "passthrough"
+        "*": "passthrough"
 ---
-#| HTTPRoute for Azure OpenAI US East chat completions #|
-#| Routes ai-gw.domain/v1/chat/completions to Azure OpenAI #|
+#| HTTPRoute for Azure OpenAI US East #|
+#| Routes ai-gw.domain/azure-us-east/* to Azure OpenAI US East backend #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -254,110 +217,51 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
-    sectionName: https
-  hostnames:
-  - "ai-gw.#{ primary_domain }#"
   rules:
-  #| Route chat completions to Azure OpenAI US East based on x-ai-eg-model header #|
   - matches:
     - path:
         type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-4.1"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-4.1-nano"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-4o-mini"
+        value: /azure-us-east
     backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east
-  #| Route reasoning models (o3, o4-mini) to Azure OpenAI US East #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "o3"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "o4-mini"
-    backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east
-  #| Route embedding requests to Azure OpenAI US East #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /v1/embeddings
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "text-embedding-3-small"
-    - path:
-        type: PathPrefix
-        value: /v1/embeddings
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "text-embedding-ada-002"
-    backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east
+    - name: azure-openai-us-east
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
 #% endif %#
 #% if azure_openai_us_east2_api_key %#
 ---
 #| ============================================== #|
 #| Azure OpenAI US East2 AI Backend Configuration #|
 #| ============================================== #|
-#| Backend with type: AI for Azure OpenAI US East2 #|
+#| AgentgatewayBackend for Azure OpenAI US East2 #|
 #| Supports chat models (gpt-5, gpt-5-nano, etc.) #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: azure-openai-us-east2
   labels:
     provider: azure-openai
     region: us-east2
 spec:
-  type: AI
   ai:
-    llm:
+    provider:
       azureopenai:
         endpoint: "#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
         deploymentName: "gpt-5"
         apiVersion: "2025-01-01-preview"
-      authToken:
-        kind: SecretRef
-        secretRef:
-          name: azure-openai-us-east2-secret
-      authHeader:
-        headerName: api-key
-        prefix: ""
+  policies:
+    auth:
+      secretRef:
+        name: azure-openai-us-east2-secret
+    ai:
+      routes:
+        "/v1/chat/completions": "completions"
+        "/v1/embeddings": "passthrough"
+        "/v1/models": "passthrough"
+        "*": "passthrough"
 ---
-#| HTTPRoute for Azure OpenAI US East2 chat completions #|
-#| Routes ai-gw.domain/v1/chat/completions to Azure OpenAI US East2 #|
+#| HTTPRoute for Azure OpenAI US East2 #|
+#| Routes ai-gw.domain/azure-us-east2/* to Azure OpenAI US East2 backend #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -366,96 +270,15 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
-    sectionName: https
-  hostnames:
-  - "ai-gw.#{ primary_domain }#"
   rules:
-  #| Route GPT-5 models to Azure OpenAI US East2 #|
   - matches:
     - path:
         type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5-nano"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5-mini"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5.1"
+        value: /azure-us-east2
     backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east2
-  #| Route thinking models (gpt-5-chat, gpt-5.1-chat) to Azure OpenAI US East2 #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5-chat"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5.1-chat"
-    backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east2
-  #| Route codex models to Azure OpenAI US East2 #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5.1-codex"
-    - path:
-        type: PathPrefix
-        value: /v1/chat/completions
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "gpt-5.1-codex-mini"
-    backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east2
-  #| Route text-embedding-3-large to Azure OpenAI US East2 #|
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /v1/embeddings
-      headers:
-      - name: x-ai-eg-model
-        type: Exact
-        value: "text-embedding-3-large"
-    backendRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: azure-openai-us-east2
+    - name: azure-openai-us-east2
+      namespace: agentgateway
+      group: agentgateway.dev
+      kind: AgentgatewayBackend
 #% endif %#
 #% endif %#
