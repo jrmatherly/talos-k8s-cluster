@@ -32,6 +32,14 @@ spec:
           port: 9977  # xDS gRPC
         - protocol: TCP
           port: 9978  # xDS REST
+    # Allow Prometheus scraping from observability namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9092  # Metrics port
 ---
 # NetworkPolicy for kgateway controller - egress rules
 apiVersion: networking.k8s.io/v1
@@ -107,6 +115,16 @@ spec:
           port: 443
         - protocol: TCP
           port: 3000
+    # Allow Prometheus scraping from observability namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 15020  # Stats/metrics endpoint
+        - protocol: TCP
+          port: 15000  # Admin UI (for dashboard access)
 ---
 # NetworkPolicy for agentgateway data plane - egress rules
 apiVersion: networking.k8s.io/v1
