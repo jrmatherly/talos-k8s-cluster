@@ -1,20 +1,27 @@
 #% if agentgateway_enabled %#
 ---
-#| AgentgatewayParameters for agentgateway runtime config and deployment settings #|
-#| Referenced by GatewayClass.parametersRef - controls both K8s resources and agentgateway config.yaml #|
-#| NOTE: We use AgentgatewayParameters (not GatewayParameters) because: #|
-#| 1. It supports rawConfig for native agentgateway configuration (adminAddr, binds, etc.) #|
-#| 2. It also supports service/deployment overrides like GatewayParameters #|
-#| 3. Gateway.infrastructure.parametersRef has a bug in kgateway v2.2.0-main that rejects agentgateway.dev group #|
+#| GatewayParameters for Kubernetes deployment settings (gateway.kgateway.dev API) #|
+#| Referenced by GatewayClass.parametersRef - controls K8s resources #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+---
+#| AgentgatewayParameters for agentgateway runtime config (agentgateway.dev API) #|
+#| NOTE: kgateway v2.2.0-main has bugs that prevent referencing AgentgatewayParameters #|
+#| from GatewayClass or Gateway parametersRef. The controller should still watch this #|
+#| resource and apply rawConfig to the generated ConfigMap. #|
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayParameters
 metadata:
   name: agentgateway-mcp-config
 spec:
-  #| Service type override - LoadBalancer for external access #|
-  service:
-    spec:
-      type: LoadBalancer
   #| Native agentgateway configuration via rawConfig #|
   rawConfig:
     #| Admin UI configuration - bind to all interfaces for external access #|

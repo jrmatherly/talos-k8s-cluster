@@ -7,4 +7,4 @@ spec:
   interval: 1h
   url: oci://ghcr.io/jrmatherly/charts/obot
   ref:
-    tag: "v0.2.12"
+    tag: "v0.2.13"

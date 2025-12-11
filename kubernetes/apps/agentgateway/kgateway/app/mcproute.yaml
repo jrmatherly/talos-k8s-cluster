@@ -1,12 +1,20 @@
 ---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+---
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayParameters
 metadata:
   name: agentgateway-mcp-config
 spec:
-  service:
-    spec:
-      type: LoadBalancer
   rawConfig:
     config:
       adminAddr: "0.0.0.0:15000"

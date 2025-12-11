@@ -7,9 +7,9 @@ spec:
   controllerName: kgateway.dev/agentgateway
   description: "agentgateway for MCP protocol support with OAuth authentication"
   parametersRef:
-    group: agentgateway.dev
-    kind: AgentgatewayParameters
-    name: agentgateway-mcp-config
+    group: gateway.kgateway.dev
+    kind: GatewayParameters
+    name: agentgateway-params
     namespace: agentgateway
 ---
 apiVersion: gateway.networking.k8s.io/v1
