@@ -880,8 +880,10 @@ cloudflare_token: ""
 # kagent_grafana_url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
 
 # -- Grafana API key for grafana-mcp tool authentication.
-#    (OPTIONAL)
+#    (OPTIONAL) - Will be encrypted with SOPS via Flux valuesFrom
 #    Create a Service Account with Editor role in Grafana UI:
 #    Administration > Service Accounts > Add Service Account > Add Token
 #    Note: If not set, grafana-mcp will use anonymous access (if enabled in Grafana)
+#    The API key is stored in kagent-grafana-secret (SOPS-encrypted) and injected
+#    via Flux valuesFrom - it never appears in the rendered HelmRelease.
 # kagent_grafana_api_key: ""

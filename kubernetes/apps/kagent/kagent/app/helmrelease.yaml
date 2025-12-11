@@ -11,6 +11,11 @@ spec:
   timeout: 15m
   dependsOn:
     - name: kagent-crds
+  valuesFrom:
+    - kind: Secret
+      name: kagent-grafana-secret
+      valuesKey: GRAFANA_API_KEY
+      targetPath: grafana-mcp.grafana.apiKey
   values:
     # ============================================================
     # Global Configuration
@@ -159,6 +164,7 @@ spec:
         enabled: true
 
     # grafana-mcp configuration - connects to existing cluster Grafana
+    # NOTE: apiKey is injected via valuesFrom from kagent-grafana-secret (SOPS-encrypted)
     grafana-mcp:
       grafana:
         url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"

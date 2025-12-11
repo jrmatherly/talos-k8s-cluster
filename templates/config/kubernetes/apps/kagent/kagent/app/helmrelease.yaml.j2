@@ -12,6 +12,13 @@ spec:
   timeout: 15m
   dependsOn:
     - name: kagent-crds
+#% if kagent_grafana_api_key %#
+  valuesFrom:
+    - kind: Secret
+      name: kagent-grafana-secret
+      valuesKey: GRAFANA_API_KEY
+      targetPath: grafana-mcp.grafana.apiKey
+#% endif %#
   values:
     # ============================================================
     # Global Configuration
@@ -158,12 +165,10 @@ spec:
         enabled: true
 
     # grafana-mcp configuration - connects to existing cluster Grafana
+    # NOTE: apiKey is injected via valuesFrom from kagent-grafana-secret (SOPS-encrypted)
     grafana-mcp:
       grafana:
         url: "#{ kagent_grafana_url }#"
-#% if kagent_grafana_api_key %#
-        apiKey: "#{ kagent_grafana_api_key }#"
-#% endif %#
 
     kagent-tools:
       enabled: true

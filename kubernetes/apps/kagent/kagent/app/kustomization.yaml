@@ -5,6 +5,7 @@ resources:
   - ocirepository.yaml
   - helmrelease.yaml
   - secret.sops.yaml
+  - grafana-secret.sops.yaml
   - db-secret.sops.yaml
   - postgresql.yaml
   - httproute.yaml

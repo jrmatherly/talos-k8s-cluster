@@ -6,6 +6,9 @@ resources:
   - ocirepository.yaml
   - helmrelease.yaml
   - secret.sops.yaml
+#% if kagent_grafana_api_key %#
+  - grafana-secret.sops.yaml
+#% endif %#
 #% if kagent_database_type == 'postgres' %#
   - db-secret.sops.yaml
   - postgresql.yaml
