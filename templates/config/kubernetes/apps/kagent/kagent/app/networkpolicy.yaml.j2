@@ -265,6 +265,13 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+#% if kagent_openai_api_base %#
+    # LLM Gateway (external) - agents route LLM calls through external gateway
+    # ai-gateway.matherly.net is hosted externally (e.g., Cloudflare Workers, etc.)
+    - ports:
+        - protocol: TCP
+          port: 443
+#% endif %#
 #% if observability_enabled %#
     # Prometheus (for observability-agent, promql-agent)
     - to:
