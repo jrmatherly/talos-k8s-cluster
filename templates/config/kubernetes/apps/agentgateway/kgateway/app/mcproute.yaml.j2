@@ -11,6 +11,15 @@ spec:
       replicas: 1
     service:
       type: LoadBalancer
+    #| Additional service ports for admin UI #|
+    serviceOverrides:
+      metadata: {}
+      spec:
+        ports:
+          - name: admin
+            port: 15000
+            targetPort: 15000
+            protocol: TCP
 ---
 #| AgentgatewayParameters for MCP config (agentgateway.dev API) #|
 #| This uses rawConfig to pass native agentgateway configuration #|
@@ -21,6 +30,11 @@ metadata:
 spec:
   #| Native agentgateway configuration via rawConfig #|
   rawConfig:
+    #| Admin UI configuration - bind to all interfaces for external access #|
+    config:
+      adminAddr: "0.0.0.0:15000"
+      logging:
+        level: info
     binds:
     - port: 3000
       listeners:
@@ -68,34 +82,44 @@ spec:
                   cmd: echo
                   args: ["MCP backend not configured"]
 ---
-#| TODO: Re-enable once we determine the correct port for agentgateway admin UI #|
-#| HTTPRoute for web traffic to the agentgateway UI #|
-#| apiVersion: gateway.networking.k8s.io/v1 #|
-#| kind: HTTPRoute #|
-#| metadata: #|
-#|   name: agentgateway-ui #|
-#| spec: #|
-#|   parentRefs: #|
-#|   - name: agentgateway #|
-#|     namespace: agentgateway #|
-#|     sectionName: https #|
-#|   hostnames: #|
-#|   - "mcp-auth.#{ primary_domain }#" #|
-#|   rules: #|
-#|   - matches: #|
-#|     - path: #|
-#|         type: PathPrefix #|
-#|         value: /ui #|
-#|     backendRefs: #|
-#|     - name: agentgateway #|
-#|       port: 15000 #|
-#|   - matches: #|
-#|     - path: #|
-#|         type: Exact #|
-#|         value: /healthz #|
-#|     backendRefs: #|
-#|     - name: agentgateway #|
-#|       port: 15000 #|
+#| HTTPRoute for agentgateway admin UI #|
+#| Routes /ui and related paths to the admin interface on port 15000 #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: agentgateway-ui
+spec:
+  parentRefs:
+  - name: agentgateway
+    namespace: agentgateway
+    sectionName: https
+  hostnames:
+  - "mcp-auth.#{ primary_domain }#"
+  rules:
+  #| Admin UI routes #|
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ui
+    backendRefs:
+    - name: agentgateway
+      port: 15000
+  #| Health check endpoint #|
+  - matches:
+    - path:
+        type: Exact
+        value: /healthz
+    backendRefs:
+    - name: agentgateway
+      port: 15000
+  #| API endpoints for UI #|
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: agentgateway
+      port: 15000
 ---
 #| TrafficPolicy for rate limiting #|
 apiVersion: gateway.kgateway.dev/v1alpha1

@@ -55,6 +55,13 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
+    #| Admin UI listener (port 15000 for agentgateway admin interface) #|
+    - name: admin
+      protocol: HTTP
+      port: 15000
+      allowedRoutes:
+        namespaces:
+          from: Same
 ---
 #| Certificate for agentgateway #|
 apiVersion: cert-manager.io/v1
