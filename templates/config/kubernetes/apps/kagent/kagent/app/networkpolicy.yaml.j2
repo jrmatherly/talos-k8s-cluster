@@ -272,6 +272,59 @@ spec:
         - protocol: TCP
           port: 443
 #% endif %#
+#% if agentgateway_enabled %#
+    # agentgateway (ai-gw.matherly.net) - internal LLM gateway via kgateway
+    # Located in agentgateway namespace at 192.168.22.147:443
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
+#% endif %#
+#% if obot_enabled %#
+    # obot - AI assistant platform
+    # Located in obot namespace on port 80
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 8080
+#% endif %#
+    # Cilium/Hubble (for cilium-* agents) - requires Cilium CNI
+    # hubble-relay for network flow queries
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hubble-relay
+      ports:
+        - protocol: TCP
+          port: 80
+    # cilium-agent for direct Cilium API access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: cilium
+      ports:
+        - protocol: TCP
+          port: 9962
+        - protocol: TCP
+          port: 9964
+        - protocol: TCP
+          port: 4245
 #% if observability_enabled %#
     # Prometheus (for observability-agent, promql-agent)
     - to:
@@ -281,5 +334,16 @@ spec:
       ports:
         - protocol: TCP
           port: 9090
+    # Grafana (for observability-agent)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: grafana
+      ports:
+        - protocol: TCP
+          port: 3000
 #% endif %#
 #% endif %#
