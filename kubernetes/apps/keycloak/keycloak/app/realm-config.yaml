@@ -113,11 +113,13 @@ data:
           "clientAuthenticatorType": "client-secret",
           "secret": "",
           "redirectUris": [
-            "https://mcp-auth.matherly.net/*",
+            "https://mcp-gw.matherly.net/*",
+            "https://ai-gw.matherly.net/*",
             "http://localhost:*"
           ],
           "webOrigins": [
-            "https://mcp-auth.matherly.net",
+            "https://mcp-gw.matherly.net",
+            "https://ai-gw.matherly.net",
             "https://*.matherly.net"
           ],
           "protocol": "openid-connect",
@@ -143,7 +145,7 @@ data:
           ],
           "attributes": {
             "pkce.code.challenge.method": "S256",
-            "post.logout.redirect.uris": "https://mcp-auth.matherly.net/*",
+            "post.logout.redirect.uris": "https://mcp-gw.matherly.net/*++https://ai-gw.matherly.net/*",
             "oauth2.device.authorization.grant.enabled": "true",
             "backchannel.logout.session.required": "true",
             "display.on.consent.screen": "false"

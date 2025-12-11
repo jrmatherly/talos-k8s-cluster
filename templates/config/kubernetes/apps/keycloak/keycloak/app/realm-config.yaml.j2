@@ -114,11 +114,13 @@ data:
           "clientAuthenticatorType": "client-secret",
           "secret": "#{keycloak_agentgateway_client_secret | default(keycloak_oidc_client_secret)}#",
           "redirectUris": [
-            "https://mcp-auth.#{primary_domain}#/*",
+            "https://mcp-gw.#{primary_domain}#/*",
+            "https://ai-gw.#{primary_domain}#/*",
             "http://localhost:*"
           ],
           "webOrigins": [
-            "https://mcp-auth.#{primary_domain}#",
+            "https://mcp-gw.#{primary_domain}#",
+            "https://ai-gw.#{primary_domain}#",
             "https://*.#{primary_domain}#"
           ],
           "protocol": "openid-connect",
@@ -144,7 +146,7 @@ data:
           ],
           "attributes": {
             "pkce.code.challenge.method": "S256",
-            "post.logout.redirect.uris": "https://mcp-auth.#{primary_domain}#/*",
+            "post.logout.redirect.uris": "https://mcp-gw.#{primary_domain}#/*++https://ai-gw.#{primary_domain}#/*",
             "oauth2.device.authorization.grant.enabled": "true",
             "backchannel.logout.session.required": "true",
             "display.on.consent.screen": "false"

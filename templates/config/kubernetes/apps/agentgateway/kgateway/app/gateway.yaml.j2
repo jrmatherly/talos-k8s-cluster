@@ -59,6 +59,7 @@ spec:
     #| Port 15000 is reserved by kgateway and cannot be used as a Gateway listener #|
 ---
 #| Certificate for agentgateway #|
+#| Includes mcp-gw (admin UI) and ai-gw (AI Gateway) hostnames #|
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -69,5 +70,8 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - "mcp-auth.#{ primary_domain }#"
+    - "mcp-gw.#{ primary_domain }#"
+#% if azure_openai_us_east_api_key or azure_openai_us_east2_api_key %#
+    - "ai-gw.#{ primary_domain }#"
+#% endif %#
 #% endif %#

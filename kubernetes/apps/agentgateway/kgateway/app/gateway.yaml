@@ -50,4 +50,5 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   dnsNames:
-    - "mcp-auth.matherly.net"
+    - "mcp-gw.matherly.net"
+    - "ai-gw.matherly.net"
