@@ -1,21 +1,10 @@
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: agentgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 1
-    service:
-      type: LoadBalancer
----
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayParameters
-metadata:
-  name: agentgateway-mcp-config
-spec:
-  rawConfig:
+  name: agentgateway-config
+data:
+  config.yaml: |-
     config:
       adminAddr: "0.0.0.0:15000"
       logging:
@@ -65,6 +54,37 @@ spec:
                   cmd: echo
                   args: ["MCP backend not configured"]
 ---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+    agentgateway:
+      enabled: true
+      customConfigMapName: agentgateway-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-admin
+  labels:
+    app.kubernetes.io/name: agentgateway-admin
+spec:
+  selector:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+  ports:
+  - name: admin
+    port: 15000
+    targetPort: 15000
+    protocol: TCP
+  type: ClusterIP
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -82,21 +102,21 @@ spec:
         type: PathPrefix
         value: /ui
     backendRefs:
-    - name: agentgateway
+    - name: agentgateway-admin
       port: 15000
   - matches:
     - path:
         type: Exact
         value: /healthz
     backendRefs:
-    - name: agentgateway
+    - name: agentgateway-admin
       port: 15000
   - matches:
     - path:
         type: PathPrefix
         value: /api
     backendRefs:
-    - name: agentgateway
+    - name: agentgateway-admin
       port: 15000
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1

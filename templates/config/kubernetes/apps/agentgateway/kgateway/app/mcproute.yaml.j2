@@ -1,27 +1,13 @@
 #% if agentgateway_enabled %#
 ---
-#| GatewayParameters for deployment settings (gateway.kgateway.dev API) #|
-#| Note: Service ports are derived from Gateway listeners (port 15000 admin listener) #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
+#| ConfigMap for agentgateway native configuration #|
+#| This is referenced by GatewayParameters via customConfigMapName #|
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: agentgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 1
-    service:
-      type: LoadBalancer
----
-#| AgentgatewayParameters for MCP config (agentgateway.dev API) #|
-#| This uses rawConfig to pass native agentgateway configuration #|
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayParameters
-metadata:
-  name: agentgateway-mcp-config
-spec:
-  #| Native agentgateway configuration via rawConfig #|
-  rawConfig:
+  name: agentgateway-config
+data:
+  config.yaml: |-
     #| Admin UI configuration - bind to all interfaces for external access #|
     config:
       adminAddr: "0.0.0.0:15000"
@@ -74,8 +60,43 @@ spec:
                   cmd: echo
                   args: ["MCP backend not configured"]
 ---
+#| GatewayParameters for deployment settings (gateway.kgateway.dev API) #|
+#| References ConfigMap via customConfigMapName for agentgateway config #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayParameters
+metadata:
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+    agentgateway:
+      enabled: true
+      customConfigMapName: agentgateway-config
+---
+#| Service for agentgateway admin UI (port 15000 is reserved in Gateway) #|
+#| This exposes the admin interface which agentgateway binds to 0.0.0.0:15000 #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-admin
+  labels:
+    app.kubernetes.io/name: agentgateway-admin
+spec:
+  selector:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+  ports:
+  - name: admin
+    port: 15000
+    targetPort: 15000
+    protocol: TCP
+  type: ClusterIP
+---
 #| HTTPRoute for agentgateway admin UI #|
-#| Routes /ui and related paths to the admin interface on port 15000 #|
+#| Routes /ui and related paths to the admin interface via agentgateway-admin service #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -94,7 +115,7 @@ spec:
         type: PathPrefix
         value: /ui
     backendRefs:
-    - name: agentgateway
+    - name: agentgateway-admin
       port: 15000
   #| Health check endpoint #|
   - matches:
@@ -102,7 +123,7 @@ spec:
         type: Exact
         value: /healthz
     backendRefs:
-    - name: agentgateway
+    - name: agentgateway-admin
       port: 15000
   #| API endpoints for UI #|
   - matches:
@@ -110,7 +131,7 @@ spec:
         type: PathPrefix
         value: /api
     backendRefs:
-    - name: agentgateway
+    - name: agentgateway-admin
       port: 15000
 ---
 #| TrafficPolicy for rate limiting #|

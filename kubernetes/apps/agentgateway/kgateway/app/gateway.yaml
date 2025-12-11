@@ -45,12 +45,6 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
-    - name: admin
-      protocol: HTTP
-      port: 15000
-      allowedRoutes:
-        namespaces:
-          from: Same
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
