@@ -59,7 +59,7 @@ spec:
             severity: warning
           annotations:
             summary: "High error rate on agentgateway (>5%)"
-            description: "Gateway {{ $labels.gateway_name }} has {{ $value | humanizePercentage }} error rate over the last 5 minutes"
+            description: "Gateway {{ $$labels.gateway_name }} has {{ $$value | humanizePercentage }} error rate over the last 5 minutes"
 
         - alert: AgentgatewayDailyCostHigh
           expr: |
@@ -69,7 +69,7 @@ spec:
             severity: warning
           annotations:
             summary: "Daily AI cost exceeds $100"
-            description: "Gateway {{ $labels.gateway_name }} has incurred ${{ $value | humanize }} in AI costs today"
+            description: "Gateway {{ $$labels.gateway_name }} has incurred $${{ $$value | humanize }} in AI costs today"
 
         - alert: AgentgatewayTokenBudgetExceeded
           expr: |
@@ -79,7 +79,7 @@ spec:
             severity: critical
           annotations:
             summary: "Daily token usage exceeds 1M tokens"
-            description: "Gateway {{ $labels.gateway_name }} has processed {{ $value | humanize }} tokens in the last 24 hours"
+            description: "Gateway {{ $$labels.gateway_name }} has processed {{ $$value | humanize }} tokens in the last 24 hours"
 
         - alert: AgentgatewayHighLatency
           expr: |
@@ -91,7 +91,7 @@ spec:
             severity: warning
           annotations:
             summary: "High latency for agentgateway (P99 > 10s)"
-            description: "Gateway {{ $labels.gateway_name }} P99 latency is {{ $value | humanizeDuration }}"
+            description: "Gateway {{ $$labels.gateway_name }} P99 latency is {{ $$value | humanizeDuration }}"
 
         - alert: AgentgatewayFrequentPromptGuardBlocks
           expr: |
@@ -101,7 +101,7 @@ spec:
             severity: info
           annotations:
             summary: "Frequent prompt guard blocks detected"
-            description: "Gateway {{ $labels.gateway_name }} is blocking {{ $value | humanize }} requests/sec due to {{ $labels.pattern }} pattern"
+            description: "Gateway {{ $$labels.gateway_name }} is blocking {{ $$value | humanize }} requests/sec due to {{ $$labels.pattern }} pattern"
 
         - alert: AgentgatewayRateLimitActive
           expr: |
@@ -111,7 +111,7 @@ spec:
             severity: info
           annotations:
             summary: "Rate limiting is actively rejecting requests"
-            description: "Gateway {{ $labels.gateway_name }} is rate limiting {{ $value | humanize }} requests/sec. Consider increasing limits."
+            description: "Gateway {{ $$labels.gateway_name }} is rate limiting {{ $$value | humanize }} requests/sec. Consider increasing limits."
 
         - alert: AgentgatewayModelCostAnomaly
           expr: |
@@ -122,5 +122,5 @@ spec:
           labels:
             severity: warning
           annotations:
-            summary: "Model {{ $labels.model }} cost is 50% higher than 7-day average"
-            description: "Gateway {{ $labels.gateway_name }} model {{ $labels.model }} hourly cost is anomalously high"
+            summary: "Model {{ $$labels.model }} cost is 50% higher than 7-day average"
+            description: "Gateway {{ $$labels.gateway_name }} model {{ $$labels.model }} hourly cost is anomalously high"
