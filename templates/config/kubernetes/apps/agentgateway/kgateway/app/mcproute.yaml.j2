@@ -1,6 +1,7 @@
 #% if agentgateway_enabled %#
 ---
 #| GatewayParameters for deployment settings (gateway.kgateway.dev API) #|
+#| Note: Service ports are derived from Gateway listeners (port 15000 admin listener) #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: GatewayParameters
 metadata:
@@ -11,15 +12,6 @@ spec:
       replicas: 1
     service:
       type: LoadBalancer
-    #| Additional service ports for admin UI #|
-    serviceOverrides:
-      metadata: {}
-      spec:
-        ports:
-          - name: admin
-            port: 15000
-            targetPort: 15000
-            protocol: TCP
 ---
 #| AgentgatewayParameters for MCP config (agentgateway.dev API) #|
 #| This uses rawConfig to pass native agentgateway configuration #|

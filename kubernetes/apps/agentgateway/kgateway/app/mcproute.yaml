@@ -9,14 +9,6 @@ spec:
       replicas: 1
     service:
       type: LoadBalancer
-    serviceOverrides:
-      metadata: {}
-      spec:
-        ports:
-          - name: admin
-            port: 15000
-            targetPort: 15000
-            protocol: TCP
 ---
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayParameters
