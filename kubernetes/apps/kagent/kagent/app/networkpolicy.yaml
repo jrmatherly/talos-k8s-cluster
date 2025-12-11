@@ -109,8 +109,8 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    # MCP Tool Servers (kagent-tools, grafana-mcp)
-    # Required for controller to fetch tools from RemoteMCPServer resources
+    # MCP Tool Servers (kagent-tools, grafana-mcp, querydoc)
+    # Required for controller to fetch tools from RemoteMCPServer and MCP-labeled services
     - to:
         - podSelector:
             matchLabels:
@@ -125,6 +125,13 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: querydoc
+      ports:
+        - protocol: TCP
+          port: 8080
 ---
 # NetworkPolicy for kagent UI
 apiVersion: networking.k8s.io/v1
