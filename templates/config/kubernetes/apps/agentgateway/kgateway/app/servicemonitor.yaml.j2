@@ -88,8 +88,92 @@ spec:
       app.kubernetes.io/name: agentgateway
       gateway.networking.k8s.io/gateway-name: agentgateway
 ---
-#| PrometheusRule for agentgateway alerting (Phase 1) #|
-#| Alerts for: gateway down, high error rate, high daily cost #|
+#| ============================================= #|
+#| PrometheusRule: kgateway Control Plane Alerts #|
+#| ============================================= #|
+#| Alerts for: NACKs, reconciliation failures, xDS issues #|
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kgateway-control-plane-alerts
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: kgateway.control-plane.rules
+      rules:
+        #| Alert when agentgateway rejects configuration (NACK) #|
+        #| Critical: indicates misconfigured resources #|
+        - alert: KgatewayConfigurationRejected
+          expr: |
+            increase(kgateway_agentgateway_xds_rejects_total[5m]) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "agentgateway proxy rejected configuration update"
+            description: "The agentgateway data plane has rejected {{ $$value | humanize }} configuration updates in the last 5 minutes. Check Kubernetes events: kubectl get events -n agentgateway --field-selector=reason=AgentGatewayNackError"
+
+        #| Alert when kgateway control plane is down #|
+        - alert: KgatewayControlPlaneDown
+          expr: |
+            absent(up{job="kgateway"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "kgateway control plane is down"
+            description: "The kgateway control plane has been unavailable for more than 5 minutes. Configuration updates will not propagate to agentgateway."
+
+        #| Alert on high reconciliation error rate #|
+        - alert: KgatewayReconciliationErrors
+          expr: |
+            sum(rate(kgateway_controller_reconciliations_total{result="error"}[5m])) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "kgateway controller experiencing reconciliation errors"
+            description: "The kgateway controller is failing to reconcile resources at {{ $$value | humanize }} errors/sec"
+
+        #| Alert when resource updates are dropped #|
+        #| Critical: All resource metrics become invalid when this occurs #|
+        - alert: KgatewayResourceUpdatesDropped
+          expr: |
+            increase(kgateway_resources_updates_dropped_total[5m]) > 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "kgateway controller dropped resource updates"
+            description: "CRITICAL: kgateway controller dropped resource updates. All resource metrics are now invalid. Restart the kgateway controller immediately: kubectl rollout restart deployment/kgateway -n agentgateway"
+
+        #| Alert on xDS sync failures #|
+        - alert: KgatewayXdsSyncFailures
+          expr: |
+            sum(rate(kgateway_xds_snapshot_syncs_total{result="error"}[5m])) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "xDS snapshot sync failures detected"
+            description: "kgateway is failing to sync xDS snapshots at {{ $$value | humanize }} errors/sec. agentgateway may have stale configuration."
+
+        #| Alert on xDS authentication failures #|
+        - alert: KgatewayXdsAuthFailures
+          expr: |
+            sum(rate(kgateway_xds_auth_rq_failure_total[5m])) > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "xDS authentication failures detected"
+            description: "agentgateway data plane is failing to authenticate with kgateway control plane. Check NetworkPolicies and TLS configuration."
+---
+#| ============================================= #|
+#| PrometheusRule: agentgateway Data Plane Alerts #|
+#| ============================================= #|
+#| Alerts for: gateway down, high error rate, cost, latency #|
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
