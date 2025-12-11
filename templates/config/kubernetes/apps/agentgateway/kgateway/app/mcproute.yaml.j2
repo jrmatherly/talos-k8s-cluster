@@ -202,10 +202,10 @@ spec:
         name: azure-openai-us-east-secret
     ai:
       routes:
-        "/v1/chat/completions": "completions"
-        "/v1/embeddings": "passthrough"
-        "/v1/models": "passthrough"
-        "*": "passthrough"
+        "/v1/chat/completions": "Completions"
+        "/v1/embeddings": "Passthrough"
+        "/v1/models": "Models"
+        "*": "Passthrough"
 ---
 #| HTTPRoute for Azure OpenAI US East #|
 #| Routes ai-gw.domain/azure-us-east/* to Azure OpenAI US East backend #|
@@ -255,10 +255,10 @@ spec:
         name: azure-openai-us-east2-secret
     ai:
       routes:
-        "/v1/chat/completions": "completions"
-        "/v1/embeddings": "passthrough"
-        "/v1/models": "passthrough"
-        "*": "passthrough"
+        "/v1/chat/completions": "Completions"
+        "/v1/embeddings": "Passthrough"
+        "/v1/models": "Models"
+        "*": "Passthrough"
 ---
 #| HTTPRoute for Azure OpenAI US East2 #|
 #| Routes ai-gw.domain/azure-us-east2/* to Azure OpenAI US East2 backend #|
