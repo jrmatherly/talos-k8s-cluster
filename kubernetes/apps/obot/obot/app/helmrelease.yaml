@@ -83,6 +83,9 @@ spec:
       OBOT_SERVER_ENCRYPTION_CONFIG_FILE: "/config/encryption.yaml"
 
       # AI Gateway Integration
+      # Supports two gateway options:
+      # - agentgateway (ai-gw): MCP/AI-focused gateway with rate limiting, prompt guards, FinOps metrics
+      # - Envoy AI Gateway (llms): Legacy Azure OpenAI routing gateway
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
 
       # Tool Registries - Unified path containing all auth providers (upstream + custom)

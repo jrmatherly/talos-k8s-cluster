@@ -101,8 +101,15 @@ spec:
 #% endif %#
 
       # AI Gateway Integration
+      # Supports two gateway options:
+      # - agentgateway (ai-gw): MCP/AI-focused gateway with rate limiting, prompt guards, FinOps metrics
+      # - Envoy AI Gateway (llms): Legacy Azure OpenAI routing gateway
 #% if obot_use_ai_gateway | default(true) %#
+#% if obot_use_agentgateway | default(false) %#
+      OBOT_SERVER_LLM_BASE_URL: "https://ai-gw.${SECRET_DOMAIN}/v1"
+#% else %#
       OBOT_SERVER_LLM_BASE_URL: "https://llms.${SECRET_DOMAIN}/v1"
+#% endif %#
 #% endif %#
 
       # Tool Registries - Unified path containing all auth providers (upstream + custom)

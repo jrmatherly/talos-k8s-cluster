@@ -101,6 +101,16 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+    # agentgateway (MCP OAuth proxy and AI routing)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
     # PostgreSQL database (CNPG)
     - to:
         - podSelector:

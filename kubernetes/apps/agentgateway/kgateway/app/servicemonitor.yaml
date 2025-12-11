@@ -1,0 +1,126 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: agentgateway
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobLabel: agentgateway
+  namespaceSelector:
+    matchNames:
+      - agentgateway
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    honorLabels: true
+    relabelings:
+      - sourceLabels: [__meta_kubernetes_namespace]
+        targetLabel: namespace
+      - sourceLabels: [__meta_kubernetes_pod_name]
+        targetLabel: pod
+      - sourceLabels: [__meta_kubernetes_pod_label_gateway_networking_k8s_io_gateway_name]
+        targetLabel: gateway_name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+      gateway.networking.k8s.io/gateway-name: agentgateway
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: agentgateway-alerts
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: agentgateway.rules
+      rules:
+        - alert: AgentgatewayDown
+          expr: |
+            absent(up{job="agentgateway"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "agentgateway is down"
+            description: "The agentgateway has been unavailable for more than 5 minutes. AI traffic routing is offline."
+
+        - alert: AgentgatewayHighErrorRate
+          expr: |
+            sum(rate(agentgateway_requests_total{status=~"5.."}[5m])) by (gateway_name)
+            /
+            sum(rate(agentgateway_requests_total[5m])) by (gateway_name)
+            > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High error rate on agentgateway (>5%)"
+            description: "Gateway {{ $labels.gateway_name }} has {{ $value | humanizePercentage }} error rate over the last 5 minutes"
+
+        - alert: AgentgatewayDailyCostHigh
+          expr: |
+            sum(agentgateway_cost_usd_daily) by (gateway_name) > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Daily AI cost exceeds $100"
+            description: "Gateway {{ $labels.gateway_name }} has incurred ${{ $value | humanize }} in AI costs today"
+
+        - alert: AgentgatewayTokenBudgetExceeded
+          expr: |
+            sum(increase(agentgateway_input_tokens_total[24h])) by (gateway_name) > 1000000
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Daily token usage exceeds 1M tokens"
+            description: "Gateway {{ $labels.gateway_name }} has processed {{ $value | humanize }} tokens in the last 24 hours"
+
+        - alert: AgentgatewayHighLatency
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(agentgateway_request_duration_seconds_bucket[5m])) by (le, gateway_name)
+            ) > 10
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High latency for agentgateway (P99 > 10s)"
+            description: "Gateway {{ $labels.gateway_name }} P99 latency is {{ $value | humanizeDuration }}"
+
+        - alert: AgentgatewayFrequentPromptGuardBlocks
+          expr: |
+            sum(rate(agentgateway_prompt_guard_blocks_total[5m])) by (gateway_name, pattern) > 1
+          for: 10m
+          labels:
+            severity: info
+          annotations:
+            summary: "Frequent prompt guard blocks detected"
+            description: "Gateway {{ $labels.gateway_name }} is blocking {{ $value | humanize }} requests/sec due to {{ $labels.pattern }} pattern"
+
+        - alert: AgentgatewayRateLimitActive
+          expr: |
+            sum(rate(agentgateway_rate_limit_exceeded_total[5m])) by (gateway_name) > 5
+          for: 10m
+          labels:
+            severity: info
+          annotations:
+            summary: "Rate limiting is actively rejecting requests"
+            description: "Gateway {{ $labels.gateway_name }} is rate limiting {{ $value | humanize }} requests/sec. Consider increasing limits."
+
+        - alert: AgentgatewayModelCostAnomaly
+          expr: |
+            sum(rate(agentgateway_cost_usd_total[1h])) by (model, gateway_name)
+            >
+            1.5 * avg_over_time(sum(rate(agentgateway_cost_usd_total[1h])) by (model, gateway_name)[7d:1h])
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Model {{ $labels.model }} cost is 50% higher than 7-day average"
+            description: "Gateway {{ $labels.gateway_name }} model {{ $labels.model }} hourly cost is anomalously high"

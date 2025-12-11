@@ -138,6 +138,27 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+#% if agentgateway_enabled | default(false) %#
+    # Allow to agentgateway namespace for AI/LLM routing via ai-gw hostname
+    # Used when obot_use_agentgateway is enabled
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
+    # Allow to agentgateway LoadBalancer IP for LLM requests via external hostname (ai-gw.matherly.net)
+    # Required because TLS cert is valid for *.matherly.net, not internal service name
+    - to:
+        - ipBlock:
+            cidr: #{ agentgateway_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 443
+#% endif %#
     # Allow external internet access (GitHub for tools, MCP catalogs, etc.)
     # Excludes private IP ranges (RFC 1918)
     - to:

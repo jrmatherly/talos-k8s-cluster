@@ -157,6 +157,7 @@ import (
 	obot_memory_limit?: string & !=""           // Memory limit (default: 4Gi)
 	obot_encryption_provider?: *"custom" | "azure-keyvault" | "aws-kms" | "gcp-kms"  // Encryption provider
 	obot_use_ai_gateway?: *true | bool          // Use existing envoy-ai gateway for LLM requests
+	obot_use_agentgateway?: *false | bool       // Use agentgateway (ai-gw) instead of envoy-ai (llms) for LLM requests
 
 	// kagent Configuration (Kubernetes-native AI Agent Framework)
 	// Cloud Native Computing Foundation (CNCF) sandbox project for AI agents

@@ -299,6 +299,7 @@ class Plugin(makejinja.plugin.Plugin):
         # Advanced
         data.setdefault("obot_encryption_provider", "custom")
         data.setdefault("obot_use_ai_gateway", True)
+        data.setdefault("obot_use_agentgateway", False)
 
         # kagent defaults (Kubernetes-native AI Agent Framework)
         data.setdefault("kagent_enabled", False)

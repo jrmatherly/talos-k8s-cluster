@@ -2,7 +2,7 @@
 ---
 #| GatewayParameters for Kubernetes deployment settings (gateway.kgateway.dev API) #|
 #| Referenced by GatewayClass.parametersRef - controls K8s resources #|
-#| Uses agentgateway.env to set ADMIN_ADDR for external admin UI access #|
+#| Enhanced with metrics endpoint for observability (Phase 1) #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: GatewayParameters
 metadata:
@@ -19,6 +19,31 @@ spec:
         #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
         - name: ADMIN_ADDR
           value: "0.0.0.0:15000"
+        #| Enable metrics endpoint for Prometheus scraping (Phase 1) #|
+        - name: METRICS_ENABLED
+          value: "true"
+        - name: METRICS_PORT
+          value: "9090"
+---
+#| Service for agentgateway metrics endpoint (Phase 1) #|
+#| Exposes metrics on port 9090 for Prometheus ServiceMonitor #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-metrics
+  labels:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+spec:
+  selector:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  type: ClusterIP
 ---
 #| Service for agentgateway admin UI (port 15000 is reserved in Gateway) #|
 #| This exposes the admin interface which agentgateway binds to 0.0.0.0:15000 #|
@@ -91,24 +116,69 @@ spec:
       kind: Backend
       name: mcp-backend
 ---
-#| TrafficPolicy for rate limiting #|
+#| =========================================== #|
+#| TrafficPolicy: Token-based Rate Limiting    #|
+#| and Prompt Guards (Phase 2 + Phase 3)       #|
+#| =========================================== #|
+#| Comprehensive TrafficPolicy with token-based rate limiting and prompt guards #|
+#| Token limits: 100K burst, 10K/min sustained for general traffic #|
+#| Built-in guards: CREDIT_CARD (mask), SSN (reject), EMAIL (mask) #|
+#| Custom regex: credential patterns (reject) #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
 metadata:
-  name: agentgateway-rate-limit
+  name: agentgateway-comprehensive
 spec:
   targetRefs:
   - group: gateway.networking.k8s.io
     kind: Gateway
     name: agentgateway
+  #| Phase 2: Token-based rate limiting #|
+  #| Limits token usage for LLM requests (more accurate than request count) #|
   rateLimit:
     local:
       tokenBucket:
-        maxTokens: 100
-        tokensPerFill: 100
-        fillInterval: "60s"
+        maxTokens: 100000        # Maximum burst capacity
+        tokensPerFill: 10000     # Tokens added per interval
+        fillInterval: "60s"      # Refill interval (1 minute)
+  #| Phase 3: Prompt guards for sensitive data protection #|
+  ai:
+    promptGuard:
+      #| Request guards - filter incoming prompts #|
+      request:
+        customResponseMessage: "Request blocked by security policy: contains sensitive data"
+        #| Built-in pattern guards #|
+        builtins:
+          CREDIT_CARD:
+            action: MASK         # Replace with [REDACTED]
+          SSN:
+            action: REJECT       # Block the request
+          EMAIL:
+            action: MASK         # Replace with [REDACTED]
+          PHONE_NUMBER:
+            action: MASK
+          IP_ADDRESS:
+            action: MASK
+        #| Custom regex patterns for credential detection #|
+        matches:
+        - regex: "\\b(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*\\S+"
+          action: REJECT
+          name: "credential-pattern"
+        - regex: "\\b(?:BEGIN|END)\\s+(?:RSA|OPENSSH|PRIVATE)\\s+KEY"
+          action: REJECT
+          name: "private-key-pattern"
+      #| Response guards - filter LLM outputs #|
+      response:
+        builtins:
+          CREDIT_CARD:
+            action: MASK
+          SSN:
+            action: MASK
+          EMAIL:
+            action: MASK
 ---
-#| HTTPListenerPolicy for access logging #|
+#| HTTPListenerPolicy for enhanced access logging #|
+#| Includes AI-specific fields: tokens, cost, prompt guard actions #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: HTTPListenerPolicy
 metadata:
@@ -122,6 +192,7 @@ spec:
   - fileSink:
       path: /dev/stdout
       jsonFormat:
+        #| Standard fields #|
         timestamp: "%START_TIME%"
         method: "%REQ(:METHOD)%"
         path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
@@ -135,7 +206,14 @@ spec:
         userAgent: "%REQ(USER-AGENT)%"
         requestId: "%REQ(X-REQUEST-ID)%"
         authority: "%REQ(:AUTHORITY)%"
+        #| AI-specific fields #|
         xAiModel: "%REQ(X-AI-EG-MODEL)%"
+        #| Token usage and cost tracking (if available from backend) #|
+        inputTokens: "%RESP(X-INPUT-TOKENS)%"
+        outputTokens: "%RESP(X-OUTPUT-TOKENS)%"
+        costUsd: "%RESP(X-COST-USD)%"
+        #| Prompt guard action tracking #|
+        promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
 #% if azure_openai_us_east_api_key %#
 ---
 #| ============================================= #|

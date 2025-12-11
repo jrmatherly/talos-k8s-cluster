@@ -13,6 +13,28 @@ spec:
       env:
         - name: ADMIN_ADDR
           value: "0.0.0.0:15000"
+        - name: METRICS_ENABLED
+          value: "true"
+        - name: METRICS_PORT
+          value: "9090"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-metrics
+  labels:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+spec:
+  selector:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Service
@@ -79,7 +101,7 @@ spec:
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
 metadata:
-  name: agentgateway-rate-limit
+  name: agentgateway-comprehensive
 spec:
   targetRefs:
   - group: gateway.networking.k8s.io
@@ -88,9 +110,39 @@ spec:
   rateLimit:
     local:
       tokenBucket:
-        maxTokens: 100
-        tokensPerFill: 100
-        fillInterval: "60s"
+        maxTokens: 100000        # Maximum burst capacity
+        tokensPerFill: 10000     # Tokens added per interval
+        fillInterval: "60s"      # Refill interval (1 minute)
+  ai:
+    promptGuard:
+      request:
+        customResponseMessage: "Request blocked by security policy: contains sensitive data"
+        builtins:
+          CREDIT_CARD:
+            action: MASK         # Replace with [REDACTED]
+          SSN:
+            action: REJECT       # Block the request
+          EMAIL:
+            action: MASK         # Replace with [REDACTED]
+          PHONE_NUMBER:
+            action: MASK
+          IP_ADDRESS:
+            action: MASK
+        matches:
+        - regex: "\\b(?:password|secret|api[_-]?key|token)\\s*[:=]\\s*\\S+"
+          action: REJECT
+          name: "credential-pattern"
+        - regex: "\\b(?:BEGIN|END)\\s+(?:RSA|OPENSSH|PRIVATE)\\s+KEY"
+          action: REJECT
+          name: "private-key-pattern"
+      response:
+        builtins:
+          CREDIT_CARD:
+            action: MASK
+          SSN:
+            action: MASK
+          EMAIL:
+            action: MASK
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: HTTPListenerPolicy
@@ -119,6 +171,10 @@ spec:
         requestId: "%REQ(X-REQUEST-ID)%"
         authority: "%REQ(:AUTHORITY)%"
         xAiModel: "%REQ(X-AI-EG-MODEL)%"
+        inputTokens: "%RESP(X-INPUT-TOKENS)%"
+        outputTokens: "%RESP(X-OUTPUT-TOKENS)%"
+        costUsd: "%RESP(X-COST-USD)%"
+        promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: Backend

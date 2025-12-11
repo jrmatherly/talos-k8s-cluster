@@ -82,6 +82,7 @@ proxmox_csi_token_secret: "fake-secret"
 # obot_mcp_namespace: ""
 # obot_cookie_secret: ""
 # obot_encryption_key: ""
+# obot_use_agentgateway: false
 # kagent (disabled for private repo testing)
 # kagent_enabled: false
 # kagent_provider: ""

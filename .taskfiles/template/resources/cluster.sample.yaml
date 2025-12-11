@@ -714,6 +714,13 @@ cloudflare_token: ""
 #    Set to false if configuring model providers directly in obot
 # obot_use_ai_gateway: true
 
+# -- Use agentgateway (ai-gw) instead of Envoy AI Gateway (llms) for LLM requests.
+#    (OPTIONAL) / (DEFAULT: false)
+#    When enabled, routes LLM traffic through agentgateway for rate limiting,
+#    prompt guards, FinOps metrics, and MCP-focused features.
+#    Requires: agentgateway_enabled=true and Azure OpenAI backends configured.
+# obot_use_agentgateway: false
+
 # ==============================================================================
 # KAGENT CONFIGURATION (Optional - Kubernetes-native AI Agent Framework)
 # ==============================================================================

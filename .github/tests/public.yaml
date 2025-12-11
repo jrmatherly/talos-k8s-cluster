@@ -123,6 +123,7 @@ obot_memory_limit: "4Gi"
 # Advanced
 obot_encryption_provider: "custom"
 obot_use_ai_gateway: true
+obot_use_agentgateway: true
 # kagent Configuration (Kubernetes-native AI Agent Framework)
 kagent_enabled: true
 kagent_provider: "anthropic"
