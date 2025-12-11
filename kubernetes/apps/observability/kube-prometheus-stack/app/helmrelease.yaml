@@ -111,6 +111,8 @@ spec:
           searchNamespace: ALL
           labelValue: "1"
           folderAnnotation: grafana_folder
+          # Place default Kubernetes dashboards in the Kubernetes folder
+          defaultFolderName: "Kubernetes"
           provider:
             foldersFromFilesStructure: true
         datasources:
