@@ -55,6 +55,9 @@ spec:
     # ============================================================
     grafana:
       enabled: true
+      # Use Recreate strategy to avoid Multi-Attach errors with ReadWriteOnce PVC
+      deploymentStrategy:
+        type: Recreate
       defaultDashboardsEnabled: true
       defaultDashboardsTimezone: America/New_York
       admin:

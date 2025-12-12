@@ -105,6 +105,15 @@ spec:
             name: litellm-secret
             key: LITELLM_SALT_KEY
 
+      # UI Authentication (default: admin / MASTER_KEY)
+      - name: UI_USERNAME
+        value: "admin"
+      - name: UI_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LITELLM_MASTER_KEY
+
       # Redis/Dragonfly Cache Password
       - name: REDIS_PASSWORD
         valueFrom:
