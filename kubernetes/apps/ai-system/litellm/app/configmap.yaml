@@ -369,6 +369,9 @@ data:
           litellm_credential_name: azure_credential_us_east2
           rpm: 18000
           tpm: 3000000
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
           id: "84"
           mode: embedding
