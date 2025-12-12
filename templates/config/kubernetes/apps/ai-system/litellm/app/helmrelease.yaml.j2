@@ -156,14 +156,18 @@ spec:
       existingConfigMapName: litellm-config
 
     # ============================================================
-    # Additional Volumes (for non-root user cache)
+    # Additional Volumes (for non-root user cache and npm)
     # ============================================================
     volumes:
       - name: cache
         emptyDir: {}
+      - name: npm-cache
+        emptyDir: {}
     volumeMounts:
       - name: cache
         mountPath: "/.cache"
+      - name: npm-cache
+        mountPath: "/.npm"
 
     # ============================================================
     # Probes Configuration
