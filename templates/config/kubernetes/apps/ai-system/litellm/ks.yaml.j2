@@ -6,10 +6,16 @@ metadata:
   name: litellm
 spec:
   dependsOn:
-    - name: cloudnative-pg
-      namespace: database
     - name: cilium
       namespace: kube-system
+    - name: cloudnative-pg
+      namespace: cnpg-system
+    - name: envoy-gateway
+      namespace: network
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+    - name: proxmox-csi
+      namespace: csi-proxmox
+#% endif %#
   interval: 1h
   timeout: 15m
   path: ./kubernetes/apps/ai-system/litellm/app
@@ -19,7 +25,7 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: ai-system
-  wait: true
+  wait: false
   postBuild:
     substituteFrom:
       - kind: Secret

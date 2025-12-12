@@ -1,11 +1,13 @@
 ---
 # CloudNativePG Cluster for LiteLLM
+# Uses PostgreSQL 18 minimal image with pgvector extension via ImageVolume
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: litellm-db
 spec:
-  imageName: ghcr.io/cloudnative-pg/postgresql:18-bookworm
+  # Use PostgreSQL 18 minimal image for extension_control_path support
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
 
   instances: 3
 
@@ -14,7 +16,7 @@ spec:
     size: 20Gi
     storageClass: proxmox-csi
 
-  # PostgreSQL Configuration
+  # PostgreSQL Configuration with pgvector extension
   postgresql:
     parameters:
       max_connections: "200"
@@ -29,6 +31,11 @@ spec:
       work_mem: "4MB"
       min_wal_size: "1GB"
       max_wal_size: "4GB"
+    # pgvector extension for semantic search (litellm-pgvector)
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.1-18-trixie
 
   # Bootstrap Configuration
   bootstrap:
@@ -51,7 +58,20 @@ spec:
       cpu: "1000m"
       memory: "2Gi"
 
-  # Anti-affinity for HA
+  # Anti-affinity for HA (CNPG enables this by default)
   affinity:
     enablePodAntiAffinity: true
     podAntiAffinityType: preferred
+---
+# Database resource to declaratively manage litellm database with pgvector extension
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: litellm-db-litellm
+spec:
+  name: litellm
+  owner: litellm
+  cluster:
+    name: litellm-db
+  extensions:
+    - name: vector
