@@ -23,8 +23,12 @@ data:
           tpm: 250000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["premium-models"]
+          id: "41"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-4.1
 
       - model_name: gpt-4.1-nano
@@ -36,8 +40,12 @@ data:
           tpm: 450000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["default-models"]
+          id: "42"
+          access_groups: ["default-models", "aangpt-models", "aanai-models"]
           base_model: gpt-4.1-nano
 
       - model_name: gpt-4o-mini
@@ -49,8 +57,12 @@ data:
           tpm: 500000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["default-models"]
+          id: "40"
+          access_groups: ["default-models", "aangpt-models", "aanai-models"]
           base_model: gpt-4o-mini
 
       - model_name: o3
@@ -66,8 +78,12 @@ data:
           tpm: 250000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["premium-models"]
+          id: "53"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: o3
 
       - model_name: o4-mini
@@ -83,8 +99,12 @@ data:
           tpm: 400000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["premium-models"]
+          id: "54"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: o4-mini
 
       - model_name: text-embedding-3-small
@@ -93,9 +113,13 @@ data:
           litellm_credential_name: azure_credential_us_east
           rpm: 3000
           tpm: 500000
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "86"
           mode: embedding
-          access_groups: ["default-models"]
+          access_groups: ["default-models", "developer-models", "aangpt-models", "aanai-models"]
           base_model: text-embedding-3-small
 
       - model_name: text-embedding-ada-002
@@ -104,9 +128,13 @@ data:
           litellm_credential_name: azure_credential_us_east
           rpm: 3000
           tpm: 500000
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "88"
           mode: embedding
-          access_groups: ["default-models"]
+          access_groups: ["default-models", "developer-models", "aangpt-models", "aanai-models"]
           base_model: text-embedding-ada-002
 #% endif %#
 
@@ -121,9 +149,34 @@ data:
           tpm: 1750000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["premium-models"]
+          id: "10"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5
+
+      - model_name: gpt-5-chat
+        litellm_params:
+          model: azure/gpt-5-chat
+          litellm_credential_name: azure_credential_us_east2
+          thinking:
+            type: enabled
+            budget_tokens: 16384
+          max_completion_tokens: 16384
+          merge_reasoning_content_in_choices: true
+          rpm: 1750
+          tpm: 1750000
+          timeout: 300
+          stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
+        model_info:
+          id: "11"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
+          base_model: gpt-5-chat
 
       - model_name: gpt-5-mini
         litellm_params:
@@ -134,8 +187,12 @@ data:
           tpm: 2500000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["default-models"]
+          id: "12"
+          access_groups: ["default-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5-mini
 
       - model_name: gpt-5-nano
@@ -147,8 +204,12 @@ data:
           tpm: 15000000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["default-models"]
+          id: "13"
+          access_groups: ["default-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5-nano
 
       - model_name: gpt-5.1
@@ -160,10 +221,32 @@ data:
           tpm: 2000000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "6"
           supports_reasoning: true
-          access_groups: ["premium-models"]
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.1
+
+      - model_name: gpt-5.1-chat
+        litellm_params:
+          model: azure/gpt-5.1-chat
+          litellm_credential_name: azure_credential_us_east2
+          max_completion_tokens: 16384
+          rpm: 20000
+          tpm: 2000000
+          timeout: 300
+          stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
+        model_info:
+          id: "7"
+          supports_reasoning: true
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
+          base_model: gpt-5.1-chat
 
       - model_name: gpt-5.1-codex
         litellm_params:
@@ -174,8 +257,12 @@ data:
           tpm: 2000000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["premium-models"]
+          id: "8"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.1-codex
 
       - model_name: gpt-5.1-codex-mini
@@ -187,8 +274,12 @@ data:
           tpm: 2500000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
-          access_groups: ["premium-models"]
+          id: "9"
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.1-codex-mini
 
       - model_name: gpt-5.2
@@ -200,9 +291,13 @@ data:
           tpm: 2250000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "1"
           supports_reasoning: true
-          access_groups: ["premium-models"]
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.2
 
       # Anthropic via Azure (Claude models)
@@ -215,9 +310,14 @@ data:
           tpm: 1500000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "20"
           supports_reasoning: true
-          access_groups: ["premium-models"]
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
+          base_model: claude-opus-4-5
 
       - model_name: claude-sonnet-4-5
         litellm_params:
@@ -228,9 +328,14 @@ data:
           tpm: 2750000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "21"
           supports_reasoning: true
-          access_groups: ["premium-models"]
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
+          base_model: claude-sonnet-4-5
 
       - model_name: claude-opus-4-1
         litellm_params:
@@ -241,9 +346,14 @@ data:
           tpm: 1250000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "22"
           supports_reasoning: true
-          access_groups: ["premium-models"]
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
+          base_model: claude-opus-4-1
 
       - model_name: claude-haiku-4-5
         litellm_params:
@@ -254,9 +364,14 @@ data:
           tpm: 2250000
           timeout: 300
           stream_timeout: 300
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "23"
           supports_reasoning: true
-          access_groups: ["premium-models"]
+          access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
+          base_model: cclaude-haiku-4-5
 
       - model_name: text-embedding-3-large
         litellm_params:
@@ -264,9 +379,13 @@ data:
           litellm_credential_name: azure_credential_us_east2
           rpm: 18000
           tpm: 3000000
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
+          id: "84"
           mode: embedding
-          access_groups: ["default-models"]
+          access_groups: ["default-models", "developer-models", "aangpt-models", "aanai-models"]
           base_model: text-embedding-3-large
 #% endif %#
 
@@ -311,15 +430,20 @@ data:
       max_file_size_mb: 25
       set_verbose: false
       json_logs: true
+      log_raw_request_response: true
 
       # Fallback Logic
       fallbacks:
         - gpt-5.2:
             - gpt-5.1
-            - gpt-5
+            - gpt-5.1-chat
+            - gpt-4.1
         - gpt-5.1:
             - gpt-5
-            - gpt-5-mini
+            - gpt-5.1-chat
+            - gpt-4.1
+
+      context_window_fallbacks: [{ "gpt-5-nano": ["gpt-5-mini"] }]
 
       # Caching
       cache: true
@@ -336,6 +460,8 @@ data:
           - acompletion
           - embedding
           - aembedding
+          - atext_completion
+          - atranscription
 
       # Callbacks - 'callbacks' enables /metrics endpoint
       callbacks:
@@ -360,6 +486,17 @@ data:
       langfuse_secret: os.environ/LANGFUSE_SECRET_KEY
       langfuse_enabled: true
       langfuse_sample_rate: 1.0
+      langfuse_default_tags:
+        [
+          "cache_hit",
+          "cache_key",
+          "proxy_base_url",
+          "user_api_key_alias",
+          "user_api_key_user_id",
+          "user_api_key_user_email",
+          "user_api_key_team_alias",
+          "semantic-similarity",
+        ]
 #% endif %#
 
     # Router Settings
@@ -369,6 +506,8 @@ data:
       redis_port: os.environ/REDIS_PORT
       redis_password: os.environ/REDIS_PASSWORD
       enable_pre_call_checks: true
+      model_group_alias:
+        { "my-special-fake-model-alias-name": "fake-openai-endpoint-3" }
       allowed_fails: 3
       cooldown_time: 30
       retry_policy:
@@ -382,14 +521,28 @@ data:
     general_settings:
       master_key: os.environ/LITELLM_MASTER_KEY
       database_url: os.environ/DATABASE_URL
-      database_connection_pool_limit: 50
+      database_connection_pool_limit: 20
       database_connection_timeout: 60
       store_model_in_db: os.environ/STORE_MODEL_IN_DB
       proxy_batch_write_at: 60
       maximum_spend_logs_retention_period: "35d"
       maximum_spend_logs_retention_interval: "1d"
       allow_requests_on_db_unavailable: true
+      store_prompts_in_spend_logs: true
+      user_header_name: X-OpenWebUI-User-Email
+      disable_spend_logs: false
 #% if litellm_mcp_enabled %#
       mcp_client_side_auth_header_name: "authorization"
 #% endif %#
+      # Passthrough Endpoints
+      pass_through_endpoints:
+        # Cohere v2
+        - path: "/v2/rerank" # route you want to add to LiteLLM Proxy Server
+          #target: "https://aan-cohere-rerank-v3-5.eastus.models.ai.azure.com/v2/rerank" # URL this route should forward requests to
+          target: "os.environ/AZURE_API_COHERE_BASE"
+          headers: # headers to forward to this URL
+            Authorization: "bearer os.environ/AZURE_API_COHERE_KEY"
+            content-type: application/json # (Optional) Extra Headers to pass to this endpoint
+            accept: application/json
+          forward_headers: True
 #% endif %#

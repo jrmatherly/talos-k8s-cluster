@@ -42,6 +42,8 @@ azure_openai_us_east_resource_name: "test-openai-resource"
 # Azure OpenAI - US East2 Region
 azure_openai_us_east2_api_key: "fake-api-key"
 azure_openai_us_east2_resource_name: "ets-east-us2"
+# Azure Cohere API (for reranking models)
+azure_cohere_api_base: "https://test-cohere-rerank.eastus.models.ai.azure.com/v2/rerank"
 # Observability Stack (Prometheus/Grafana for K8s metrics)
 observability_enabled: true
 grafana_admin_password: "test-password"

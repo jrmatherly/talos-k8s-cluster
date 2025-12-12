@@ -197,6 +197,8 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("azure_openai_us_east_resource_name", "")
         data.setdefault("azure_openai_us_east2_api_key", "")
         data.setdefault("azure_openai_us_east2_resource_name", "")
+        # Azure Cohere API default
+        data.setdefault("azure_cohere_api_base", "")
 
         # Observability Stack defaults (Prometheus/Grafana for K8s metrics)
         data.setdefault("observability_enabled", False)

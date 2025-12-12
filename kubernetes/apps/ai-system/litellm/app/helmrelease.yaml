@@ -84,10 +84,11 @@ spec:
       LITELLM_MIGRATION_DIR: "/tmp"
       LITELLM_CALLBACKS: "prometheus"
       AZURE_API_BASE: "https://aaronsai.openai.azure.com"
-      AZURE_API_VERSION: "2024-10-01-preview"
+      AZURE_API_VERSION: "2025-01-01-preview"
       AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com"
-      AZURE_API_VERSION_EAST2: "2024-10-01-preview"
+      AZURE_API_VERSION_EAST2: "2025-01-01-preview"
       AZURE_ANTHROPIC_API_BASE: "https://ets-east-us2.models.ai.azure.com"
+      AZURE_COHERE_API_BASE: "https://aan-cohere-rerank-v3-5.eastus.models.ai.azure.com/v2/rerank"
       LANGFUSE_HOST: "https://aiops.matherly.net"
 
     # ============================================================

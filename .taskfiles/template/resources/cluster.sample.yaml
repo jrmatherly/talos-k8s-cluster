@@ -297,6 +297,11 @@ cloudflare_token: ""
 #    Example: "my-ai-foundry-east2" for https://my-ai-foundry-east2.openai.azure.com
 # azure_openai_us_east2_resource_name: ""
 
+# -- Azure Cohere API base URL for reranking models.
+#    (optional) - Full URL to the Azure AI inference endpoint
+#    Example: "https://my-cohere-rerank.eastus.models.ai.azure.com/v2/rerank"
+# azure_cohere_api_base: ""
+
 # ==============================================================================
 # AZURE ENTRA ID AUTHENTICATION
 # ==============================================================================
