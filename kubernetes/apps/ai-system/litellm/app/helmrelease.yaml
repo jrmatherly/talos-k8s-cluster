@@ -150,8 +150,10 @@ spec:
     # ============================================================
     # Config File (mounted from ConfigMap)
     # ============================================================
-    litellm_config:
-      existingConfigMapName: litellm-config
+    proxyConfigMap:
+      create: false
+      name: litellm-config
+      key: config.yaml
 
     # ============================================================
     # Probes Configuration
