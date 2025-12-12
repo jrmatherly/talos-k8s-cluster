@@ -24,9 +24,33 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
-    # Langfuse observability
+    # Azure AI Services (Anthropic, Cohere Embed, Cognitive Services)
+    - toFQDNs:
+        - matchPattern: "*.services.ai.azure.com"
+        - matchPattern: "*.cognitiveservices.azure.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Azure AI Models (Cohere Rerank)
+    - toFQDNs:
+        - matchPattern: "*.models.ai.azure.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Azure Speech Services (TTS/STT)
+    - toFQDNs:
+        - matchPattern: "*.stt.speech.microsoft.com"
+        - matchPattern: "*.tts.speech.microsoft.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    # Langfuse observability (cloud and self-hosted)
     - toFQDNs:
         - matchPattern: "*.langfuse.com"
+        - matchName: "aiops.matherly.net"
       toPorts:
         - ports:
             - port: "443"

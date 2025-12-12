@@ -161,9 +161,7 @@ data:
         litellm_params:
           model: azure/gpt-5-chat
           litellm_credential_name: azure_credential_us_east2
-          thinking:
-            type: enabled
-            budget_tokens: 16384
+          thinking: { "type": "enabled", "budget_tokens": 16384 }
           max_completion_tokens: 16384
           merge_reasoning_content_in_choices: true
           rpm: 1750
@@ -319,7 +317,6 @@ data:
           id: "20"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: claude-opus-4-5
 
       - model_name: claude-sonnet-4-5
         litellm_params:
@@ -337,7 +334,6 @@ data:
           id: "21"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: claude-sonnet-4-5
 
       - model_name: claude-opus-4-1
         litellm_params:
@@ -355,7 +351,6 @@ data:
           id: "22"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: claude-opus-4-1
 
       - model_name: claude-haiku-4-5
         litellm_params:
@@ -373,7 +368,6 @@ data:
           id: "23"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: claude-haiku-4-5
 #% endif %#
 
 #% if azure_openai_us_east2_api_key %#
@@ -383,9 +377,6 @@ data:
           litellm_credential_name: azure_credential_us_east2
           rpm: 18000
           tpm: 3000000
-          cache_control_injection_points:
-            - location: message
-              role: system
         model_info:
           id: "84"
           mode: embedding
@@ -438,6 +429,19 @@ data:
       json_logs: true
       log_raw_request_response: true
 
+      # Budget Alert Configuration
+      # budget_alert_ttl: 86400 # 24 hours between budget alerts
+      # budget_alert_webhook: os.environ/BUDGET_ALERT_WEBHOOK_URL # Optional webhook for budget alerts
+      # Enhanced Monitoring
+      track_cost_per_model: true # Track costs per model
+      track_cost_per_team: true # Track costs per team
+      track_cost_per_user: true # Track costs per user
+      # Database Views for Analytics (ensures missing views are created)
+      enable_budget_tracking: true
+      enable_usage_analytics: true
+      create_monthly_spend_views: true
+      create_user_spend_views: true
+
       # Fallback Logic
       fallbacks:
         - gpt-5.2:
@@ -451,6 +455,26 @@ data:
 
       context_window_fallbacks: [{ "gpt-5-nano": ["gpt-5-mini"] }]
 
+      # Security and Rate Limiting Enhancements
+      security_settings:
+        # IP-based rate limiting
+        ip_whitelist: [] # Optional: List of allowed IP addresses
+        ip_blacklist: [] # Optional: List of blocked IP addresses
+        # Request validation
+        enforce_user_header: true # Require user identification headers
+        log_failed_requests: true # Log all failed authentication attempts
+        max_requests_per_minute_per_ip: 1000 # Rate limit per IP address
+
+      # Advanced Monitoring Configuration
+      monitoring:
+        # Performance metrics
+        track_response_time: true
+        track_token_usage: true
+        track_error_rates: true
+        # Alerting thresholds
+        response_time_threshold_ms: 5000 # Alert if responses take > 5 seconds
+        error_rate_threshold_percent: 5.0 # Alert if error rate > 5%
+
       # Caching
       cache: true
       cache_params:
@@ -462,12 +486,14 @@ data:
         ttl: 600
         mode: default_on
         supported_call_types:
-          - completion
-          - acompletion
-          - embedding
-          - aembedding
-          - atext_completion
-          - atranscription
+          [
+            "acompletion",
+            "atext_completion",
+            "completion",
+            "embedding",
+            "aembedding",
+            "atranscription",
+          ]
 
       # Callbacks - 'callbacks' enables /metrics endpoint
       callbacks:
