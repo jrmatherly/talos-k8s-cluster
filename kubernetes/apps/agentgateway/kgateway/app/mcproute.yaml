@@ -79,6 +79,13 @@ spec:
   - matches:
     - path:
         type: PathPrefix
+        value: /config_dump
+    backendRefs:
+    - name: agentgateway-admin
+      port: 15000
+  - matches:
+    - path:
+        type: PathPrefix
         value: /oauth2
     backendRefs:
     - name: agentgateway-admin

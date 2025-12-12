@@ -60,8 +60,7 @@ spec:
   type: ClusterIP
 ---
 #| HTTPRoute for agentgateway admin UI #|
-#| Routes /ui path prefix to admin interface for both hostnames #|
-#| Admin UI serves /ui, /config, /config_dump, etc. #|
+#| Routes /ui, /config, /config_dump path prefixes to admin interface #|
 #| Protected by OAuth2 via TrafficPolicy when keycloak_enabled #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -89,6 +88,14 @@ spec:
     - path:
         type: PathPrefix
         value: /config
+    backendRefs:
+    - name: agentgateway-admin
+      port: 15000
+  #| Route /config_dump path to admin UI service (separate from /config) #|
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /config_dump
     backendRefs:
     - name: agentgateway-admin
       port: 15000
