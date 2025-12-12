@@ -9,6 +9,19 @@ spec:
     name: litellm
   interval: 1h
   timeout: 15m
+  install:
+    crds: CreateReplace
+    remediation:
+      retries: 3
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+  # Skip Helm tests - chart has bug in test-env-vars.yaml expecting DD_* vars
+  test:
+    enable: false
   values:
     # ============================================================
     # Image Configuration
@@ -42,17 +55,30 @@ spec:
       port: 4000
 
     # ============================================================
-    # Environment Variables
+    # Environment Variables (simple key-value map)
     # ============================================================
     envVars:
+      STORE_MODEL_IN_DB: "true"
+      REDIS_HOST: "litellm-dragonfly"
+      REDIS_PORT: "6379"
+      REDIS_NAMESPACE: "litellm"
+      AZURE_API_BASE: "https://aaronsai.openai.azure.com"
+      AZURE_API_VERSION: "2024-10-01-preview"
+      AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com"
+      AZURE_API_VERSION_EAST2: "2024-10-01-preview"
+      AZURE_ANTHROPIC_API_BASE: "https://ets-east-us2.models.ai.azure.com"
+      LANGFUSE_HOST: "https://aiops.matherly.net"
+
+    # ============================================================
+    # Extra Environment Variables (K8s env spec with secretKeyRef)
+    # ============================================================
+    extraEnvVars:
       # Database Configuration
       - name: DATABASE_URL
         valueFrom:
           secretKeyRef:
             name: litellm-secret
             key: DATABASE_URL
-      - name: STORE_MODEL_IN_DB
-        value: "true"
       - name: LITELLM_MASTER_KEY
         valueFrom:
           secretKeyRef:
@@ -64,18 +90,12 @@ spec:
             name: litellm-secret
             key: LITELLM_SALT_KEY
 
-      # Redis/Dragonfly Cache Configuration
-      - name: REDIS_HOST
-        value: "litellm-dragonfly"
-      - name: REDIS_PORT
-        value: "6379"
+      # Redis/Dragonfly Cache Password
       - name: REDIS_PASSWORD
         valueFrom:
           secretKeyRef:
             name: litellm-secret
             key: REDIS_PASSWORD
-      - name: REDIS_NAMESPACE
-        value: "litellm"
 
       # Azure OpenAI US East
       - name: AZURE_API_KEY
@@ -83,10 +103,6 @@ spec:
           secretKeyRef:
             name: litellm-secret
             key: AZURE_API_KEY
-      - name: AZURE_API_BASE
-        value: "https://aaronsai.openai.azure.com"
-      - name: AZURE_API_VERSION
-        value: "2024-10-01-preview"
 
       # Azure OpenAI US East2
       - name: AZURE_API_KEY_EAST2
@@ -94,16 +110,8 @@ spec:
           secretKeyRef:
             name: litellm-secret
             key: AZURE_API_KEY_EAST2
-      - name: AZURE_API_BASE_EAST2
-        value: "https://ets-east-us2.openai.azure.com"
-      - name: AZURE_API_VERSION_EAST2
-        value: "2024-10-01-preview"
-      - name: AZURE_ANTHROPIC_API_BASE
-        value: "https://ets-east-us2.models.ai.azure.com"
 
       # Langfuse Observability
-      - name: LANGFUSE_HOST
-        value: "https://aiops.matherly.net"
       - name: LANGFUSE_PUBLIC_KEY
         valueFrom:
           secretKeyRef:
