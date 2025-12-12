@@ -1,0 +1,158 @@
+#% if litellm_enabled %#
+---
+# CiliumNetworkPolicy for LiteLLM - FQDN-based egress to Azure OpenAI
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: litellm-azure-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: litellm
+  egress:
+    # Azure OpenAI endpoints (US East)
+#% if azure_openai_us_east_api_key %#
+    - toFQDNs:
+        - matchName: "#{ azure_openai_us_east_resource_name }#.openai.azure.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+#% endif %#
+    # Azure OpenAI endpoints (US East2)
+#% if azure_openai_us_east2_api_key %#
+    - toFQDNs:
+        - matchName: "#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
+        - matchName: "#{ azure_openai_us_east2_resource_name }#.models.ai.azure.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+#% endif %#
+#% if litellm_langfuse_enabled %#
+    # Langfuse observability
+    - toFQDNs:
+        - matchPattern: "*.langfuse.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+#% endif %#
+---
+# NetworkPolicy for LiteLLM proxy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: litellm
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: litellm
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from Envoy Gateway (external access)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 4000
+    # Allow from internal services (e.g., kagent, obot)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kagent
+      ports:
+        - protocol: TCP
+          port: 4000
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 4000
+    # Allow Prometheus scraping
+#% if observability_enabled %#
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 4000
+#% endif %#
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # PostgreSQL (CloudNativePG)
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: litellm-db
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Dragonfly (Redis-compatible cache)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: dragonfly
+              app.kubernetes.io/instance: litellm-dragonfly
+      ports:
+        - protocol: TCP
+          port: 6379
+    # External LLM providers (Azure OpenAI, Langfuse)
+    # Note: FQDN-based egress is handled by CiliumNetworkPolicy above
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# NetworkPolicy for Dragonfly cache
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: litellm-dragonfly
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/instance: litellm-dragonfly
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from LiteLLM pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
+      ports:
+        - protocol: TCP
+          port: 6379
+  egress:
+    # DNS only - Dragonfly doesn't need external access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+#% endif %#

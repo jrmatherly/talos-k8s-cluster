@@ -332,6 +332,27 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("kagent_postgres_user", "kagent")
         data.setdefault("kagent_postgres_password", "")
 
+        # LiteLLM defaults (LLM Proxy with Multi-Provider Routing)
+        data.setdefault("litellm_enabled", False)
+        data.setdefault("litellm_master_key", "")
+        data.setdefault("litellm_salt_key", "")
+        data.setdefault("litellm_db_password", "")
+        data.setdefault("litellm_cache_password", "")
+        data.setdefault("litellm_mcp_enabled", True)
+        data.setdefault("litellm_replicas_min", 2)
+        data.setdefault("litellm_replicas_max", 5)
+        data.setdefault("litellm_cpu_request", "500m")
+        data.setdefault("litellm_cpu_limit", "2000m")
+        data.setdefault("litellm_memory_request", "512Mi")
+        data.setdefault("litellm_memory_limit", "2Gi")
+        data.setdefault("litellm_postgresql_replicas", 3)
+        data.setdefault("litellm_postgresql_storage_size", "20Gi")
+        data.setdefault("litellm_cache_memory", "1Gi")
+        data.setdefault("litellm_langfuse_enabled", False)
+        data.setdefault("litellm_langfuse_host", "https://cloud.langfuse.com")
+        data.setdefault("litellm_langfuse_public_key", "")
+        data.setdefault("litellm_langfuse_secret_key", "")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

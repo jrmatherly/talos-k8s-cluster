@@ -188,6 +188,28 @@ import (
 	kagent_azure_endpoint?: string & !=""       // Azure OpenAI endpoint (if provider=azure)
 	kagent_azure_deployment?: string & !=""     // Azure OpenAI deployment name (if provider=azure)
 	kagent_ollama_host?: string & !=""          // Ollama host (if provider=ollama, default: ollama.ollama.svc.cluster.local:11434)
+
+	// LiteLLM Configuration (LLM Proxy with Multi-Provider Routing)
+	// Unified AI Gateway for routing requests across Azure OpenAI, Anthropic, and other providers
+	litellm_enabled?: bool                      // Enable LiteLLM deployment
+	litellm_master_key?: string & !=""          // Master key for admin API access (generate with: openssl rand -hex 32)
+	litellm_salt_key?: string & !=""            // Salt key for encrypting API keys in database (DO NOT change after adding models)
+	litellm_db_password?: string & !=""         // PostgreSQL password for LiteLLM database
+	litellm_cache_password?: string & !=""      // Dragonfly/Redis password for caching
+	litellm_mcp_enabled?: *true | bool          // Enable MCP server support (Open Source feature)
+	litellm_replicas_min?: int & >=1            // Minimum replicas for HPA (default: 2)
+	litellm_replicas_max?: int & >=1            // Maximum replicas for HPA (default: 5)
+	litellm_cpu_request?: string & !=""         // CPU request (default: 500m)
+	litellm_cpu_limit?: string & !=""           // CPU limit (default: 2000m)
+	litellm_memory_request?: string & !=""      // Memory request (default: 512Mi)
+	litellm_memory_limit?: string & !=""        // Memory limit (default: 2Gi)
+	litellm_postgresql_replicas?: int & >=1     // CNPG PostgreSQL replicas (default: 3)
+	litellm_postgresql_storage_size?: string & !=""  // CNPG PostgreSQL storage size (default: 20Gi)
+	litellm_cache_memory?: string & !=""        // Dragonfly memory limit (default: 1Gi)
+	litellm_langfuse_enabled?: bool             // Enable Langfuse observability integration
+	litellm_langfuse_host?: string & !=""       // Langfuse host URL (default: https://cloud.langfuse.com)
+	litellm_langfuse_public_key?: string & !="" // Langfuse public key
+	litellm_langfuse_secret_key?: string & !="" // Langfuse secret key
 }
 
 #Config

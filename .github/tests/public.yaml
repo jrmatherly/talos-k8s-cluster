@@ -156,3 +156,23 @@ kagent_kmcp_enabled: true
 kagent_write_operations_enabled: false
 kagent_grafana_url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
 kagent_grafana_api_key: "test-grafana-api-key"
+# LiteLLM Configuration (LLM Proxy with Multi-Provider Routing)
+litellm_enabled: true
+litellm_master_key: "sk-test-master-key-1234567890abcdef"
+litellm_salt_key: "test-salt-key-1234567890abcdef"
+litellm_db_password: "test-litellm-db-password"
+litellm_cache_password: "test-litellm-cache-password"
+litellm_mcp_enabled: true
+litellm_replicas_min: 2
+litellm_replicas_max: 5
+litellm_cpu_request: "500m"
+litellm_cpu_limit: "2000m"
+litellm_memory_request: "512Mi"
+litellm_memory_limit: "2Gi"
+litellm_postgresql_replicas: 3
+litellm_postgresql_storage_size: "20Gi"
+litellm_cache_memory: "1Gi"
+litellm_langfuse_enabled: true
+litellm_langfuse_host: "https://cloud.langfuse.com"
+litellm_langfuse_public_key: "pk-lf-test-public-key"
+litellm_langfuse_secret_key: "sk-lf-test-secret-key"

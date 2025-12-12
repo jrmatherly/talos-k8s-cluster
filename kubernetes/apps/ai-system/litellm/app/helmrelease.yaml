@@ -1,0 +1,186 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: litellm
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: litellm
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Image Configuration
+    # ============================================================
+    image:
+      repository: ghcr.io/berriai/litellm
+      tag: main-stable
+      pullPolicy: IfNotPresent
+
+    # ============================================================
+    # Replica Configuration (HPA handles scaling)
+    # ============================================================
+    replicaCount: 2
+
+    # ============================================================
+    # Resource Configuration
+    # ============================================================
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "2000m"
+        memory: "2Gi"
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      port: 4000
+
+    # ============================================================
+    # Environment Variables
+    # ============================================================
+    envVars:
+      # Database Configuration
+      - name: DATABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: DATABASE_URL
+      - name: STORE_MODEL_IN_DB
+        value: "true"
+      - name: LITELLM_MASTER_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LITELLM_MASTER_KEY
+      - name: LITELLM_SALT_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LITELLM_SALT_KEY
+
+      # Redis/Dragonfly Cache Configuration
+      - name: REDIS_HOST
+        value: "litellm-dragonfly"
+      - name: REDIS_PORT
+        value: "6379"
+      - name: REDIS_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: REDIS_PASSWORD
+      - name: REDIS_NAMESPACE
+        value: "litellm"
+
+      # Azure OpenAI US East
+      - name: AZURE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_API_KEY
+      - name: AZURE_API_BASE
+        value: "https://aaronsai.openai.azure.com"
+      - name: AZURE_API_VERSION
+        value: "2024-10-01-preview"
+
+      # Azure OpenAI US East2
+      - name: AZURE_API_KEY_EAST2
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_API_KEY_EAST2
+      - name: AZURE_API_BASE_EAST2
+        value: "https://ets-east-us2.openai.azure.com"
+      - name: AZURE_API_VERSION_EAST2
+        value: "2024-10-01-preview"
+      - name: AZURE_ANTHROPIC_API_BASE
+        value: "https://ets-east-us2.models.ai.azure.com"
+
+      # Langfuse Observability
+      - name: LANGFUSE_HOST
+        value: "https://aiops.matherly.net"
+      - name: LANGFUSE_PUBLIC_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LANGFUSE_PUBLIC_KEY
+      - name: LANGFUSE_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LANGFUSE_SECRET_KEY
+
+    # ============================================================
+    # Config File (mounted from ConfigMap)
+    # ============================================================
+    litellm_config:
+      existingConfigMapName: litellm-config
+
+    # ============================================================
+    # Probes Configuration
+    # ============================================================
+    livenessProbe:
+      httpGet:
+        path: /health/liveliness
+        port: 4000
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+    readinessProbe:
+      httpGet:
+        path: /health/readiness
+        port: 4000
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+
+    # ============================================================
+    # Pod Disruption Budget
+    # ============================================================
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+
+    # ============================================================
+    # Autoscaling
+    # ============================================================
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+
+    # ============================================================
+    # Security Context
+    # ============================================================
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 1000
+      capabilities:
+        drop:
+          - ALL
+
+    # ============================================================
+    # Pod Annotations (for Prometheus scraping)
+    # ============================================================
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "4000"
+      prometheus.io/path: "/metrics"

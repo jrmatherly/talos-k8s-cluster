@@ -894,3 +894,114 @@ cloudflare_token: ""
 #    The API key is stored in kagent-grafana-secret (SOPS-encrypted) and injected
 #    via Flux valuesFrom - it never appears in the rendered HelmRelease.
 # kagent_grafana_api_key: ""
+
+# ==============================================================================
+# LITELLM CONFIGURATION (Optional - LLM Proxy with Multi-Provider Routing)
+# ==============================================================================
+# LiteLLM is a unified AI Gateway for routing requests across Azure OpenAI,
+# Anthropic, and other LLM providers with spend tracking, caching, and team management.
+# REF: https://docs.litellm.ai/docs/
+# REF: docs/LITELLM_DESIGN.md
+
+# -- Enable LiteLLM deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# litellm_enabled: true
+
+# -- LiteLLM master key (admin API access).
+#    (REQUIRED if litellm_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -hex 32
+#    NOTE: Must start with "sk-" prefix
+# litellm_master_key: "sk-your-master-key"
+
+# -- Salt key for encrypting API keys stored in database.
+#    (REQUIRED if litellm_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -hex 16
+#    WARNING: DO NOT change after adding models - will break existing encrypted keys
+# litellm_salt_key: ""
+
+# -- PostgreSQL password for LiteLLM database.
+#    (REQUIRED if litellm_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 24
+# litellm_db_password: ""
+
+# -- Dragonfly (Redis-compatible) password for caching.
+#    (REQUIRED if litellm_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 24
+# litellm_cache_password: ""
+
+# -- Enable MCP server support (Open Source feature).
+#    (OPTIONAL) / (DEFAULT: true)
+#    Allows LiteLLM to act as an MCP server bridge for tool calling.
+# litellm_mcp_enabled: true
+
+# ==============================================================================
+# LITELLM SCALING CONFIGURATION
+# ==============================================================================
+
+# -- Minimum replicas for HPA.
+#    (OPTIONAL) / (DEFAULT: 2)
+# litellm_replicas_min: 2
+
+# -- Maximum replicas for HPA.
+#    (OPTIONAL) / (DEFAULT: 5)
+# litellm_replicas_max: 5
+
+# -- CPU request for LiteLLM pods.
+#    (OPTIONAL) / (DEFAULT: "500m")
+# litellm_cpu_request: "500m"
+
+# -- CPU limit for LiteLLM pods.
+#    (OPTIONAL) / (DEFAULT: "2000m")
+# litellm_cpu_limit: "2000m"
+
+# -- Memory request for LiteLLM pods.
+#    (OPTIONAL) / (DEFAULT: "512Mi")
+# litellm_memory_request: "512Mi"
+
+# -- Memory limit for LiteLLM pods.
+#    (OPTIONAL) / (DEFAULT: "2Gi")
+# litellm_memory_limit: "2Gi"
+
+# ==============================================================================
+# LITELLM POSTGRESQL CONFIGURATION
+# ==============================================================================
+
+# -- CNPG PostgreSQL cluster replicas.
+#    (OPTIONAL) / (DEFAULT: 3)
+#    PostgreSQL is used for spend tracking, user/team management, and model storage.
+# litellm_postgresql_replicas: 3
+
+# -- CNPG PostgreSQL storage size.
+#    (OPTIONAL) / (DEFAULT: "20Gi")
+# litellm_postgresql_storage_size: "20Gi"
+
+# ==============================================================================
+# LITELLM CACHE CONFIGURATION (Dragonfly)
+# ==============================================================================
+
+# -- Dragonfly memory limit.
+#    (OPTIONAL) / (DEFAULT: "1Gi")
+#    Dragonfly is used for caching responses, rate limiting, and router state.
+# litellm_cache_memory: "1Gi"
+
+# ==============================================================================
+# LITELLM LANGFUSE OBSERVABILITY (Optional)
+# ==============================================================================
+# Langfuse provides team-based spend tracking and observability.
+# REF: https://docs.litellm.ai/docs/observability/langfuse_integration
+
+# -- Enable Langfuse observability integration.
+#    (OPTIONAL) / (DEFAULT: false)
+# litellm_langfuse_enabled: true
+
+# -- Langfuse host URL.
+#    (OPTIONAL) / (DEFAULT: "https://cloud.langfuse.com")
+# litellm_langfuse_host: "https://cloud.langfuse.com"
+
+# -- Langfuse public key.
+#    (REQUIRED if litellm_langfuse_enabled) - From Langfuse dashboard
+# litellm_langfuse_public_key: ""
+
+# -- Langfuse secret key.
+#    (REQUIRED if litellm_langfuse_enabled) - Will be encrypted with SOPS
+# litellm_langfuse_secret_key: ""

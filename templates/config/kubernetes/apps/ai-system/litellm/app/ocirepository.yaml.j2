@@ -1,0 +1,12 @@
+#% if litellm_enabled %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: litellm
+spec:
+  interval: 1h
+  url: oci://ghcr.io/berriai/litellm-helm
+  ref:
+    tag: "0.1.830"
+#% endif %#

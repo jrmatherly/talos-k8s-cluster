@@ -1,0 +1,95 @@
+#% if litellm_enabled %#
+---
+# Dragonfly - Redis-compatible in-memory data store (25x faster than Redis)
+# Used for LiteLLM caching and router state sharing across replicas
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm-dragonfly
+  labels:
+    app.kubernetes.io/name: dragonfly
+    app.kubernetes.io/instance: litellm-dragonfly
+    app.kubernetes.io/component: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/instance: litellm-dragonfly
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dragonfly
+        app.kubernetes.io/instance: litellm-dragonfly
+        app.kubernetes.io/component: cache
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      containers:
+        - name: dragonfly
+          image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+          args:
+            - "--requirepass=$(REDIS_PASSWORD)"
+            - "--maxmemory=#{ litellm_cache_memory }#"
+            - "--proactor_threads=2"
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secret
+                  key: REDIS_PASSWORD
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: #{ litellm_cache_memory }#
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm-dragonfly
+  labels:
+    app.kubernetes.io/name: dragonfly
+    app.kubernetes.io/instance: litellm-dragonfly
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    app.kubernetes.io/name: dragonfly
+    app.kubernetes.io/instance: litellm-dragonfly
+#% endif %#

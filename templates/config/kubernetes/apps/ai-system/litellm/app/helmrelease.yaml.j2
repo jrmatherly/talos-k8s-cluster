@@ -1,0 +1,194 @@
+#% if litellm_enabled %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: litellm
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: litellm
+  interval: 1h
+  timeout: 15m
+  values:
+    # ============================================================
+    # Image Configuration
+    # ============================================================
+    image:
+      repository: ghcr.io/berriai/litellm
+      tag: main-stable
+      pullPolicy: IfNotPresent
+
+    # ============================================================
+    # Replica Configuration (HPA handles scaling)
+    # ============================================================
+    replicaCount: #{ litellm_replicas_min }#
+
+    # ============================================================
+    # Resource Configuration
+    # ============================================================
+    resources:
+      requests:
+        cpu: "#{ litellm_cpu_request }#"
+        memory: "#{ litellm_memory_request }#"
+      limits:
+        cpu: "#{ litellm_cpu_limit }#"
+        memory: "#{ litellm_memory_limit }#"
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      port: 4000
+
+    # ============================================================
+    # Environment Variables
+    # ============================================================
+    envVars:
+      # Database Configuration
+      - name: DATABASE_URL
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: DATABASE_URL
+      - name: STORE_MODEL_IN_DB
+        value: "true"
+      - name: LITELLM_MASTER_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LITELLM_MASTER_KEY
+      - name: LITELLM_SALT_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LITELLM_SALT_KEY
+
+      # Redis/Dragonfly Cache Configuration
+      - name: REDIS_HOST
+        value: "litellm-dragonfly"
+      - name: REDIS_PORT
+        value: "6379"
+      - name: REDIS_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: REDIS_PASSWORD
+      - name: REDIS_NAMESPACE
+        value: "litellm"
+
+      # Azure OpenAI US East
+#% if azure_openai_us_east_api_key %#
+      - name: AZURE_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_API_KEY
+      - name: AZURE_API_BASE
+        value: "https://#{ azure_openai_us_east_resource_name }#.openai.azure.com"
+      - name: AZURE_API_VERSION
+        value: "2024-10-01-preview"
+#% endif %#
+
+      # Azure OpenAI US East2
+#% if azure_openai_us_east2_api_key %#
+      - name: AZURE_API_KEY_EAST2
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_API_KEY_EAST2
+      - name: AZURE_API_BASE_EAST2
+        value: "https://#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
+      - name: AZURE_API_VERSION_EAST2
+        value: "2024-10-01-preview"
+      - name: AZURE_ANTHROPIC_API_BASE
+        value: "https://#{ azure_openai_us_east2_resource_name }#.models.ai.azure.com"
+#% endif %#
+
+      # Langfuse Observability
+#% if litellm_langfuse_enabled %#
+      - name: LANGFUSE_HOST
+        value: "#{ litellm_langfuse_host }#"
+      - name: LANGFUSE_PUBLIC_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LANGFUSE_PUBLIC_KEY
+      - name: LANGFUSE_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: LANGFUSE_SECRET_KEY
+#% endif %#
+
+    # ============================================================
+    # Config File (mounted from ConfigMap)
+    # ============================================================
+    litellm_config:
+      existingConfigMapName: litellm-config
+
+    # ============================================================
+    # Probes Configuration
+    # ============================================================
+    livenessProbe:
+      httpGet:
+        path: /health/liveliness
+        port: 4000
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+    readinessProbe:
+      httpGet:
+        path: /health/readiness
+        port: 4000
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+
+    # ============================================================
+    # Pod Disruption Budget
+    # ============================================================
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+
+    # ============================================================
+    # Autoscaling
+    # ============================================================
+    autoscaling:
+      enabled: true
+      minReplicas: #{ litellm_replicas_min }#
+      maxReplicas: #{ litellm_replicas_max }#
+      targetCPUUtilizationPercentage: 70
+      targetMemoryUtilizationPercentage: 80
+
+    # ============================================================
+    # Security Context
+    # ============================================================
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 1000
+      capabilities:
+        drop:
+          - ALL
+
+    # ============================================================
+    # Pod Annotations (for Prometheus scraping)
+    # ============================================================
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "4000"
+      prometheus.io/path: "/metrics"
+#% endif %#
