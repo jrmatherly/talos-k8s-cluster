@@ -55,6 +55,19 @@ spec:
       port: 4000
 
     # ============================================================
+    # Database Configuration (use external CloudNativePG)
+    # ============================================================
+    db:
+      useExisting: true
+      deployStandalone: false
+      endpoint: litellm-db-rw
+      database: litellm
+      secret:
+        name: litellm-db-secret
+        usernameKey: username
+        passwordKey: password
+
+    # ============================================================
     # Environment Variables (simple key-value map)
     # ============================================================
     envVars:
@@ -73,12 +86,6 @@ spec:
     # Extra Environment Variables (K8s env spec with secretKeyRef)
     # ============================================================
     extraEnvVars:
-      # Database Configuration
-      - name: DATABASE_URL
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: DATABASE_URL
       - name: LITELLM_MASTER_KEY
         valueFrom:
           secretKeyRef:
@@ -128,6 +135,16 @@ spec:
     # ============================================================
     litellm_config:
       existingConfigMapName: litellm-config
+
+    # ============================================================
+    # Additional Volumes (for non-root user cache)
+    # ============================================================
+    volumes:
+      - name: cache
+        emptyDir: {}
+    volumeMounts:
+      - name: cache
+        mountPath: "/.cache"
 
     # ============================================================
     # Probes Configuration
