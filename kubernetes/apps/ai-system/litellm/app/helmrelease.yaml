@@ -81,6 +81,8 @@ spec:
       REDIS_HOST: "litellm-dragonfly"
       REDIS_PORT: "6379"
       REDIS_NAMESPACE: "litellm"
+      LITELLM_MIGRATION_DIR: "/tmp"
+      LITELLM_CALLBACKS: "prometheus"
       AZURE_API_BASE: "https://aaronsai.openai.azure.com"
       AZURE_API_VERSION: "2024-10-01-preview"
       AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com"
