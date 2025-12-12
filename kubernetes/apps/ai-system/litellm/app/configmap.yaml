@@ -244,7 +244,7 @@ data:
 
       - model_name: gpt-5.1-codex
         litellm_params:
-          model: azure/gpt5_series/gpt-5.1-codex
+          model: azure_text/gpt5_series/gpt-5.1-codex
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 2000
@@ -256,12 +256,13 @@ data:
               role: system
         model_info:
           id: "8"
+          mode: completion
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.1-codex
 
       - model_name: gpt-5.1-codex-mini
         litellm_params:
-          model: azure/gpt5_series/gpt-5.1-codex-mini
+          model: azure_text/gpt5_series/gpt-5.1-codex-mini
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 2500
@@ -273,6 +274,7 @@ data:
               role: system
         model_info:
           id: "9"
+          mode: completion
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.1-codex-mini
 
