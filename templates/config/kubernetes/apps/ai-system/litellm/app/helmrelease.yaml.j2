@@ -85,12 +85,12 @@ spec:
       LITELLM_MIGRATION_DIR: "/tmp"
       LITELLM_CALLBACKS: "prometheus"
 #% if azure_openai_us_east_api_key %#
-      AZURE_API_BASE: "https://#{ azure_openai_us_east_resource_name }#.openai.azure.com"
+      AZURE_API_BASE: "https://#{ azure_openai_us_east_resource_name }#.openai.azure.com/"
       AZURE_API_VERSION: "2025-01-01-preview"
 #% endif %#
 #% if azure_openai_us_east2_api_key %#
-      AZURE_API_BASE_EAST2: "https://#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
-      AZURE_API_VERSION_EAST2: "2025-01-01-preview"
+      AZURE_API_BASE_EAST2: "https://#{ azure_openai_us_east2_resource_name }#.openai.azure.com/"
+      AZURE_API_VERSION_EAST2: "2025-04-01-preview"
 #% endif %#
 #% if azure_anthropic_api_base %#
       AZURE_ANTHROPIC_API_BASE: "#{ azure_anthropic_api_base }#"

@@ -138,7 +138,7 @@ data:
       # Azure OpenAI US East2 Models
       - model_name: gpt-5
         litellm_params:
-          model: azure/gpt-5
+          model: azure/gpt5_series/gpt-5
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 1750
@@ -155,7 +155,7 @@ data:
 
       - model_name: gpt-5-chat
         litellm_params:
-          model: azure/gpt-5-chat
+          model: azure/gpt5_series/gpt-5-chat
           litellm_credential_name: azure_credential_us_east2
           thinking: { "type": "enabled", "budget_tokens": 16384 }
           max_completion_tokens: 16384
@@ -174,7 +174,7 @@ data:
 
       - model_name: gpt-5-mini
         litellm_params:
-          model: azure/gpt-5-mini
+          model: azure/gpt5_series/gpt-5-mini
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 2500
@@ -191,7 +191,7 @@ data:
 
       - model_name: gpt-5-nano
         litellm_params:
-          model: azure/gpt-5-nano
+          model: azure/gpt5_series/gpt-5-nano
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 15000
@@ -208,7 +208,7 @@ data:
 
       - model_name: gpt-5.1
         litellm_params:
-          model: azure/gpt-5.1
+          model: azure/gpt5_series/gpt-5.1
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 20000
@@ -226,7 +226,7 @@ data:
 
       - model_name: gpt-5.1-chat
         litellm_params:
-          model: azure/gpt-5.1-chat
+          model: azure/gpt5_series/gpt-5.1-chat
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 20000
@@ -244,7 +244,7 @@ data:
 
       - model_name: gpt-5.1-codex
         litellm_params:
-          model: azure/gpt-5.1-codex
+          model: azure/gpt5_series/gpt-5.1-codex
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 2000
@@ -261,7 +261,7 @@ data:
 
       - model_name: gpt-5.1-codex-mini
         litellm_params:
-          model: azure/gpt-5.1-codex-mini
+          model: azure/gpt5_series/gpt-5.1-codex-mini
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 2500
@@ -278,7 +278,7 @@ data:
 
       - model_name: gpt-5.2
         litellm_params:
-          model: azure/gpt-5.2
+          model: azure/gpt5_series/gpt-5.2
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 22500
@@ -413,6 +413,7 @@ data:
       set_verbose: false
       json_logs: true
       log_raw_request_response: true
+      models: ["gpt-5-mini", "gpt-5-nano", "gpt-4.1-nano", "gpt-4.0-mini"]
 
       # Budget Alert Configuration
       # budget_alert_ttl: 86400 # 24 hours between budget alerts
@@ -429,14 +430,10 @@ data:
 
       # Fallback Logic
       fallbacks:
-        - gpt-5.2:
-            - gpt-5.1
-            - gpt-5.1-chat
-            - gpt-4.1
-        - gpt-5.1:
-            - gpt-5
-            - gpt-5.1-chat
-            - gpt-4.1
+        - {"gpt-5.2": ["gpt-5.1", "gpt-5.1-chat", "gpt-4.1"]}
+        - {"gpt-5.1": ["gpt-5", "gpt-5.1-chat", "gpt-4.1"]}
+        - {"gpt-5": ["gpt-4.1", "gpt-5.1"]}
+        - {"claude-opus-4-5": ["claude-opus-4-1", "claude-sonnet-4-5", "claude-haiku-4-5"]}
 
       context_window_fallbacks: [{ "gpt-5-nano": ["gpt-5-mini"] }]
 
@@ -482,15 +479,15 @@ data:
 
       # Callbacks - 'callbacks' enables /metrics endpoint
       callbacks:
-        - prometheus
+        - "prometheus"
       service_callback:
-        - prometheus_system
+        - "prometheus_system"
       success_callback:
-        - prometheus
-        - langfuse
+        - "prometheus"
+        - "langfuse"
       failure_callback:
-        - prometheus
-        - langfuse
+        - "prometheus"
+        - "langfuse"
 
       # Langfuse Settings
       langfuse_host: os.environ/LANGFUSE_HOST
