@@ -60,8 +60,9 @@ spec:
   type: ClusterIP
 ---
 #| HTTPRoute for agentgateway admin UI #|
-#| Routes /ui traffic for both mcp-gw and ai-gw hostnames to admin interface #|
-#| Admin UI calls /config, /config_dump, /ui, /api, etc. at root level #|
+#| Routes /ui path prefix to admin interface for both hostnames #|
+#| Admin UI serves /ui, /config, /config_dump, etc. #|
+#| Protected by OAuth2 via TrafficPolicy when keycloak_enabled #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -75,10 +76,109 @@ spec:
   - "mcp-gw.#{ primary_domain }#"
   - "ai-gw.#{ primary_domain }#"
   rules:
-  #| Route all paths to admin UI service #|
-  - backendRefs:
+  #| Route /ui paths to admin UI service #|
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ui
+    backendRefs:
     - name: agentgateway-admin
       port: 15000
+  #| Route /config paths to admin UI service #|
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /config
+    backendRefs:
+    - name: agentgateway-admin
+      port: 15000
+  #| OAuth2 callback path (handled by kgateway TrafficPolicy) #|
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /oauth2
+    backendRefs:
+    - name: agentgateway-admin
+      port: 15000
+#% if keycloak_enabled %#
+---
+#| =========================================== #|
+#| OAuth2 Protection for Admin UI (kgateway)   #|
+#| =========================================== #|
+#| GatewayExtension for Keycloak OIDC configuration #|
+#| REF: https://kgateway.dev/docs/guides/oidc/ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: keycloak-oauth
+spec:
+  oauth2:
+    backendRef:
+      kind: Backend
+      group: gateway.kgateway.dev
+      name: keycloak-oauth
+    issuerURI: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+    credentials:
+      clientID: "agentgateway-mcp"
+      clientSecretRef:
+        name: agentgateway-oauth-secret
+    redirectURI: "https://ai-gw.#{ primary_domain }#/oauth2/callback"
+    logoutPath: /logout
+    forwardAccessToken: true
+    scopes:
+      - openid
+      - profile
+      - email
+---
+#| Backend for Keycloak OAuth endpoints #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-oauth
+spec:
+  type: Static
+  static:
+    hosts:
+    - host: "auth.#{ primary_domain }#"
+      port: 443
+---
+#| BackendTLSPolicy for Keycloak OAuth #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-oauth-tls
+spec:
+  targetRefs:
+  - group: gateway.kgateway.dev
+    kind: Backend
+    name: keycloak-oauth
+  validation:
+    hostname: "auth.#{ primary_domain }#"
+    wellKnownCACertificates: System
+---
+#| Secret for OAuth client credentials #|
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agentgateway-oauth-secret
+type: Opaque
+stringData:
+  client-secret: "#{ keycloak_agentgateway_client_secret | default(keycloak_oidc_client_secret) }#"
+---
+#| TrafficPolicy to protect admin UI with OAuth2 #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: agentgateway-ui-oauth
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: agentgateway-ui
+  oauth2:
+    extensionRef:
+      name: keycloak-oauth
+#% endif %#
 ---
 #| MCP Backend for routing to MCP servers #|
 #| Uses label selector to dynamically discover MCP server pods #|
@@ -96,7 +196,9 @@ spec:
           matchLabels:
             agentgateway.dev/mcp: "true"
 ---
-#| HTTPRoute for MCP traffic on port 8080 listener #|
+#| HTTPRoute for MCP traffic on HTTPS listener #|
+#| Routes mcp-gw.<domain> to MCP backend with OAuth authentication #|
+#| The mcp-oauth-authentication policy targets this route #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -105,7 +207,9 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
-    sectionName: mcp
+    sectionName: https
+  hostnames:
+  - "mcp-gw.#{ primary_domain }#"
   rules:
   - backendRefs:
     - group: agentgateway.dev

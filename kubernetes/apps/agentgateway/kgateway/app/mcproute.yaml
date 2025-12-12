@@ -62,9 +62,95 @@ spec:
   - "mcp-gw.matherly.net"
   - "ai-gw.matherly.net"
   rules:
-  - backendRefs:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /ui
+    backendRefs:
     - name: agentgateway-admin
       port: 15000
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /config
+    backendRefs:
+    - name: agentgateway-admin
+      port: 15000
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /oauth2
+    backendRefs:
+    - name: agentgateway-admin
+      port: 15000
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: keycloak-oauth
+spec:
+  oauth2:
+    backendRef:
+      kind: Backend
+      group: gateway.kgateway.dev
+      name: keycloak-oauth
+    issuerURI: "https://auth.matherly.net/realms/k8s-cluster"
+    credentials:
+      clientID: "agentgateway-mcp"
+      clientSecretRef:
+        name: agentgateway-oauth-secret
+    redirectURI: "https://ai-gw.matherly.net/oauth2/callback"
+    logoutPath: /logout
+    forwardAccessToken: true
+    scopes:
+      - openid
+      - profile
+      - email
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-oauth
+spec:
+  type: Static
+  static:
+    hosts:
+    - host: "auth.matherly.net"
+      port: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-oauth-tls
+spec:
+  targetRefs:
+  - group: gateway.kgateway.dev
+    kind: Backend
+    name: keycloak-oauth
+  validation:
+    hostname: "auth.matherly.net"
+    wellKnownCACertificates: System
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agentgateway-oauth-secret
+type: Opaque
+stringData:
+  client-secret: ""
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: agentgateway-ui-oauth
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: agentgateway-ui
+  oauth2:
+    extensionRef:
+      name: keycloak-oauth
 ---
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayBackend
@@ -87,7 +173,9 @@ spec:
   parentRefs:
   - name: agentgateway
     namespace: agentgateway
-    sectionName: mcp
+    sectionName: https
+  hostnames:
+  - "mcp-gw.matherly.net"
   rules:
   - backendRefs:
     - group: agentgateway.dev
