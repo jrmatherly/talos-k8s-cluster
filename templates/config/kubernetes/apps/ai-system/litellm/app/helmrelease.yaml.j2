@@ -82,6 +82,9 @@ spec:
       REDIS_HOST: "litellm-dragonfly"
       REDIS_PORT: "6379"
       REDIS_NAMESPACE: "litellm"
+      # Prisma binary cache for non-root user (user 1000)
+      PRISMA_BINARY_CACHE_DIR: "/.cache/prisma"
+      HOME: "/"
 #% if azure_openai_us_east_api_key %#
       AZURE_API_BASE: "https://#{ azure_openai_us_east_resource_name }#.openai.azure.com"
       AZURE_API_VERSION: "2024-10-01-preview"
