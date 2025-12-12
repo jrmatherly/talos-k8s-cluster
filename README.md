@@ -631,6 +631,7 @@ When enabled, agentgateway provides:
 **Key Implementation Notes:**
 - kgateway does NOT use an `MCPRoute` CRD. Key CRDs include:
   - `AgentgatewayBackend` (`agentgateway.dev/v1alpha1`) - AI/LLM providers and MCP backend configuration
+  - `AgentgatewayPolicy` (`agentgateway.dev/v1alpha1`) - MCP OAuth (`spec.backend.mcp.authentication`), CORS (`spec.traffic.cors`), RBAC
   - `GatewayParameters` (`gateway.kgateway.dev/v1alpha1`) - K8s deployment/service settings
   - `TrafficPolicy` (`gateway.kgateway.dev/v1alpha1`) - Rate limiting
   - `HTTPListenerPolicy` (`gateway.kgateway.dev/v1alpha1`) - Access logging
@@ -639,6 +640,7 @@ When enabled, agentgateway provides:
 - HTTPRoute `backendRefs` for AgentgatewayBackend must use `group: agentgateway.dev`
 - Azure OpenAI secrets must use `Authorization` as the key name (NOT `api-key`)
 - HTTPRoute rules must use `PathPrefix` matching with longest paths first (to prevent `/azure/gpt5` from matching `/azure/gpt51`)
+- AgentgatewayPolicy CORS `maxAge` must be integer (not string); `allowOrigins` cannot use wildcard ports
 
 **Observability:**
 

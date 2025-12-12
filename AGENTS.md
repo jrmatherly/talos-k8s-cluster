@@ -123,6 +123,7 @@ See `.serena/memories/adding-new-templates-checklist.md` for complete checklist.
 5. **Helm extraZonePlugins/extraConfig** often REPLACES defaults, not extends
 6. **agentgateway only supports chat completions** - Embeddings API not supported; use direct Azure endpoint
 7. **agentgateway HTTPRoute path ordering** - Longest paths first to prevent path collisions
+8. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors`; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
 
 ## Extended Documentation
 
