@@ -81,9 +81,6 @@ spec:
       REDIS_HOST: "litellm-dragonfly"
       REDIS_PORT: "6379"
       REDIS_NAMESPACE: "litellm"
-      # Prisma binary cache for non-root user (user 1000)
-      PRISMA_BINARY_CACHE_DIR: "/.cache/prisma"
-      HOME: "/"
       AZURE_API_BASE: "https://aaronsai.openai.azure.com"
       AZURE_API_VERSION: "2024-10-01-preview"
       AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com"
@@ -146,24 +143,6 @@ spec:
       existingConfigMapName: litellm-config
 
     # ============================================================
-    # Additional Volumes (for non-root user cache and npm)
-    # ============================================================
-    volumes:
-      - name: cache
-        emptyDir: {}
-      - name: npm-cache
-        emptyDir: {}
-      - name: root-cache
-        emptyDir: {}
-    volumeMounts:
-      - name: cache
-        mountPath: "/.cache"
-      - name: npm-cache
-        mountPath: "/.npm"
-      - name: root-cache
-        mountPath: "/root/.cache"
-
-    # ============================================================
     # Probes Configuration
     # ============================================================
     livenessProbe:
@@ -203,18 +182,21 @@ spec:
 
     # ============================================================
     # Security Context
+    # Using litellm-non_root image which has pre-generated Prisma binaries
+    # runAsGroup: 150 aligns with the Prisma binary ownership in the image
     # ============================================================
-    securityContext:
+    podSecurityContext:
       runAsNonRoot: true
       runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
+      runAsGroup: 150
+      fsGroup: 150
 
-    containerSecurityContext:
+    securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: false
       runAsNonRoot: true
       runAsUser: 1000
+      runAsGroup: 150
       capabilities:
         drop:
           - ALL
