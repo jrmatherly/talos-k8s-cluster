@@ -177,8 +177,8 @@ spec:
 #| =========================================== #|
 #| AgentgatewayPolicy: MCP OAuth Authentication #|
 #| =========================================== #|
-#| Applies mcpAuthentication policy to MCP routes #|
-#| Wraps Keycloak for MCP OAuth 2.1 spec compliance (RFC 9728, CORS, DCR) #|
+#| Applies MCP backend authentication policy to MCP routes #|
+#| Uses Keycloak for MCP OAuth 2.1 spec compliance (RFC 9728, RFC 8707) #|
 #| REF: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization #|
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayPolicy
@@ -189,34 +189,35 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: mcp-route
-  policy:
-    #| MCP Authentication wraps Keycloak for OAuth 2.1 compliance #|
-    mcpAuthentication:
-      #| Keycloak realm issuer URL #|
-      issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-      #| Expected audiences for token validation (RFC 8707) #|
-      audiences:
-        - "https://mcp-gw.#{ primary_domain }#/mcp"
-      #| Provider-specific wrapping for Keycloak #|
-      #| Adds CORS headers, wraps DCR, exposes RFC 9728 metadata #|
-      provider:
-        keycloak: {}
-      #| RFC 9728 Protected Resource Metadata #|
-      #| Exposed at /.well-known/oauth-protected-resource #|
-      resourceMetadata:
-        resource: "https://mcp-gw.#{ primary_domain }#/mcp"
-        #| RFC 9728 Section 3.1 requires authorization_servers array for client discovery #|
-        authorizationServers:
-          - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-        scopesSupported:
-          - openid
-          - profile
-          - email
-          - mcp:tools
-          - offline_access
-        bearerMethodsSupported:
-          - header
-        resourceDocumentation: "https://mcp-gw.#{ primary_domain }#/docs"
+  #| Backend policy for MCP authentication (spec.backend.mcp.authentication) #|
+  backend:
+    mcp:
+      authentication:
+        #| Keycloak realm issuer URL #|
+        issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+        #| Expected audiences for token validation (RFC 8707) #|
+        audiences:
+          - "https://mcp-gw.#{ primary_domain }#/mcp"
+        #| Provider-specific settings for Keycloak #|
+        provider: Keycloak
+        #| JWKS endpoint for JWT signature validation #|
+        jwks:
+          uri: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
+        #| RFC 9728 Protected Resource Metadata #|
+        #| Exposed at /.well-known/oauth-protected-resource #|
+        resourceMetadata:
+          default:
+            resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+            authorizationServers:
+              - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+            scopesSupported:
+              - openid
+              - profile
+              - email
+              - mcp:tools
+              - offline_access
+            bearerMethodsSupported:
+              - header
 ---
 #| =========================================== #|
 #| AgentgatewayPolicy: CORS for MCP             #|
@@ -231,7 +232,8 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: mcp-route
-  policy:
+  #| Traffic policy for CORS (spec.traffic.cors) #|
+  traffic:
     cors:
       allowOrigins:
         - "https://mcp-gw.#{ primary_domain }#"
@@ -251,6 +253,7 @@ spec:
         - X-Request-ID
         - WWW-Authenticate
       allowCredentials: true
-      maxAge: "86400s"
+      #| maxAge is integer (seconds), not string #|
+      maxAge: 86400
 #% endif %#
 #% endif %#

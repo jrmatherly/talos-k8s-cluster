@@ -151,26 +151,28 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: mcp-route
-  policy:
-    mcpAuthentication:
-      issuer: "https://auth.matherly.net/realms/k8s-cluster"
-      audiences:
-        - "https://mcp-gw.matherly.net/mcp"
-      provider:
-        keycloak: {}
-      resourceMetadata:
-        resource: "https://mcp-gw.matherly.net/mcp"
-        authorizationServers:
-          - "https://auth.matherly.net/realms/k8s-cluster"
-        scopesSupported:
-          - openid
-          - profile
-          - email
-          - mcp:tools
-          - offline_access
-        bearerMethodsSupported:
-          - header
-        resourceDocumentation: "https://mcp-gw.matherly.net/docs"
+  backend:
+    mcp:
+      authentication:
+        issuer: "https://auth.matherly.net/realms/k8s-cluster"
+        audiences:
+          - "https://mcp-gw.matherly.net/mcp"
+        provider: Keycloak
+        jwks:
+          uri: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
+        resourceMetadata:
+          default:
+            resource: "https://mcp-gw.matherly.net/mcp"
+            authorizationServers:
+              - "https://auth.matherly.net/realms/k8s-cluster"
+            scopesSupported:
+              - openid
+              - profile
+              - email
+              - mcp:tools
+              - offline_access
+            bearerMethodsSupported:
+              - header
 ---
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayPolicy
@@ -181,7 +183,7 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: mcp-route
-  policy:
+  traffic:
     cors:
       allowOrigins:
         - "https://mcp-gw.matherly.net"
@@ -201,4 +203,4 @@ spec:
         - X-Request-ID
         - WWW-Authenticate
       allowCredentials: true
-      maxAge: "86400s"
+      maxAge: 86400
