@@ -18,8 +18,8 @@ spec:
               protocol: TCP
     # Azure OpenAI endpoints (US East2)
     - toFQDNs:
-        - matchName: "aaronsai.openai.azure.com"
-        - matchName: "aaronsai.models.ai.azure.com"
+        - matchName: "ets-east-us2.openai.azure.com"
+        - matchName: "ets-east-us2.models.ai.azure.com"
       toPorts:
         - ports:
             - port: "443"

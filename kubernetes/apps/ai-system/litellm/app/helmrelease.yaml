@@ -85,7 +85,7 @@ spec:
       LITELLM_CALLBACKS: "prometheus"
       AZURE_API_BASE: "https://aaronsai.openai.azure.com"
       AZURE_API_VERSION: "2025-01-01-preview"
-      AZURE_API_BASE_EAST2: "https://aaronsai.openai.azure.com"
+      AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com"
       AZURE_API_VERSION_EAST2: "2025-01-01-preview"
       AZURE_ANTHROPIC_API_BASE: "https://ets-east-us2.services.ai.azure.com/anthropic/v1/messages"
       AZURE_COHERE_RERANK_API_BASE: "https://aan-cohere-rerank-v3-5.eastus.models.ai.azure.com/v2/rerank"
