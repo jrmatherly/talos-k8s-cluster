@@ -197,8 +197,15 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("azure_openai_us_east_resource_name", "")
         data.setdefault("azure_openai_us_east2_api_key", "")
         data.setdefault("azure_openai_us_east2_resource_name", "")
-        # Azure Cohere API default
-        data.setdefault("azure_cohere_api_base", "")
+        # Azure Cohere Rerank API default
+        data.setdefault("azure_cohere_rerank_api_key", "")
+        data.setdefault("azure_cohere_rerank_api_base", "")
+        # Azure Cohere Embed API default
+        data.setdefault("azure_cohere_embed_api_key", "")
+        data.setdefault("azure_cohere_embed_api_base", "")
+        # Azure Anthropic API default
+        data.setdefault("azure_anthropic_api_key", "")
+        data.setdefault("azure_anthropic_api_base", "")
 
         # Observability Stack defaults (Prometheus/Grafana for K8s metrics)
         data.setdefault("observability_enabled", False)

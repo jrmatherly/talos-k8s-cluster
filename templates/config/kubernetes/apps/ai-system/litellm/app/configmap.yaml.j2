@@ -299,7 +299,9 @@ data:
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: gpt-5.2
+#% endif %#
 
+#% if azure_anthropic_api_key %#
       # Anthropic via Azure (Claude models)
       - model_name: claude-opus-4-5
         litellm_params:
@@ -371,8 +373,10 @@ data:
           id: "23"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: cclaude-haiku-4-5
+          base_model: claude-haiku-4-5
+#% endif %#
 
+#% if azure_openai_us_east2_api_key %#
       - model_name: text-embedding-3-large
         litellm_params:
           model: azure/text-embedding-3-large
@@ -408,9 +412,11 @@ data:
           api_version: os.environ/AZURE_API_VERSION_EAST2
         credential_info:
           description: "Azure OpenAI US East2 credentials"
+#% endif %#
+#% if azure_anthropic_api_key %#
       - credential_name: azure_credential_anthropic_us_east2
         credential_values:
-          api_key: os.environ/AZURE_API_KEY_EAST2
+          api_key: os.environ/AZURE_ANTHROPIC_API_KEY
           api_base: os.environ/AZURE_ANTHROPIC_API_BASE
         credential_info:
           description: "Azure Anthropic US East2 credentials"
@@ -536,13 +542,24 @@ data:
 #% endif %#
       # Passthrough Endpoints
       pass_through_endpoints:
-        # Cohere v2
-        - path: "/v2/rerank" # route you want to add to LiteLLM Proxy Server
-          #target: "https://aan-cohere-rerank-v3-5.eastus.models.ai.azure.com/v2/rerank" # URL this route should forward requests to
-          target: "os.environ/AZURE_API_COHERE_BASE"
-          headers: # headers to forward to this URL
-            Authorization: "bearer os.environ/AZURE_API_COHERE_KEY"
-            content-type: application/json # (Optional) Extra Headers to pass to this endpoint
+#% if azure_cohere_rerank_api_key %#
+        # Cohere Rerank v2
+        - path: "/v2/rerank"
+          target: "os.environ/AZURE_COHERE_RERANK_API_BASE"
+          headers:
+            Authorization: "bearer os.environ/AZURE_COHERE_RERANK_API_KEY"
+            content-type: application/json
             accept: application/json
           forward_headers: True
+#% endif %#
+#% if azure_cohere_embed_api_key %#
+        # Cohere Embed v2
+        - path: "/v2/embed"
+          target: "os.environ/AZURE_COHERE_EMBED_API_BASE"
+          headers:
+            Authorization: "bearer os.environ/AZURE_COHERE_EMBED_API_KEY"
+            content-type: application/json
+            accept: application/json
+          forward_headers: True
+#% endif %#
 #% endif %#

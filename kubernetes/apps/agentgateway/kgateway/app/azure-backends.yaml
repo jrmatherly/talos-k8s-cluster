@@ -113,7 +113,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5"
         apiVersion: "2025-01-01-preview"
   policies:
@@ -133,7 +133,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5-nano"
         apiVersion: "2025-01-01-preview"
   policies:
@@ -153,7 +153,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5-chat"
         apiVersion: "2025-01-01-preview"
   policies:
@@ -173,7 +173,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5.1-chat"
         apiVersion: "2025-01-01-preview"
   policies:
@@ -193,7 +193,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5-mini"
         apiVersion: "2025-04-01-preview"
   policies:
@@ -213,7 +213,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5.1"
         apiVersion: "2025-04-01-preview"
   policies:
@@ -233,7 +233,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5.1-codex"
         apiVersion: "2025-04-01-preview"
   policies:
@@ -253,7 +253,7 @@ spec:
   ai:
     provider:
       azureopenai:
-        endpoint: "ets-east-us2.openai.azure.com"
+        endpoint: "aaronsai.openai.azure.com"
         deploymentName: "gpt-5.1-codex-mini"
         apiVersion: "2025-04-01-preview"
   policies:

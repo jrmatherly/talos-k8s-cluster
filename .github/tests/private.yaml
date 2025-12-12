@@ -38,8 +38,15 @@ proxmox_csi_token_secret: "fake-secret"
 # Azure OpenAI - US East2 Region (commented - disabled)
 # azure_openai_us_east2_api_key: ""
 # azure_openai_us_east2_resource_name: ""
-# Azure Cohere API (commented - disabled)
-# azure_cohere_api_base: ""
+# Azure Cohere Rerank API (commented - disabled)
+# azure_cohere_rerank_api_key: ""
+# azure_cohere_rerank_api_base: ""
+# Azure Cohere Embed API (commented - disabled)
+# azure_cohere_embed_api_key: ""
+# azure_cohere_embed_api_base: ""
+# Azure Anthropic API (commented - disabled)
+# azure_anthropic_api_key: ""
+# azure_anthropic_api_base: ""
 # Observability Stack (disabled for private repo testing)
 # observability_enabled: false
 # grafana_admin_password: ""

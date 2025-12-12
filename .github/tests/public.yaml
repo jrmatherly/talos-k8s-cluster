@@ -42,8 +42,15 @@ azure_openai_us_east_resource_name: "test-openai-resource"
 # Azure OpenAI - US East2 Region
 azure_openai_us_east2_api_key: "fake-api-key"
 azure_openai_us_east2_resource_name: "ets-east-us2"
-# Azure Cohere API (for reranking models)
-azure_cohere_api_base: "https://test-cohere-rerank.eastus.models.ai.azure.com/v2/rerank"
+# Azure Cohere Rerank API (for reranking models)
+azure_cohere_rerank_api_key: "fake-cohere-rerank-api-key"
+azure_cohere_rerank_api_base: "https://test-cohere-rerank.eastus.models.ai.azure.com/v2/rerank"
+# Azure Cohere Embed API (for embedding models)
+azure_cohere_embed_api_key: "fake-cohere-embed-api-key"
+azure_cohere_embed_api_base: "https://test-cohere-embed.eastus.models.ai.azure.com/v2/embed"
+# Azure Anthropic API (for Claude models)
+azure_anthropic_api_key: "fake-anthropic-api-key"
+azure_anthropic_api_base: "https://test-anthropic.eastus2.models.ai.azure.com"
 # Observability Stack (Prometheus/Grafana for K8s metrics)
 observability_enabled: true
 grafana_admin_password: "test-password"

@@ -367,7 +367,7 @@ data:
           id: "23"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: cclaude-haiku-4-5
+          base_model: claude-haiku-4-5
 
       - model_name: text-embedding-3-large
         litellm_params:
@@ -402,7 +402,7 @@ data:
           description: "Azure OpenAI US East2 credentials"
       - credential_name: azure_credential_anthropic_us_east2
         credential_values:
-          api_key: os.environ/AZURE_API_KEY_EAST2
+          api_key: os.environ/AZURE_ANTHROPIC_API_KEY
           api_base: os.environ/AZURE_ANTHROPIC_API_BASE
         credential_info:
           description: "Azure Anthropic US East2 credentials"
@@ -519,12 +519,19 @@ data:
       mcp_client_side_auth_header_name: "authorization"
       # Passthrough Endpoints
       pass_through_endpoints:
-        # Cohere v2
-        - path: "/v2/rerank" # route you want to add to LiteLLM Proxy Server
-          #target: "https://aan-cohere-rerank-v3-5.eastus.models.ai.azure.com/v2/rerank" # URL this route should forward requests to
-          target: "os.environ/AZURE_API_COHERE_BASE"
-          headers: # headers to forward to this URL
-            Authorization: "bearer os.environ/AZURE_API_COHERE_KEY"
-            content-type: application/json # (Optional) Extra Headers to pass to this endpoint
+        # Cohere Rerank v2
+        - path: "/v2/rerank"
+          target: "os.environ/AZURE_COHERE_RERANK_API_BASE"
+          headers:
+            Authorization: "bearer os.environ/AZURE_COHERE_RERANK_API_KEY"
+            content-type: application/json
+            accept: application/json
+          forward_headers: True
+        # Cohere Embed v2
+        - path: "/v2/embed"
+          target: "os.environ/AZURE_COHERE_EMBED_API_BASE"
+          headers:
+            Authorization: "bearer os.environ/AZURE_COHERE_EMBED_API_KEY"
+            content-type: application/json
             accept: application/json
           forward_headers: True

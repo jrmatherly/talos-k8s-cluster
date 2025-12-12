@@ -55,8 +55,17 @@ import (
 	azure_openai_us_east2_api_key?: string & !=""
 	azure_openai_us_east2_resource_name?: string & !=""
 
-	// Azure Cohere API (optional - for reranking models)
-	azure_cohere_api_base?: string & !=""
+	// Azure Cohere Rerank API (optional - for reranking models)
+	azure_cohere_rerank_api_key?: string & !=""
+	azure_cohere_rerank_api_base?: string & !=""
+
+	// Azure Cohere Embed API (optional - for embedding models)
+	azure_cohere_embed_api_key?: string & !=""
+	azure_cohere_embed_api_base?: string & !=""
+
+	// Azure Anthropic API (optional - for Claude models via Azure AI)
+	azure_anthropic_api_key?: string & !=""
+	azure_anthropic_api_base?: string & !=""
 
 	// Azure Entra ID Authentication (optional - alternative to API key)
 	azure_tenant_id?: string & !=""

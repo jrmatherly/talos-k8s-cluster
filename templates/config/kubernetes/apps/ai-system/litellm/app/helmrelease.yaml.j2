@@ -91,10 +91,15 @@ spec:
 #% if azure_openai_us_east2_api_key %#
       AZURE_API_BASE_EAST2: "https://#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
       AZURE_API_VERSION_EAST2: "2025-01-01-preview"
-      AZURE_ANTHROPIC_API_BASE: "https://#{ azure_openai_us_east2_resource_name }#.models.ai.azure.com"
 #% endif %#
-#% if azure_cohere_api_base %#
-      AZURE_COHERE_API_BASE: "#{ azure_cohere_api_base }#"
+#% if azure_anthropic_api_base %#
+      AZURE_ANTHROPIC_API_BASE: "#{ azure_anthropic_api_base }#"
+#% endif %#
+#% if azure_cohere_rerank_api_base %#
+      AZURE_COHERE_RERANK_API_BASE: "#{ azure_cohere_rerank_api_base }#"
+#% endif %#
+#% if azure_cohere_embed_api_base %#
+      AZURE_COHERE_EMBED_API_BASE: "#{ azure_cohere_embed_api_base }#"
 #% endif %#
 #% if litellm_langfuse_enabled %#
       LANGFUSE_HOST: "#{ litellm_langfuse_host }#"
@@ -147,6 +152,33 @@ spec:
           secretKeyRef:
             name: litellm-secret
             key: AZURE_API_KEY_EAST2
+#% endif %#
+
+#% if azure_cohere_rerank_api_key %#
+      # Azure Cohere Rerank API
+      - name: AZURE_COHERE_RERANK_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_COHERE_RERANK_API_KEY
+#% endif %#
+
+#% if azure_cohere_embed_api_key %#
+      # Azure Cohere Embed API
+      - name: AZURE_COHERE_EMBED_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_COHERE_EMBED_API_KEY
+#% endif %#
+
+#% if azure_anthropic_api_key %#
+      # Azure Anthropic API (Claude models via Azure AI)
+      - name: AZURE_ANTHROPIC_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: litellm-secret
+            key: AZURE_ANTHROPIC_API_KEY
 #% endif %#
 
 #% if litellm_langfuse_enabled %#

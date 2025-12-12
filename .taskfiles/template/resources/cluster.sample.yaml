@@ -294,13 +294,50 @@ cloudflare_token: ""
 
 # -- Azure OpenAI US East2 resource name (the subdomain of your endpoint).
 #    (optional)
-#    Example: "my-ai-foundry-east2" for https://my-ai-foundry-east2.openai.azure.com
+#    Example: "my-openai" for https://my-openai-east2.openai.azure.com
 # azure_openai_us_east2_resource_name: ""
 
-# -- Azure Cohere API base URL for reranking models.
+# ==============================================================================
+# AZURE COHERE RERANK API (Reranking Models)
+# ==============================================================================
+# Models: cohere-rerank-v3-5 (via passthrough endpoint /v2/rerank)
+
+# -- Azure Cohere Rerank API Key for authentication.
+#    (optional) - From Azure AI Studio
+# azure_cohere_rerank_api_key: ""
+
+# -- Azure Cohere Rerank API base URL.
 #    (optional) - Full URL to the Azure AI inference endpoint
 #    Example: "https://my-cohere-rerank.eastus.models.ai.azure.com/v2/rerank"
-# azure_cohere_api_base: ""
+# azure_cohere_rerank_api_base: ""
+
+# ==============================================================================
+# AZURE COHERE EMBED API (Embedding Models)
+# ==============================================================================
+# Models: cohere-embed-v3 (via passthrough endpoint /v2/embed)
+
+# -- Azure Cohere Embed API Key for authentication.
+#    (optional) - From Azure AI Studio
+# azure_cohere_embed_api_key: ""
+
+# -- Azure Cohere Embed API base URL.
+#    (optional) - Full URL to the Azure AI inference endpoint
+#    Example: "https://my-cohere-embed.ai.azure.com/models"
+# azure_cohere_embed_api_base: ""
+
+# ==============================================================================
+# AZURE ANTHROPIC API (Claude Models via Azure AI)
+# ==============================================================================
+# Models: claude-opus-4-5, claude-sonnet-4-5, claude-opus-4-1, claude-haiku-4-5
+
+# -- Azure Anthropic API Key for authentication.
+#    (optional) - From Azure AI Studio
+# azure_anthropic_api_key: ""
+
+# -- Azure Anthropic API base URL for Claude models via Azure AI.
+#    (optional) - Full URL to the Azure AI inference endpoint
+#    Example: "https://claude-sonnet-4-5.services.ai.azure.com"
+# azure_anthropic_api_base: ""
 
 # ==============================================================================
 # AZURE ENTRA ID AUTHENTICATION
