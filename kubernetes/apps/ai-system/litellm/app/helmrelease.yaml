@@ -150,11 +150,15 @@ spec:
         emptyDir: {}
       - name: npm-cache
         emptyDir: {}
+      - name: root-cache
+        emptyDir: {}
     volumeMounts:
       - name: cache
         mountPath: "/.cache"
       - name: npm-cache
         mountPath: "/.npm"
+      - name: root-cache
+        mountPath: "/root/.cache"
 
     # ============================================================
     # Probes Configuration
@@ -190,7 +194,7 @@ spec:
     autoscaling:
       enabled: true
       minReplicas: 2
-      maxReplicas: 5
+      maxReplicas: 3
       targetCPUUtilizationPercentage: 70
       targetMemoryUtilizationPercentage: 80
 
