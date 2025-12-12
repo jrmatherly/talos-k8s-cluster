@@ -674,6 +674,66 @@ kubectl get configmap -n observability -l grafana_dashboard=1 | grep agentgatewa
 
 See `docs/agentgateway-mcp-implementation-guide.md` for complete implementation details and `CLAUDE.md` for detailed observability configuration.
 
+### LiteLLM (LLM Proxy)
+
+**Included (optional):** This template includes [LiteLLM](https://litellm.ai/) as a unified LLM proxy providing an OpenAI-compatible API for multiple providers. It enables multi-provider routing, credential management, rate limiting, and observability.
+
+Enable it by configuring the following variables in `cluster.yaml`:
+
+```yaml
+# Enable LiteLLM
+litellm_enabled: true
+
+# Resource configuration
+litellm_replicas_min: 1
+litellm_replicas_max: 5
+litellm_cpu_request: "100m"
+litellm_cpu_limit: "2000m"
+litellm_memory_request: "256Mi"
+litellm_memory_limit: "1Gi"
+
+# Azure OpenAI backends (same as AI Gateway)
+azure_openai_us_east_api_key: "<api-key>"
+azure_openai_us_east_resource_name: "myopenai"
+azure_openai_us_east2_api_key: "<api-key>"
+azure_openai_us_east2_resource_name: "ets-east-us2"
+
+# Azure Cohere (reranking models)
+azure_cohere_api_base: "https://my-cohere.eastus.models.ai.azure.com/v2/rerank"
+
+# Optional: Langfuse observability
+litellm_langfuse_enabled: false
+litellm_langfuse_host: "https://langfuse.example.com"
+```
+
+When enabled, LiteLLM provides:
+- Unified OpenAI-compatible API at `litellm.${cloudflare_domain}`
+- Multi-provider routing (Azure OpenAI, Anthropic via Azure, Cohere)
+- Named credential management in ConfigMap
+- Dragonfly (Redis-compatible) cache for response caching
+- CloudNativePG PostgreSQL database for state
+- Prometheus metrics at `/metrics` endpoint
+- Grafana dashboard in the AI folder
+- UI authentication (admin / LITELLM_MASTER_KEY)
+- Horizontal Pod Autoscaling (HPA)
+
+**Technical Notes:**
+- Uses `ghcr.io/berriai/litellm-non_root` image (runs as UID 1000, GID 150)
+- Pre-generated Prisma binaries (no runtime compilation)
+- ConfigMap mount via `proxyConfigMap` (not `litellm_config`)
+
+```bash
+# Test LiteLLM health
+kubectl port-forward -n ai-system svc/litellm 4000:4000
+curl http://localhost:4000/health/readiness
+
+# List models (requires API key)
+MASTER_KEY=$(kubectl get secret -n ai-system litellm-secret -o jsonpath='{.data.LITELLM_MASTER_KEY}' | base64 -d)
+curl -H "Authorization: Bearer $MASTER_KEY" http://localhost:4000/models
+```
+
+See `docs/ai-context/litellm.md` for complete configuration details and troubleshooting.
+
 ### kagent (Kubernetes AI Agent Framework)
 
 **Included (optional):** This template includes [kagent](https://kagent.dev/) for Kubernetes-native AI agent workflows. When enabled, it provides a controller that manages specialized AI agents for cluster operations, monitoring, and debugging tasks.
