@@ -172,4 +172,85 @@ spec:
         #| Prompt guard action tracking #|
         promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
 #| Note: Azure OpenAI backends are defined in azure-backends.yaml.j2 #|
+#% if keycloak_enabled %#
+---
+#| =========================================== #|
+#| AgentgatewayPolicy: MCP OAuth Authentication #|
+#| =========================================== #|
+#| Applies mcpAuthentication policy to MCP routes #|
+#| Wraps Keycloak for MCP OAuth 2.1 spec compliance (RFC 9728, CORS, DCR) #|
+#| REF: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-authentication
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  policy:
+    #| MCP Authentication wraps Keycloak for OAuth 2.1 compliance #|
+    mcpAuthentication:
+      #| Keycloak realm issuer URL #|
+      issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+      #| Expected audiences for token validation (RFC 8707) #|
+      audiences:
+        - "https://mcp-gw.#{ primary_domain }#/mcp"
+      #| Provider-specific wrapping for Keycloak #|
+      #| Adds CORS headers, wraps DCR, exposes RFC 9728 metadata #|
+      provider:
+        keycloak: {}
+      #| RFC 9728 Protected Resource Metadata #|
+      #| Exposed at /.well-known/oauth-protected-resource #|
+      resourceMetadata:
+        resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+        #| RFC 9728 Section 3.1 requires authorization_servers array for client discovery #|
+        authorizationServers:
+          - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+        scopesSupported:
+          - openid
+          - profile
+          - email
+          - mcp:tools
+          - offline_access
+        bearerMethodsSupported:
+          - header
+        resourceDocumentation: "https://mcp-gw.#{ primary_domain }#/docs"
+---
+#| =========================================== #|
+#| AgentgatewayPolicy: CORS for MCP             #|
+#| =========================================== #|
+#| Enables browser-based MCP clients (MCP Inspector, Claude Desktop) #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  policy:
+    cors:
+      allowOrigins:
+        - "https://mcp-gw.#{ primary_domain }#"
+        - "https://ai-gw.#{ primary_domain }#"
+        - "https://*.#{ primary_domain }#"
+        - "http://localhost:*"
+        - "http://127.0.0.1:*"
+      allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-ID
+      exposeHeaders:
+        - X-Request-ID
+        - WWW-Authenticate
+      allowCredentials: true
+      maxAge: "86400s"
+#% endif %#
 #% endif %#

@@ -141,3 +141,64 @@ spec:
         outputTokens: "%RESP(X-OUTPUT-TOKENS)%"
         costUsd: "%RESP(X-COST-USD)%"
         promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-authentication
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  policy:
+    mcpAuthentication:
+      issuer: "https://auth.matherly.net/realms/k8s-cluster"
+      audiences:
+        - "https://mcp-gw.matherly.net/mcp"
+      provider:
+        keycloak: {}
+      resourceMetadata:
+        resource: "https://mcp-gw.matherly.net/mcp"
+        authorizationServers:
+          - "https://auth.matherly.net/realms/k8s-cluster"
+        scopesSupported:
+          - openid
+          - profile
+          - email
+          - mcp:tools
+          - offline_access
+        bearerMethodsSupported:
+          - header
+        resourceDocumentation: "https://mcp-gw.matherly.net/docs"
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  policy:
+    cors:
+      allowOrigins:
+        - "https://mcp-gw.matherly.net"
+        - "https://ai-gw.matherly.net"
+        - "https://*.matherly.net"
+        - "http://localhost:*"
+        - "http://127.0.0.1:*"
+      allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-ID
+      exposeHeaders:
+        - X-Request-ID
+        - WWW-Authenticate
+      allowCredentials: true
+      maxAge: "86400s"

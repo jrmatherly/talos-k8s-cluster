@@ -109,19 +109,22 @@ data:
         {
           "clientId": "agentgateway-mcp",
           "name": "agentgateway MCP OAuth Client",
-          "description": "OAuth client for agentgateway MCP authentication proxy",
+          "description": "OAuth client for agentgateway MCP authentication proxy - MCP 2025-11-25 compliant",
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
           "secret": "#{keycloak_agentgateway_client_secret | default(keycloak_oidc_client_secret)}#",
           "redirectUris": [
             "https://mcp-gw.#{primary_domain}#/*",
             "https://ai-gw.#{primary_domain}#/*",
-            "http://localhost:*"
+            "http://localhost:*",
+            "http://127.0.0.1:*"
           ],
           "webOrigins": [
             "https://mcp-gw.#{primary_domain}#",
             "https://ai-gw.#{primary_domain}#",
-            "https://*.#{primary_domain}#"
+            "https://*.#{primary_domain}#",
+            "http://localhost",
+            "http://127.0.0.1"
           ],
           "protocol": "openid-connect",
           "publicClient": false,
@@ -138,11 +141,26 @@ data:
             "profile",
             "roles",
             "email",
-            "offline_access"
+            "offline_access",
+            "mcp:tools"
           ],
           "optionalClientScopes": [
             "address",
             "phone"
+          ],
+          "protocolMappers": [
+            {
+              "name": "mcp-resource-audience",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-audience-mapper",
+              "consentRequired": false,
+              "config": {
+                "included.client.audience": "",
+                "included.custom.audience": "https://mcp-gw.#{primary_domain}#/mcp",
+                "id.token.claim": "true",
+                "access.token.claim": "true"
+              }
+            }
           ],
           "attributes": {
             "pkce.code.challenge.method": "S256",
@@ -190,7 +208,35 @@ data:
         }
       ],
       "scopeMappings": [],
-      "clientScopeMappings": {}#% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#,
+      "clientScopeMappings": {},
+      "clientScopes": [
+#% if agentgateway_enabled %#
+        {
+          "name": "mcp:tools",
+          "description": "MCP Tool Server Access - Enables RFC 8707 audience restriction for MCP clients",
+          "protocol": "openid-connect",
+          "attributes": {
+            "include.in.token.scope": "true",
+            "display.on.consent.screen": "true",
+            "consent.screen.text": "Access to MCP tool servers"
+          },
+          "protocolMappers": [
+            {
+              "name": "mcp-resource-audience",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-audience-mapper",
+              "consentRequired": false,
+              "config": {
+                "included.client.audience": "",
+                "included.custom.audience": "https://mcp-gw.#{primary_domain}#/mcp",
+                "id.token.claim": "true",
+                "access.token.claim": "true"
+              }
+            }
+          ]
+        }
+#% endif %#
+      ]#% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#,
       "identityProviders": [
         {
           "alias": "entra-id",
@@ -287,10 +333,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v18
+  name: keycloak-realm-import-v19
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "18"
+    config-version: "19"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
