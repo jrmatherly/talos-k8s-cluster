@@ -328,7 +328,9 @@ data:
           - embedding
           - aembedding
 
-      # Callbacks
+      # Callbacks - 'callbacks' enables /metrics endpoint
+      callbacks:
+        - prometheus
       service_callback:
         - prometheus_system
       success_callback:
