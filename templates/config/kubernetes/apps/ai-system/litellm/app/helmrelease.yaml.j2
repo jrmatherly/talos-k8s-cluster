@@ -28,7 +28,7 @@ spec:
     # ==========================================================================
     defaultPodOptions:
       securityContext:
-        # runAsUser: 1000  # Disabled - Prisma has hardcoded /root/.cache paths in generated client.py
+        runAsUser: 1000  # Prisma has hardcoded /root/.cache paths in generated client.py
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
