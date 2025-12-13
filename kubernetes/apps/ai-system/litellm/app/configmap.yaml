@@ -10,6 +10,7 @@ data:
     # This config provides initial bootstrap settings and general configuration
 
     # Model Definitions (Bootstrap - can be modified via API)
+    # https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
     model_list:
       # Azure OpenAI US East Models
       - model_name: gpt-4.1
