@@ -25,14 +25,17 @@ spec:
   values:
     # ============================================================
     # Image Configuration
-    # IMPORTANT: Use litellm-database image from Docker Hub which
-    # includes pre-built Prisma binaries and database tools.
-    # ghcr.io images have Prisma/wolfi compatibility issues.
+    # IMPORTANT: Use litellm-non_root image which has proper Prisma
+    # binary compatibility. The litellm-database and standard images
+    # use Chainguard/wolfi base which causes Prisma query engine
+    # timeouts due to missing OpenSSL 3.6.0 (falls back to Debian
+    # binaries that don't work in wolfi).
     # See: https://github.com/BerriAI/litellm/issues/17093
+    # See: https://github.com/BerriAI/litellm/issues/11864
     # ============================================================
     image:
-      # Docker Hub litellm-database image with pre-built Prisma binaries
-      repository: litellm/litellm-database
+      # litellm-non_root image with working Prisma binaries
+      repository: litellm/litellm-non_root
       tag: v1.80.5-stable.1
       pullPolicy: IfNotPresent
 
@@ -280,26 +283,24 @@ spec:
 
     # ============================================================
     # Security Context
-    # Standard litellm image requires root for Prisma binary generation
-    # on first run. readOnlyRootFilesystem must be false for /tmp writes.
+    # The litellm-non_root image runs as non-root user (UID 1000).
+    # readOnlyRootFilesystem must be false for /tmp writes needed
+    # by Prisma binary cache.
     # ============================================================
     podSecurityContext:
-      # Standard image runs as root (UID 0)
-      runAsNonRoot: false
-      fsGroup: 0
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
 
     securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: false
-      # Standard image needs root for Prisma
-      runAsNonRoot: false
-      runAsUser: 0
+      runAsNonRoot: true
+      runAsUser: 1000
       capabilities:
         drop:
           - ALL
-        add:
-          # Required for network operations
-          - NET_BIND_SERVICE
 
     # ============================================================
     # Pod Lifecycle

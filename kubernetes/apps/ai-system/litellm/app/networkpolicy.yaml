@@ -101,12 +101,6 @@ spec:
         - protocol: TCP
           port: 4000
   egress:
-    # Allow localhost/loopback for Prisma query engine
-    # Prisma runs an internal HTTP server on a random port (e.g., 48285)
-    # that the Python client connects to via localhost
-    - to:
-        - ipBlock:
-            cidr: 127.0.0.0/8
     # DNS
     - to:
         - namespaceSelector:
