@@ -14,6 +14,7 @@ spec:
 #% if azure_openai_us_east_api_key %#
     - toFQDNs:
         - matchName: "#{ azure_openai_us_east_resource_name }#.openai.azure.com"
+        - matchName: "#{ azure_openai_us_east_resource_name }#.models.ai.azure.com"
       toPorts:
         - ports:
             - port: "443"
@@ -193,4 +194,51 @@ spec:
       ports:
         - protocol: UDP
           port: 53
+---
+# NetworkPolicy for CloudNativePG database
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: litellm-db
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: litellm-db
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from LiteLLM pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow from other database replicas (replication)
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: litellm-db
+      ports:
+        - protocol: TCP
+          port: 5432
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+    # Replication between database pods
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: litellm-db
+      ports:
+        - protocol: TCP
+          port: 5432
 #% endif %#
