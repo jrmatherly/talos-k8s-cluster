@@ -52,7 +52,7 @@ spec:
         image:
           repository: ghcr.io/sergelogvinov/proxmox-csi-node
           # renovate: datasource=docker depName=ghcr.io/sergelogvinov/proxmox-csi-node
-          tag: v0.16.0
+          tag: v0.17.0
       driverRegistrar:
         image:
           repository: registry.k8s.io/sig-storage/csi-node-driver-registrar
