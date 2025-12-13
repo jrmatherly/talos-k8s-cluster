@@ -27,8 +27,8 @@ spec:
     # ==========================================================================
     defaultPodOptions:
       securityContext:
-        # Debian image runs as root - Prisma needs /root/.cache access
-        fsGroup: 1000
+        # litellm-non_root image runs as UID 1000 / GID 150
+        fsGroup: 150
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
@@ -53,8 +53,9 @@ spec:
         containers:
           app:
             image:
-              # Using litellm-database image optimized for PostgreSQL deployments
-              repository: ghcr.io/berriai/litellm-database
+              # Using litellm-non_root image with pre-generated Prisma binaries
+              # Fixes Prisma query engine timeout issues on Wolfi distro (GitHub #17093)
+              repository: ghcr.io/berriai/litellm-non_root
               tag: main-stable
               pullPolicy: IfNotPresent
 
