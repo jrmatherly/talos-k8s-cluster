@@ -573,8 +573,8 @@ data:
     # LiteLLM Settings
     litellm_settings:
       drop_params: true
-      # Callbacks - 'callbacks' enables /metrics endpoint
       # Logging/Callback settings
+      # Callbacks - 'callbacks' enables /metrics endpoint
       success_callback: # ["langfuse"]  # list of success callbacks
         - "prometheus"
 #% if litellm_langfuse_enabled %#
@@ -594,6 +594,17 @@ data:
         - "prometheus_system"
       turn_off_message_logging: true # boolean  # prevent the messages and responses from being logged to on your callbacks, but request metadata will still be logged. Useful for privacy/compliance when handling sensitive data.
       redact_user_api_key_info: true # boolean  # Redact information about the user api key (hashed token, user_id, team id, etc.), from logs. Currently supported for Langfuse, OpenTelemetry, Logfire, ArizeAI logging.
+      # modify_params: true # modify the params before sending to the provider
+      enable_preview_features: true # enable preview features
+      set_verbose: false
+      # Debugging - see debugging docs for more options
+      # Use `--debug` or `--detailed_debug` CLI flags, or set LITELLM_LOG env var to "INFO", "DEBUG", or "ERROR"
+      json_logs: true # if true, logs will be in json format
+
+      # Networking & Timeout Settings
+      request_timeout: 30 # (int) llm requesttimeout in seconds. Raise Timeout error if call takes longer than 10s. Sets litellm.request_timeout
+      force_ipv4: true # If true, litellm will force ipv4 for all LLM requests. Some users have seen httpx ConnectionError when using ipv6 + Anthropic API
+      # forward_traceparent_to_llm_provider: true # Forward traceparent header to LLM providers for distributed tracing
 
 #% if litellm_langfuse_enabled %#
       # Langfuse Settings
@@ -615,18 +626,16 @@ data:
         ]
 #% endif %#
 
-      # Networking settings
-      request_timeout: 30 # (int) llm requesttimeout in seconds. Raise Timeout error if call takes longer than 10s. Sets litellm.request_timeout
-      # force_ipv4: true # If true, litellm will force ipv4 for all LLM requests. Some users have seen httpx ConnectionError when using ipv6 + Anthropic API
-
-      # Debugging - see debugging docs for more options
-      # Use `--debug` or `--detailed_debug` CLI flags, or set LITELLM_LOG env var to "INFO", "DEBUG", or "ERROR"
-      json_logs: true # if true, logs will be in json format
-
-      # Fallbacks, reliability
+      # Fallback & Reliability Settings
       default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
       # content_policy_fallbacks: [{"gpt-3.5-turbo-small": ["claude-opus"]}] # fallbacks for ContentPolicyErrors
       # context_window_fallbacks: [{"gpt-3.5-turbo-small": ["gpt-3.5-turbo-large", "claude-opus"]}] # fallbacks for ContextWindowExceededErrors
+      disable_end_user_cost_tracking: false # Disable cost tracking for end users to avoid unnecessary database writes
+      disable_end_user_cost_tracking_prometheus_only: false # Only track costs in Prometheus, not in database
+      # key_generation_settings: # Enterprise only for paid plans
+      # disable_add_transform_inline_image_block: false # Disable adding transform_inline_image_block for image inputs
+      disable_hf_tokenizer_download: false # Disable downloading Hugging Face tokenizers
+
 
       # MCP Aliases - Map aliases to MCP server names for easier tool access
       # mcp_aliases: { "github": "github_mcp_server", "zapier": "zapier_mcp_server", "deepwiki": "deepwiki_mcp_server" } # Maps friendly aliases to MCP server names. Only the first alias for each server is used
@@ -716,7 +725,7 @@ data:
       tpm_limit: 3500000
       rpm_limit: 35000
       max_file_size_mb: 25
-      set_verbose: false
+
 
       # Budget Alert Configuration
       # budget_alert_ttl: 86400 # 24 hours between budget alerts

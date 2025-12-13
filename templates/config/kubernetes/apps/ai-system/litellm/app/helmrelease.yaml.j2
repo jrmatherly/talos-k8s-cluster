@@ -77,6 +77,13 @@ spec:
               LITELLM_MIGRATION_DIR: /tmp
               LITELLM_CALLBACKS: prometheus
 
+              # Non-root cache configuration
+              # XDG_CACHE_HOME tells platformdirs (used by prisma-python) where to cache binaries
+              # Without this, prisma-python tries /root/.cache which doesn't exist for UID 1000
+              HOME: /.cache
+              XDG_CACHE_HOME: /.cache
+              npm_config_cache: /.cache/.npm
+
               # Redis/Dragonfly settings
               REDIS_HOST: litellm-dragonfly
               REDIS_PORT: "6379"
