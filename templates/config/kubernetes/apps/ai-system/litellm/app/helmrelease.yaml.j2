@@ -28,8 +28,7 @@ spec:
     # ==========================================================================
     defaultPodOptions:
       securityContext:
-        runAsUser: 1000  # Prisma has hardcoded /root/.cache paths in generated client.py
-        runAsGroup: 1000
+        # Debian image runs as root - Prisma needs /root/.cache access
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
@@ -55,7 +54,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/berriai/litellm-non_root
+              # Using Debian-based image instead of wolfi/non_root due to Prisma compatibility
+              repository: ghcr.io/berriai/litellm
               tag: main-v1.80.5-stable
               pullPolicy: IfNotPresent
 
@@ -70,13 +70,8 @@ spec:
             env:
               # Core LiteLLM settings
               TZ: "America/New_York"
-              # Disabled DB features - Prisma Query Engine hangs on wolfi distro
-              # The litellm-non_root image uses wolfi/Chainguard which has Prisma binary
-              # compatibility issues. Models are loaded from config.yaml only.
-              # Re-enable after LiteLLM fixes Prisma on wolfi or switch to debian image.
-              STORE_MODEL_IN_DB: "False"
-              USE_PRISMA_MIGRATE: "False"
-              DISABLE_PRISMA_SCHEMA_UPDATE: "True"
+              STORE_MODEL_IN_DB: "True"
+              USE_PRISMA_MIGRATE: "True"
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
               LITELLM_CALLBACKS: prometheus
@@ -268,18 +263,9 @@ spec:
             subPath: config.yaml
             readOnly: true
 
-      # Cache directories for npm, Prisma CLI, and temp files
-      # Note: readOnlyRootFilesystem must be false because Prisma writes
-      # binaries directly to its installed package directory
-      # The litellm-non_root image has pre-generated Prisma binaries,
-      # so we don't need to mount over the package directory
-      cache:
+      # Temp directory for ephemeral data
+      tmp:
         type: emptyDir
         globalMounts:
-          - path: /.cache
-            subPath: cache
-          - path: /.npm
-            subPath: npm
           - path: /tmp
-            subPath: tmp
 #% endif %#
