@@ -109,15 +109,23 @@ spec:
     # Environment Variables (simple key-value map)
     # ============================================================
     envVars:
+      # Core LiteLLM settings
       STORE_MODEL_IN_DB: "true"
       USE_PRISMA_MIGRATE: "true"
       LITELLM_MODE: "PRODUCTION"
       LITELLM_DONT_SHOW_FEEDBACK_BOX: "true"
+      LITELLM_MIGRATION_DIR: "/tmp"
+      LITELLM_CALLBACKS: "prometheus"
+      # Non-root cache configuration (Prisma + npm)
+      # Reference: https://github.com/m00nwtchr/homelab-cluster
+      HOME: "/.cache"
+      npm_config_cache: "/.cache/.npm"
+      PRISMA_HOME: "/.cache/prisma"
+      PRISMA_BINARY_CACHE_DIR: "/.cache/prisma/binaries"
+      # Redis/Dragonfly settings
       REDIS_HOST: "litellm-dragonfly"
       REDIS_PORT: "6379"
       REDIS_NAMESPACE: "litellm"
-      LITELLM_MIGRATION_DIR: "/tmp"
-      LITELLM_CALLBACKS: "prometheus"
       AZURE_API_BASE: "https://aaronsai.openai.azure.com/"
       AZURE_API_VERSION: "2025-01-01-preview"
       AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com/"
