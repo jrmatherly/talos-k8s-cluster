@@ -1,5 +1,5 @@
 [tools]
-helm = "3.19.2"  # Helm 4.x has breaking changes with helmfile post-renderer
+helm = "3.19.4"  # Helm 4.x has breaking changes with helmfile post-renderer
 
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
