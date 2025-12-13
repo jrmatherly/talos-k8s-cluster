@@ -76,6 +76,8 @@ spec:
               # Re-enable after LiteLLM fixes Prisma on wolfi or switch to debian image.
               STORE_MODEL_IN_DB: "False"
               USE_PRISMA_MIGRATE: "True"
+              # Writable directory for migration baseline files (non-root image)
+              LITELLM_MIGRATION_DIR: "/tmp"
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
               LITELLM_CALLBACKS: prometheus
