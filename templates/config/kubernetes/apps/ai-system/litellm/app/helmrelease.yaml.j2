@@ -54,9 +54,9 @@ spec:
         containers:
           app:
             image:
-              # Using Debian-based image instead of wolfi/non_root due to Prisma compatibility
-              repository: ghcr.io/berriai/litellm
-              tag: main-v1.80.5-stable
+              # Using litellm-database image optimized for PostgreSQL deployments
+              repository: ghcr.io/berriai/litellm-database
+              tag: main-stable
               pullPolicy: IfNotPresent
 
             args:
