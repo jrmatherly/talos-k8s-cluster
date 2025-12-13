@@ -56,7 +56,7 @@ spec:
           app:
             image:
               repository: ghcr.io/berriai/litellm-non_root
-              tag: litellm_embedding_header_forwarding-v1.80.9.dev6
+              tag: main-v1.80.5-stable
               pullPolicy: IfNotPresent
 
             args:
@@ -72,11 +72,10 @@ spec:
               TZ: "America/New_York"
               # Disabled DB model storage - Prisma Query Engine timeout on wolfi distro
               # Models loaded from config.yaml only; re-enable after fixing Prisma
-              STORE_MODEL_IN_DB: "False"
+              STORE_MODEL_IN_DB: "True"
               USE_PRISMA_MIGRATE: "True"
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
-              LITELLM_MIGRATION_DIR: /tmp
               LITELLM_CALLBACKS: prometheus
 
               # Redis/Dragonfly settings
@@ -207,7 +206,7 @@ spec:
                   httpGet:
                     path: /health/liveliness
                     port: *port
-                  initialDelaySeconds: 0
+                  initialDelaySeconds: 60
                   periodSeconds: 15
                   timeoutSeconds: 10
                   failureThreshold: 3
@@ -218,7 +217,7 @@ spec:
                   httpGet:
                     path: /health/readiness
                     port: *port
-                  initialDelaySeconds: 0
+                  initialDelaySeconds: 10
                   periodSeconds: 10
                   timeoutSeconds: 10
                   failureThreshold: 3
@@ -269,6 +268,8 @@ spec:
       # Cache directories for npm, Prisma CLI, and temp files
       # Note: readOnlyRootFilesystem must be false because Prisma writes
       # binaries directly to its installed package directory
+      # The litellm-non_root image has pre-generated Prisma binaries,
+      # so we don't need to mount over the package directory
       cache:
         type: emptyDir
         globalMounts:
