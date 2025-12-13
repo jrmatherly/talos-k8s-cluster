@@ -178,10 +178,12 @@ spec:
                   httpGet:
                     path: /health/readiness
                     port: &port 4000
-                  initialDelaySeconds: 10
+                  # Extended timeout for Prisma Query Engine initialization
+                  # wolfi distro fallback to debian binaries causes slow startup
+                  initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 10
-                  failureThreshold: 30
+                  failureThreshold: 60
                   successThreshold: 1
               liveness:
                 enabled: true
