@@ -235,14 +235,16 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    # Allow from other database replicas (replication)
+    # Allow from other database replicas (replication and health checks)
     - from:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: litellm-db
       ports:
         - protocol: TCP
-          port: 5432
+          port: 5432   # PostgreSQL replication
+        - protocol: TCP
+          port: 8000   # CNPG instance manager HTTP API
     # Allow from CNPG operator (instance manager HTTP port)
     - from:
         - namespaceSelector:
@@ -260,12 +262,14 @@ spec:
       ports:
         - protocol: UDP
           port: 53
-    # Replication between database pods
+    # Replication and health checks between database pods
     - to:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: litellm-db
       ports:
         - protocol: TCP
-          port: 5432
+          port: 5432   # PostgreSQL replication
+        - protocol: TCP
+          port: 8000   # CNPG instance manager HTTP API (health checks, orchestration)
 #% endif %#
