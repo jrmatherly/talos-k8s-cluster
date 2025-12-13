@@ -70,7 +70,9 @@ spec:
             env:
               # Core LiteLLM settings
               TZ: "America/New_York"
-              STORE_MODEL_IN_DB: "True"
+              # Disabled DB model storage - Prisma Query Engine timeout on wolfi distro
+              # Models loaded from config.yaml only; re-enable after fixing Prisma
+              STORE_MODEL_IN_DB: "False"
               USE_PRISMA_MIGRATE: "True"
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
