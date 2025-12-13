@@ -65,6 +65,22 @@ spec:
         memory: "#{ litellm_memory_limit }#"
 
     # ============================================================
+    # Volumes for Prisma cache (required for non-root)
+    # Reference: https://github.com/m00nwtchr/homelab-cluster
+    # ============================================================
+    volumes:
+      - name: cache
+        emptyDir: {}
+
+    volumeMounts:
+      - name: cache
+        mountPath: /.cache
+      - name: cache
+        mountPath: /root/.cache
+      - name: cache
+        mountPath: /tmp
+
+    # ============================================================
     # Service Configuration
     # ============================================================
     service:
