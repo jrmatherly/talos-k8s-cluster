@@ -1,5 +1,6 @@
 #% if litellm_enabled %#
 ---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -11,351 +12,272 @@ spec:
   interval: 1h
   timeout: 15m
   install:
-    crds: CreateReplace
     remediation:
       retries: 3
   upgrade:
-    crds: CreateReplace
     cleanupOnFail: true
     remediation:
       retries: 3
       remediateLastFailure: true
-  # Skip Helm tests - chart has bug in test-env-vars.yaml expecting DD_* vars
-  test:
-    enable: false
+
   values:
-    # ============================================================
-    # Image Configuration
-    # Use ghcr.io/berriai/litellm from official GHCR registry.
-    # Reference: https://github.com/dapperdivers/dapper-cluster
-    # See: https://docs.litellm.ai/docs/proxy/deploy#kubernetes
-    # ============================================================
-    image:
-      repository: ghcr.io/berriai/litellm
-      tag: v1.80.5-stable
-      pullPolicy: IfNotPresent
-
-    # ============================================================
-    # Replica Configuration (HPA handles scaling)
-    # ============================================================
-    replicaCount: #{ litellm_replicas_min }#
-
-    # ============================================================
-    # Deployment Strategy
-    # Conservative RollingUpdate prevents cascading failures during
-    # slow startups with Prisma engine initialization
-    # ============================================================
-    strategy:
-      type: RollingUpdate
-      rollingUpdate:
-        # Only surge by 1 pod at a time to limit failed pod accumulation
-        maxSurge: 1
-        # Keep at least 50% available during updates
-        maxUnavailable: 0
-
-    # ============================================================
-    # Resource Configuration
-    # ============================================================
-    resources:
-      requests:
-        cpu: "#{ litellm_cpu_request }#"
-        memory: "#{ litellm_memory_request }#"
-      limits:
-        cpu: "#{ litellm_cpu_limit }#"
-        memory: "#{ litellm_memory_limit }#"
-
-    # ============================================================
-    # Volumes for Prisma cache (required for non-root)
+    # ==========================================================================
+    # Default Pod Options
+    # Security context with fsGroup ensures mounted volumes are writable
     # Reference: https://github.com/m00nwtchr/homelab-cluster
-    # ============================================================
-    volumes:
-      - name: cache
-        emptyDir: {}
+    # ==========================================================================
+    defaultPodOptions:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/metrics"
+      terminationGracePeriodSeconds: 60
 
-    volumeMounts:
-      - name: cache
-        mountPath: /.cache
-      - name: cache
-        mountPath: /root/.cache
-      - name: cache
-        mountPath: /tmp
+    # ==========================================================================
+    # Controllers
+    # ==========================================================================
+    controllers:
+      litellm:
+        type: deployment
+        replicas: #{ litellm_replicas_min }#
+        strategy: RollingUpdate
+        rollingUpdate:
+          unavailable: 0
+          surge: 1
 
-    # ============================================================
-    # Service Configuration
-    # ============================================================
-    service:
-      type: ClusterIP
-      port: 4000
+        containers:
+          app:
+            image:
+              repository: ghcr.io/berriai/litellm
+              tag: v1.80.5-stable
+              pullPolicy: IfNotPresent
 
-    # ============================================================
-    # Database Configuration (use external CloudNativePG)
-    # ============================================================
-    db:
-      useExisting: true
-      deployStandalone: false
-      endpoint: litellm-db-rw
-      database: litellm
-      secret:
-        name: litellm-db-secret
-        usernameKey: username
-        passwordKey: password
+            args:
+              - --host
+              - "::"
+              - --port
+              - "4000"
+              - --config
+              - /app/config.yaml
 
-    # ============================================================
-    # Migration Job Configuration
-    # ============================================================
-    migrationJob:
-      enabled: false  # Disable - has permission issues with non-root
+            env:
+              # Core LiteLLM settings
+              TZ: "America/New_York"
+              STORE_MODEL_IN_DB: "True"
+              USE_PRISMA_MIGRATE: "True"
+              LITELLM_MODE: "PRODUCTION"
+              LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
+              LITELLM_MIGRATION_DIR: /tmp
+              LITELLM_CALLBACKS: prometheus
 
-    # ============================================================
-    # Environment Variables (simple key-value map)
-    # ============================================================
-    envVars:
-      # Core LiteLLM settings
-      STORE_MODEL_IN_DB: "true"
-      USE_PRISMA_MIGRATE: "true"
-      LITELLM_MODE: "PRODUCTION"
-      LITELLM_DONT_SHOW_FEEDBACK_BOX: "true"
-      LITELLM_MIGRATION_DIR: "/tmp"
-      LITELLM_CALLBACKS: "prometheus"
-      # Non-root cache configuration (Prisma + npm)
-      # Reference: https://github.com/m00nwtchr/homelab-cluster
-      HOME: "/.cache"
-      npm_config_cache: "/.cache/.npm"
-      PRISMA_HOME: "/.cache/prisma"
-      PRISMA_BINARY_CACHE_DIR: "/.cache/prisma/binaries"
-      # Redis/Dragonfly settings
-      REDIS_HOST: "litellm-dragonfly"
-      REDIS_PORT: "6379"
-      REDIS_NAMESPACE: "litellm"
-#% if azure_openai_us_east_api_key %#
-      AZURE_API_BASE: "https://#{ azure_openai_us_east_resource_name }#.openai.azure.com/"
-      AZURE_API_VERSION: "2025-01-01-preview"
-#% endif %#
-#% if azure_openai_us_east2_api_key %#
-      AZURE_API_BASE_EAST2: "https://#{ azure_openai_us_east2_resource_name }#.openai.azure.com/"
-      AZURE_API_VERSION_EAST2: "2025-04-01-preview"
-#% endif %#
-#% if azure_anthropic_api_base %#
-      AZURE_ANTHROPIC_API_BASE: "#{ azure_anthropic_api_base }#"
-#% endif %#
-#% if azure_cohere_rerank_api_base %#
-      AZURE_COHERE_RERANK_API_BASE: "#{ azure_cohere_rerank_api_base }#"
-#% endif %#
-#% if azure_cohere_embed_api_base %#
-      AZURE_COHERE_EMBED_API_BASE: "#{ azure_cohere_embed_api_base }#"
-#% endif %#
-#% if litellm_langfuse_enabled %#
-      LANGFUSE_HOST: "#{ litellm_langfuse_host }#"
-#% endif %#
+              # Redis/Dragonfly settings
+              REDIS_HOST: litellm-dragonfly
+              REDIS_PORT: "6379"
+              REDIS_NAMESPACE: litellm
 
-    # ============================================================
-    # Extra Environment Variables (K8s env spec with secretKeyRef)
-    # ============================================================
-    extraEnvVars:
-      - name: LITELLM_MASTER_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: LITELLM_MASTER_KEY
-      - name: LITELLM_SALT_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: LITELLM_SALT_KEY
+              # Database URL (constructed from secret)
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: DATABASE_URL
 
-      # UI Authentication (default: admin / MASTER_KEY)
-      - name: UI_USERNAME
-        value: "admin"
-      - name: UI_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: LITELLM_MASTER_KEY
+              # LiteLLM Master/Salt Keys
+              LITELLM_MASTER_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: LITELLM_MASTER_KEY
+              LITELLM_SALT_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: LITELLM_SALT_KEY
 
-      # Redis/Dragonfly Cache Password
-      - name: REDIS_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: REDIS_PASSWORD
+              # UI Authentication
+              UI_USERNAME: admin
+              UI_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: LITELLM_MASTER_KEY
+
+              # Redis Password
+              REDIS_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: REDIS_PASSWORD
 
 #% if azure_openai_us_east_api_key %#
-      # Azure OpenAI US East
-      - name: AZURE_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: AZURE_API_KEY
+              # Azure OpenAI US East
+              AZURE_API_BASE: "https://#{ azure_openai_us_east_resource_name }#.openai.azure.com/"
+              AZURE_API_VERSION: "2025-01-01-preview"
+              AZURE_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: AZURE_API_KEY
 #% endif %#
 
 #% if azure_openai_us_east2_api_key %#
-      # Azure OpenAI US East2
-      - name: AZURE_API_KEY_EAST2
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: AZURE_API_KEY_EAST2
-#% endif %#
-
-#% if azure_cohere_rerank_api_key %#
-      # Azure Cohere Rerank API
-      - name: AZURE_COHERE_RERANK_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: AZURE_COHERE_RERANK_API_KEY
-#% endif %#
-
-#% if azure_cohere_embed_api_key %#
-      # Azure Cohere Embed API
-      - name: AZURE_COHERE_EMBED_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: AZURE_COHERE_EMBED_API_KEY
+              # Azure OpenAI US East2
+              AZURE_API_BASE_EAST2: "https://#{ azure_openai_us_east2_resource_name }#.openai.azure.com/"
+              AZURE_API_VERSION_EAST2: "2025-04-01-preview"
+              AZURE_API_KEY_EAST2:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: AZURE_API_KEY_EAST2
 #% endif %#
 
 #% if azure_anthropic_api_key %#
-      # Azure Anthropic API (Claude models via Azure AI)
-      - name: AZURE_ANTHROPIC_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: AZURE_ANTHROPIC_API_KEY
+              # Azure Anthropic API
+              AZURE_ANTHROPIC_API_BASE: "#{ azure_anthropic_api_base }#"
+              AZURE_ANTHROPIC_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: AZURE_ANTHROPIC_API_KEY
+#% endif %#
+
+#% if azure_cohere_rerank_api_key %#
+              # Azure Cohere Rerank API
+              AZURE_COHERE_RERANK_API_BASE: "#{ azure_cohere_rerank_api_base }#"
+              AZURE_COHERE_RERANK_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: AZURE_COHERE_RERANK_API_KEY
+#% endif %#
+
+#% if azure_cohere_embed_api_key %#
+              # Azure Cohere Embed API
+              AZURE_COHERE_EMBED_API_BASE: "#{ azure_cohere_embed_api_base }#"
+              AZURE_COHERE_EMBED_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: AZURE_COHERE_EMBED_API_KEY
 #% endif %#
 
 #% if litellm_langfuse_enabled %#
-      # Langfuse Observability
-      - name: LANGFUSE_PUBLIC_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: LANGFUSE_PUBLIC_KEY
-      - name: LANGFUSE_SECRET_KEY
-        valueFrom:
-          secretKeyRef:
-            name: litellm-secret
-            key: LANGFUSE_SECRET_KEY
+              # Langfuse Observability
+              LANGFUSE_HOST: "#{ litellm_langfuse_host }#"
+              LANGFUSE_PUBLIC_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: LANGFUSE_PUBLIC_KEY
+              LANGFUSE_SECRET_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: LANGFUSE_SECRET_KEY
 #% endif %#
 
-    # ============================================================
-    # Config File (mounted from ConfigMap)
-    # ============================================================
-    proxyConfigMap:
-      create: false
-      name: litellm-config
-      key: config.yaml
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/readiness
+                    port: &port 4000
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 10
+                  failureThreshold: 30
+                  successThreshold: 1
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/liveliness
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 15
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/readiness
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 10
+                  failureThreshold: 3
 
-    # ============================================================
-    # Probes Configuration
-    # Prisma engine initialization can take 30-60s on cold start.
-    # Startup probe allows slow initialization without triggering
-    # liveness/readiness failures during boot.
-    # ============================================================
-    startupProbe:
-      httpGet:
-        path: /health/readiness
-        port: 4000
-      # Allow up to 5 minutes for Prisma engine + migrations
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      timeoutSeconds: 10
-      failureThreshold: 30
-      successThreshold: 1
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
 
-    livenessProbe:
-      httpGet:
-        path: /health/liveliness
-        port: 4000
-      # Only checked after startupProbe succeeds
-      initialDelaySeconds: 0
-      periodSeconds: 15
-      timeoutSeconds: 10
-      failureThreshold: 3
+            resources:
+              requests:
+                cpu: "#{ litellm_cpu_request }#"
+                memory: "#{ litellm_memory_request }#"
+              limits:
+                cpu: "#{ litellm_cpu_limit }#"
+                memory: "#{ litellm_memory_limit }#"
 
-    readinessProbe:
-      httpGet:
-        path: /health/readiness
-        port: 4000
-      # Only checked after startupProbe succeeds
-      initialDelaySeconds: 0
-      periodSeconds: 10
-      timeoutSeconds: 10
-      failureThreshold: 3
+    # ==========================================================================
+    # Service
+    # Service named 'litellm' to match existing HTTPRoute/ServiceMonitor refs
+    # ==========================================================================
+    service:
+      litellm:
+        controller: litellm
+        ports:
+          http:
+            port: 4000
+            targetPort: *port
 
-    # ============================================================
-    # Pod Disruption Budget
-    # ============================================================
-    podDisruptionBudget:
-      enabled: true
-      minAvailable: 1
+    # ==========================================================================
+    # Persistence
+    # EmptyDir mounts for writable directories required by Prisma + npm
+    # Reference: https://github.com/m00nwtchr/homelab-cluster
+    # ==========================================================================
+    persistence:
+      # LiteLLM config file from ConfigMap
+      config:
+        type: configMap
+        name: litellm-config
+        globalMounts:
+          - path: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true
 
-    # ============================================================
-    # Autoscaling
-    # IMPORTANT: HPA behavior prevents rapid pod spinning when pods
-    # fail during startup. Scale-up is stabilized over 3 minutes to
-    # give failing pods time to recover or be properly terminated.
-    # ============================================================
-    autoscaling:
-      enabled: true
-      minReplicas: #{ litellm_replicas_min }#
-      maxReplicas: #{ litellm_replicas_max }#
-      # Use CPU only - memory spikes during failures cause feedback loops
-      targetCPUUtilizationPercentage: 70
-      # Disable memory-based scaling to prevent pod spinning
-      # targetMemoryUtilizationPercentage: 80
-      behavior:
-        scaleUp:
-          # Stabilize for 3 minutes before scaling up
-          # Prevents rapid pod accumulation during cascading failures
-          stabilizationWindowSeconds: 180
-          policies:
-            # Add at most 1 pod per minute
-            - type: Pods
-              value: 1
-              periodSeconds: 60
-            # Or 25% of current replicas, whichever is smaller
-            - type: Percent
-              value: 25
-              periodSeconds: 60
-          selectPolicy: Min
-        scaleDown:
-          # Wait 5 minutes before scaling down
-          # Allows for traffic spikes without thrashing
-          stabilizationWindowSeconds: 300
-          policies:
-            - type: Pods
-              value: 1
-              periodSeconds: 60
+      # Cache directories for npm, Prisma CLI, and temp files
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /.cache
+            subPath: cache
+          - path: /.npm
+            subPath: npm
+          - path: /tmp
+            subPath: tmp
 
-    # ============================================================
-    # Security Context
-    # Run as non-root user (UID 1000) per dapper-cluster reference.
-    # readOnlyRootFilesystem must be false for Prisma binary cache.
-    # ============================================================
-    podSecurityContext:
-      runAsUser: 1000
-      runAsGroup: 150
-      runAsNonRoot: true
-
-    securityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: false
-      capabilities:
-        drop:
-          - ALL
-
-    # ============================================================
-    # Pod Lifecycle
-    # ============================================================
-    # Allow time for graceful shutdown and connection draining
-    terminationGracePeriodSeconds: 60
-
-    # ============================================================
-    # Pod Annotations (for Prometheus scraping)
-    # ============================================================
-    podAnnotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "4000"
-      prometheus.io/path: "/metrics"
+      # Prisma Python client directory - allows binary caching
+      # This is critical: prisma-python hardcodes /root/.cache paths
+      # By mounting the entire prisma package, we allow it to write binaries
+      prisma-client:
+        type: emptyDir
+        globalMounts:
+          - path: /usr/lib/python3.13/site-packages/prisma
+            subPath: prisma
 #% endif %#

@@ -1,10 +1,13 @@
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: litellm
 spec:
-  interval: 1h
-  url: oci://ghcr.io/berriai/litellm-helm
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
   ref:
-    tag: "0.1.830"
+    tag: 4.5.0
+  url: oci://ghcr.io/bjw-s-labs/helm/app-template
