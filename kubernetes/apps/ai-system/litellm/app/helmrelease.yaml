@@ -175,14 +175,14 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /health/readiness
+                    # Use liveliness for startup - readiness checks DB which can be slow
+                    path: /health/liveliness
                     port: &port 4000
-                  # Extended timeout for Prisma Query Engine initialization
-                  # wolfi distro fallback to debian binaries causes slow startup
-                  initialDelaySeconds: 30
-                  periodSeconds: 10
-                  timeoutSeconds: 10
-                  failureThreshold: 60
+                  # Quick startup check - just verify HTTP server is running
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 30
                   successThreshold: 1
               liveness:
                 enabled: true
