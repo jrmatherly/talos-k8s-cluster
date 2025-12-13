@@ -660,7 +660,9 @@ data:
                               # /chat/completions, /completions, /embeddings, /audio/transcriptions
         mode: default_on # if default_off, you need to opt in to caching on a per call basis
         ttl: 600 # ttl for caching
-        disable_copilot_system_to_assistant: false  # If false (default), converts all 'system' role messages to 'assistant' for GitHub Copilot compatibility. Set to true to disable this behavior.
+
+      # GitHub Copilot compatibility
+      disable_copilot_system_to_assistant: false  # If false (default), converts all 'system' role messages to 'assistant' for GitHub Copilot compatibility. Set to true to disable this behavior.
 
     # callback_settings:
     #   otel:
