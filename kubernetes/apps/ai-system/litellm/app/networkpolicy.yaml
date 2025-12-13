@@ -92,6 +92,14 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
+    # Allow from agentgateway (AI Gateway)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+      ports:
+        - protocol: TCP
+          port: 4000
     # Allow Prometheus scraping
     - from:
         - namespaceSelector:
