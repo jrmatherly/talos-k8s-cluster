@@ -25,18 +25,13 @@ spec:
   values:
     # ============================================================
     # Image Configuration
-    # IMPORTANT: Use litellm-non_root image which has proper Prisma
-    # binary compatibility. The litellm-database and standard images
-    # use Chainguard/wolfi base which causes Prisma query engine
-    # timeouts due to missing OpenSSL 3.6.0 (falls back to Debian
-    # binaries that don't work in wolfi).
-    # See: https://github.com/BerriAI/litellm/issues/17093
-    # See: https://github.com/BerriAI/litellm/issues/11864
+    # Use ghcr.io/berriai/litellm from official GHCR registry.
+    # Reference: https://github.com/dapperdivers/dapper-cluster
+    # See: https://docs.litellm.ai/docs/proxy/deploy#kubernetes
     # ============================================================
     image:
-      # litellm-non_root image with working Prisma binaries
-      repository: litellm/litellm-non_root
-      tag: v1.80.5-stable.1
+      repository: ghcr.io/berriai/litellm
+      tag: v1.80.5-stable
       pullPolicy: IfNotPresent
 
     # ============================================================
@@ -99,6 +94,9 @@ spec:
     # ============================================================
     envVars:
       STORE_MODEL_IN_DB: "true"
+      USE_PRISMA_MIGRATE: "true"
+      LITELLM_MODE: "PRODUCTION"
+      LITELLM_DONT_SHOW_FEEDBACK_BOX: "true"
       REDIS_HOST: "litellm-dragonfly"
       REDIS_PORT: "6379"
       REDIS_NAMESPACE: "litellm"
@@ -283,21 +281,17 @@ spec:
 
     # ============================================================
     # Security Context
-    # The litellm-non_root image runs as non-root user (UID 1000).
-    # readOnlyRootFilesystem must be false for /tmp writes needed
-    # by Prisma binary cache.
+    # Run as non-root user (UID 1000) per dapper-cluster reference.
+    # readOnlyRootFilesystem must be false for Prisma binary cache.
     # ============================================================
     podSecurityContext:
-      runAsNonRoot: true
       runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
+      runAsGroup: 150
+      runAsNonRoot: true
 
     securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: false
-      runAsNonRoot: true
-      runAsUser: 1000
       capabilities:
         drop:
           - ALL
