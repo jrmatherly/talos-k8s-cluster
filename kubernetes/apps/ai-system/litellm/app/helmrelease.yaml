@@ -55,7 +55,7 @@ spec:
           app:
             image:
               repository: ghcr.io/berriai/litellm-non_root
-              tag: v1.80.8.rc.1
+              tag: litellm_embedding_header_forwarding-v1.80.9.dev6
               pullPolicy: IfNotPresent
 
             args:
