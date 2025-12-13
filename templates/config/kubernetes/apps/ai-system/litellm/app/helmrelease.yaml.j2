@@ -221,7 +221,8 @@ spec:
 
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
+              # Must be false - Prisma needs to write binaries to package dir
+              readOnlyRootFilesystem: false
               capabilities:
                 drop:
                   - ALL
@@ -262,6 +263,8 @@ spec:
             readOnly: true
 
       # Cache directories for npm, Prisma CLI, and temp files
+      # Note: readOnlyRootFilesystem must be false because Prisma writes
+      # binaries directly to its installed package directory
       cache:
         type: emptyDir
         globalMounts:
@@ -271,13 +274,4 @@ spec:
             subPath: npm
           - path: /tmp
             subPath: tmp
-
-      # Prisma Python client directory - allows binary caching
-      # This is critical: prisma-python hardcodes /root/.cache paths
-      # By mounting the entire prisma package, we allow it to write binaries
-      prisma-client:
-        type: emptyDir
-        globalMounts:
-          - path: /usr/lib/python3.13/site-packages/prisma
-            subPath: prisma
 #% endif %#
