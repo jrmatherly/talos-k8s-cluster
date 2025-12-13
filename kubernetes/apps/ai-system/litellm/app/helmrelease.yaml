@@ -25,15 +25,15 @@ spec:
   values:
     # ============================================================
     # Image Configuration
-    # IMPORTANT: Use stable releases for production. Dev images may
-    # have broken Prisma binaries causing httpx.ConnectTimeout errors.
-    # See: https://github.com/BerriAI/litellm/pkgs/container/litellm
+    # IMPORTANT: Use litellm-database image from Docker Hub which
+    # includes pre-built Prisma binaries and database tools.
+    # ghcr.io images have Prisma/wolfi compatibility issues.
+    # See: https://github.com/BerriAI/litellm/issues/17093
     # ============================================================
     image:
-      # Using standard image (not non_root) for stable releases
-      # Non-root images don't have stable tags published
-      repository: ghcr.io/berriai/litellm
-      tag: main-v1.80.5-stable
+      # Docker Hub litellm-database image with pre-built Prisma binaries
+      repository: litellm/litellm-database
+      tag: v1.80.5-stable.1
       pullPolicy: IfNotPresent
 
     # ============================================================
