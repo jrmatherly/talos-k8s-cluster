@@ -195,6 +195,23 @@ spec:
         - protocol: UDP
           port: 53
 ---
+# CiliumNetworkPolicy for CloudNativePG database - Kubernetes API access
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: litellm-db-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: litellm-db
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
 # NetworkPolicy for CloudNativePG database
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
