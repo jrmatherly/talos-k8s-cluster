@@ -628,8 +628,8 @@ data:
 
       # Fallback & Reliability Settings
       default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
-      # content_policy_fallbacks: [{"gpt-3.5-turbo-small": ["claude-opus"]}] # fallbacks for ContentPolicyErrors
-      # context_window_fallbacks: [{"gpt-3.5-turbo-small": ["gpt-3.5-turbo-large", "claude-opus"]}] # fallbacks for ContextWindowExceededErrors
+      # content_policy_fallbacks: [{"gpt-5": ["gpt-5-mini"]}] # List[Dict[str, List[str]]]: Fallback model for content policy violations
+      # context_window_fallbacks: [{"gpt-5": ["gpt-5-mini", "gpt-5-nano"]}] # List[Dict[str, List[str]]]: Fallback model for context window exceeded
       disable_end_user_cost_tracking: false # Disable cost tracking for end users to avoid unnecessary database writes
       disable_end_user_cost_tracking_prometheus_only: false # Only track costs in Prometheus, not in database
       # key_generation_settings: # Enterprise only for paid plans
@@ -724,7 +724,6 @@ data:
       tpm_limit: 3500000
       rpm_limit: 35000
       max_file_size_mb: 25
-
 
       # Budget Alert Configuration
       # budget_alert_ttl: 86400 # 24 hours between budget alerts
@@ -841,22 +840,46 @@ data:
     # Router Settings
     router_settings:
       routing_strategy: simple-shuffle # Literal["simple-shuffle", "least-busy", "usage-based-routing","latency-based-routing"], default="simple-shuffle" - RECOMMENDED for best performance
-      redis_host: os.environ/REDIS_HOST           # string
-      redis_password: os.environ/REDIS_PASSWORD   # string
-      redis_port: os.environ/REDIS_PORT           # string
-      enable_pre_call_checks: true            # bool - Before call is made check if a call is within model context window
+      model_group_alias: # Map model names to aliases for easier management
+        {"my-special-fake-model-alias-name": "fake-openai-endpoint-3"}
+      # default_max_parallel_requests: 1000 # Maximum parallel requests allowed per model
+      # default_priority: 1 # Default priority for models (higher number = higher priority)
+      # polling_interval: 30 # (in seconds) how often to poll for model updates
+      # caching_groups: # List of cache groups to use for caching
+      # assistants_config: # Enterprise Only - Configure assistants for your LLMs
+
+      # Multi-Instance Coordination & Scaling
+      redis_host: os.environ/REDIS_HOST # Redis host for multi-instance coordination
+      redis_port: os.environ/REDIS_PORT # Redis port for multi-instance coordination
+      redis_password: os.environ/REDIS_PASSWORD # Redis password for multi-instance coordination
+      # redis_url: os.environ/REDIS_URL # Redis URL for multi-instance coordination
+      # client_ttl: 3600 # TTL for client cache in seconds
+      # cache_responses: true # Enable response caching for improved performance
+      # routing_strategy_args: { # Additional arguments for routing strategy
+      #   "latency_threshold": 2.0, # Only consider models with latency < 2.0s
+      # }
+
+      #Pre-Call Checks & Validation
+      enable_pre_call_checks: true # Before call is made, check if a call is within model context window
+      # optional_pre_call_checks: { # Optional pre-call checks to perform
+      #   "check_model_supported": true, # Check if model is supported
+      #   "check_model_max_tokens": true, # Check if request is within model max tokens
+      #   "check_model_context_window": true, # Check if request is within model context window
+      # }
+
+      # Failover & Retry Policies
       allowed_fails: 3 # cooldown model if it fails > 1 call in a minute.
       cooldown_time: 30 # (in seconds) how long to cooldown model if fails/min > allowed_fails
-      disable_cooldowns: true                  # bool - Disable cooldowns for all models
-      enable_tag_filtering: true                # bool - Use tag based routing for requests
-      retry_policy: {                          # Dict[str, int]: retry policy for different types of exceptions
+      disable_cooldowns: true # Disable cooldowns for all models
+      enable_tag_filtering: true # Use tag based routing for requests
+      retry_policy: { # Dict[str, int]: retry policy for different types of exceptions
         "AuthenticationErrorRetries": 1,       # Default: 1 retry for authentication errors
         "TimeoutErrorRetries": 2,              # Default: 2 retries for timeout errors
         "RateLimitErrorRetries": 3,            # Default: 3 retries for rate limit errors
         "ContentPolicyViolationErrorRetries": 2, # Default: 2 retries for content policy violations
         "InternalServerErrorRetries": 3        # Default: 3 retries for internal server errors
       }
-      allowed_fails_policy: {
+      allowed_fails_policy: { # Configure allowed fails for different error types
        "BadRequestErrorAllowedFails": 1000, # Allow (Default: 1000) BadRequestErrors before cooling down a deployment
        "AuthenticationErrorAllowedFails": 10, # int - Default: 10 failures before cooling down a deployment
        "TimeoutErrorAllowedFails": 12, # int - Default: 12 failures before cooling down a deployment
@@ -864,11 +887,17 @@ data:
        "ContentPolicyViolationErrorAllowedFails": 15, # int - Default: 15 failures before cooling down a deployment
        "InternalServerErrorAllowedFails": 20 # int - Default: 20 failures before cooling down a deployment
       }
-      # content_policy_fallbacks: [{"claude-2": ["my-fallback-model"]}] # List[Dict[str, List[str]]]: Fallback model for content policy violations
-      # fallbacks: [{"claude-2": ["my-fallback-model"]}] # List[Dict[str, List[str]]]: Fallback model for all errors
-      content_policy_fallbacks: [{"claude-2": ["my-fallback-model"]}] # List[Dict[str, List[str]]]: Fallback model for content policy violations
-      fallbacks: [{"claude-2": ["my-fallback-model"]}] # List[Dict[str, List[str]]]: Fallback model for all errors
+      # fallbacks: [{"gpt-5": ["gpt-5-nano"]}] # List[Dict[str, List[str]]]: Fallback model for all errors
+      # content_policy_fallbacks: [{"gpt-5": ["gpt-5-mini"]}] # List[Dict[str, List[str]]]: Fallback model for content policy violations
+      # context_window_fallbacks: [{"gpt-5": ["gpt-5-mini", "gpt-5-nano"]}] # List[Dict[str, List[str]]]: Fallback model for context window exceeded
+      default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
+      # max_fallbacks: 3 # Maximum number of fallbacks to try
+      # num_retries: 3 # Number of retries for failed requests
+      # model_group_retry_policy: # SDK Only - retry policy for model groups
 
-      model_group_alias:
-        {"my-special-fake-model-alias-name": "fake-openai-endpoint-3"}
+      # Timeouts & Debugging
+      timeout: 120 # Request timeout in seconds
+      stream_timeout: 300 # Stream request timeout in seconds
+      debug_level: "INFO" # Debug level for logging
+      # set_verbose: false # Deprecated - use debug_level instead
 #% endif %#

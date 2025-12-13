@@ -51,6 +51,31 @@ spec:
           unavailable: 0
           surge: 1
 
+        initContainers:
+          # Fetch Prisma Query Engine binary to writable cache location
+          # The Docker image has hardcoded /root/.cache paths in generated client.py
+          # This initContainer downloads fresh binaries to our writable cache
+          fetch-prisma-engine:
+            image:
+              repository: ghcr.io/berriai/litellm
+              tag: v1.80.5-stable
+              pullPolicy: IfNotPresent
+            command:
+              - python
+              - -m
+              - prisma
+              - py
+              - fetch
+            env:
+              HOME: /.cache
+              PRISMA_BINARY_CACHE_DIR: /.cache/prisma-python
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+
         containers:
           app:
             image:
@@ -77,12 +102,13 @@ spec:
               LITELLM_CALLBACKS: prometheus
 
               # Non-root cache configuration
-              # PRISMA_BINARY_CACHE_DIR is the explicit prisma-python env var for binary cache location
-              # XDG_CACHE_HOME tells platformdirs (fallback) where to cache binaries
-              # Without these, prisma-python tries /root/.cache which doesn't exist for UID 1000
+              # The Docker image has hardcoded /root/.cache paths in prisma/client.py BINARY_PATHS
+              # We use an initContainer to fetch the query engine to our writable cache
+              # PRISMA_QUERY_ENGINE_BINARY tells prisma-python exactly where to find the engine
               HOME: /.cache
               XDG_CACHE_HOME: /.cache
               PRISMA_BINARY_CACHE_DIR: /.cache/prisma-python
+              PRISMA_QUERY_ENGINE_BINARY: /.cache/prisma-python/prisma-query-engine-debian-openssl-3.0.x
               npm_config_cache: /.cache/.npm
 
               # Redis/Dragonfly settings
