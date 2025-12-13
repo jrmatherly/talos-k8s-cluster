@@ -26,16 +26,34 @@ spec:
   values:
     # ============================================================
     # Image Configuration
+    # IMPORTANT: Use stable releases for production. Dev images may
+    # have broken Prisma binaries causing httpx.ConnectTimeout errors.
+    # See: https://github.com/BerriAI/litellm/pkgs/container/litellm
     # ============================================================
     image:
-      repository: ghcr.io/berriai/litellm-non_root
-      tag: litellm_embedding_header_forwarding-v1.80.9.dev6
+      # Using standard image (not non_root) for stable releases
+      # Non-root images don't have stable tags published
+      repository: ghcr.io/berriai/litellm
+      tag: main-v1.80.5-stable
       pullPolicy: IfNotPresent
 
     # ============================================================
     # Replica Configuration (HPA handles scaling)
     # ============================================================
     replicaCount: #{ litellm_replicas_min }#
+
+    # ============================================================
+    # Deployment Strategy
+    # Conservative RollingUpdate prevents cascading failures during
+    # slow startups with Prisma engine initialization
+    # ============================================================
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        # Only surge by 1 pod at a time to limit failed pod accumulation
+        maxSurge: 1
+        # Keep at least 50% available during updates
+        maxUnavailable: 0
 
     # ============================================================
     # Resource Configuration
@@ -205,23 +223,39 @@ spec:
 
     # ============================================================
     # Probes Configuration
+    # Prisma engine initialization can take 30-60s on cold start.
+    # Startup probe allows slow initialization without triggering
+    # liveness/readiness failures during boot.
     # ============================================================
+    startupProbe:
+      httpGet:
+        path: /health/readiness
+        port: 4000
+      # Allow up to 5 minutes for Prisma engine + migrations
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 10
+      failureThreshold: 30
+      successThreshold: 1
+
     livenessProbe:
       httpGet:
         path: /health/liveliness
         port: 4000
-      initialDelaySeconds: 30
-      periodSeconds: 10
-      timeoutSeconds: 5
+      # Only checked after startupProbe succeeds
+      initialDelaySeconds: 0
+      periodSeconds: 15
+      timeoutSeconds: 10
       failureThreshold: 3
 
     readinessProbe:
       httpGet:
         path: /health/readiness
         port: 4000
-      initialDelaySeconds: 10
-      periodSeconds: 5
-      timeoutSeconds: 3
+      # Only checked after startupProbe succeeds
+      initialDelaySeconds: 0
+      periodSeconds: 10
+      timeoutSeconds: 10
       failureThreshold: 3
 
     # ============================================================
@@ -233,34 +267,70 @@ spec:
 
     # ============================================================
     # Autoscaling
+    # IMPORTANT: HPA behavior prevents rapid pod spinning when pods
+    # fail during startup. Scale-up is stabilized over 3 minutes to
+    # give failing pods time to recover or be properly terminated.
     # ============================================================
     autoscaling:
       enabled: true
       minReplicas: #{ litellm_replicas_min }#
       maxReplicas: #{ litellm_replicas_max }#
+      # Use CPU only - memory spikes during failures cause feedback loops
       targetCPUUtilizationPercentage: 70
-      targetMemoryUtilizationPercentage: 80
+      # Disable memory-based scaling to prevent pod spinning
+      # targetMemoryUtilizationPercentage: 80
+      behavior:
+        scaleUp:
+          # Stabilize for 3 minutes before scaling up
+          # Prevents rapid pod accumulation during cascading failures
+          stabilizationWindowSeconds: 180
+          policies:
+            # Add at most 1 pod per minute
+            - type: Pods
+              value: 1
+              periodSeconds: 60
+            # Or 25% of current replicas, whichever is smaller
+            - type: Percent
+              value: 25
+              periodSeconds: 60
+          selectPolicy: Min
+        scaleDown:
+          # Wait 5 minutes before scaling down
+          # Allows for traffic spikes without thrashing
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
 
     # ============================================================
     # Security Context
-    # Using litellm-non_root image which has pre-generated Prisma binaries
-    # runAsGroup: 150 aligns with the Prisma binary ownership in the image
+    # Standard litellm image requires root for Prisma binary generation
+    # on first run. readOnlyRootFilesystem must be false for /tmp writes.
     # ============================================================
     podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 150
-      fsGroup: 150
+      # Standard image runs as root (UID 0)
+      runAsNonRoot: false
+      fsGroup: 0
 
     securityContext:
       allowPrivilegeEscalation: false
       readOnlyRootFilesystem: false
-      runAsNonRoot: true
-      runAsUser: 1000
-      runAsGroup: 150
+      # Standard image needs root for Prisma
+      runAsNonRoot: false
+      runAsUser: 0
       capabilities:
         drop:
           - ALL
+        add:
+          # Required for network operations
+          - NET_BIND_SERVICE
+
+    # ============================================================
+    # Pod Lifecycle
+    # ============================================================
+    # Allow time for graceful shutdown and connection draining
+    terminationGracePeriodSeconds: 60
 
     # ============================================================
     # Pod Annotations (for Prometheus scraping)
