@@ -762,7 +762,7 @@ data:
       disable_error_logs: true # turn off writing LLM Exceptions to DB
 
       # Key Management & Encryption
-      # key_management_system: "local" # Enterprise Only - use HashiCorp Vault or AWS Secrets Manager
+      # key_management_system: azure_kms # Enterprise Only - either google_kms or azure_kms
       # key_management_settings: # Enterprise Only - configure encryption settings for keys
       # use_azure_key_vault: # Enterprise Only - use Azure Key Vault for key management
       # use_google_kms: # Enterprise Only - use Google KMS for key management
@@ -770,25 +770,25 @@ data:
       # custom_key_generate: # Custom key generation function
 
       # Rate Limiting & Quotas
-      # max_parallel_requests
-      # global_max_parallel_requests
-      # max_request_size_mb
-      # max_response_size_mb
-      # proxy_budget_rescheduler_min_time
-      # proxy_budget_rescheduler_max_time
+      # max_parallel_requests: 0  # the max parallel requests allowed per deployment
+      # global_max_parallel_requests: 0  # the max parallel requests allowed on the proxy all up
+      # max_request_size_mb: 0  # maximum request size in MB
+      # max_response_size_mb: 0  # maximum response size in MB
+      # proxy_budget_rescheduler_min_time: 0  # reschedule budget updates every X seconds
+      # proxy_budget_rescheduler_max_time: 0  # reschedule budget updates at most every X seconds
 
       # Monitoring, Alerting & Health Checks
-      # background_health_checks
-      # health_check_interval
-      # health_check_details
-      # alerting
-      # alerting_threshold
-      # alerting_args
-      # alert_types
-      # alert_to_webhook_url
+      background_health_checks: true # enable background health checks
+      health_check_interval: 300 # health check interval in seconds
+      # health_check_details: # health check details configuration
+      # alerting: ["slack", "email"] # alerting configuration
+      # alerting_threshold: 0.8 # alert when health check fails above this threshold
+      # alerting_args: {} # alerting arguments
+      # alert_types: [] # alert types to trigger
+      # alert_to_webhook_url: "" # webhook URL to send alerts to
       # spend_report_frequency: # Enterprise Only - how often to send spend reports (e.g., "1d", "1w")
-      # forward_openai_org_id
-      # forward_client_headers_to_llm_api
+      # forward_openai_org_id: "" # Forward OpenAI organization ID to LLM API
+      # forward_client_headers_to_llm_api: false # Forward client request headers to LLM API
       # use_client_credentials_pass_through_routes: # Enterprise Only - enable client credentials pass-through routes
       # allow_client_side_credentials: # Use with Caution - allows client-side credentials to be passed through to LLM providers
 
@@ -799,37 +799,17 @@ data:
       # retry_after: # Enterprise Only - configure retry behavior after rate limit errors
       # num_retries: # Number of retries for failed requests
 
+      # disable_master_key_return: true  # turn off returning master key on UI (checked on '/user/info' endpoint)
+      # disable_retry_on_max_parallel_request_limit_error: true  # turn off retries when max parallel request limit is reached
+      # disable_reset_budget: false  # turn off reset budget scheduled task
 
+      # disable_responses_id_security: false  # turn off response ID security checks that prevent users from accessing other users' responses
+      # reject_clientside_metadata_tags: true  # if true, rejects requests with client-side 'metadata.tags' to prevent users from influencing budgets
 
+      # maximum_spend_logs_retention_period: 35d # The maximum time to retain spend logs before deletion.
+      # maximum_spend_logs_retention_interval: 1d # interval in which the spend log cleanup task should run in.
 
-
-
-      # forward_client_headers_to_llm_api: boolean
-
-      disable_master_key_return: true  # turn off returning master key on UI (checked on '/user/info' endpoint)
-      disable_retry_on_max_parallel_request_limit_error: true  # turn off retries when max parallel request limit is reached
-      disable_reset_budget: false  # turn off reset budget scheduled task
-
-      disable_responses_id_security: false  # turn off response ID security checks that prevent users from accessing other users' responses
-      reject_clientside_metadata_tags: true  # if true, rejects requests with client-side 'metadata.tags' to prevent users from influencing budgets
-
-      # key_management_system: azure_kms  # either google_kms or azure_kms
-
-      maximum_spend_logs_retention_period: 35d # The maximum time to retain spend logs before deletion.
-      maximum_spend_logs_retention_interval: 1d # interval in which the spend log cleanup task should run in.
-
-
-
-      # custom_auth: string
-      # max_parallel_requests: 0  # the max parallel requests allowed per deployment
-      # global_max_parallel_requests: 0  # the max parallel requests allowed on the proxy all up
-      # infer_model_from_keys: true
-      background_health_checks: true
-      health_check_interval: 300
-      # alerting: ["slack", "email"]
-      # alerting_threshold: 0
-      # use_client_credentials_pass_through_routes: boolean  # use client credentials for all pass through routes like "/vertex-ai", /bedrock/. When this is True Virtual Key auth will not be applied on these endpoints
-      user_header_name: X-OpenWebUI-User-Email
+      user_header_name: X-OpenWebUI-User-Email # Header name to extract user email from requests
 
       # mcp_client_side_auth_header_name: authorization
 
