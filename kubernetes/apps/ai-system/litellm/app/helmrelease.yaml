@@ -77,10 +77,12 @@ spec:
               LITELLM_CALLBACKS: prometheus
 
               # Non-root cache configuration
-              # XDG_CACHE_HOME tells platformdirs (used by prisma-python) where to cache binaries
-              # Without this, prisma-python tries /root/.cache which doesn't exist for UID 1000
+              # PRISMA_BINARY_CACHE_DIR is the explicit prisma-python env var for binary cache location
+              # XDG_CACHE_HOME tells platformdirs (fallback) where to cache binaries
+              # Without these, prisma-python tries /root/.cache which doesn't exist for UID 1000
               HOME: /.cache
               XDG_CACHE_HOME: /.cache
+              PRISMA_BINARY_CACHE_DIR: /.cache/prisma-python
               npm_config_cache: /.cache/.npm
 
               # Redis/Dragonfly settings
