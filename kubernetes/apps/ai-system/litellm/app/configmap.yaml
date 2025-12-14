@@ -474,7 +474,8 @@ data:
           cache_control_injection_points:
             - location: message
               role: system
-          input_type: search_document
+          # input_type: search_document
+          input_type: text
         model_info:
           id: "77"
           mode: embedding
