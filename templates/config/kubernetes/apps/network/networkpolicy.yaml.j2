@@ -124,18 +124,24 @@ spec:
     - Egress
   ingress:
     # Allow LoadBalancer traffic (external access)
+    # CRITICAL: Cilium socket-based LB evaluates policy with ORIGINAL port before DNAT
+    # Must allow both Service ports (80, 443) AND container ports (10080, 10443, etc.)
     - from:
         - ipBlock:
             cidr: 0.0.0.0/0
       ports:
         - protocol: TCP
-          port: 10080   # HTTP
+          port: 80      # LoadBalancer service port (pre-DNAT)
         - protocol: TCP
-          port: 10443   # HTTPS
+          port: 443     # LoadBalancer service port (pre-DNAT)
         - protocol: TCP
-          port: 8080    # HTTP alt
+          port: 10080   # HTTP container port (post-DNAT)
         - protocol: TCP
-          port: 8443    # HTTPS alt
+          port: 10443   # HTTPS container port (post-DNAT)
+        - protocol: TCP
+          port: 8080    # HTTP alt container port
+        - protocol: TCP
+          port: 8443    # HTTPS alt container port
     # Allow from cloudflare-tunnel
     - from:
         - podSelector:
