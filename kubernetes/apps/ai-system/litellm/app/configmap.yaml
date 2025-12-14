@@ -20,7 +20,7 @@ data:
           max_completion_tokens: 13107
           rpm: 250
           tpm: 250000
-          timeout: 300
+          # timeout: 300
           stream_timeout: 300
           cache_control_injection_points:
             - location: message
@@ -37,7 +37,7 @@ data:
           max_completion_tokens: 13107
           rpm: 450
           tpm: 450000
-          timeout: 300
+          # timeout: 300
           stream_timeout: 300
           cache_control_injection_points:
             - location: message
@@ -54,7 +54,7 @@ data:
           max_completion_tokens: 4096
           rpm: 5000
           tpm: 500000
-          timeout: 300
+          # timeout: 300
           stream_timeout: 300
           cache_control_injection_points:
             - location: message
@@ -75,7 +75,7 @@ data:
           merge_reasoning_content_in_choices: true
           rpm: 250
           tpm: 250000
-          timeout: 300
+          # timeout: 300
           stream_timeout: 300
           cache_control_injection_points:
             - location: message
@@ -96,7 +96,7 @@ data:
           merge_reasoning_content_in_choices: true
           rpm: 2000
           tpm: 400000
-          timeout: 300
+          # timeout: 300
           stream_timeout: 300
           cache_control_injection_points:
             - location: message
@@ -145,15 +145,16 @@ data:
           max_completion_tokens: 16384
           rpm: 1750
           tpm: 1750000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
         model_info:
           id: "10"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/us/gpt-5-2025-08-07
+          # base_model: azure/us/gpt-5-2025-08-07
+          # base_model: azure/gpt-5-2025-08-07
 
       - model_name: gpt-5-chat
         litellm_params:
@@ -165,8 +166,8 @@ data:
           merge_reasoning_content_in_choices: true
           rpm: 1750
           tpm: 1750000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -184,8 +185,8 @@ data:
           max_completion_tokens: 16384
           rpm: 2500
           tpm: 2500000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -202,8 +203,8 @@ data:
           max_completion_tokens: 16384
           rpm: 15000
           tpm: 15000000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -220,8 +221,8 @@ data:
           max_completion_tokens: 16384
           rpm: 20000
           tpm: 2000000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -239,8 +240,8 @@ data:
           max_completion_tokens: 16384
           rpm: 20000
           tpm: 2000000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -259,8 +260,8 @@ data:
           max_tokens: 16384
           rpm: 2000
           tpm: 2000000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -278,8 +279,8 @@ data:
           max_tokens: 16384
           rpm: 2500
           tpm: 2500000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -297,8 +298,8 @@ data:
           max_completion_tokens: 16384
           rpm: 22500
           tpm: 2250000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -326,8 +327,8 @@ data:
           max_completion_tokens: 8192
           rpm: 250
           tpm: 250000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
         model_info:
           id: "96"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
@@ -344,8 +345,8 @@ data:
           max_completion_tokens: 8192
           rpm: 200
           tpm: 100000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
         model_info:
           id: "98"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
@@ -361,8 +362,8 @@ data:
           model: azure/gpt-image-1
           litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
           rpm: 60
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
         model_info:
           id: "66"
           mode: image_generation
@@ -377,8 +378,8 @@ data:
           max_completion_tokens: 8192
           rpm: 200
           tpm: 100000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
         model_info:
           id: "92"
           mode: chat
@@ -396,8 +397,8 @@ data:
           max_completion_tokens: 8192
           rpm: 200
           tpm: 100000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
         model_info:
           id: "94"
           mode: chat
@@ -443,8 +444,8 @@ data:
           max_completion_tokens: 16384
           rpm: 1500
           tpm: 1500000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -461,8 +462,8 @@ data:
           max_completion_tokens: 16384
           rpm: 2750
           tpm: 2750000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -479,8 +480,8 @@ data:
           max_completion_tokens: 16384
           rpm: 1250
           tpm: 1250000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -497,8 +498,8 @@ data:
           max_completion_tokens: 16384
           rpm: 2250
           tpm: 2250000
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -514,8 +515,8 @@ data:
           api_key: "os.environ/AZURE_COHERE_RERANK_API_KEY"
           api_base: "os.environ/AZURE_COHERE_RERANK_API_BASE"
           max_output_tokens: 4096
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
         model_info:
           id: "76"
           mode: rerank
@@ -527,8 +528,8 @@ data:
           model: azure_ai/cohere-embed-v-4-0
           api_key: "os.environ/AZURE_COHERE_EMBED_API_KEY"
           api_base: "os.environ/AZURE_COHERE_EMBED_API_BASE"
-          timeout: 300
-          stream_timeout: 300
+          # timeout: 300
+          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -620,7 +621,7 @@ data:
       disable_end_user_cost_tracking_prometheus_only: false # Only track costs in Prometheus, not in database
       # key_generation_settings: # Enterprise only for paid plans
       # disable_add_transform_inline_image_block: false # Disable adding transform_inline_image_block for image inputs
-      disable_hf_tokenizer_download: false # Disable downloading Hugging Face tokenizers
+      # disable_hf_tokenizer_download: false # Disable downloading Hugging Face tokenizers
 
       # MCP Aliases - Map aliases to MCP server names for easier tool access
       # mcp_aliases: { "github": "github_mcp_server", "zapier": "zapier_mcp_server", "deepwiki": "deepwiki_mcp_server" } # Maps friendly aliases to MCP server names. Only the first alias for each server is used
@@ -760,10 +761,10 @@ data:
       database_connection_timeout: 60  # default 60s
       allow_requests_on_db_unavailable: true  # if true, will allow requests that can not connect to the DB to verify Virtual Key to still work
       disable_spend_logs: false  # turn off writing each transaction to the db
-      disable_adding_master_key_hash_to_db: false  # turn off storing master key hash in db, for spend tracking
+      # disable_adding_master_key_hash_to_db: false  # turn off storing master key hash in db, for spend tracking
       store_model_in_db: "os.environ/STORE_MODEL_IN_DB" # store model info in DB for better observability
       store_prompts_in_spend_logs: true # store prompts in spend logs for better observability
-      disable_prisma_schema_update: false  # turn off Prisma schema updates
+      # disable_prisma_schema_update: false  # turn off Prisma schema updates
       proxy_batch_write_at: 60 # batch write to DB every 60 seconds
       proxy_budget_rescheduler_min_time: 300 # reschedule budget updates every 5 minutes
       proxy_budget_rescheduler_max_time: 3600 # reschedule budget updates at most every 1 hour
