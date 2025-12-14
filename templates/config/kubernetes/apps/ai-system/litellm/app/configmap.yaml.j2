@@ -12,6 +12,7 @@ data:
 
     # Model Definitions (Bootstrap - can be modified via API)
     # https://github.com/BerriAI/litellm/blob/main/model_prices_and_context_window.json
+    # https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/concepts/models-sold-directly-by-azure?view=foundry-classic&tabs=global-standard-aoai%2Cstandard-chat-completions%2Cglobal-standard&pivots=azure-openai
     model_list:
 #% if azure_openai_us_east_api_key %#
       # Azure OpenAI US East Models
@@ -289,7 +290,8 @@ data:
           tpm: 250000
         model_info:
           id: "96"
-          mode: audio_transcription
+          # mode: audio_transcription
+          mode: realtime
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
           base_model: azure/gpt-audio-2025-08-28
@@ -304,7 +306,8 @@ data:
           tpm: 100000
         model_info:
           id: "98"
-          mode: audio_transcription
+          # mode: audio_transcription
+          mode: realtime
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
           base_model: azure/gpt-audio-mini-2025-08-28
