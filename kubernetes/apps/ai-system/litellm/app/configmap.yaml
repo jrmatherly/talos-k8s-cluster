@@ -275,11 +275,13 @@ data:
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: azure/global/gpt-5.2
 
-      # Azure Audio Models
+      # Azure Audio Models (gpt-4o-audio)
+      # These are hybrid chat completion models requiring modalities: ["text", "audio"] in requests.
+      # LiteLLM health checks don't support audio chat models (no mode sends audio modalities).
+      # Health checks must be disabled; models work correctly for audio-enabled requests.
       - model_name: gpt-audio
         litellm_params:
           model: azure/gpt-audio
-          # api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
           api_base: "https://ets-east-us2.openai.azure.com/"
           api_key: "os.environ/AZURE_API_KEY_EAST2"
           api_version: 2025-01-01-preview
@@ -287,15 +289,16 @@ data:
           tpm: 250000
         model_info:
           id: "96"
-          # mode: chat
+          mode: chat
+          supports_audio_output: true
+          supports_audio_input: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
+          disable_background_health_check: true
           base_model: azure/gpt-audio-2025-08-28
 
       - model_name: gpt-audio-mini
         litellm_params:
           model: azure/gpt-audio-mini
-          # api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
           api_base: "https://ets-east-us2.openai.azure.com/"
           api_key: "os.environ/AZURE_API_KEY_EAST2"
           api_version: 2025-01-01-preview
@@ -303,10 +306,12 @@ data:
           tpm: 100000
         model_info:
           id: "98"
-          #mode: chat
+          mode: chat
+          supports_audio_output: true
+          supports_audio_input: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
-          base_model: azure/gpt-audio-mini-2025-08-28
+          disable_background_health_check: true
+          base_model: azure/gpt-audio-mini-2025-10-06
 
       # Azure Image Models
       - model_name: gpt-image-1
@@ -465,6 +470,7 @@ data:
           cache_control_injection_points:
             - location: message
               role: system
+          input_type: search_document
         model_info:
           id: "77"
           mode: embedding
