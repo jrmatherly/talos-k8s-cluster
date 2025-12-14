@@ -225,8 +225,9 @@ data:
 
       - model_name: gpt-5.1-codex
         litellm_params:
-          model: azure_ai/gpt5_series/gpt-5.1-codex
+          model: azure/gpt5_series/gpt-5.1-codex
           litellm_credential_name: azure_credential_us_east2
+          api_version: preview
           max_tokens: 16384
           rpm: 2000
           tpm: 2000000
@@ -241,8 +242,9 @@ data:
 
       - model_name: gpt-5.1-codex-mini
         litellm_params:
-          model: azure_ai/gpt5_series/gpt-5.1-codex-mini
+          model: azure/gpt5_series/gpt-5.1-codex-mini
           litellm_credential_name: azure_credential_us_east2
+          api_version: preview
           max_tokens: 16384
           rpm: 2500
           tpm: 2500000
@@ -320,7 +322,7 @@ data:
       # Azure Realtime Models
       - model_name: gpt-realtime
         litellm_params:
-          model: azure_ai/gpt-realtime
+          model: azure/gpt-realtime
           litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
           max_completion_tokens: 8192
           rpm: 200
@@ -337,7 +339,7 @@ data:
 
       - model_name: gpt-realtime-mini
         litellm_params:
-          model: azure_ai/gpt-realtime-mini
+          model: azure/gpt-realtime-mini
           litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
           max_completion_tokens: 8192
           rpm: 200
