@@ -21,6 +21,7 @@ spec:
     - toFQDNs:
         - matchName: "ets-east-us2.openai.azure.com"
         - matchName: "ets-east-us2.models.ai.azure.com"
+        - matchName: "ets-east-us2.cognitiveservices.azure.com"
       toPorts:
         - ports:
             - port: "443"
