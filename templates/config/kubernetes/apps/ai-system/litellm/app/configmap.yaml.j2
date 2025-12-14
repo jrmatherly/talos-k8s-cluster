@@ -22,8 +22,6 @@ data:
           max_completion_tokens: 13107
           rpm: 250
           tpm: 250000
-          # timeout: 300
-          stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -39,8 +37,6 @@ data:
           max_completion_tokens: 13107
           rpm: 450
           tpm: 450000
-          # timeout: 300
-          stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -56,8 +52,6 @@ data:
           max_completion_tokens: 4096
           rpm: 5000
           tpm: 500000
-          # timeout: 300
-          stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -77,8 +71,6 @@ data:
           merge_reasoning_content_in_choices: true
           rpm: 250
           tpm: 250000
-          # timeout: 300
-          stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -98,8 +90,6 @@ data:
           merge_reasoning_content_in_choices: true
           rpm: 2000
           tpm: 400000
-          # timeout: 300
-          stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -144,34 +134,27 @@ data:
       - model_name: gpt-5
         litellm_params:
           model: azure/gpt5_series/gpt-5
-          # model: azure/gpt-5
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 1750
           tpm: 1750000
-          # timeout: 300
-          # stream_timeout: 300
-          # cache_control_injection_points:
-          #   - location: message
-          #     role: system
+          cache_control_injection_points:
+            - location: message
+              role: system
         model_info:
           id: "10"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          # base_model: azure/us/gpt-5-2025-08-07
-          base_model: gpt-5
+          base_model: azure/us/gpt-5-2025-08-07
 
       - model_name: gpt-5-chat
         litellm_params:
           model: azure/gpt5_series/gpt-5-chat
-          # model: azure/gpt-5-chat
           litellm_credential_name: azure_credential_us_east2
           thinking: { "type": "enabled", "budget_tokens": 16384 }
           max_completion_tokens: 16384
           merge_reasoning_content_in_choices: true
           rpm: 1750
           tpm: 1750000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -184,13 +167,10 @@ data:
       - model_name: gpt-5-mini
         litellm_params:
           model: azure/gpt5_series/gpt-5-mini
-          # model: azure/gpt-5-mini
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 2500
           tpm: 2500000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -202,13 +182,10 @@ data:
       - model_name: gpt-5-nano
         litellm_params:
           model: azure/gpt5_series/gpt-5-nano
-          # model: azure/gpt-5-nano
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 15000
           tpm: 15000000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -219,14 +196,11 @@ data:
 
       - model_name: gpt-5.1
         litellm_params:
-          # model: azure/gpt5_series/gpt-5.1
-          model: azure/gpt-5.1
+          model: azure/gpt5_series/gpt-5.1
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 20000
           tpm: 2000000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -239,13 +213,10 @@ data:
       - model_name: gpt-5.1-chat
         litellm_params:
           model: azure/gpt5_series/gpt-5.1-chat
-          # model: azure/gpt-5.1-chat
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 20000
           tpm: 2000000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -258,14 +229,11 @@ data:
 
       - model_name: gpt-5.1-codex
         litellm_params:
-          model: azure/gpt5_series/gpt-5.1-codex
-          # model: azure/gpt-5.1-codex
+          model: azure_ai/gpt5_series/gpt-5.1-codex
           litellm_credential_name: azure_credential_us_east2
           max_tokens: 16384
           rpm: 2000
           tpm: 2000000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -277,14 +245,11 @@ data:
 
       - model_name: gpt-5.1-codex-mini
         litellm_params:
-          model: azure/gpt5_series/gpt-5.1-codex-mini
-          # model: azure/gpt-5.1-codex-mini
+          model: azure_ai/gpt5_series/gpt-5.1-codex-mini
           litellm_credential_name: azure_credential_us_east2
           max_tokens: 16384
           rpm: 2500
           tpm: 2500000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -297,13 +262,10 @@ data:
       - model_name: gpt-5.2
         litellm_params:
           model: azure/gpt5_series/gpt-5.2
-          # model: azure/gpt-5.2
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 22500
           tpm: 2250000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -311,15 +273,6 @@ data:
           id: "1"
           mode: chat
           supports_reasoning: true
-          # supports_function_calling: true
-          # supports_native_streaming: true
-          # supports_parallel_function_calling: true
-          # supports_pdf_input: true
-          # supports_prompt_caching: true
-          # supports_response_schema: true
-          # supports_system_messages: true
-          # supports_tool_choice: true
-          # supports_vision: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: azure/global/gpt-5.2
 
@@ -331,8 +284,6 @@ data:
           max_completion_tokens: 8192
           rpm: 250
           tpm: 250000
-          # timeout: 300
-          # stream_timeout: 300
         model_info:
           id: "96"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
@@ -349,8 +300,6 @@ data:
           max_completion_tokens: 8192
           rpm: 200
           tpm: 100000
-          # timeout: 300
-          # stream_timeout: 300
         model_info:
           id: "98"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
@@ -366,8 +315,6 @@ data:
           model: azure/gpt-image-1
           litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
           rpm: 60
-          # timeout: 300
-          # stream_timeout: 300
         model_info:
           id: "66"
           mode: image_generation
@@ -377,13 +324,11 @@ data:
       # Azure Realtime Models
       - model_name: gpt-realtime
         litellm_params:
-          model: azure/gpt-realtime
+          model: azure_ai/gpt-realtime
           litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
           max_completion_tokens: 8192
           rpm: 200
           tpm: 100000
-          # timeout: 300
-          # stream_timeout: 300
         model_info:
           id: "92"
           mode: chat
@@ -396,13 +341,11 @@ data:
 
       - model_name: gpt-realtime-mini
         litellm_params:
-          model: azure/gpt-realtime-mini
+          model: azure_ai/gpt-realtime-mini
           litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
           max_completion_tokens: 8192
           rpm: 200
           tpm: 100000
-          # timeout: 300
-          # stream_timeout: 300
         model_info:
           id: "94"
           mode: chat
@@ -445,13 +388,11 @@ data:
       # Anthropic via Azure (Claude models)
       - model_name: claude-opus-4-5
         litellm_params:
-          model: azure_ai/claude-opus-4-5
+          model: azure/claude-opus-4-5
           litellm_credential_name: azure_credential_anthropic_us_east2
           max_completion_tokens: 16384
           rpm: 1500
           tpm: 1500000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -459,17 +400,15 @@ data:
           id: "20"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure_ai/claude-opus-4-5
+          base_model: azure/claude-opus-4-5
 
       - model_name: claude-sonnet-4-5
         litellm_params:
-          model: azure_ai/claude-sonnet-4-5
+          model: azure/claude-sonnet-4-5
           litellm_credential_name: azure_credential_anthropic_us_east2
           max_completion_tokens: 16384
           rpm: 2750
           tpm: 2750000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -477,17 +416,15 @@ data:
           id: "21"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure_ai/claude-sonnet-4-5
+          base_model: azure/claude-sonnet-4-5
 
       - model_name: claude-opus-4-1
         litellm_params:
-          model: azure_ai/claude-opus-4-1
+          model: azure/claude-opus-4-1
           litellm_credential_name: azure_credential_anthropic_us_east2
           max_completion_tokens: 16384
           rpm: 1250
           tpm: 1250000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -495,17 +432,15 @@ data:
           id: "22"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure_ai/claude-opus-4-1
+          base_model: azure/claude-opus-4-1
 
       - model_name: claude-haiku-4-5
         litellm_params:
-          model: azure_ai/claude-haiku-4-5
+          model: azure/claude-haiku-4-5
           litellm_credential_name: azure_credential_anthropic_us_east2
           max_completion_tokens: 16384
           rpm: 2250
           tpm: 2250000
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -513,33 +448,29 @@ data:
           id: "23"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure_ai/claude-haiku-4-5
+          base_model: azure/claude-haiku-4-5
 #% endif %#
 
 #% if azure_cohere_rerank_api_key %#
       - model_name: cohere-rerank-v3.5
         litellm_params:
-          model: azure_ai/cohere-rerank-v3.5
+          model: azure/cohere-rerank-v3.5
           api_key: "os.environ/AZURE_COHERE_RERANK_API_KEY"
           api_base: "os.environ/AZURE_COHERE_RERANK_API_BASE"
           max_output_tokens: 4096
-          # timeout: 300
-          # stream_timeout: 300
         model_info:
           id: "76"
           mode: rerank
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure_ai/cohere-rerank-v3.5
+          base_model: azure/cohere-rerank-v3.5
 #% endif %#
 
 #% if azure_cohere_embed_api_key %#
       - model_name: cohere-embed-v-4-0
         litellm_params:
-          model: azure_ai/cohere-embed-v-4-0
+          model: azure/cohere-embed-v-4-0
           api_key: "os.environ/AZURE_COHERE_EMBED_API_KEY"
           api_base: "os.environ/AZURE_COHERE_EMBED_API_BASE"
-          # timeout: 300
-          # stream_timeout: 300
           cache_control_injection_points:
             - location: message
               role: system
@@ -547,7 +478,7 @@ data:
           id: "77"
           mode: embedding
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure_ai/cohere-embed-v-4-0
+          base_model: azure/cohere-embed-v-4-0
           disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
 #% endif %#
 
