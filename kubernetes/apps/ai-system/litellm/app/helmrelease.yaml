@@ -23,12 +23,11 @@ spec:
     # ==========================================================================
     # Default Pod Options
     # Security context with fsGroup ensures mounted volumes are writable
-    # Reference: https://github.com/m00nwtchr/homelab-cluster
+    # litellm-non_root image runs as UID 65534 (nobody)
     # ==========================================================================
     defaultPodOptions:
       securityContext:
-        # litellm-non_root image runs as UID 1000 / GID 150
-        fsGroup: 150
+        fsGroup: 65534
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
@@ -53,9 +52,9 @@ spec:
         containers:
           app:
             image:
-              # litellm-database image is the official recommendation for database-backed deployments
-              # It properly handles Prisma setup for non-root execution
-              repository: ghcr.io/berriai/litellm-database
+              # litellm-non_root image is designed for K8s non-root contexts
+              # Pre-built Prisma binaries eliminate runtime npm install issues
+              repository: ghcr.io/berriai/litellm-non_root
               tag: main-v1.80.5-stable.1
               pullPolicy: IfNotPresent
 
@@ -68,10 +67,6 @@ spec:
               - /app/config.yaml
 
             env:
-              # Set HOME and XDG_CACHE_HOME to writable directory for Prisma cache
-              # The container's /root has 700 permissions, blocking non-root access
-              HOME: "/tmp"
-              XDG_CACHE_HOME: "/tmp/.cache"
               # Core LiteLLM settings
               TZ: "America/New_York"
               STORE_MODEL_IN_DB: "True"
@@ -79,8 +74,8 @@ spec:
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
               LITELLM_CALLBACKS: prometheus
-              # Writable directory for database migrations
-              LITELLM_MIGRATION_DIR: "/tmp/migrations"
+              # Writable directory for database migrations (non-root support)
+              LITELLM_MIGRATION_DIR: "/data/migrations"
 
               # Redis/Dragonfly settings
               REDIS_HOST: litellm-dragonfly
@@ -187,13 +182,12 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    # Use liveliness for startup - readiness checks DB which can be slow
                     path: /health/liveliness
                     port: &port 4000
-                  # Quick startup check - just verify HTTP server is running
-                  initialDelaySeconds: 10
+                  # Extended startup time for Prisma initialization
+                  initialDelaySeconds: 30
                   periodSeconds: 5
-                  timeoutSeconds: 5
+                  timeoutSeconds: 10
                   failureThreshold: 30
                   successThreshold: 1
               liveness:
@@ -212,22 +206,18 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    # Use liveliness instead of readiness to avoid Prisma DB checks
-                    # The readiness endpoint queries DB via Prisma which times out
-                    # due to httpcore.ConnectTimeout (5s default) under load
                     path: /health/liveliness
                     port: *port
-                  initialDelaySeconds: 10
+                  initialDelaySeconds: 30
                   periodSeconds: 10
                   timeoutSeconds: 10
                   failureThreshold: 3
 
             securityContext:
               allowPrivilegeEscalation: false
-              # Must be false - Prisma needs to write binaries to package dir
               readOnlyRootFilesystem: false
-              runAsUser: 1000
-              runAsGroup: 150
+              runAsUser: 65534
+              runAsGroup: 65534
               runAsNonRoot: true
               privileged: false
               capabilities: { drop: ["ALL"] }
@@ -256,7 +246,7 @@ spec:
     # ==========================================================================
     # Persistence
     # EmptyDir mounts for writable directories required by Prisma + npm
-    # Reference: https://github.com/m00nwtchr/homelab-cluster
+    # litellm-non_root uses /nonexistent as home directory for nobody user
     # ==========================================================================
     persistence:
       # LiteLLM config file from ConfigMap
@@ -271,18 +261,34 @@ spec:
       # Temp directory for ephemeral data
       tmp:
         type: emptyDir
+        sizeLimit: 100Mi
         globalMounts:
           - path: /tmp
 
-      # Prisma cache directory for binaries
-      # Required because Prisma downloads query engine binaries at runtime
+      # Prisma/Python cache directory
       cache:
         type: emptyDir
+        sizeLimit: 500Mi
         globalMounts:
           - path: /.cache
 
-      # npm cache directory for Prisma CLI installation
+      # npm cache directory for Prisma CLI
       npm-cache:
         type: emptyDir
+        sizeLimit: 500Mi
         globalMounts:
           - path: /.npm
+
+      # Prisma cache for nobody user (home dir is /nonexistent)
+      nonexistent:
+        type: emptyDir
+        sizeLimit: 500Mi
+        globalMounts:
+          - path: /nonexistent
+
+      # Migrations directory for LITELLM_MIGRATION_DIR
+      data:
+        type: emptyDir
+        sizeLimit: 100Mi
+        globalMounts:
+          - path: /data
