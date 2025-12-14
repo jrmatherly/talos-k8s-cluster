@@ -281,4 +281,11 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /tmp
+
+      # Prisma cache directory for binaries
+      # Required because Prisma downloads query engine binaries at runtime
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /.cache
 #% endif %#
