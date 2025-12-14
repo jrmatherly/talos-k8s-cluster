@@ -251,6 +251,55 @@ spec:
         - protocol: TCP
           port: 443
 ---
+# CiliumNetworkPolicy for cloudflare-tunnel - Egress to external/world (LoadBalancer + Cloudflare edge)
+# CRITICAL: Standard NetworkPolicy ipBlock doesn't work reliably for external IPs with Cilium socket-based LB
+# Must use Cilium's native toEntities: world for traffic to LoadBalancer IPs and external services
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-tunnel-world-egress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflared
+  egress:
+    # Allow egress to world (external IPs including LoadBalancer IPs and Cloudflare edge)
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "7844"
+              protocol: UDP
+---
+# CiliumNetworkPolicy for Envoy proxies - Ingress from world (LoadBalancer traffic)
+# CRITICAL: Must use Cilium's native fromEntities: world for LoadBalancer service traffic
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: envoy-proxies-world-ingress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.envoyproxy.io/owning-gateway-namespace: network
+  ingress:
+    # Allow ingress from world on both service ports (pre-DNAT) and container ports (post-DNAT)
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+            - port: "10080"
+              protocol: TCP
+            - port: "10443"
+              protocol: TCP
+---
 # NetworkPolicy for cloudflare-tunnel (DNS and external access)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
