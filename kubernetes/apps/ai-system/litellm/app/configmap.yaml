@@ -289,7 +289,10 @@ data:
           tpm: 250000
         model_info:
           id: "96"
-          mode: chat
+          # mode: chat
+          # mode: completion
+          mode: audio_speech
+          health_check_voice: alloy
           supports_audio_output: true
           supports_audio_input: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
@@ -306,7 +309,10 @@ data:
           tpm: 100000
         model_info:
           id: "98"
-          mode: chat
+          # mode: chat
+          # mode: completion
+          mode: audio_speech
+          health_check_voice: alloy
           supports_audio_output: true
           supports_audio_input: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
