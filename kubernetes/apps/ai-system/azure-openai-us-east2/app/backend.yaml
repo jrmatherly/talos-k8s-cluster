@@ -8,7 +8,7 @@ metadata:
 spec:
   endpoints:
     - fqdn:
-        hostname: ets-east-us2.openai.azure.com
+        hostname: aaronsai.openai.azure.com
         port: 443
 ---
 # BackendTLSPolicy for TLS validation (Gateway API standard)
@@ -23,4 +23,4 @@ spec:
       name: azure-openai-us-east2-backend
   validation:
     wellKnownCACertificates: System
-    hostname: ets-east-us2.openai.azure.com
+    hostname: aaronsai.openai.azure.com
