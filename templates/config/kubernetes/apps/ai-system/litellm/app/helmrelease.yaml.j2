@@ -232,8 +232,6 @@ spec:
               runAsGroup: 150
               runAsNonRoot: true
               privileged: false
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: false
               capabilities: { drop: ["ALL"] }
               seccompProfile: { type: RuntimeDefault }
 
