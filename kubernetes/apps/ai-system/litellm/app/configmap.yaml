@@ -333,10 +333,6 @@ data:
         model_info:
           id: "92"
           mode: realtime
-          # mode: chat
-          # mode: audio_speech
-          # supports_audio_output: true        # set supports_audio_output to True so /model/info returns this attribute as True
-          # supports_audio_input: true         # set supports_audio_input to True so /model/info returns this attribute as True
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
           base_model: gpt-realtime-2025-08-28
@@ -354,10 +350,6 @@ data:
         model_info:
           id: "94"
           mode: realtime
-          # mode: chat
-          # mode: audio_speech
-          # supports_audio_output: true        # set supports_audio_output to True so /model/info returns this attribute as True
-          # supports_audio_input: true         # set supports_audio_input to True so /model/info returns this attribute as True
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
           base_model: gpt-realtime-mini-2025-10-06
