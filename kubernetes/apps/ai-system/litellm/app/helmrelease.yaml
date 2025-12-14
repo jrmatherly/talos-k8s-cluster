@@ -130,7 +130,7 @@ spec:
                     key: AZURE_API_KEY
 
               # Azure OpenAI US East2
-              AZURE_API_BASE_EAST2: "https://ets-east-us2.cognitiveservices.azure.com/"
+              AZURE_API_BASE_EAST2: "https://ets-east-us2.openai.azure.com/"
               AZURE_API_VERSION_EAST2: "2025-04-01-preview"
               AZURE_API_KEY_EAST2:
                 valueFrom:

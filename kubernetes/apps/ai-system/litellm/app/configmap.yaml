@@ -147,14 +147,14 @@ data:
           tpm: 1750000
           # timeout: 300
           # stream_timeout: 300
-          cache_control_injection_points:
-            - location: message
-              role: system
+          # cache_control_injection_points:
+          #   - location: message
+          #     role: system
         model_info:
           id: "10"
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           # base_model: azure/us/gpt-5-2025-08-07
-          # base_model: azure/gpt-5-2025-08-07
+          base_model: gpt-5
 
       - model_name: gpt-5-chat
         litellm_params:
