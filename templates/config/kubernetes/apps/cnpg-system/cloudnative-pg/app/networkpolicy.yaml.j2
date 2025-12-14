@@ -1,14 +1,22 @@
 ---
-# CiliumNetworkPolicy for CloudNativePG operator - Kubernetes API access
+# CiliumNetworkPolicy for CloudNativePG operator - Kubernetes API access and webhook ingress
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: cloudnative-pg-kube-api-egress
+  name: cloudnative-pg-kube-api
   namespace: cnpg-system
 spec:
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: cloudnative-pg
+  ingress:
+    # Allow webhook calls from kube-apiserver (admission webhooks)
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP
   egress:
     - toEntities:
         - kube-apiserver
