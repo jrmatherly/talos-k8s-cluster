@@ -22,12 +22,11 @@ spec:
   values:
     # ==========================================================================
     # Default Pod Options
-    # Security context with fsGroup ensures mounted volumes are writable
-    # litellm-non_root image runs as UID 65534 (nobody)
+    # Standard litellm image runs as root for proper UI and Prisma support
     # ==========================================================================
     defaultPodOptions:
       securityContext:
-        fsGroup: 65534
+        # Standard litellm image runs as root
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
@@ -52,9 +51,9 @@ spec:
         containers:
           app:
             image:
-              # litellm-non_root image is designed for K8s non-root contexts
-              # Pre-built Prisma binaries eliminate runtime npm install issues
-              repository: ghcr.io/berriai/litellm-non_root
+              # Standard litellm image includes pre-built UI
+              # Security context settings restrict to non-root where possible
+              repository: ghcr.io/berriai/litellm
               tag: main-v1.80.5-stable.1
               pullPolicy: IfNotPresent
 
@@ -74,13 +73,8 @@ spec:
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
               LITELLM_CALLBACKS: prometheus
-              # Writable directory for database migrations (non-root support)
-              # LITELLM_MIGRATION_DIR: "/data/migrations"
+              # Writable directory for database migrations
               LITELLM_MIGRATION_DIR: "/tmp/prisma"
-              # Prisma engine binary configuration for non-root image
-              # Use pre-built binaries baked into the image at /app/.cache/prisma
-              PRISMA_QUERY_ENGINE_BINARY: "/app/.cache/prisma/master/ac9d7041ed77bcc8a8dbd2ab6616b39013829574/debian-openssl-3.0.x/query-engine"
-              PRISMA_QUERY_ENGINE_LIBRARY: "/app/.cache/prisma/master/ac9d7041ed77bcc8a8dbd2ab6616b39013829574/debian-openssl-3.0.x/libquery-engine"
 
               # Redis/Dragonfly settings
               REDIS_HOST: litellm-dragonfly
@@ -221,9 +215,8 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
-              runAsUser: 65534
-              runAsGroup: 65534
-              runAsNonRoot: true
+              # Standard litellm image runs as root (UID 0) for UI serving
+              runAsNonRoot: false
               privileged: false
               capabilities: { drop: ["ALL"] }
               seccompProfile: { type: RuntimeDefault }
