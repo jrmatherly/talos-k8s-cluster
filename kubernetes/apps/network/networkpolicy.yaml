@@ -241,7 +241,35 @@ spec:
         - protocol: TCP
           port: 443
 ---
-# NetworkPolicy for cloudflare-tunnel
+# CiliumNetworkPolicy for cloudflare-tunnel - Service access
+# CRITICAL: Standard NetworkPolicy podSelector doesn't work for Service IPs with Cilium
+# Cilium's socket-based load balancing evaluates policies before service translation
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-tunnel-service-egress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflared
+  egress:
+    # Allow access to Kubernetes Services in the same namespace via toServices
+    - toServices:
+        - k8sService:
+            serviceName: envoy-external
+            namespace: network
+        - k8sService:
+            serviceName: envoy-internal
+            namespace: network
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP
+---
+# NetworkPolicy for cloudflare-tunnel (DNS and external access)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -267,20 +295,12 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Envoy proxy backends (via Kubernetes Service)
-    # Note: Connects via Service port 443 which maps to container port 10443
-    # Allow both ports for compatibility with different Cilium service handling modes
+    # Pod-to-pod traffic (fallback for non-service traffic)
     - to:
         - podSelector:
             matchLabels:
               gateway.envoyproxy.io/owning-gateway-namespace: network
       ports:
-        - protocol: TCP
-          port: 80      # Service port (HTTP)
-        - protocol: TCP
-          port: 443     # Service port (HTTPS)
-        - protocol: TCP
-          port: 10080   # Container port (HTTP)
         - protocol: TCP
           port: 10443   # Container port (HTTPS)
     # Cloudflare edge network (tunnel connection)
