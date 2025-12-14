@@ -283,14 +283,15 @@ data:
       - model_name: gpt-audio
         litellm_params:
           model: azure/gpt-audio
-          api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
+          # api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
+          api_base: "https://ets-east-us2.openai.azure.com/"
           api_key: "os.environ/AZURE_API_KEY_EAST2"
           api_version: 2025-01-01-preview
           rpm: 250
           tpm: 250000
         model_info:
           id: "96"
-          mode: chat
+          # mode: chat
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
           base_model: azure/gpt-audio-2025-08-28
@@ -298,14 +299,15 @@ data:
       - model_name: gpt-audio-mini
         litellm_params:
           model: azure/gpt-audio-mini
-          api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
+          # api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
+          api_base: "https://ets-east-us2.openai.azure.com/"
           api_key: "os.environ/AZURE_API_KEY_EAST2"
           api_version: 2025-01-01-preview
           rpm: 200
           tpm: 100000
         model_info:
           id: "98"
-          mode: chat
+          #mode: chat
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
           base_model: azure/gpt-audio-mini-2025-08-28
