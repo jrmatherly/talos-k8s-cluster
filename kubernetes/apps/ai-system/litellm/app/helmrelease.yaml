@@ -275,3 +275,15 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /.cache
+
+      # npm cache directory for Prisma CLI installation
+      npm-cache:
+        type: emptyDir
+        globalMounts:
+          - path: /.npm
+
+      # Root cache directory - Prisma also checks here for binaries
+      root-cache:
+        type: emptyDir
+        globalMounts:
+          - path: /root/.cache
