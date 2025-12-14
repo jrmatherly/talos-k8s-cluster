@@ -5,6 +5,7 @@ resources:
   - ./helmrelease.yaml
   - ./helmrepository.yaml
   - ./httproute.yaml
+  - ./networkpolicy.yaml
   - ./secret.sops.yaml
   - ./postgresql.yaml
   - ./realm-config.yaml

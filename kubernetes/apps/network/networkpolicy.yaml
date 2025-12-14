@@ -1,0 +1,356 @@
+---
+# CiliumNetworkPolicy for envoy-gateway controller - Kubernetes API access
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: envoy-gateway-kube-api-egress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: envoy-gateway
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+# CiliumNetworkPolicy for cloudflare-dns - Kubernetes API access
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cloudflare-dns-kube-api-egress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: external-dns
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+# CiliumNetworkPolicy for k8s-gateway - Kubernetes API access
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: k8s-gateway-kube-api-egress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-gateway
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+# NetworkPolicy for envoy-gateway controller
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: envoy-gateway-controller
+  namespace: network
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: envoy-gateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow xDS connections from Envoy proxy pods
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-namespace: network
+      ports:
+        - protocol: TCP
+          port: 18000  # xDS
+        - protocol: TCP
+          port: 18001  # xDS rate limit
+        - protocol: TCP
+          port: 19001  # Metrics
+    # Allow Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 19001
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 8081
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Note: Kubernetes API access handled by CiliumNetworkPolicy
+---
+# NetworkPolicy for Envoy proxy pods (internal, external, ai, mcp)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: envoy-proxies
+  namespace: network
+spec:
+  podSelector:
+    matchLabels:
+      gateway.envoyproxy.io/owning-gateway-namespace: network
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow LoadBalancer traffic (external access)
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 10080   # HTTP
+        - protocol: TCP
+          port: 10443   # HTTPS
+        - protocol: TCP
+          port: 8080    # HTTP alt
+        - protocol: TCP
+          port: 8443    # HTTPS alt
+    # Allow from cloudflare-tunnel
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudflared
+      ports:
+        - protocol: TCP
+          port: 10443
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 19001
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 19001
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # xDS to envoy-gateway controller
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: envoy-gateway
+      ports:
+        - protocol: TCP
+          port: 18000
+        - protocol: TCP
+          port: 18001
+    # Backend traffic to all internal namespaces
+    # This is intentionally broad as gateways route to many services
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+    # External backends (Cloudflare, external APIs)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# NetworkPolicy for cloudflare-dns (external-dns)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudflare-dns
+  namespace: network
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: external-dns
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 7979  # Health/metrics
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Note: Kubernetes API access handled by CiliumNetworkPolicy
+    # Cloudflare API
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# NetworkPolicy for cloudflare-tunnel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cloudflare-tunnel
+  namespace: network
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cloudflared
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+    # No ingress needed - tunnel is outbound only
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Envoy proxy backends (internal routing)
+    - to:
+        - podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-namespace: network
+      ports:
+        - protocol: TCP
+          port: 10443
+    # Cloudflare edge network (tunnel connection)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: UDP
+          port: 7844  # QUIC tunnel
+---
+# NetworkPolicy for k8s-gateway (split DNS)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: k8s-gateway
+  namespace: network
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-gateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow DNS queries from cluster (LoadBalancer)
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    # DNS (upstream DNS servers)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Note: Kubernetes API access handled by CiliumNetworkPolicy
+    # External DNS servers (fallback)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+        - protocol: TCP
+          port: 443  # DNS-over-HTTPS

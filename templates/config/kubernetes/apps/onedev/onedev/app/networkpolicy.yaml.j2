@@ -1,0 +1,65 @@
+#% if onedev_enabled %#
+---
+# NetworkPolicy for OneDev
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: onedev
+  namespace: onedev
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: onedev
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from Envoy Gateway (HTTP interface)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 6610
+    # SSH access (if exposed via LoadBalancer or NodePort)
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 6611
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: #{ node_cidr }#
+      ports:
+        - protocol: TCP
+          port: 6610
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # External HTTPS (GitHub, Git remotes, webhooks)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 22  # SSH for Git
+#% endif %#

@@ -6,6 +6,7 @@ resources:
   - ./helmrelease.yaml
   - ./helmrepository.yaml
   - ./httproute.yaml
+  - ./networkpolicy.yaml
   - ./secret.sops.yaml
 #% if keycloak_postgresql_enabled | default(true) %#
   - ./postgresql.yaml
