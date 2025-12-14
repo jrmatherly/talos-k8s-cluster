@@ -286,8 +286,7 @@ data:
           tpm: 250000
         model_info:
           id: "96"
-          # mode: audio_transcription
-          mode: realtime
+          mode: chat
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
           base_model: azure/gpt-audio-2025-08-28
@@ -302,8 +301,7 @@ data:
           tpm: 100000
         model_info:
           id: "98"
-          # mode: audio_transcription
-          mode: realtime
+          mode: chat
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support audio health checks currently
           base_model: azure/gpt-audio-mini-2025-08-28
@@ -447,7 +445,7 @@ data:
 
       - model_name: cohere-rerank-v3.5
         litellm_params:
-          model: azure_ai/cohere-rerank-v3.5
+          model: cohere/cohere-rerank-v3.5
           api_key: "os.environ/AZURE_COHERE_RERANK_API_KEY"
           api_base: "os.environ/AZURE_COHERE_RERANK_API_BASE"
           max_output_tokens: 4096
@@ -459,7 +457,7 @@ data:
 
       - model_name: cohere-embed-v-4-0
         litellm_params:
-          model: azure_ai/cohere-embed-v-4-0
+          model: cohere/cohere-embed-v-4-0
           api_key: "os.environ/AZURE_COHERE_EMBED_API_KEY"
           api_base: "os.environ/AZURE_COHERE_EMBED_API_BASE"
           cache_control_injection_points:
