@@ -339,7 +339,7 @@ data:
           # supports_audio_input: true         # set supports_audio_input to True so /model/info returns this attribute as True
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
-          base_model: azure/gpt-realtime-2025-08-28
+          base_model: gpt-realtime-2025-08-28
 
       - model_name: gpt-realtime-mini
         litellm_params:
@@ -356,7 +356,7 @@ data:
           # supports_audio_input: true         # set supports_audio_input to True so /model/info returns this attribute as True
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
-          base_model: azure/gpt-realtime-mini-2025-10-06
+          base_model: gpt-realtime-mini-2025-10-06
 
       - model_name: text-embedding-3-large
         litellm_params:
@@ -402,7 +402,7 @@ data:
           id: "20"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/claude-opus-4-5
+          base_model: claude-opus-4-5
 
       - model_name: claude-sonnet-4-5
         litellm_params:
@@ -418,7 +418,7 @@ data:
           id: "21"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/claude-sonnet-4-5
+          base_model: claude-sonnet-4-5
 
       - model_name: claude-opus-4-1
         litellm_params:
@@ -434,7 +434,7 @@ data:
           id: "22"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/claude-opus-4-1
+          base_model: claude-opus-4-1
 
       - model_name: claude-haiku-4-5
         litellm_params:
@@ -450,13 +450,13 @@ data:
           id: "23"
           supports_reasoning: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/claude-haiku-4-5
+          base_model: claude-haiku-4-5
 #% endif %#
 
 #% if azure_cohere_rerank_api_key %#
       - model_name: cohere-rerank-v3.5
         litellm_params:
-          model: azure/cohere-rerank-v3.5
+          model: azure_ai/cohere-rerank-v3.5
           api_key: "os.environ/AZURE_COHERE_RERANK_API_KEY"
           api_base: "os.environ/AZURE_COHERE_RERANK_API_BASE"
           max_output_tokens: 4096
@@ -464,13 +464,13 @@ data:
           id: "76"
           mode: rerank
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/cohere-rerank-v3.5
+          base_model: cohere-rerank-v3.5
 #% endif %#
 
 #% if azure_cohere_embed_api_key %#
       - model_name: cohere-embed-v-4-0
         litellm_params:
-          model: azure/cohere-embed-v-4-0
+          model: azure_ai/cohere-embed-v-4-0
           api_key: "os.environ/AZURE_COHERE_EMBED_API_KEY"
           api_base: "os.environ/AZURE_COHERE_EMBED_API_BASE"
           cache_control_injection_points:
@@ -480,7 +480,7 @@ data:
           id: "77"
           mode: embedding
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
-          base_model: azure/cohere-embed-v-4-0
+          base_model: cohere-embed-v-4-0
           disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
 #% endif %#
 
