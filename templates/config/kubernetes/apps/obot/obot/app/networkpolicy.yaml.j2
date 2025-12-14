@@ -159,6 +159,47 @@ spec:
         - protocol: TCP
           port: 443
 #% endif %#
+#% if litellm_enabled | default(false) %#
+    # Option 1: Direct ClusterIP access to LiteLLM (recommended for internal use)
+    # Use http://litellm.ai-system.svc.cluster.local:4000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ai-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
+      ports:
+        - protocol: TCP
+          port: 4000
+    # Option 2: Access LiteLLM via envoy-internal gateway (litellm → internal)
+    # Requires HTTPRoute attached to envoy-internal and k8s-gateway DNS update
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+      ports:
+        - protocol: TCP
+          port: 10443
+    # envoy-internal LoadBalancer IP for TLS hostname validation
+    - to:
+        - ipBlock:
+            cidr: #{ cluster_gateway_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 443
+    # Option 3: Access LiteLLM via envoy-external gateway (current HTTPRoute location)
+    # envoy-external LoadBalancer IP (litellm currently resolves here)
+    - to:
+        - ipBlock:
+            cidr: #{ cloudflare_gateway_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 443
+#% endif %#
     # Allow external internet access (GitHub for tools, MCP catalogs, etc.)
     # Excludes private IP ranges (RFC 1918)
     - to:
