@@ -124,6 +124,7 @@ spec:
     # Allow LoadBalancer traffic (external access)
     # CRITICAL: Cilium socket-based LB evaluates policy with ORIGINAL port before DNAT
     # Must allow both Service ports (80, 443) AND container ports (10080, 10443, etc.)
+    # Includes both TCP and UDP for HTTP/3 (QUIC) support
     - from:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -132,10 +133,14 @@ spec:
           port: 80      # LoadBalancer service port (pre-DNAT)
         - protocol: TCP
           port: 443     # LoadBalancer service port (pre-DNAT)
+        - protocol: UDP
+          port: 443     # HTTP/3 (QUIC) service port (pre-DNAT)
         - protocol: TCP
           port: 10080   # HTTP container port (post-DNAT)
         - protocol: TCP
           port: 10443   # HTTPS container port (post-DNAT)
+        - protocol: UDP
+          port: 10443   # HTTP/3 (QUIC) container port (post-DNAT)
         - protocol: TCP
           port: 8080    # HTTP alt container port
         - protocol: TCP
@@ -291,6 +296,7 @@ spec:
       gateway.envoyproxy.io/owning-gateway-namespace: network
   ingress:
     # Allow ingress from world on both service ports (pre-DNAT) and container ports (post-DNAT)
+    # Includes both TCP and UDP for HTTP/3 (QUIC) support
     - fromEntities:
         - world
       toPorts:
@@ -299,10 +305,14 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
+            - port: "443"
+              protocol: UDP
             - port: "10080"
               protocol: TCP
             - port: "10443"
               protocol: TCP
+            - port: "10443"
+              protocol: UDP
 ---
 # NetworkPolicy for cloudflare-tunnel (DNS and external access)
 apiVersion: networking.k8s.io/v1
