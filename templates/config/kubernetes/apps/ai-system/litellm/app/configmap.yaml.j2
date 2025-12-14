@@ -143,8 +143,8 @@ data:
       # Azure OpenAI US East2 Models
       - model_name: gpt-5
         litellm_params:
-          model: azure/gpt5_series/gpt-5
-          # model: azure/gpt-5
+          # model: azure/gpt5_series/gpt-5
+          model: azure/gpt-5
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 1750
@@ -218,8 +218,8 @@ data:
 
       - model_name: gpt-5.1
         litellm_params:
-          model: azure/gpt5_series/gpt-5.1
-          # model: azure/gpt-5.1
+          # model: azure/gpt5_series/gpt-5.1
+          model: azure/gpt-5.1
           litellm_credential_name: azure_credential_us_east2
           max_completion_tokens: 16384
           rpm: 20000
@@ -584,16 +584,20 @@ data:
       drop_params: true
       # Logging/Callback settings
       # Callbacks - 'callbacks' enables /metrics endpoint
+#% if litellm_langfuse_enabled %#
       success_callback: # ["langfuse"]  # list of success callbacks
         - "prometheus"
-#% if litellm_langfuse_enabled %#
         - "langfuse"
-#% endif %#
       failure_callback: # ["sentry"]  # list of failure callbacks
         # - "sentry"
         - "prometheus"
-#% if litellm_langfuse_enabled %#
         - "langfuse"
+#% else %#
+      success_callback: # ["langfuse"]  # list of success callbacks
+        - "prometheus"
+      failure_callback: # ["sentry"]  # list of failure callbacks
+        # - "sentry"
+        - "prometheus"
 #% endif %#
       callbacks: # ["otel"]  # list of callbacks - runs on success and failure
         # - "otel"
@@ -604,7 +608,7 @@ data:
       turn_off_message_logging: true # boolean  # prevent the messages and responses from being logged to on your callbacks, but request metadata will still be logged. Useful for privacy/compliance when handling sensitive data.
       redact_user_api_key_info: true # boolean  # Redact information about the user api key (hashed token, user_id, team id, etc.), from logs. Currently supported for Langfuse, OpenTelemetry, Logfire, ArizeAI logging.
       # modify_params: true # modify the params before sending to the provider
-      enable_preview_features: true # enable preview features
+      # enable_preview_features: true # enable preview features
       set_verbose: false
       # Debugging - see debugging docs for more options
       # Use `--debug` or `--detailed_debug` CLI flags, or set LITELLM_LOG env var to "INFO", "DEBUG", or "ERROR"
@@ -612,7 +616,7 @@ data:
 
       # Networking & Timeout Settings
       request_timeout: 30 # (int) llm requesttimeout in seconds. Raise Timeout error if call takes longer than 10s. Sets litellm.request_timeout
-      force_ipv4: true # If true, litellm will force ipv4 for all LLM requests. Some users have seen httpx ConnectionError when using ipv6 + Anthropic API
+      # force_ipv4: true # If true, litellm will force ipv4 for all LLM requests. Some users have seen httpx ConnectionError when using ipv6 + Anthropic API
       # forward_traceparent_to_llm_provider: true # Forward traceparent header to LLM providers for distributed tracing
 
 #% if litellm_langfuse_enabled %#
