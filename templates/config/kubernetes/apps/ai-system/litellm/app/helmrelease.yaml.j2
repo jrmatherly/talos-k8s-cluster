@@ -77,6 +77,8 @@ spec:
               LITELLM_MODE: "PRODUCTION"
               LITELLM_DONT_SHOW_FEEDBACK_BOX: "True"
               LITELLM_CALLBACKS: prometheus
+              # Writable directory for database migrations
+              LITELLM_MIGRATION_DIR: "/tmp/migrations"
 
               # Redis/Dragonfly settings
               REDIS_HOST: litellm-dragonfly
