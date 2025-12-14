@@ -57,7 +57,7 @@ spec:
               # Using litellm-non_root image with pre-generated Prisma binaries
               # Fixes Prisma query engine timeout issues on Wolfi distro (GitHub #17093)
               repository: ghcr.io/berriai/litellm-non_root
-              tag: main-stable
+              tag: v1.80.0-stable@sha256:0924d5820ce51b3be5f08b1b74a8869dd87f7bbc271ec06c00a42d8d76123175
               pullPolicy: IfNotPresent
 
             args:
@@ -228,9 +228,14 @@ spec:
               allowPrivilegeEscalation: false
               # Must be false - Prisma needs to write binaries to package dir
               readOnlyRootFilesystem: false
-              capabilities:
-                drop:
-                  - ALL
+              runAsUser: 1000
+              runAsGroup: 150
+              runAsNonRoot: true
+              privileged: false
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+              seccompProfile: { type: RuntimeDefault }
 
             resources:
               requests:
@@ -259,7 +264,7 @@ spec:
     # ==========================================================================
     persistence:
       # LiteLLM config file from ConfigMap
-      config:
+      config-file:
         type: configMap
         name: litellm-config
         globalMounts:
