@@ -11,17 +11,24 @@ spec:
   egress:
     # Azure OpenAI endpoints (US East)
     - toFQDNs:
-        - matchName: "aaronsai.openai.azure.com"
-        - matchName: "aaronsai.models.ai.azure.com"
+        - matchPattern: "*.openai.azure.com"
+        - matchPattern: "*.models.ai.azure.com"
+        - matchPattern: "*.cognitiveservices.azure.com"
+        - matchPattern: "*.services.ai.azure.com"
+        - matchPattern: "*.stt.speech.microsoft.com"
+        - matchPattern: "*.tts.speech.microsoft.com"
       toPorts:
         - ports:
             - port: "443"
               protocol: TCP
     # Azure OpenAI endpoints (US East2)
     - toFQDNs:
-        - matchName: "ets-east-us2.openai.azure.com"
-        - matchName: "ets-east-us2.models.ai.azure.com"
-        - matchName: "ets-east-us2.cognitiveservices.azure.com"
+        - matchPattern: "*.openai.azure.com"
+        - matchPattern: "*.models.ai.azure.com"
+        - matchPattern: "*.cognitiveservices.azure.com"
+        - matchPattern: "*.services.ai.azure.com"
+        - matchPattern: "*.stt.speech.microsoft.com"
+        - matchPattern: "*.tts.speech.microsoft.com"
       toPorts:
         - ports:
             - port: "443"

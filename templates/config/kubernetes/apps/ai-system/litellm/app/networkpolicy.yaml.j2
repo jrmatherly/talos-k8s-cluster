@@ -13,8 +13,12 @@ spec:
     # Azure OpenAI endpoints (US East)
 #% if azure_openai_us_east_api_key %#
     - toFQDNs:
-        - matchName: "#{ azure_openai_us_east_resource_name }#.openai.azure.com"
-        - matchName: "#{ azure_openai_us_east_resource_name }#.models.ai.azure.com"
+        - matchPattern: "*.openai.azure.com"
+        - matchPattern: "*.models.ai.azure.com"
+        - matchPattern: "*.cognitiveservices.azure.com"
+        - matchPattern: "*.services.ai.azure.com"
+        - matchPattern: "*.stt.speech.microsoft.com"
+        - matchPattern: "*.tts.speech.microsoft.com"
       toPorts:
         - ports:
             - port: "443"
@@ -23,9 +27,12 @@ spec:
     # Azure OpenAI endpoints (US East2)
 #% if azure_openai_us_east2_api_key %#
     - toFQDNs:
-        - matchName: "#{ azure_openai_us_east2_resource_name }#.openai.azure.com"
-        - matchName: "#{ azure_openai_us_east2_resource_name }#.models.ai.azure.com"
-        - matchName: "#{ azure_openai_us_east2_resource_name }#.cognitiveservices.azure.com"
+        - matchPattern: "*.openai.azure.com"
+        - matchPattern: "*.models.ai.azure.com"
+        - matchPattern: "*.cognitiveservices.azure.com"
+        - matchPattern: "*.services.ai.azure.com"
+        - matchPattern: "*.stt.speech.microsoft.com"
+        - matchPattern: "*.tts.speech.microsoft.com"
       toPorts:
         - ports:
             - port: "443"
