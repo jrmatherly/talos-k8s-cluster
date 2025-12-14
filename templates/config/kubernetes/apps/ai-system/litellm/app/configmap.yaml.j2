@@ -281,8 +281,10 @@ data:
 
       # Azure Audio Models (gpt-4o-audio)
       # These are hybrid chat completion models requiring modalities: ["text", "audio"] in requests.
-      # LiteLLM health checks don't support audio chat models (no mode sends audio modalities).
-      # Health checks must be disabled; models work correctly for audio-enabled requests.
+      # They use the chat completions API (NOT audio/speech TTS API).
+      # LiteLLM has NO health check mode for audio chat models - the chat mode sends text-only
+      # requests which fail because these models require audio modalities.
+      # Health checks MUST be disabled; models work correctly for audio-enabled requests.
       - model_name: gpt-audio
         litellm_params:
           model: azure/gpt-audio
@@ -293,10 +295,6 @@ data:
           tpm: 250000
         model_info:
           id: "96"
-          # mode: chat
-          # mode: completion
-          mode: audio_speech
-          health_check_voice: alloy
           supports_audio_output: true
           supports_audio_input: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
@@ -313,10 +311,6 @@ data:
           tpm: 100000
         model_info:
           id: "98"
-          # mode: chat
-          # mode: completion
-          mode: audio_speech
-          health_check_voice: alloy
           supports_audio_output: true
           supports_audio_input: true
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
