@@ -77,6 +77,9 @@ spec:
               LITELLM_CALLBACKS: prometheus
               # Writable directory for database migrations (non-root support)
               LITELLM_MIGRATION_DIR: "/data/migrations"
+              # Prisma engine binary configuration for non-root image
+              PRISMA_QUERY_ENGINE_BINARY: "/nonexistent/node_modules/@prisma/engines/query-engine-debian-openssl-3.0.x"
+              PRISMA_QUERY_ENGINE_LIBRARY: "/nonexistent/node_modules/@prisma/engines/libquery_engine-debian-openssl-3.0.x.so.node"
 
               # Redis/Dragonfly settings
               REDIS_HOST: litellm-dragonfly
