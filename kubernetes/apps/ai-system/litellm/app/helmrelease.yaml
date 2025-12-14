@@ -155,7 +155,7 @@ spec:
                     key: AZURE_COHERE_RERANK_API_KEY
 
               # Azure Cohere Embed API
-              AZURE_COHERE_EMBED_API_BASE: "https://aaronsai.services.ai.azure.com/models"
+              AZURE_COHERE_EMBED_API_BASE: "https://aaronsai.services.ai.azure.com/"
               AZURE_COHERE_EMBED_API_KEY:
                 valueFrom:
                   secretKeyRef:
