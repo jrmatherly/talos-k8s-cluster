@@ -90,7 +90,9 @@ spec:
                 originRequest:
                   http2Origin: true
                   originServerName: external.#{ primary_domain }#
-                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
+                #| Use LoadBalancer IP instead of ClusterIP Service to work with NetworkPolicy #|
+                #| ClusterIP traffic is blocked by Cilium's socket-based LB before NetworkPolicy can evaluate #|
+                service: https://#{ cloudflare_gateway_addr }#:443
 #% endfor %#
               - service: http_status:404
     persistence:
