@@ -220,6 +220,16 @@ spec:
     - Ingress
     - Egress
   ingress:
+#% if observability_enabled %#
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 7979
+#% endif %#
     # Kubelet probes
     - from:
         - ipBlock:
@@ -313,8 +323,24 @@ spec:
   policyTypes:
     - Ingress
     - Egress
-  ingress: []
-    # No ingress needed - tunnel is outbound only
+  ingress:
+#% if observability_enabled %#
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 8080
+#% endif %#
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: #{ node_cidr }#
+      ports:
+        - protocol: TCP
+          port: 8080
   egress:
     # DNS
     - to:
@@ -421,7 +447,7 @@ spec:
               kubernetes.io/metadata.name: observability
       ports:
         - protocol: TCP
-          port: 8080
+          port: 9153
 #% endif %#
     # Kubelet probes
     - from:
@@ -429,7 +455,7 @@ spec:
             cidr: #{ node_cidr }#
       ports:
         - protocol: TCP
-          port: 8080
+          port: 9153
   egress:
     # DNS (upstream DNS servers)
     - to:

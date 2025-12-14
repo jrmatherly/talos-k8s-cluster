@@ -129,6 +129,14 @@ spec:
     - Ingress
     - Egress
   ingress:
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9402
     # Kubelet probes
     - from:
         - ipBlock:

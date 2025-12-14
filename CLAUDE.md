@@ -294,7 +294,8 @@ When adding new application templates to this project, multiple files must be up
 8. **Adding new templates** requires updating multiple config files first - see checklist above
 9. **obot service port must be 80** - MCP servers generate token exchange URLs without explicit ports (defaulting to 80)
 10. **NetworkPolicies require ports on BOTH sides** - Traffic between namespaces must be allowed by both egress (source) AND ingress (destination) policies
-11. **agentgateway only supports chat completions** - Embeddings API not supported; Gateway API RequestHeaderModifier doesn't support secret refs for API key injection
+11. **Cilium socket-based LB and NetworkPolicy** - Standard `ipBlock` rules DON'T work for LoadBalancer IPs; use CiliumNetworkPolicy with `fromEntities: world` / `toEntities: world` instead. Must allow BOTH service port AND container port (e.g., 53 AND 1053 for k8s-gateway)
+12. **agentgateway only supports chat completions** - Embeddings API not supported; Gateway API RequestHeaderModifier doesn't support secret refs for API key injection
 12. **agentgateway HTTPRoute path ordering** - Use PathPrefix matching with longest paths first to prevent `/azure/gpt5` from matching `/azure/gpt51`
 13. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors` (NOT `spec.policy.*`); provider is enum (`Keycloak`), not object; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
 
