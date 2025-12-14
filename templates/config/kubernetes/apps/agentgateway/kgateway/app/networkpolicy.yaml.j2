@@ -64,6 +64,26 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+    # Allow to envoy-external for JWKS fetching (auth.matherly.net via LoadBalancer)
+    # The LoadBalancer IP (192.168.22.130) routes to envoy-external pods on port 10443
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-external
+      ports:
+        - protocol: TCP
+          port: 10443  # Internal HTTPS targetPort
+    # Allow to envoy-external LoadBalancer IP for JWKS fetching via external hostname
+    # kgateway resolves auth.matherly.net to LoadBalancer IP (cloudflare_gateway_addr)
+    - to:
+        - ipBlock:
+            cidr: #{ cloudflare_gateway_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 443
 ---
 # NetworkPolicy for agentgateway data plane - ingress rules
 apiVersion: networking.k8s.io/v1
