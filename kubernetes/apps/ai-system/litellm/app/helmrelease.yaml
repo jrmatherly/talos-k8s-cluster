@@ -69,6 +69,9 @@ spec:
               - /app/config.yaml
 
             env:
+              # Set HOME to writable directory for Prisma cache
+              # The container's /root has 700 permissions, blocking non-root access
+              HOME: "/tmp"
               # Core LiteLLM settings
               TZ: "America/New_York"
               STORE_MODEL_IN_DB: "True"
@@ -283,9 +286,3 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /.npm
-
-      # Root cache directory - Prisma also checks here for binaries
-      root-cache:
-        type: emptyDir
-        globalMounts:
-          - path: /root/.cache
