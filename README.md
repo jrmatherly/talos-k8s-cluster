@@ -718,9 +718,10 @@ When enabled, LiteLLM provides:
 - Horizontal Pod Autoscaling (HPA)
 
 **Technical Notes:**
-- Uses `ghcr.io/berriai/litellm-non_root` image (runs as UID 1000, GID 150)
-- Pre-generated Prisma binaries (no runtime compilation)
+- Uses `ghcr.io/berriai/litellm` base image (runs as root for UI serving)
+- Background health checks disabled to prevent Prisma connection pool exhaustion
 - ConfigMap mount via `proxyConfigMap` (not `litellm_config`)
+- Readiness probe uses `/health/readiness` for full dependency checking
 
 ```bash
 # Test LiteLLM health
