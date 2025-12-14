@@ -420,6 +420,23 @@ Below is a general guide on trying to debug an issue with an resource or applica
     kubectl -n <namespace> get events --sort-by='.metadata.creationTimestamp'
     ```
 
+6. Check for NetworkPolicy issues (Cilium):
+
+   📍 _When using Cilium CNI, standard NetworkPolicy `ipBlock` rules DON'T work for LoadBalancer IPs or K8s API access_
+
+    ```sh
+    # Check for dropped traffic in Hubble
+    kubectl exec -n kube-system ds/cilium -c cilium-agent -- hubble observe --verdict DROPPED -o compact
+
+    # Check CiliumNetworkPolicies
+    kubectl get ciliumnetworkpolicy -A
+
+    # Verify pod labels match policy selectors
+    kubectl get pods -n <namespace> --show-labels
+    ```
+
+   📍 _See `docs/ai-context/cilium-networkpolicy.md` for patterns: use `toEntities: kube-apiserver` for K8s API access, and `fromEntities: world` / `toEntities: world` for LoadBalancer traffic. Always allow BOTH service AND container ports._
+
 Resolving problems that you have could take some tweaking of your YAML manifests in order to get things working, other times it could be a external factor like permissions on a NFS server. If you are unable to figure out your problem see the support sections below.
 
 ## 🧹 Tidy up
