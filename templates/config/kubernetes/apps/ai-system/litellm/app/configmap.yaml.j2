@@ -327,9 +327,9 @@ data:
       - model_name: gpt-realtime
         litellm_params:
           model: azure/gpt-realtime
-          litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
-          # api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
-          # api_key: "os.environ/AZURE_API_KEY_EAST2"
+          # litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
+          api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
+          api_key: "os.environ/AZURE_API_KEY_EAST2"
           api_version: 2024-10-01-preview
           # max_completion_tokens: 8192
           rpm: 200
@@ -348,7 +348,9 @@ data:
       - model_name: gpt-realtime-mini
         litellm_params:
           model: azure/gpt-realtime-mini
-          litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
+          # litellm_credential_name: azure_credential_us_east2 # Uses centralized credentials below
+          api_base: "https://ets-east-us2.cognitiveservices.azure.com/"
+          api_key: "os.environ/AZURE_API_KEY_EAST2"
           api_version: 2024-10-01-preview
           # max_completion_tokens: 8192
           rpm: 200
