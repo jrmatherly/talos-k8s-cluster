@@ -56,7 +56,7 @@ spec:
               # litellm-database image is the official recommendation for database-backed deployments
               # It properly handles Prisma setup for non-root execution
               repository: ghcr.io/berriai/litellm-database
-              tag: v1.80.5-stable.1
+              tag: main-v1.80.5-stable.1
               pullPolicy: IfNotPresent
 
             args:
