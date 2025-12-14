@@ -208,6 +208,8 @@ import (
 	litellm_salt_key?: string & !=""            // Salt key for encrypting API keys in database (DO NOT change after adding models)
 	litellm_db_password?: string & !=""         // PostgreSQL password for LiteLLM database
 	litellm_cache_password?: string & !=""      // Dragonfly/Redis password for caching
+	litellm_database_url?: string & !=""        // PostgreSQL connection URL (optional - auto-generated if not set)
+	litellm_redis_url?: string & !=""           // Redis/Dragonfly connection URL (optional - auto-generated if not set)
 	litellm_mcp_enabled?: *true | bool          // Enable MCP server support (Open Source feature)
 	litellm_replicas_min?: int & >=1            // Minimum replicas for HPA (default: 2)
 	litellm_replicas_max?: int & >=1            // Maximum replicas for HPA (default: 5)

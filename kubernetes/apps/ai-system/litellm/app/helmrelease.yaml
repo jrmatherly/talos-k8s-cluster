@@ -81,6 +81,11 @@ spec:
               REDIS_HOST: litellm-dragonfly
               REDIS_PORT: "6379"
               REDIS_NAMESPACE: litellm
+              REDIS_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-secret
+                    key: REDIS_URL
 
               # Database URL (constructed from secret)
               DATABASE_URL:

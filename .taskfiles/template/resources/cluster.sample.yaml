@@ -971,6 +971,16 @@ cloudflare_token: ""
 #    Generate with: openssl rand -base64 24
 # litellm_cache_password: ""
 
+# -- PostgreSQL connection URL (optional - auto-generated if not set).
+#    (OPTIONAL) - Override the default DATABASE_URL for LiteLLM
+#    Default: postgresql://litellm:<password>@litellm-db-rw.ai-system.svc.cluster.local:5432/litellm?sslmode=disable
+# litellm_database_url: ""
+
+# -- Redis/Dragonfly connection URL (optional - auto-generated if not set).
+#    (OPTIONAL) - Override the default REDIS_URL for LiteLLM
+#    Default: redis://:<password>@litellm-dragonfly.ai-system.svc.cluster.local:6379/0
+# litellm_redis_url: ""
+
 # -- Enable MCP server support (Open Source feature).
 #    (OPTIONAL) / (DEFAULT: true)
 #    Allows LiteLLM to act as an MCP server bridge for tool calling.

@@ -171,6 +171,8 @@ litellm_master_key: "sk-test-master-key-1234567890abcdef"
 litellm_salt_key: "test-salt-key-1234567890abcdef"
 litellm_db_password: "test-litellm-db-password"
 litellm_cache_password: "test-litellm-cache-password"
+litellm_database_url: "postgresql://litellm:test-litellm-db-password@litellm-db-rw.ai-system.svc.cluster.local:5432/litellm?sslmode=disable"
+litellm_redis_url: "redis://:test-litellm-cache-password@litellm-dragonfly.ai-system.svc.cluster.local:6379/0"
 litellm_mcp_enabled: true
 litellm_replicas_min: 2
 litellm_replicas_max: 5

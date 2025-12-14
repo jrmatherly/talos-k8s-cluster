@@ -125,6 +125,8 @@ proxmox_csi_token_secret: "fake-secret"
 # litellm_salt_key: ""
 # litellm_db_password: ""
 # litellm_cache_password: ""
+# litellm_database_url: ""
+# litellm_redis_url: ""
 # litellm_mcp_enabled: true
 # litellm_replicas_min: 2
 # litellm_replicas_max: 5

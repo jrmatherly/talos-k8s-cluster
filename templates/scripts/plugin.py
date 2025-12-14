@@ -272,7 +272,9 @@ class Plugin(makejinja.plugin.Plugin):
         # agentgateway defaults (MCP 2025-11-25 OAuth Proxy)
         data.setdefault("agentgateway_enabled", False)
         data.setdefault("agentgateway_addr", "")
-        data.setdefault("agentgateway_scopes", ["openid", "profile", "email", "offline_access"])
+        data.setdefault(
+            "agentgateway_scopes", ["openid", "profile", "email", "offline_access"]
+        )
         data.setdefault("keycloak_agentgateway_client_secret", "")
 
         # obot defaults (Multi-tenant MCP Gateway)
@@ -333,7 +335,10 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("kagent_kmcp_enabled", True)
         data.setdefault("kagent_write_operations_enabled", False)
         # kagent Grafana MCP settings (uses existing cluster Grafana)
-        data.setdefault("kagent_grafana_url", "http://kube-prometheus-stack-grafana.observability.svc:80/api")
+        data.setdefault(
+            "kagent_grafana_url",
+            "http://kube-prometheus-stack-grafana.observability.svc:80/api",
+        )
         data.setdefault("kagent_grafana_api_key", "")
         # kagent CloudNativePG (CNPG) PostgreSQL settings
         data.setdefault("kagent_postgresql_replicas", 3)
@@ -347,6 +352,8 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("litellm_salt_key", "")
         data.setdefault("litellm_db_password", "")
         data.setdefault("litellm_cache_password", "")
+        data.setdefault("litellm_database_url", "")
+        data.setdefault("litellm_redis_url", "")
         data.setdefault("litellm_mcp_enabled", True)
         data.setdefault("litellm_replicas_min", 2)
         data.setdefault("litellm_replicas_max", 5)
