@@ -332,7 +332,7 @@ data:
           tpm: 100000
         model_info:
           id: "92"
-          mode: chat
+          # mode: chat
           # mode: audio_speech
           # supports_audio_output: true        # set supports_audio_output to True so /model/info returns this attribute as True
           # supports_audio_input: true         # set supports_audio_input to True so /model/info returns this attribute as True
@@ -349,7 +349,7 @@ data:
           tpm: 100000
         model_info:
           id: "94"
-          mode: chat
+          # mode: chat
           # mode: audio_speech
           # supports_audio_output: true        # set supports_audio_output to True so /model/info returns this attribute as True
           # supports_audio_input: true         # set supports_audio_input to True so /model/info returns this attribute as True
