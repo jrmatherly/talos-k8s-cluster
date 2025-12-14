@@ -786,8 +786,12 @@ data:
       # proxy_budget_rescheduler_max_time: 0  # reschedule budget updates at most every X seconds
 
       # Monitoring, Alerting & Health Checks
-      background_health_checks: true # enable background health checks
-      health_check_interval: 300 # health check interval in seconds
+      # IMPORTANT: Disabled background health checks due to Prisma query engine
+      # httpcore.ConnectTimeout issues. The Prisma Python client has a 5s default
+      # timeout that causes failures under concurrent DB operations.
+      # See: https://github.com/BerriAI/litellm/issues/7196
+      background_health_checks: false # disable to avoid Prisma overload
+      health_check_interval: 300 # health check interval in seconds (unused when disabled)
       # health_check_details: # health check details configuration
       # alerting: ["slack", "email"] # alerting configuration
       # alerting_threshold: 0.8 # alert when health check fails above this threshold

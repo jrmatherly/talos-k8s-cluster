@@ -201,7 +201,10 @@ spec:
                 custom: true
                 spec:
                   httpGet:
-                    path: /health/readiness
+                    # Use liveliness instead of readiness to avoid Prisma DB checks
+                    # The readiness endpoint queries DB via Prisma which times out
+                    # due to httpcore.ConnectTimeout (5s default) under load
+                    path: /health/liveliness
                     port: *port
                   initialDelaySeconds: 10
                   periodSeconds: 10
