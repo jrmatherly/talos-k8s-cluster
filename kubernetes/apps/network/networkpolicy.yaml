@@ -267,14 +267,22 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Envoy proxy backends (internal routing)
+    # Envoy proxy backends (via Kubernetes Service)
+    # Note: Connects via Service port 443 which maps to container port 10443
+    # Allow both ports for compatibility with different Cilium service handling modes
     - to:
         - podSelector:
             matchLabels:
               gateway.envoyproxy.io/owning-gateway-namespace: network
       ports:
         - protocol: TCP
-          port: 10443
+          port: 80      # Service port (HTTP)
+        - protocol: TCP
+          port: 443     # Service port (HTTPS)
+        - protocol: TCP
+          port: 10080   # Container port (HTTP)
+        - protocol: TCP
+          port: 10443   # Container port (HTTPS)
     # Cloudflare edge network (tunnel connection)
     - to:
         - ipBlock:
