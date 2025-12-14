@@ -478,7 +478,7 @@ data:
 #% if azure_cohere_embed_api_key %#
       - model_name: cohere-embed-v-4-0
         litellm_params:
-          model: cohere/cohere-embed-v-4-0
+          model: azure_ai/cohere-embed-v-4-0
           api_key: "os.environ/AZURE_COHERE_EMBED_API_KEY"
           api_base: "os.environ/AZURE_COHERE_EMBED_API_BASE"
           cache_control_injection_points:
@@ -487,10 +487,10 @@ data:
           input_type: search_document
         model_info:
           id: "77"
-          # mode: embedding
+          mode: embedding
           access_groups: ["premium-models", "restricted-models", "aangpt-models", "aanai-models"]
           base_model: cohere-embed-v-4-0
-          disable_background_health_check: true # LiteLLM Health Checks does not support realtime health checks currently
+          disable_background_health_check: true  # Azure AI embedding endpoint returns 404 on health checks
 #% endif %#
 
     # Credential List
