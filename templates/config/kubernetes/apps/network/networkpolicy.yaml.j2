@@ -356,6 +356,29 @@ spec:
         - protocol: UDP
           port: 7844  # QUIC tunnel
 ---
+# CiliumNetworkPolicy for k8s-gateway - Ingress from world (LoadBalancer DNS traffic)
+# CRITICAL: Standard NetworkPolicy ipBlock doesn't work for LoadBalancer IPs with Cilium socket-based LB
+# Must use Cilium's native fromEntities: world for external DNS queries to LoadBalancer service
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: k8s-gateway-world-ingress
+  namespace: network
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: k8s-gateway
+  ingress:
+    # Allow DNS queries from world (external clients via LoadBalancer)
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+---
 # NetworkPolicy for k8s-gateway (split DNS)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
