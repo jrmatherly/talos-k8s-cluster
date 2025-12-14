@@ -1,4 +1,4 @@
-#% if litellm_enabled %#
+#% if litellm_enabled | default(false) %#
 ---
 # CiliumNetworkPolicy for LiteLLM - FQDN-based egress to Azure OpenAI
 apiVersion: cilium.io/v2
@@ -10,6 +10,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: litellm
   egress:
+    # Cilium's kube-proxy replacement and reserved entity handling
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
     # Azure OpenAI endpoints (US East)
 #% if azure_openai_us_east_api_key %#
     - toFQDNs:
@@ -133,7 +140,7 @@ spec:
           port: 4000
 #% endif %#
   egress:
-    # DNS
+    # Allow DNS queries
     - to:
         - namespaceSelector:
             matchLabels:
@@ -141,7 +148,9 @@ spec:
       ports:
         - protocol: UDP
           port: 53
-    # PostgreSQL (CloudNativePG)
+        - protocol: TCP
+          port: 53
+    # Allow PostgreSQL connection to CloudNativePG cluster
     - to:
         - podSelector:
             matchLabels:
@@ -201,6 +210,8 @@ spec:
               kubernetes.io/metadata.name: kube-system
       ports:
         - protocol: UDP
+          port: 53
+        - protocol: TCP
           port: 53
 ---
 # CiliumNetworkPolicy for CloudNativePG database - Kubernetes API access
