@@ -144,7 +144,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/name: cloudflared
+              app.kubernetes.io/name: cloudflare-tunnel
       ports:
         - protocol: TCP
           port: 10443
@@ -258,7 +258,7 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: cloudflared
+      app.kubernetes.io/name: cloudflare-tunnel
   egress:
     # Allow egress to world (external IPs including LoadBalancer IPs and Cloudflare edge)
     - toEntities:
@@ -305,7 +305,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: cloudflared
+      app.kubernetes.io/name: cloudflare-tunnel
   policyTypes:
     - Ingress
     - Egress
