@@ -70,9 +70,10 @@ spec:
               - /app/config.yaml
 
             env:
-              # Set HOME to writable directory for Prisma cache
+              # Set HOME and XDG_CACHE_HOME to writable directory for Prisma cache
               # The container's /root has 700 permissions, blocking non-root access
               HOME: "/tmp"
+              XDG_CACHE_HOME: "/tmp/.cache"
               # Core LiteLLM settings
               TZ: "America/New_York"
               STORE_MODEL_IN_DB: "True"
