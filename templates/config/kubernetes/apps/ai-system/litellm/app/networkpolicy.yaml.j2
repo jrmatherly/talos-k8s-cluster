@@ -272,6 +272,16 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+#% if observability_enabled %#
+    # Allow Prometheus scraping of PostgreSQL metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9187
+#% endif %#
   egress:
     # DNS
     - to:
@@ -280,6 +290,8 @@ spec:
               kubernetes.io/metadata.name: kube-system
       ports:
         - protocol: UDP
+          port: 53
+        - protocol: TCP
           port: 53
     # Replication and health checks between database pods
     - to:
