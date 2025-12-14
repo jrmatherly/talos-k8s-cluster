@@ -359,6 +359,7 @@ spec:
 # CiliumNetworkPolicy for k8s-gateway - Ingress from world (LoadBalancer DNS traffic)
 # CRITICAL: Standard NetworkPolicy ipBlock doesn't work for LoadBalancer IPs with Cilium socket-based LB
 # Must use Cilium's native fromEntities: world for external DNS queries to LoadBalancer service
+# CRITICAL: Must allow BOTH service port (53) AND container port (1053) due to Cilium socket-based LB
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -370,6 +371,7 @@ spec:
       app.kubernetes.io/name: k8s-gateway
   ingress:
     # Allow DNS queries from world (external clients via LoadBalancer)
+    # Include both service port (pre-DNAT) and container port (post-DNAT)
     - fromEntities:
         - world
       toPorts:
@@ -377,6 +379,10 @@ spec:
             - port: "53"
               protocol: UDP
             - port: "53"
+              protocol: TCP
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
               protocol: TCP
 ---
 # NetworkPolicy for k8s-gateway (split DNS)
@@ -394,6 +400,7 @@ spec:
     - Egress
   ingress:
     # Allow DNS queries from cluster (LoadBalancer)
+    # CRITICAL: Include both service port (53) AND container port (1053) for Cilium socket-based LB
     - from:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -402,6 +409,10 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+        - protocol: UDP
+          port: 1053
+        - protocol: TCP
+          port: 1053
 #% if observability_enabled %#
     # Prometheus metrics
     - from:
