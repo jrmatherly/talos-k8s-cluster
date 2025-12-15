@@ -1,0 +1,18 @@
+#% if obot_enabled | default(false) %#
+# Custom NamespaceTransformer that sets namespace on resources
+# WITHOUT transforming the metadata.name of Namespace resources
+# This allows multiple namespaces (obot and obot-mcp) to coexist
+# See: https://github.com/kubernetes-sigs/kustomize/issues/5282
+apiVersion: builtin
+kind: NamespaceTransformer
+metadata:
+  name: obot-namespace-transformer
+namespace: obot
+setRoleBindingSubjects: defaultOnly
+fieldSpecs:
+  # Standard namespace field for namespaced resources
+  - path: metadata/namespace
+    create: true
+  # DO NOT include metadata/name for Namespace kind here
+  # This prevents kustomize from renaming Namespace resources
+#% endif %#

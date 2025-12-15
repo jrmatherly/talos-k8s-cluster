@@ -1,0 +1,4 @@
+# Kustomize configuration to prevent namespace transformation on Namespace resources
+# This allows multiple namespaces (obot and obot-mcp) to coexist in namespace.yaml
+# See: https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/configurations/
+namespace: []

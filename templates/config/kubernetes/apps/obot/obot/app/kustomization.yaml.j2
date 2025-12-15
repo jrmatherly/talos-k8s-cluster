@@ -3,7 +3,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./mcp-namespace.yaml
+  # NOTE: obot-mcp namespace is created at parent level (../namespace.yaml)
+  # to avoid targetNamespace override issues in the ks.yaml
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./httproute.yaml
