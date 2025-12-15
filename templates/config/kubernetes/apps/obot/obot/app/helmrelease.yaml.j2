@@ -137,7 +137,9 @@ spec:
       AWS_SECRET_ACCESS_KEY: "${OBOT_S3_SECRET_KEY}"
       AWS_REGION: "#{ obot_s3_region | default('us-east-1') }#"
 #% if obot_s3_use_path_style | default(false) %#
-      AWS_S3_USE_PATH_STYLE: "true"
+      # Use path-style URLs for S3-compatible storage (MinIO without wildcard DNS)
+      # Format: https://my-s3-endpoint.domain.com/bucket instead of https://bucket.s3.domain.com
+      WORKSPACE_PROVIDER_S3_USE_PATH_STYLE: "true"
 #% endif %#
 #% endif %#
 
