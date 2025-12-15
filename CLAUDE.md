@@ -302,11 +302,13 @@ When adding new application templates to this project, multiple files must be up
 16. **MinIO chart ServiceMonitor** - Don't add `release` to `metrics.serviceMonitor.additionalLabels` - the chart already sets `release: {{ .Release.Name }}`, causing duplicate key errors with Flux
 17. **Flux Kustomization substituteFrom** - Only use `cluster-secrets` Secret (exists in each namespace); `cluster-settings` ConfigMap doesn't exist in this cluster
 18. **MinIO v3 metrics require custom ServiceMonitor** - Helm chart only scrapes v2 endpoints; for community v3 Grafana dashboard, deploy separate ServiceMonitor scraping `/minio/metrics/v3/*` paths
+19. **Cognee migration architecture bug** - Cognee's entrypoint.sh runs Alembic migrations BEFORE SQLAlchemy creates base tables; init container workaround pre-creates some tables but deployment may still fail; see `docs/ai-context/cognee-deployment.md`
 
 ## Extended Documentation
 
 For detailed component documentation, see:
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)
+- `docs/ai-context/cognee-deployment.md` - Cognee Graph RAG deployment (Neo4j + pgvector, migration workarounds, known issues)
 - `docs/ai-context/envoy-ai-gateway.md` - Envoy AI Gateway integration (multi-model routing, Azure OpenAI backends, testing)
 - `docs/ai-context/agentgateway-mcp.md` - agentgateway/kgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy patterns for K8s API access
