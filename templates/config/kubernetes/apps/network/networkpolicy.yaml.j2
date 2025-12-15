@@ -155,6 +155,19 @@ spec:
       ports:
         - protocol: TCP
           port: 10443
+#% if agentgateway_enabled %#
+    # Allow from kgateway for JWKS fetching (auth.matherly.net via LoadBalancer)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kgateway
+      ports:
+        - protocol: TCP
+          port: 10443  # HTTPS container port
+#% endif %#
 #% if observability_enabled %#
     # Prometheus metrics
     - from:
