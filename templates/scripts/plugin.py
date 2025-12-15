@@ -420,6 +420,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_mcp_server_name", "cognee-mcp")
         # Cognee API Server defaults
         data.setdefault("cognee_api_enabled", False)
+        data.setdefault("cognee_hostname", "cognee")
         data.setdefault("cognee_version", "0.5.0")
         data.setdefault("cognee_replicas", 1)
         data.setdefault("cognee_api_resources_requests_cpu", "100m")

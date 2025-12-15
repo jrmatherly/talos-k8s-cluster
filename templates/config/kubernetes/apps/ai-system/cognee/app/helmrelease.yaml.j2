@@ -47,6 +47,63 @@ spec:
           unavailable: 0
           surge: 1
 
+        # Init container to create PostgreSQL enum types if missing
+        # Fixes Alembic migration issue where ADD VALUE runs before CREATE TYPE
+        initContainers:
+          init-db-enums:
+            image:
+              repository: postgres
+              tag: "16-alpine"
+            env:
+              - name: PGHOST
+                value: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
+              - name: PGPORT
+                value: "5432"
+              - name: PGDATABASE
+                value: "#{ cognee_db_name | default('cognee') }#"
+              - name: PGUSER
+                value: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-api-secrets
+                    key: DB_PASSWORD
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "Creating PostgreSQL enum types if missing..."
+                psql -c "
+                DO \$\$
+                BEGIN
+                  -- Create pipelinerunstatus enum if not exists
+                  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pipelinerunstatus') THEN
+                    CREATE TYPE pipelinerunstatus AS ENUM (
+                      'QUEUED',
+                      'RUNNING',
+                      'COMPLETED',
+                      'FAILED',
+                      'CANCELLED',
+                      'DATASET_PROCESSING_INITIATED',
+                      'DATASET_PROCESSING_STARTED',
+                      'DATASET_PROCESSING_COMPLETED',
+                      'DATASET_PROCESSING_ERROR'
+                    );
+                    RAISE NOTICE 'Created pipelinerunstatus enum type';
+                  ELSE
+                    RAISE NOTICE 'pipelinerunstatus enum type already exists';
+                  END IF;
+                END\$\$;
+                " && echo "Enum types initialized successfully"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              runAsNonRoot: true
+              runAsUser: 70
+              seccompProfile:
+                type: RuntimeDefault
+
         containers:
           app:
             image:
@@ -69,6 +126,14 @@ spec:
               DB_PORT: "5432"
               DB_NAME: "#{ cognee_db_name | default('cognee') }#"
               DB_USERNAME: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
+
+              # Migration Database - Use same PostgreSQL for migration tracking
+              # Required for consistent migration state when using PostgreSQL
+              MIGRATION_DB_PROVIDER: "postgres"
+              MIGRATION_DB_HOST: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
+              MIGRATION_DB_PORT: "5432"
+              MIGRATION_DB_NAME: "#{ cognee_db_name | default('cognee') }#"
+              MIGRATION_DB_USERNAME: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
 
               # Vector Database - pgvector (same PostgreSQL instance)
               VECTOR_DB_PROVIDER: "pgvector"

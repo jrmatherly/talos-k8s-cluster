@@ -234,5 +234,6 @@ cognee_embedding_dimensions: 3072
 cognee_mcp_server_name: "cognee-mcp"
 # Cognee API Server Configuration
 cognee_api_enabled: true
+cognee_hostname: "cognee"
 cognee_version: "0.5.0"
 cognee_replicas: 1

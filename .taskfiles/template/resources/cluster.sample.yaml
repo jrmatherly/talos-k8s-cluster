@@ -1290,6 +1290,11 @@ kagent_kmcp_enabled: true
 #    Deploys Cognee as a web service accessible at cognee.${SECRET_DOMAIN}
 # cognee_api_enabled: false
 
+# -- Cognee API hostname (subdomain).
+#    (OPTIONAL) / (DEFAULT: "cognee")
+#    Results in cognee.<primary_domain>
+# cognee_hostname: "cognee"
+
 # -- Cognee Docker image version.
 #    (OPTIONAL) / (DEFAULT: "0.5.0")
 # cognee_version: "0.5.0"

@@ -280,6 +280,7 @@ import (
 
 	// Cognee API Server Configuration (optional - requires cognee_enabled)
 	cognee_api_enabled?: bool                   // Enable Cognee API server deployment with UI
+	cognee_hostname?: string & !=""             // Hostname subdomain (default: cognee)
 	cognee_version?: string & !=""              // Cognee Docker image version (default: 0.5.0)
 	cognee_replicas?: int & >=1                 // Number of Cognee API replicas (default: 1)
 	cognee_api_resources_requests_cpu?: string & !=""     // CPU request (default: 100m)

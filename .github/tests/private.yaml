@@ -172,5 +172,6 @@ proxmox_csi_token_secret: "fake-secret"
 # cognee_mcp_server_name: ""
 # Cognee API Server (disabled for private repo testing)
 # cognee_api_enabled: false
+# cognee_hostname: ""
 # cognee_version: ""
 # cognee_replicas:
