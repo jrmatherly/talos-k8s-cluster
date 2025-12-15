@@ -673,9 +673,9 @@ data:
     # General Settings
     general_settings:
       # Default Model Selection
-      completion_model: gpt-5-mini # Default model to use for completions
-      embedding_model: text-embedding-3-large # Default model to use for embeddings
-      image_generation_model: gpt-image-1 # Default model to use for image generation
+      # completion_model: gpt-5-mini # Default model to use for completions
+      # embedding_model: text-embedding-3-large # Default model to use for embeddings
+      # image_generation_model: gpt-image-1 # Default model to use for image generation
       # moderation_model: content-filter-alpha # Default model to use for content moderation
       # infer_model_from_keys: true # Automatically infer model from API keys
 

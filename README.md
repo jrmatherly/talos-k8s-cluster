@@ -487,7 +487,9 @@ For a more streamlined approach to those issues, consider [External Secrets](htt
 
 ### Storage
 
-**Included (optional):** This template includes [Proxmox CSI](https://github.com/sergelogvinov/proxmox-csi-plugin) for dynamic persistent volume provisioning from Proxmox storage pools. Enable it by configuring the `proxmox_csi_*` variables in `cluster.yaml`. See `docs/proxmox-csi-implementation.md` for details.
+**Block Storage (optional):** This template includes [Proxmox CSI](https://github.com/sergelogvinov/proxmox-csi-plugin) for dynamic persistent volume provisioning from Proxmox storage pools. Enable it by configuring the `proxmox_csi_*` variables in `cluster.yaml`. See `docs/proxmox-csi-implementation.md` for details.
+
+**Object Storage (optional):** This template includes [MinIO](https://min.io/) for S3-compatible object storage. MinIO is deployed in standalone mode in the `storage` namespace. Enable it by setting `minio_enabled: true` in `cluster.yaml`. MinIO is required for obot multi-replica deployments (Proxmox CSI only supports RWO volumes).
 
 If your workloads require other storage solutions with features like replication or connectivity to NFS, SMB, or iSCSI servers, there are several projects worth exploring:
 
@@ -831,7 +833,7 @@ By default, obot uses directory-based workspace storage with a RWO PVC (single r
 ```yaml
 obot_workspace_provider: "s3"
 obot_s3_bucket: "obot-workspaces"
-obot_s3_endpoint: "http://minio.minio.svc.cluster.local:9000"
+obot_s3_endpoint: "http://minio.storage.svc.cluster.local:9000"
 obot_s3_region: "us-east-1"
 obot_s3_access_key: "<minio-access-key>"
 obot_s3_secret_key: "<minio-secret-key>"

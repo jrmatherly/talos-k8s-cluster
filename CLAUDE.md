@@ -299,6 +299,8 @@ When adding new application templates to this project, multiple files must be up
 13. **agentgateway only supports chat completions** - Embeddings API not supported; Gateway API RequestHeaderModifier doesn't support secret refs for API key injection
 14. **agentgateway HTTPRoute path ordering** - Use PathPrefix matching with longest paths first to prevent `/azure/gpt5` from matching `/azure/gpt51`
 15. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors` (NOT `spec.policy.*`); provider is enum (`Keycloak`), not object; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
+16. **MinIO chart ServiceMonitor** - Don't add `release` to `metrics.serviceMonitor.additionalLabels` - the chart already sets `release: {{ .Release.Name }}`, causing duplicate key errors with Flux
+17. **Flux Kustomization substituteFrom** - Only use `cluster-secrets` Secret (exists in each namespace); `cluster-settings` ConfigMap doesn't exist in this cluster
 
 ## Extended Documentation
 
