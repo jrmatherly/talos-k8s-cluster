@@ -29,11 +29,11 @@ import (
 	cilium_loadbalancer_mode?: *"dsr" | "snat"
 
 	// Control Plane Scheduling
-	allow_scheduling_on_control_planes?: *true | bool  // Allow workloads on control plane nodes
+	allow_scheduling_on_control_planes?: *false | bool  // Allow workloads on control plane nodes
 
 	// Proxmox CSI Integration (required for Proxmox storage)
 	proxmox_api_url?: string & =~"^https?://.+/api2/json$"
-	proxmox_insecure?: *true | bool
+	proxmox_insecure?: *false | bool
 	proxmox_region?: string & !=""
 	proxmox_storage?: string & !=""
 	proxmox_csi_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
@@ -168,8 +168,16 @@ import (
 	obot_memory_request?: string & !=""         // Memory request (default: 1Gi)
 	obot_memory_limit?: string & !=""           // Memory limit (default: 4Gi)
 	obot_encryption_provider?: *"custom" | "azure-keyvault" | "aws-kms" | "gcp-kms"  // Encryption provider
-	obot_use_ai_gateway?: *true | bool          // Use existing envoy-ai gateway for LLM requests
+	obot_use_ai_gateway?: *false | bool          // Use existing envoy-ai gateway for LLM requests
 	obot_use_agentgateway?: *false | bool       // Use agentgateway (ai-gw) instead of envoy-ai (llms) for LLM requests
+
+	// obot S3/MinIO Workspace Storage (enables multi-replica scaling)
+	obot_workspace_provider?: *"directory" | "s3" | "azure"  // Workspace storage backend (default: directory)
+	obot_s3_bucket?: string & !=""              // S3 bucket name for workspace storage
+	obot_s3_endpoint?: string & !=""            // S3-compatible endpoint (e.g., http://minio.minio.svc.cluster.local:9000)
+	obot_s3_region?: string & !=""              // S3 region (default: us-east-1)
+	obot_s3_access_key?: string & !=""          // S3 access key (MinIO access key)
+	obot_s3_secret_key?: string & !=""          // S3 secret key (MinIO secret key)
 
 	// kagent Configuration (Kubernetes-native AI Agent Framework)
 	// Cloud Native Computing Foundation (CNCF) sandbox project for AI agents
@@ -179,7 +187,7 @@ import (
 	kagent_anthropic_api_key?: string & !=""    // Anthropic API key (if provider=anthropic)
 	kagent_openai_api_key?: string & !=""       // OpenAI API key (if provider=openai)
 	kagent_openai_api_base?: string & !=""      // OpenAI-compatible API base URL (for AI Gateway routing)
-	kagent_ui_enabled?: *true | bool            // Enable kagent web UI
+	kagent_ui_enabled?: *false | bool            // Enable kagent web UI
 	kagent_ui_replicas?: int & >=1              // Number of UI replicas (default: 1)
 	kagent_controller_replicas?: int & >=1      // Number of controller replicas (default: 1)
 	kagent_controller_log_level?: *"info" | "debug" | "warn" | "error"  // Controller log level
@@ -192,7 +200,7 @@ import (
 	kagent_postgres_password?: string & !=""    // PostgreSQL password (if database_type=postgres, CNPG bootstrap)
 	kagent_postgresql_replicas?: int & >=1      // CNPG PostgreSQL replicas (default: 3)
 	kagent_postgresql_storage_size?: string & !=""  // CNPG PostgreSQL storage size (default: 10Gi)
-	kagent_kmcp_enabled?: *true | bool          // Enable kmcp MCP server controller
+	kagent_kmcp_enabled?: *false | bool          // Enable kmcp MCP server controller
 	kagent_write_operations_enabled?: bool      // Enable write operations for k8s-agent (default: false for safety)
 	kagent_grafana_url?: string & !=""          // Grafana URL for grafana-mcp tool (default: cluster Grafana)
 	kagent_grafana_api_key?: string & !=""      // Grafana API key for grafana-mcp tool (optional)
@@ -210,7 +218,7 @@ import (
 	litellm_cache_password?: string & !=""      // Dragonfly/Redis password for caching
 	litellm_database_url?: string & !=""        // PostgreSQL connection URL (optional - auto-generated if not set)
 	litellm_redis_url?: string & !=""           // Redis/Dragonfly connection URL (optional - auto-generated if not set)
-	litellm_mcp_enabled?: *true | bool          // Enable MCP server support (Open Source feature)
+	litellm_mcp_enabled?: *false | bool          // Enable MCP server support (Open Source feature)
 	litellm_replicas_min?: int & >=1            // Minimum replicas for HPA (default: 2)
 	litellm_replicas_max?: int & >=1            // Maximum replicas for HPA (default: 5)
 	litellm_cpu_request?: string & !=""         // CPU request (default: 500m)

@@ -19,15 +19,20 @@ spec:
       tag: v0.2.14
 
     # ============================================================
-    # Replicas - Set to 1 for RWO storage
+    # Replicas - Limited to 1 with RWO storage, multiple with S3
     # ============================================================
     replicaCount: #{ obot_replicas | default(1) }#
 
     # ============================================================
-    # Deployment Strategy - Use Recreate for RWO PVC compatibility
-    # RollingUpdate fails with RWO volumes due to Multi-Attach errors
+    # Deployment Strategy
+    # - Recreate: Required for RWO PVC (Multi-Attach errors with RollingUpdate)
+    # - RollingUpdate: Can be used with S3 workspace storage
     # ============================================================
+#% if obot_workspace_provider | default('directory') == 's3' %#
+    updateStrategy: RollingUpdate
+#% else %#
     updateStrategy: Recreate
+#% endif %#
 
     # ============================================================
     # Service Configuration
@@ -119,14 +124,34 @@ spec:
       # Disable update check - using forked repo, upstream version checks are not relevant
       OBOT_SERVER_DISABLE_UPDATE_CHECK: "true"
 
+#% if obot_workspace_provider | default('directory') == 's3' %#
+      # ============================================================
+      # S3 Workspace Provider Configuration
+      # Enables multi-replica scaling by using S3-compatible storage (MinIO)
+      # REF: https://docs.obot.ai/configuration/workspace-provider/
+      # ============================================================
+      OBOT_WORKSPACE_PROVIDER_TYPE: "s3"
+      WORKSPACE_PROVIDER_S3_BUCKET: "#{ obot_s3_bucket }#"
+      WORKSPACE_PROVIDER_S3_BASE_ENDPOINT: "#{ obot_s3_endpoint }#"
+      AWS_ACCESS_KEY_ID: "${OBOT_S3_ACCESS_KEY}"
+      AWS_SECRET_ACCESS_KEY: "${OBOT_S3_SECRET_KEY}"
+      AWS_REGION: "#{ obot_s3_region | default('us-east-1') }#"
+#% endif %#
+
     # ============================================================
     # Storage Configuration
+    # Note: PVC persistence is disabled when using S3 workspace provider
     # ============================================================
+#% if obot_workspace_provider | default('directory') == 's3' %#
+    persistence:
+      enabled: false
+#% else %#
     persistence:
       enabled: true
       storageClass: #{ obot_storage_class | default('proxmox-csi') }#
       size: #{ obot_storage_size | default('20Gi') }#
       accessMode: ReadWriteOnce
+#% endif %#
 
     # ============================================================
     # MCP Kubernetes Runtime Settings

@@ -824,6 +824,20 @@ obot_cookie_secret: "<sops-encrypted>"
 obot_encryption_key: "<sops-encrypted>"
 ```
 
+**Multi-Replica Support with S3 Storage:**
+
+By default, obot uses directory-based workspace storage with a RWO PVC (single replica only). For high availability, configure S3-compatible storage (e.g., MinIO):
+
+```yaml
+obot_workspace_provider: "s3"
+obot_s3_bucket: "obot-workspaces"
+obot_s3_endpoint: "http://minio.minio.svc.cluster.local:9000"
+obot_s3_region: "us-east-1"
+obot_s3_access_key: "<minio-access-key>"
+obot_s3_secret_key: "<minio-secret-key>"
+obot_replicas: 2  # Multiple replicas now supported
+```
+
 **Critical: NetworkPolicy Configuration**
 
 obot deploys MCP servers in a separate namespace (`obot-mcp`) with strict network isolation. The following networking requirements are essential:

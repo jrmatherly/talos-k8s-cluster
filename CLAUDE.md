@@ -293,11 +293,12 @@ When adding new application templates to this project, multiple files must be up
 7. **Flux Kustomization dependsOn** namespaces must match where the dependency actually runs (e.g., `cilium` is in `kube-system`, not `flux-system`)
 8. **Adding new templates** requires updating multiple config files first - see checklist above
 9. **obot service port must be 80** - MCP servers generate token exchange URLs without explicit ports (defaulting to 80)
-10. **NetworkPolicies require ports on BOTH sides** - Traffic between namespaces must be allowed by both egress (source) AND ingress (destination) policies
-11. **Cilium socket-based LB and NetworkPolicy** - Standard `ipBlock` rules DON'T work for LoadBalancer IPs; use CiliumNetworkPolicy with `fromEntities: world` / `toEntities: world` instead. Must allow BOTH service port AND container port (e.g., 53 AND 1053 for k8s-gateway)
-12. **agentgateway only supports chat completions** - Embeddings API not supported; Gateway API RequestHeaderModifier doesn't support secret refs for API key injection
-12. **agentgateway HTTPRoute path ordering** - Use PathPrefix matching with longest paths first to prevent `/azure/gpt5` from matching `/azure/gpt51`
-13. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors` (NOT `spec.policy.*`); provider is enum (`Keycloak`), not object; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
+10. **obot multi-replica requires S3 storage** - Proxmox CSI only supports RWO (ReadWriteOnce); use `obot_workspace_provider: s3` with MinIO for multiple replicas
+11. **NetworkPolicies require ports on BOTH sides** - Traffic between namespaces must be allowed by both egress (source) AND ingress (destination) policies
+12. **Cilium socket-based LB and NetworkPolicy** - Standard `ipBlock` rules DON'T work for LoadBalancer IPs; use CiliumNetworkPolicy with `fromEntities: world` / `toEntities: world` instead. Must allow BOTH service port AND container port (e.g., 53 AND 1053 for k8s-gateway)
+13. **agentgateway only supports chat completions** - Embeddings API not supported; Gateway API RequestHeaderModifier doesn't support secret refs for API key injection
+14. **agentgateway HTTPRoute path ordering** - Use PathPrefix matching with longest paths first to prevent `/azure/gpt5` from matching `/azure/gpt51`
+15. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors` (NOT `spec.policy.*`); provider is enum (`Keycloak`), not object; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
 
 ## Extended Documentation
 

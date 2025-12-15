@@ -188,10 +188,10 @@ cloudflare_token: ""
 #    When true, removes the node-role.kubernetes.io/control-plane:NoSchedule taint
 #    from control plane nodes, allowing regular workloads to run there.
 #    When false, only system components with tolerations can run on control planes.
-#    (OPTIONAL) / (DEFAULT: true)
+#    (OPTIONAL) / (DEFAULT: false)
 #    TIP: Set to true if you have limited nodes and want to maximize resources.
 #    TIP: Set to false for production clusters with dedicated worker nodes.
-# allow_scheduling_on_control_planes: true
+# allow_scheduling_on_control_planes: false
 
 # ==============================================================================
 # PROXMOX INTEGRATION (Optional)
@@ -206,8 +206,8 @@ cloudflare_token: ""
 # proxmox_api_url: ""
 
 # -- Skip TLS certificate verification for self-signed Proxmox certs.
-#    (OPTIONAL) / (DEFAULT: true)
-# proxmox_insecure: true
+#    (OPTIONAL) / (DEFAULT: false)
+# proxmox_insecure: false
 
 # -- Proxmox region name (identifies the Proxmox cluster).
 #    Used for topology.kubernetes.io/region label.
@@ -723,7 +723,8 @@ cloudflare_token: ""
 
 # -- Number of obot replicas.
 #    (OPTIONAL) / (DEFAULT: 1)
-#    NOTE: Limited to 1 when using RWO storage
+#    NOTE: Limited to 1 when using directory storage (RWO PVC).
+#          Set obot_workspace_provider="s3" to enable multiple replicas.
 # obot_replicas: 1
 
 # -- CPU request for obot container.
@@ -752,9 +753,9 @@ cloudflare_token: ""
 # obot_encryption_provider: "custom"
 
 # -- Use existing envoy-ai gateway for LLM requests.
-#    (OPTIONAL) / (DEFAULT: true)
+#    (OPTIONAL) / (DEFAULT: false)
 #    Set to false if configuring model providers directly in obot
-# obot_use_ai_gateway: true
+# obot_use_ai_gateway: false
 
 # -- Use agentgateway (ai-gw) instead of Envoy AI Gateway (llms) for LLM requests.
 #    (OPTIONAL) / (DEFAULT: false)
@@ -762,6 +763,43 @@ cloudflare_token: ""
 #    prompt guards, FinOps metrics, and MCP-focused features.
 #    Requires: agentgateway_enabled=true and Azure OpenAI backends configured.
 # obot_use_agentgateway: false
+
+# ==============================================================================
+# OBOT S3/MINIO WORKSPACE STORAGE (Optional - Enables Multi-Replica Scaling)
+# ==============================================================================
+# Configure S3-compatible storage (MinIO, AWS S3, etc.) for obot workspaces.
+# This enables horizontal scaling with multiple replicas by removing the
+# dependency on RWO (ReadWriteOnce) PVC storage.
+# REF: https://docs.obot.ai/configuration/workspace-provider/
+
+# -- Workspace storage provider type.
+#    (OPTIONAL) / (DEFAULT: "directory")
+#    Options: "directory" (local PVC), "s3" (S3-compatible), "azure" (Azure Blob)
+#    NOTE: Use "s3" with MinIO to enable multiple obot replicas
+# obot_workspace_provider: "s3"
+
+# -- S3 bucket name for workspace storage.
+#    (REQUIRED if obot_workspace_provider=s3)
+#    Create this bucket in MinIO before enabling
+# obot_s3_bucket: "obot-workspaces"
+
+# -- S3-compatible endpoint URL.
+#    (REQUIRED if obot_workspace_provider=s3 and not using AWS S3)
+#    Example for MinIO: "http://minio.minio.svc.cluster.local:9000"
+# obot_s3_endpoint: "http://minio.minio.svc.cluster.local:9000"
+
+# -- S3 region.
+#    (OPTIONAL) / (DEFAULT: "us-east-1")
+#    For MinIO, this can be any value (e.g., "us-east-1")
+# obot_s3_region: "us-east-1"
+
+# -- S3 access key (MinIO access key).
+#    (REQUIRED if obot_workspace_provider=s3) - Will be encrypted with SOPS
+# obot_s3_access_key: ""
+
+# -- S3 secret key (MinIO secret key).
+#    (REQUIRED if obot_workspace_provider=s3) - Will be encrypted with SOPS
+# obot_s3_secret_key: ""
 
 # ==============================================================================
 # KAGENT CONFIGURATION (Optional - Kubernetes-native AI Agent Framework)
@@ -822,9 +860,9 @@ cloudflare_token: ""
 # ==============================================================================
 
 # -- Enable kagent web UI.
-#    (OPTIONAL) / (DEFAULT: true)
+#    (OPTIONAL) / (DEFAULT: false)
 #    The UI provides chat interface and agent management at kagent.<domain>
-# kagent_ui_enabled: true
+# kagent_ui_enabled: false
 
 # -- Number of UI replicas.
 #    (OPTIONAL) / (DEFAULT: 1)
@@ -914,10 +952,9 @@ cloudflare_token: ""
 # ==============================================================================
 
 # -- Enable kmcp controller for MCPServer CRD management.
-#    (OPTIONAL) / (DEFAULT: true)
+#    (OPTIONAL) / (DEFAULT: false)
 #    kmcp deploys and manages MCP servers declaratively via MCPServer CRD
-# kagent_kmcp_enabled: true
-
+kagent_kmcp_enabled: true
 # ==============================================================================
 # KAGENT GRAFANA MCP INTEGRATION
 # ==============================================================================
@@ -982,9 +1019,9 @@ cloudflare_token: ""
 # litellm_redis_url: ""
 
 # -- Enable MCP server support (Open Source feature).
-#    (OPTIONAL) / (DEFAULT: true)
+#    (OPTIONAL) / (DEFAULT: false)
 #    Allows LiteLLM to act as an MCP server bridge for tool calling.
-# litellm_mcp_enabled: true
+# litellm_mcp_enabled: false
 
 # ==============================================================================
 # LITELLM SCALING CONFIGURATION

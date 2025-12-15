@@ -18,15 +18,16 @@ spec:
       tag: v0.2.14
 
     # ============================================================
-    # Replicas - Set to 1 for RWO storage
+    # Replicas - Limited to 1 with RWO storage, multiple with S3
     # ============================================================
-    replicaCount: 1
+    replicaCount: 2
 
     # ============================================================
-    # Deployment Strategy - Use Recreate for RWO PVC compatibility
-    # RollingUpdate fails with RWO volumes due to Multi-Attach errors
+    # Deployment Strategy
+    # - Recreate: Required for RWO PVC (Multi-Attach errors with RollingUpdate)
+    # - RollingUpdate: Can be used with S3 workspace storage
     # ============================================================
-    updateStrategy: Recreate
+    updateStrategy: RollingUpdate
 
     # ============================================================
     # Service Configuration
@@ -61,6 +62,9 @@ spec:
 
       # Authentication (must be boolean for chart's NOTES.txt template)
       OBOT_SERVER_ENABLE_AUTHENTICATION: true
+      OBOT_SERVER_AUTH_ADMIN_EMAILS: "jasonrmatherly@gmail.com"
+      OBOT_SERVER_AUTH_OWNER_EMAILS: "jasonrmatherly@gmail.com"
+      OBOT_BOOTSTRAP_TOKEN: "${OBOT_BOOTSTRAP_TOKEN}"
 
       # Entra ID OAuth Configuration
       OBOT_SERVER_AUTH_PROVIDER: "entra-id"
@@ -95,14 +99,24 @@ spec:
       # Disable update check - using forked repo, upstream version checks are not relevant
       OBOT_SERVER_DISABLE_UPDATE_CHECK: "true"
 
+      # ============================================================
+      # S3 Workspace Provider Configuration
+      # Enables multi-replica scaling by using S3-compatible storage (MinIO)
+      # REF: https://docs.obot.ai/configuration/workspace-provider/
+      # ============================================================
+      OBOT_WORKSPACE_PROVIDER_TYPE: "s3"
+      WORKSPACE_PROVIDER_S3_BUCKET: "obot-workspaces"
+      WORKSPACE_PROVIDER_S3_BASE_ENDPOINT: "https://s3.matherly.net"
+      AWS_ACCESS_KEY_ID: "${OBOT_S3_ACCESS_KEY}"
+      AWS_SECRET_ACCESS_KEY: "${OBOT_S3_SECRET_KEY}"
+      AWS_REGION: "matherlynet"
+
     # ============================================================
     # Storage Configuration
+    # Note: PVC persistence is disabled when using S3 workspace provider
     # ============================================================
     persistence:
-      enabled: true
-      storageClass: proxmox-csi
-      size: 20Gi
-      accessMode: ReadWriteOnce
+      enabled: false
 
     # ============================================================
     # MCP Kubernetes Runtime Settings

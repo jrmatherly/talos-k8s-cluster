@@ -92,6 +92,13 @@ proxmox_csi_token_secret: "fake-secret"
 # obot_cookie_secret: ""
 # obot_encryption_key: ""
 # obot_use_agentgateway: false
+# obot S3/MinIO storage (disabled for private repo testing)
+# obot_workspace_provider: "s3"
+# obot_s3_bucket: ""
+# obot_s3_endpoint: ""
+# obot_s3_region: "us-east-1"
+# obot_s3_access_key: ""
+# obot_s3_secret_key: ""
 # kagent (disabled for private repo testing)
 # kagent_enabled: false
 # kagent_provider: ""

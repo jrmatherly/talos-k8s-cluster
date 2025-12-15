@@ -118,13 +118,20 @@ obot_bootstrap_token: "test-bootstrap-token"
 # User management
 obot_admin_emails: "admin@example.com"
 obot_owner_emails: "owner@example.com"
-# Storage
+# Storage (using S3 for multi-replica support)
 obot_storage_size: "20Gi"
 obot_storage_class: "proxmox-csi"
 obot_postgresql_replicas: 3
 obot_postgresql_storage_size: "10Gi"
-# Resources
-obot_replicas: 1
+# S3/MinIO Workspace Storage (enables multi-replica scaling)
+obot_workspace_provider: "s3"
+obot_s3_bucket: "obot-workspaces"
+obot_s3_endpoint: "http://minio.minio.svc.cluster.local:9000"
+obot_s3_region: "us-east-1"
+obot_s3_access_key: "test-minio-access-key"
+obot_s3_secret_key: "test-minio-secret-key"
+# Resources (multiple replicas enabled with S3 storage)
+obot_replicas: 3
 obot_cpu_request: "500m"
 obot_cpu_limit: "2000m"
 obot_memory_request: "1Gi"

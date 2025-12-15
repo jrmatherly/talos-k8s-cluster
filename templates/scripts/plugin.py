@@ -311,6 +311,13 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_encryption_provider", "custom")
         data.setdefault("obot_use_ai_gateway", True)
         data.setdefault("obot_use_agentgateway", False)
+        # S3/MinIO Workspace Storage (enables multi-replica scaling)
+        data.setdefault("obot_workspace_provider", "directory")
+        data.setdefault("obot_s3_bucket", "")
+        data.setdefault("obot_s3_endpoint", "")
+        data.setdefault("obot_s3_region", "us-east-1")
+        data.setdefault("obot_s3_access_key", "")
+        data.setdefault("obot_s3_secret_key", "")
 
         # kagent defaults (Kubernetes-native AI Agent Framework)
         data.setdefault("kagent_enabled", False)

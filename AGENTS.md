@@ -122,9 +122,10 @@ See `.serena/memories/adding-new-templates-checklist.md` for complete checklist.
 4. **Commit before `task configure -y`** - it overwrites generated files
 5. **Helm extraZonePlugins/extraConfig** often REPLACES defaults, not extends
 6. **Cilium socket-based LB and NetworkPolicy** - Standard `ipBlock` rules DON'T work for LoadBalancer IPs or K8s API; use CiliumNetworkPolicy with `fromEntities: world` / `toEntities: world` / `toEntities: kube-apiserver`. Must allow BOTH service port AND container port (e.g., 53 AND 1053)
-7. **agentgateway only supports chat completions** - Embeddings API not supported; use direct Azure endpoint
-8. **agentgateway HTTPRoute path ordering** - Longest paths first to prevent path collisions
-9. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors`; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
+7. **obot multi-replica requires S3 storage** - Proxmox CSI only supports RWO; use `obot_workspace_provider: s3` with MinIO for multiple replicas
+8. **agentgateway only supports chat completions** - Embeddings API not supported; use direct Azure endpoint
+9. **agentgateway HTTPRoute path ordering** - Longest paths first to prevent path collisions
+10. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors`; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
 
 ## Extended Documentation
 
