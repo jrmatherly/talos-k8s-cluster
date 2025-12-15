@@ -47,10 +47,11 @@ spec:
           unavailable: 0
           surge: 1
 
-        # Init container to create PostgreSQL enum types if missing
-        # Fixes Alembic migration issue where ADD VALUE runs before CREATE TYPE
+        # Init container to fix Cognee Alembic migration bugs on fresh install
+        # 1. Creates pipelinerunstatus enum before ADD VALUE migration runs
+        # 2. Creates acls table with dataset_id so permission_system_rework migration skips
         initContainers:
-          init-db-enums:
+          init-db-schema:
             image:
               repository: postgres
               tag: "16-alpine"
@@ -72,11 +73,12 @@ spec:
               - /bin/sh
               - -c
               - |
-                echo "Creating PostgreSQL enum types if missing..."
+                echo "Initializing Cognee database schema prerequisites..."
                 psql -c "
                 DO \$\$
                 BEGIN
                   -- Create pipelinerunstatus enum if not exists
+                  -- Fixes: migration tries ADD VALUE before CREATE TYPE
                   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pipelinerunstatus') THEN
                     CREATE TYPE pipelinerunstatus AS ENUM (
                       'QUEUED',
@@ -93,8 +95,25 @@ spec:
                   ELSE
                     RAISE NOTICE 'pipelinerunstatus enum type already exists';
                   END IF;
+
+                  -- Create acls table with dataset_id column if not exists
+                  -- Fixes: permission_system_rework migration expects acls table
+                  -- When dataset_id exists, migration skips the rework (assumes already done)
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'acls') THEN
+                    CREATE TABLE acls (
+                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      created_at TIMESTAMPTZ DEFAULT NOW(),
+                      updated_at TIMESTAMPTZ DEFAULT NOW(),
+                      principal_id UUID,
+                      permission_id UUID,
+                      dataset_id UUID
+                    );
+                    RAISE NOTICE 'Created acls table with dataset_id column';
+                  ELSE
+                    RAISE NOTICE 'acls table already exists';
+                  END IF;
                 END\$\$;
-                " && echo "Enum types initialized successfully"
+                " && echo "Database schema prerequisites initialized successfully"
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
