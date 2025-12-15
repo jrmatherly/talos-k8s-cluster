@@ -4,9 +4,13 @@ kind: HelmRelease
 metadata:
   name: neo4j
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: neo4j
+  chart:
+    spec:
+      chart: neo4j
+      version: "5.26.0"
+      sourceRef:
+        kind: HelmRepository
+        name: neo4j
   interval: 1h
   timeout: 15m
   install:
@@ -32,10 +36,8 @@ spec:
       edition: community
       minimumClusterSize: 1
 
-      # Password from SOPS-encrypted secret
-      password: ""
+      # Password from SOPS-encrypted secret (format: neo4j/<password> in NEO4J_AUTH key)
       passwordFromSecret: neo4j-secrets
-      passwordFromSecretLookup: true
 
       # Resource allocation
       resources:
