@@ -49,11 +49,12 @@ spec:
     # ==========================================================================
     volumes:
       data:
-        mode: defaultStorageClass
-        defaultStorageClass:
+        # Use dynamic mode with explicit storage class when Proxmox CSI is configured
+        mode: dynamic
+        dynamic:
+          storageClassName: proxmox-csi
           requests:
             storage: 20Gi
-          storageClassName: proxmox-csi
 
     # ==========================================================================
     # Services Configuration

@@ -50,12 +50,19 @@ spec:
     # ==========================================================================
     volumes:
       data:
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+        # Use dynamic mode with explicit storage class when Proxmox CSI is configured
+        mode: dynamic
+        dynamic:
+          storageClassName: proxmox-csi
+          requests:
+            storage: #{ cognee_neo4j_storage_size | default('10Gi') }#
+#% else %#
+        # Use cluster default storage class
         mode: defaultStorageClass
         defaultStorageClass:
           requests:
             storage: #{ cognee_neo4j_storage_size | default('10Gi') }#
-#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
-          storageClassName: proxmox-csi
 #% endif %#
 
     # ==========================================================================
