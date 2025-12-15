@@ -112,6 +112,23 @@ spec:
                   ELSE
                     RAISE NOTICE 'acls table already exists';
                   END IF;
+
+                  -- Create data table with tenant_id column if not exists
+                  -- Fixes: expand_data_model_info migration expects data table
+                  -- When tenant_id exists, migration skips adding it
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'data') THEN
+                    CREATE TABLE data (
+                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      created_at TIMESTAMPTZ DEFAULT NOW(),
+                      updated_at TIMESTAMPTZ DEFAULT NOW(),
+                      tenant_id UUID,
+                      data_size INTEGER
+                    );
+                    CREATE INDEX ix_data_tenant_id ON data(tenant_id);
+                    RAISE NOTICE 'Created data table with tenant_id column';
+                  ELSE
+                    RAISE NOTICE 'data table already exists';
+                  END IF;
                 END\$\$;
                 " && echo "Database schema prerequisites initialized successfully"
             securityContext:
