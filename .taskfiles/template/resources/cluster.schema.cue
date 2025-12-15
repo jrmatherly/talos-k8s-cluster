@@ -178,6 +178,7 @@ import (
 	obot_s3_region?: string & !=""              // S3 region (default: us-east-1)
 	obot_s3_access_key?: string & !=""          // S3 access key (MinIO access key)
 	obot_s3_secret_key?: string & !=""          // S3 secret key (MinIO secret key)
+	obot_s3_use_path_style?: bool               // Use path-style URLs (required for MinIO without wildcard DNS)
 
 	// kagent Configuration (Kubernetes-native AI Agent Framework)
 	// Cloud Native Computing Foundation (CNCF) sandbox project for AI agents

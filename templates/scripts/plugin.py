@@ -318,6 +318,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_s3_region", "us-east-1")
         data.setdefault("obot_s3_access_key", "")
         data.setdefault("obot_s3_secret_key", "")
+        data.setdefault("obot_s3_use_path_style", False)
 
         # kagent defaults (Kubernetes-native AI Agent Framework)
         data.setdefault("kagent_enabled", False)

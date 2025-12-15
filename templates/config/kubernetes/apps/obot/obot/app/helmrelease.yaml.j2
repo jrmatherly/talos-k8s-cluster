@@ -136,6 +136,9 @@ spec:
       AWS_ACCESS_KEY_ID: "${OBOT_S3_ACCESS_KEY}"
       AWS_SECRET_ACCESS_KEY: "${OBOT_S3_SECRET_KEY}"
       AWS_REGION: "#{ obot_s3_region | default('us-east-1') }#"
+#% if obot_s3_use_path_style | default(false) %#
+      AWS_S3_USE_PATH_STYLE: "true"
+#% endif %#
 #% endif %#
 
     # ============================================================

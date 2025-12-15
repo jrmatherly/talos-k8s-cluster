@@ -99,6 +99,7 @@ proxmox_csi_token_secret: "fake-secret"
 # obot_s3_region: "us-east-1"
 # obot_s3_access_key: ""
 # obot_s3_secret_key: ""
+# obot_s3_use_path_style: true
 # kagent (disabled for private repo testing)
 # kagent_enabled: false
 # kagent_provider: ""

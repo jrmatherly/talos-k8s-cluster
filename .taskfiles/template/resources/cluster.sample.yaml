@@ -801,6 +801,13 @@ cloudflare_token: ""
 #    (REQUIRED if obot_workspace_provider=s3) - Will be encrypted with SOPS
 # obot_s3_secret_key: ""
 
+# -- Use path-style S3 URLs instead of virtual-hosted style.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Set to true for MinIO endpoints without wildcard DNS (e.g., s3.domain.com)
+#    Path-style: https://s3.domain.com/bucket/
+#    Virtual-hosted: https://bucket.s3.domain.com/ (requires *.s3.domain.com DNS)
+# obot_s3_use_path_style: true
+
 # ==============================================================================
 # KAGENT CONFIGURATION (Optional - Kubernetes-native AI Agent Framework)
 # ==============================================================================
