@@ -98,10 +98,13 @@ spec:
     # Metrics Configuration
     # Note: MinIO chart already sets release: {{ .Release.Name }} in ServiceMonitor
     # so we don't add it in additionalLabels to avoid duplicate key error
+    # includeNode: true is required for ServiceMonitor creation (chart default is false)
     # ============================================================
     metrics:
       serviceMonitor:
         enabled: true
+        includeNode: true
+        public: true
 
     # ============================================================
     # Ingress - Disabled (using Gateway API HTTPRoute instead)
