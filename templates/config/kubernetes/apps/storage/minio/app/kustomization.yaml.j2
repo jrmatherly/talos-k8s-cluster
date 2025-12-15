@@ -10,4 +10,7 @@ resources:
 #% if minio_ingress_enabled | default(false) %#
   - ./httproute.yaml
 #% endif %#
+#% if observability_enabled | default(false) %#
+  - ./servicemonitor.yaml
+#% endif %#
 #% endif %#

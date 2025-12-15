@@ -1,0 +1,47 @@
+#% if minio_enabled | default(false) and observability_enabled | default(false) %#
+---
+# Custom ServiceMonitor for MinIO v3 metrics
+# The Helm chart's ServiceMonitor only scrapes v2 endpoints which don't have
+# the metrics needed for the community v3 dashboard
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minio-v3
+  labels:
+    app: minio
+    release: kube-prometheus-stack
+spec:
+  namespaceSelector:
+    matchNames:
+      - storage
+  selector:
+    matchLabels:
+      app: minio
+      release: minio
+  endpoints:
+    # System process metrics (uptime, memory, CPU, goroutines)
+    - path: /minio/metrics/v3/system/process
+      port: http
+      scheme: http
+      interval: 30s
+    # API request metrics (request rates, errors, latency)
+    - path: /minio/metrics/v3/api/requests
+      port: http
+      scheme: http
+      interval: 30s
+    # Cluster health and capacity metrics
+    - path: /minio/metrics/v3/cluster/health
+      port: http
+      scheme: http
+      interval: 30s
+    # Cluster usage metrics (objects, buckets, storage)
+    - path: /minio/metrics/v3/cluster/usage/objects
+      port: http
+      scheme: http
+      interval: 60s
+    # System drive metrics
+    - path: /minio/metrics/v3/system/drive
+      port: http
+      scheme: http
+      interval: 30s
+#% endif %#

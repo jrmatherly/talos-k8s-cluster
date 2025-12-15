@@ -7,3 +7,4 @@ resources:
   - ./secret.sops.yaml
   - ./networkpolicy.yaml
   - ./httproute.yaml
+  - ./servicemonitor.yaml
