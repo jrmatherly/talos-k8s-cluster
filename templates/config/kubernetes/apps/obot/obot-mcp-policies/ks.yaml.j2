@@ -8,6 +8,8 @@ spec:
   dependsOn:
     - name: obot
       namespace: obot
+    - name: obot-mcp-namespace
+      namespace: obot
   interval: 1h
   path: ./kubernetes/apps/obot/obot-mcp-policies/app
   prune: true

@@ -1,16 +1,13 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+namespace: obot
 
 components:
   - ../../components/sops
 
-# Custom transformer to set namespace without renaming Namespace resources
-# This allows both 'obot' and 'obot-mcp' namespaces to exist
-transformers:
-  - ./namespace-transformer.yaml
-
 resources:
   - ./namespace.yaml
   - ./obot/ks.yaml
+  - ./obot-mcp-namespace/ks.yaml
   - ./obot-mcp-policies/ks.yaml

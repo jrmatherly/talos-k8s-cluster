@@ -1,15 +1,8 @@
 #% if obot_enabled | default(false) %#
 ---
+# NO namespace: field here - this prevents kustomize from renaming the Namespace resource
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: obot
-
-components:
-  - ../../components/sops
-
 resources:
   - ./namespace.yaml
-  - ./obot/ks.yaml
-  - ./obot-mcp-namespace/ks.yaml
-  - ./obot-mcp-policies/ks.yaml
 #% endif %#

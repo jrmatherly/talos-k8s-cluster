@@ -7,15 +7,3 @@ metadata:
     app.kubernetes.io/name: obot
     app.kubernetes.io/component: mcp-gateway
     kustomize.toolkit.fluxcd.io/prune: disabled
----
-# obot-mcp namespace for MCP server pods
-# Must be created at parent level (not in child Kustomization with targetNamespace)
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: obot-mcp
-  labels:
-    app.kubernetes.io/name: obot
-    app.kubernetes.io/component: mcp-server
-    kubernetes.io/metadata.name: obot-mcp
-    kustomize.toolkit.fluxcd.io/prune: disabled
