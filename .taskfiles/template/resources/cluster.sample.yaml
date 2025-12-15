@@ -809,6 +809,101 @@ cloudflare_token: ""
 # obot_s3_use_path_style: true
 
 # ==============================================================================
+# MINIO CONFIGURATION (Optional - S3-compatible Object Storage)
+# ==============================================================================
+# MinIO provides S3-compatible object storage for services like obot.
+# Deployed in the shared "storage" namespace for use by multiple applications.
+# REF: https://min.io/docs/minio/kubernetes/upstream/
+# REF: https://github.com/minio/minio/tree/master/helm/minio
+
+# -- Enable MinIO deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# minio_enabled: true
+
+# -- MinIO Helm chart version.
+#    (OPTIONAL) / (DEFAULT: "5.4.0")
+# minio_chart_version: "5.4.0"
+
+# -- Deployment mode for MinIO.
+#    (OPTIONAL) / (DEFAULT: "standalone")
+#    Options: "standalone" (single node), "distributed" (HA, requires 4+ replicas)
+# minio_mode: "standalone"
+
+# -- Number of MinIO replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+#    NOTE: For distributed mode, minimum 4 replicas required
+# minio_replicas: 1
+
+# -- MinIO root username (admin account).
+#    (OPTIONAL) / (DEFAULT: "admin")
+# minio_root_user: "admin"
+
+# -- MinIO root password (admin account).
+#    (REQUIRED if minio_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 24 | tr -d '/+=' | head -c 24
+# minio_root_password: ""
+
+# -- Storage class for MinIO PVC.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# minio_storage_class: "proxmox-csi"
+
+# -- Storage size for MinIO data.
+#    (OPTIONAL) / (DEFAULT: "50Gi")
+# minio_storage_size: "50Gi"
+
+# ==============================================================================
+# MINIO RESOURCE LIMITS
+# ==============================================================================
+
+# -- Memory request for MinIO.
+#    (OPTIONAL) / (DEFAULT: "512Mi")
+# minio_memory_request: "512Mi"
+
+# -- Memory limit for MinIO.
+#    (OPTIONAL) / (DEFAULT: "2Gi")
+# minio_memory_limit: "2Gi"
+
+# -- CPU request for MinIO.
+#    (OPTIONAL) / (DEFAULT: "250m")
+# minio_cpu_request: "250m"
+
+# ==============================================================================
+# MINIO CONSOLE INGRESS
+# ==============================================================================
+
+# -- Enable console HTTPRoute via Envoy Gateway.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Creates minio.<domain> route for web console access
+# minio_ingress_enabled: true
+
+# -- Console hostname subdomain.
+#    (OPTIONAL) / (DEFAULT: "minio")
+#    Results in minio.<primary_domain>
+# minio_console_hostname: "minio"
+
+# ==============================================================================
+# MINIO BUCKETS AND USERS
+# ==============================================================================
+
+# -- Buckets to create automatically.
+#    (OPTIONAL) - List of bucket configurations
+#    Policy options: "none", "public", "download", "upload"
+# minio_buckets:
+#   - name: obot-workspaces
+#     policy: none
+#   - name: backups
+#     policy: none
+
+# -- Service account users to create.
+#    (OPTIONAL) - List of user configurations
+#    Policy options: "readwrite", "readonly", "writeonly", "consoleAdmin"
+#    NOTE: Access/secret keys should be generated securely
+# minio_users:
+#   - access_key: obot
+#     secret_key: "generated-secret-key"
+#     policy: readwrite
+
+# ==============================================================================
 # KAGENT CONFIGURATION (Optional - Kubernetes-native AI Agent Framework)
 # ==============================================================================
 # kagent is a CNCF sandbox project for building, deploying, and managing AI agents

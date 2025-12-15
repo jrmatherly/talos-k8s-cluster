@@ -1,0 +1,23 @@
+#% if minio_enabled | default(false) and minio_ingress_enabled | default(false) %#
+---
+# HTTPRoute for MinIO Console (Web UI) access
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: minio-console
+spec:
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "#{ minio_console_hostname | default('minio') }#.${SECRET_DOMAIN}"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: minio-console
+          port: 9001
+#% endif %#

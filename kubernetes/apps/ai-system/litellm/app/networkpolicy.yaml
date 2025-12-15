@@ -152,6 +152,17 @@ spec:
       ports:
         - protocol: TCP
           port: 6379
+    # MinIO S3 storage (for file uploads, batch processing, etc.)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: storage
+          podSelector:
+            matchLabels:
+              app: minio
+      ports:
+        - protocol: TCP
+          port: 9000
     # External LLM providers (Azure OpenAI, Langfuse)
     # Note: FQDN-based egress is handled by CiliumNetworkPolicy above
     - to:

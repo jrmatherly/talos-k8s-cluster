@@ -100,6 +100,11 @@ proxmox_csi_token_secret: "fake-secret"
 # obot_s3_access_key: ""
 # obot_s3_secret_key: ""
 # obot_s3_use_path_style: true
+# MinIO (disabled for private repo testing)
+# minio_enabled: false
+# minio_root_password: ""
+# minio_buckets: []
+# minio_users: []
 # kagent (disabled for private repo testing)
 # kagent_enabled: false
 # kagent_provider: ""

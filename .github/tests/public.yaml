@@ -126,9 +126,9 @@ obot_postgresql_storage_size: "10Gi"
 # S3/MinIO Workspace Storage (enables multi-replica scaling)
 obot_workspace_provider: "s3"
 obot_s3_bucket: "obot-workspaces"
-obot_s3_endpoint: "http://minio.minio.svc.cluster.local:9000"
+obot_s3_endpoint: "http://minio.storage.svc.cluster.local:9000"
 obot_s3_region: "us-east-1"
-obot_s3_access_key: "test-minio-access-key"
+obot_s3_access_key: "obot"
 obot_s3_secret_key: "test-minio-secret-key"
 obot_s3_use_path_style: true
 # Resources (multiple replicas enabled with S3 storage)
@@ -141,6 +141,27 @@ obot_memory_limit: "4Gi"
 obot_encryption_provider: "custom"
 obot_use_ai_gateway: true
 obot_use_agentgateway: true
+# MinIO Configuration (S3-compatible object storage)
+minio_enabled: true
+minio_chart_version: "5.4.0"
+minio_mode: "standalone"
+minio_replicas: 1
+minio_root_user: "admin"
+minio_root_password: "test-minio-root-password"
+minio_storage_class: "proxmox-csi"
+minio_storage_size: "50Gi"
+minio_memory_request: "512Mi"
+minio_memory_limit: "2Gi"
+minio_cpu_request: "250m"
+minio_ingress_enabled: true
+minio_console_hostname: "minio"
+minio_buckets:
+  - name: obot-workspaces
+    policy: none
+minio_users:
+  - access_key: obot
+    secret_key: "test-minio-secret-key"
+    policy: readwrite
 # kagent Configuration (Kubernetes-native AI Agent Framework)
 kagent_enabled: true
 kagent_provider: "anthropic"

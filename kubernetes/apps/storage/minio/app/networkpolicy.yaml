@@ -1,0 +1,74 @@
+---
+# NetworkPolicy for MinIO - S3 API and Console access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: minio
+spec:
+  podSelector:
+    matchLabels:
+      app: minio
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow S3 API access from obot namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+      ports:
+        - protocol: TCP
+          port: 9000  # S3 API
+    # Allow S3 API access from any namespace (shared storage)
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9000  # S3 API
+    # Allow Console access from envoy-gateway proxies
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-namespace: network
+      ports:
+        - protocol: TCP
+          port: 9001  # Console
+    # Allow Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9000  # Metrics endpoint
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 9001
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Inter-pod communication (for distributed mode)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: minio
+      ports:
+        - protocol: TCP

@@ -1,0 +1,37 @@
+#% if minio_enabled | default(false) %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app minio
+  namespace: storage
+spec:
+  targetNamespace: storage
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: flux-instance
+      namespace: flux-system
+#% if proxmox_csi_enabled | default(false) %#
+    - name: proxmox-csi
+      namespace: csi-proxmox
+#% endif %#
+  path: ./kubernetes/apps/storage/minio/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute: {}
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-settings
+      - kind: Secret
+        name: cluster-secrets
+#% endif %#

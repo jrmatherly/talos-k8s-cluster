@@ -122,6 +122,18 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+    # Allow S3 API access to MinIO in storage namespace
+    # Required for obot workspace storage when using local MinIO
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: storage
+          podSelector:
+            matchLabels:
+              app: minio
+      ports:
+        - protocol: TCP
+          port: 9000
     # Allow to obot-mcp namespace for MCP server management
     # Ports: 80 (service), 443 (HTTPS), 8080 (obot pod), 8099 (MCP pod)
     - to:

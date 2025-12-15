@@ -320,6 +320,29 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_s3_secret_key", "")
         data.setdefault("obot_s3_use_path_style", False)
 
+        # MinIO defaults (S3-compatible object storage in storage namespace)
+        data.setdefault("minio_enabled", False)
+        data.setdefault("minio_chart_version", "5.4.0")
+        data.setdefault("minio_mode", "standalone")
+        data.setdefault("minio_replicas", 1)
+        data.setdefault("minio_root_user", "admin")
+        data.setdefault("minio_root_password", "")
+        data.setdefault("minio_storage_class", "proxmox-csi")
+        data.setdefault("minio_storage_size", "50Gi")
+        data.setdefault("minio_memory_request", "512Mi")
+        data.setdefault("minio_memory_limit", "2Gi")
+        data.setdefault("minio_cpu_request", "250m")
+        data.setdefault("minio_ingress_enabled", False)
+        data.setdefault("minio_console_hostname", "minio")
+        data.setdefault("minio_buckets", [])
+        data.setdefault("minio_users", [])
+
+        # Compute proxmox_csi_enabled for dependency checking
+        proxmox_csi_enabled = bool(
+            data.get("proxmox_csi_token_id") and data.get("proxmox_csi_token_secret")
+        )
+        data.setdefault("proxmox_csi_enabled", proxmox_csi_enabled)
+
         # kagent defaults (Kubernetes-native AI Agent Framework)
         data.setdefault("kagent_enabled", False)
         data.setdefault("kagent_provider", "anthropic")

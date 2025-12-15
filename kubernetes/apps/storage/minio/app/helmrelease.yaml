@@ -1,0 +1,112 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: minio
+spec:
+  interval: 1h
+  timeout: 15m
+  chart:
+    spec:
+      chart: minio
+      version: "5.4.0"
+      sourceRef:
+        kind: HelmRepository
+        name: minio
+  values:
+    # ============================================================
+    # Mode Configuration
+    # - standalone: Single server, simple setup (default)
+    # - distributed: 4+ servers for HA (requires replicas >= 4)
+    # ============================================================
+    mode: standalone
+    replicas: 1
+
+    # ============================================================
+    # Credentials - Use existing secret (SOPS encrypted)
+    # ============================================================
+    existingSecret: minio-credentials
+
+    # ============================================================
+    # Persistence Configuration
+    # ============================================================
+    persistence:
+      enabled: true
+      storageClass: "proxmox-csi"
+      size: 50Gi
+      accessMode: ReadWriteOnce
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      port: 9000
+      # Console port
+      consolePort: 9001
+
+    # ============================================================
+    # Console (Web UI) Configuration
+    # ============================================================
+    consoleService:
+      type: ClusterIP
+      port: 9001
+
+    # ============================================================
+    # Resource Configuration
+    # ============================================================
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 100m
+      limits:
+        memory: 2Gi
+
+    # ============================================================
+    # Security Context
+    # ============================================================
+    securityContext:
+      enabled: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+
+    # ============================================================
+    # Buckets to create on startup
+    # ============================================================
+    buckets:
+      - name: obot-workspaces
+        policy: none
+        purge: false
+
+    # ============================================================
+    # Policies to create on startup
+    # ============================================================
+    policies: []
+
+    # ============================================================
+    # Users to create on startup
+    # Users are created via post-install job
+    # ============================================================
+    users:
+      - accessKey: obot
+        secretKey: YC2RKTLqyQqg5OnZ0b1w0Q
+        policy: readwrite
+
+    # ============================================================
+    # Metrics Configuration
+    # ============================================================
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          release: kube-prometheus-stack
+
+    # ============================================================
+    # Ingress - Disabled (using Gateway API HTTPRoute instead)
+    # ============================================================
+    ingress:
+      enabled: false
+    consoleIngress:
+      enabled: false

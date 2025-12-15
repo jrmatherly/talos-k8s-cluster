@@ -1,0 +1,9 @@
+#% if minio_enabled | default(false) %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage
+  labels:
+    kubernetes.io/metadata.name: storage
+#% endif %#

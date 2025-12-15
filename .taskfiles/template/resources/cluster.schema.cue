@@ -174,11 +174,36 @@ import (
 	// obot S3/MinIO Workspace Storage (enables multi-replica scaling)
 	obot_workspace_provider?: *"directory" | "s3" | "azure"  // Workspace storage backend (default: directory)
 	obot_s3_bucket?: string & !=""              // S3 bucket name for workspace storage
-	obot_s3_endpoint?: string & !=""            // S3-compatible endpoint (e.g., http://minio.minio.svc.cluster.local:9000)
+	obot_s3_endpoint?: string & !=""            // S3-compatible endpoint (e.g., http://minio.storage.svc.cluster.local:9000)
 	obot_s3_region?: string & !=""              // S3 region (default: us-east-1)
 	obot_s3_access_key?: string & !=""          // S3 access key (MinIO access key)
 	obot_s3_secret_key?: string & !=""          // S3 secret key (MinIO secret key)
 	obot_s3_use_path_style?: bool               // Use path-style URLs (required for MinIO without wildcard DNS)
+
+	// MinIO Configuration (S3-compatible object storage)
+	// Shared storage namespace for S3-compatible object storage used by obot and other services
+	minio_enabled?: bool                        // Enable MinIO deployment
+	minio_chart_version?: string & !=""         // MinIO Helm chart version
+	minio_mode?: *"standalone" | "distributed"  // Deployment mode (standalone for single node, distributed for HA)
+	minio_replicas?: int & >=1                  // Number of replicas (4+ required for distributed mode)
+	minio_root_user?: string & !=""             // MinIO root username (admin account)
+	minio_root_password?: string & !=""         // MinIO root password (admin account) - will be encrypted with SOPS
+	minio_storage_class?: string & !=""         // Storage class for PVC (default: proxmox-csi)
+	minio_storage_size?: string & !=""          // Storage size for each replica (default: 50Gi)
+	minio_memory_request?: string & !=""        // Memory request (default: 512Mi)
+	minio_memory_limit?: string & !=""          // Memory limit (default: 2Gi)
+	minio_cpu_request?: string & !=""           // CPU request (default: 250m)
+	minio_ingress_enabled?: bool                // Enable console HTTPRoute via Envoy Gateway
+	minio_console_hostname?: string & !=""      // Console hostname subdomain (default: minio)
+	minio_buckets?: [...{                       // List of buckets to create
+		name: string & !=""                       // Bucket name
+		policy?: *"none" | "public" | "download" | "upload"  // Bucket policy
+	}]
+	minio_users?: [...{                         // List of service account users
+		access_key: string & !=""                 // User access key
+		secret_key: string & !=""                 // User secret key
+		policy?: *"readwrite" | "readonly" | "writeonly" | "consoleAdmin"  // User policy
+	}]
 
 	// kagent Configuration (Kubernetes-native AI Agent Framework)
 	// Cloud Native Computing Foundation (CNCF) sandbox project for AI agents

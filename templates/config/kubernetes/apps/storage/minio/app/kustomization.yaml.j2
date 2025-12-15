@@ -1,0 +1,13 @@
+#% if minio_enabled | default(false) %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./helmrepository.yaml
+  - ./helmrelease.yaml
+  - ./secret.sops.yaml
+  - ./networkpolicy.yaml
+#% if minio_ingress_enabled | default(false) %#
+  - ./httproute.yaml
+#% endif %#
+#% endif %#
