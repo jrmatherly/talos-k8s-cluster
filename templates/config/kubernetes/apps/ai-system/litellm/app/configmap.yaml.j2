@@ -584,7 +584,7 @@ data:
 #% endif %#
 
       # Fallback & Reliability Settings
-      default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
+      # default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
       # content_policy_fallbacks: [{"gpt-5": ["gpt-5-mini"]}] # List[Dict[str, List[str]]]: Fallback model for content policy violations
       # context_window_fallbacks: [{"gpt-5": ["gpt-5-mini", "gpt-5-nano"]}] # List[Dict[str, List[str]]]: Fallback model for context window exceeded
       disable_end_user_cost_tracking: false # Disable cost tracking for end users to avoid unnecessary database writes
@@ -851,7 +851,7 @@ data:
       # fallbacks: [{"gpt-5": ["gpt-5-nano"]}] # List[Dict[str, List[str]]]: Fallback model for all errors
       # content_policy_fallbacks: [{"gpt-5": ["gpt-5-mini"]}] # List[Dict[str, List[str]]]: Fallback model for content policy violations
       # context_window_fallbacks: [{"gpt-5": ["gpt-5-mini", "gpt-5-nano"]}] # List[Dict[str, List[str]]]: Fallback model for context window exceeded
-      default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
+      # default_fallbacks: ["gpt-5-mini"] # set default_fallbacks, in case a specific model group is misconfigured / bad.
       # max_fallbacks: 3 # Maximum number of fallbacks to try
       # num_retries: 3 # Number of retries for failed requests
       # model_group_retry_policy: # SDK Only - retry policy for model groups
