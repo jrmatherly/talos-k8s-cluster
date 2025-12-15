@@ -277,6 +277,15 @@ import (
 	cognee_embedding_model?: string & !=""      // Embedding model name (default: text-embedding-3-large)
 	cognee_embedding_dimensions?: int & >=1    // Embedding dimensions (default: 3072)
 	cognee_mcp_server_name?: string & !=""     // MCP server name for NetworkPolicy selectors (default: cognee-mcp)
+
+	// Cognee API Server Configuration (optional - requires cognee_enabled)
+	cognee_api_enabled?: bool                   // Enable Cognee API server deployment with UI
+	cognee_version?: string & !=""              // Cognee Docker image version (default: 0.5.0)
+	cognee_replicas?: int & >=1                 // Number of Cognee API replicas (default: 1)
+	cognee_api_resources_requests_cpu?: string & !=""     // CPU request (default: 100m)
+	cognee_api_resources_requests_memory?: string & !=""  // Memory request (default: 512Mi)
+	cognee_api_resources_limits_cpu?: string & !=""       // CPU limit (default: 2000m)
+	cognee_api_resources_limits_memory?: string & !=""    // Memory limit (default: 4Gi)
 }
 
 #Config

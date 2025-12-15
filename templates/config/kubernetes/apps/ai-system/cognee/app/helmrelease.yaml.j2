@@ -1,0 +1,189 @@
+#% if cognee_enabled | default(false) and cognee_api_enabled | default(false) %#
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cognee
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  timeout: 15m
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+
+  values:
+    # ==========================================================================
+    # Default Pod Options
+    # ==========================================================================
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: false
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      labels:
+        app.kubernetes.io/name: cognee
+        app.kubernetes.io/component: api
+      terminationGracePeriodSeconds: 60
+
+    # ==========================================================================
+    # Controllers
+    # ==========================================================================
+    controllers:
+      cognee:
+        type: deployment
+        replicas: #{ cognee_replicas | default(1) }#
+        strategy: RollingUpdate
+        rollingUpdate:
+          unavailable: 0
+          surge: 1
+
+        containers:
+          app:
+            image:
+              repository: cognee/cognee
+              tag: "#{ cognee_version | default('0.5.0') }#"
+              pullPolicy: IfNotPresent
+
+            env:
+              # Core settings
+              TZ: "America/New_York"
+              ENVIRONMENT: "production"
+              DEBUG: "false"
+              HOST: "0.0.0.0"
+              HTTP_PORT: "8000"
+              LOG_LEVEL: "INFO"
+
+              # Database Configuration - PostgreSQL with pgvector
+              DB_PROVIDER: "postgres"
+              DB_HOST: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
+              DB_PORT: "5432"
+              DB_NAME: "#{ cognee_db_name | default('cognee') }#"
+              DB_USERNAME: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
+
+              # Vector Database - pgvector (same PostgreSQL instance)
+              VECTOR_DB_PROVIDER: "pgvector"
+              VECTOR_DB_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-api-secrets
+                    key: COGNEE_DB_DSN
+
+              # Graph Database - Neo4j
+              GRAPH_DATABASE_PROVIDER: "neo4j"
+              GRAPH_DATABASE_URL: "bolt://neo4j.storage.svc.cluster.local:7687"
+              GRAPH_DATABASE_NAME: "neo4j"
+              GRAPH_DATABASE_USERNAME: "neo4j"
+
+              # LLM Configuration - Use LiteLLM proxy
+              LLM_PROVIDER: "openai"
+              LLM_ENDPOINT: "#{ cognee_llm_base_url | default('http://litellm.ai-system.svc.cluster.local:4000/v1') }#"
+              LLM_MODEL: "gpt-4o-mini"
+              LLM_MAX_TOKENS: "16384"
+
+              # Embedding Configuration
+              EMBEDDING_PROVIDER: "openai"
+              EMBEDDING_MODEL: "#{ cognee_embedding_model | default('text-embedding-3-large') }#"
+              EMBEDDING_DIMENSIONS: "#{ cognee_embedding_dimensions | default(3072) }#"
+              EMBEDDING_BATCH_SIZE: "36"
+
+              # Storage - local filesystem
+              STORAGE_BACKEND: "local"
+              DATA_ROOT_DIRECTORY: "/data"
+              SYSTEM_ROOT_DIRECTORY: "/data/system"
+
+              # Security settings
+              REQUIRE_AUTHENTICATION: "false"
+              ENABLE_BACKEND_ACCESS_CONTROL: "false"
+              ACCEPT_LOCAL_FILE_PATH: "true"
+              ALLOW_HTTP_REQUESTS: "true"
+              ALLOW_CYPHER_QUERY: "true"
+
+            envFrom:
+              - secretRef:
+                  name: cognee-api-secrets
+
+            resources:
+              requests:
+                cpu: "#{ cognee_api_resources_requests_cpu | default('100m') }#"
+                memory: "#{ cognee_api_resources_requests_memory | default('512Mi') }#"
+              limits:
+                cpu: "#{ cognee_api_resources_limits_cpu | default('2000m') }#"
+                memory: "#{ cognee_api_resources_limits_memory | default('4Gi') }#"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              seccompProfile:
+                type: RuntimeDefault
+
+            probes:
+              startup:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+
+    # ==========================================================================
+    # Service Configuration
+    # ==========================================================================
+    service:
+      cognee:
+        controller: cognee
+        ports:
+          http:
+            port: 8000
+            targetPort: 8000
+            protocol: HTTP
+
+    # ==========================================================================
+    # Persistence - Data storage for Cognee
+    # ==========================================================================
+    persistence:
+      data:
+        enabled: true
+        type: emptyDir
+        sizeLimit: 10Gi
+        globalMounts:
+          - path: /data
+
+    # ==========================================================================
+    # Service Account
+    # ==========================================================================
+    serviceAccount:
+      create: true
+      name: cognee
+#% endif %#

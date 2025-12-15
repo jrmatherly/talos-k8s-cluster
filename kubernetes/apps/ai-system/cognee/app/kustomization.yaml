@@ -5,3 +5,9 @@ resources:
   - secret.sops.yaml
   - postgresql.yaml
   - db-networkpolicy.yaml
+  # Cognee API Server resources
+  - ocirepository.yaml
+  - helmrelease.yaml
+  - api-secret.sops.yaml
+  - api-networkpolicy.yaml
+  - httproute.yaml

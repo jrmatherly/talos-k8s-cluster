@@ -11,4 +11,12 @@ resources:
   - postgresql.yaml
   - db-networkpolicy.yaml
 #% endif %#
+#% if cognee_api_enabled | default(false) %#
+  # Cognee API Server resources
+  - ocirepository.yaml
+  - helmrelease.yaml
+  - api-secret.sops.yaml
+  - api-networkpolicy.yaml
+  - httproute.yaml
+#% endif %#
 #% endif %#

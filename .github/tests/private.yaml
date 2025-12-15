@@ -170,3 +170,7 @@ proxmox_csi_token_secret: "fake-secret"
 # cognee_embedding_model: ""
 # cognee_embedding_dimensions:
 # cognee_mcp_server_name: ""
+# Cognee API Server (disabled for private repo testing)
+# cognee_api_enabled: false
+# cognee_version: ""
+# cognee_replicas:

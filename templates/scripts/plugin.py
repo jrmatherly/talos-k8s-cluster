@@ -418,6 +418,14 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_embedding_model", "text-embedding-3-large")
         data.setdefault("cognee_embedding_dimensions", 3072)
         data.setdefault("cognee_mcp_server_name", "cognee-mcp")
+        # Cognee API Server defaults
+        data.setdefault("cognee_api_enabled", False)
+        data.setdefault("cognee_version", "0.5.0")
+        data.setdefault("cognee_replicas", 1)
+        data.setdefault("cognee_api_resources_requests_cpu", "100m")
+        data.setdefault("cognee_api_resources_requests_memory", "512Mi")
+        data.setdefault("cognee_api_resources_limits_cpu", "2000m")
+        data.setdefault("cognee_api_resources_limits_memory", "4Gi")
 
         return data
 
