@@ -301,6 +301,7 @@ When adding new application templates to this project, multiple files must be up
 15. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors` (NOT `spec.policy.*`); provider is enum (`Keycloak`), not object; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
 16. **MinIO chart ServiceMonitor** - Don't add `release` to `metrics.serviceMonitor.additionalLabels` - the chart already sets `release: {{ .Release.Name }}`, causing duplicate key errors with Flux
 17. **Flux Kustomization substituteFrom** - Only use `cluster-secrets` Secret (exists in each namespace); `cluster-settings` ConfigMap doesn't exist in this cluster
+18. **MinIO v3 metrics require custom ServiceMonitor** - Helm chart only scrapes v2 endpoints; for community v3 Grafana dashboard, deploy separate ServiceMonitor scraping `/minio/metrics/v3/*` paths
 
 ## Extended Documentation
 
