@@ -48,8 +48,11 @@ spec:
           surge: 1
 
         # Init container to fix Cognee Alembic migration bugs on fresh install
-        # 1. Creates pipelinerunstatus enum before ADD VALUE migration runs
-        # 2. Creates acls table with dataset_id so permission_system_rework migration skips
+        # Cognee's migrations assume SQLAlchemy create_all() ran first, but entrypoint.sh
+        # runs migrations before the app starts. We pre-create the required schema:
+        # 1. pipelinerunstatus enum - before ADD VALUE migration runs
+        # 2. acls table with dataset_id - so permission_system_rework migration skips
+        # 3. data table with full schema - so loader_separation migration succeeds
         initContainers:
           init-db-schema:
             image:
@@ -113,19 +116,35 @@ spec:
                     RAISE NOTICE 'acls table already exists';
                   END IF;
 
-                  -- Create data table with tenant_id column if not exists
-                  -- Fixes: expand_data_model_info migration expects data table
-                  -- When tenant_id exists, migration skips adding it
+                  -- Create data table with FULL schema if not exists
+                  -- Cognee migrations assume SQLAlchemy create_all() ran first
+                  -- We pre-create the complete table so migrations succeed
                   IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'data') THEN
                     CREATE TABLE data (
                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                      created_at TIMESTAMPTZ DEFAULT NOW(),
-                      updated_at TIMESTAMPTZ DEFAULT NOW(),
+                      name VARCHAR,
+                      extension VARCHAR,
+                      mime_type VARCHAR,
+                      original_extension VARCHAR,
+                      original_mime_type VARCHAR,
+                      loader_engine VARCHAR,
+                      raw_data_location VARCHAR,
+                      original_data_location VARCHAR,
+                      owner_id UUID,
                       tenant_id UUID,
-                      data_size INTEGER
+                      content_hash VARCHAR,
+                      raw_content_hash VARCHAR,
+                      external_metadata JSON,
+                      node_set JSON,
+                      pipeline_status JSON,
+                      token_count INTEGER,
+                      data_size INTEGER,
+                      created_at TIMESTAMPTZ DEFAULT NOW(),
+                      updated_at TIMESTAMPTZ DEFAULT NOW()
                     );
+                    CREATE INDEX ix_data_owner_id ON data(owner_id);
                     CREATE INDEX ix_data_tenant_id ON data(tenant_id);
-                    RAISE NOTICE 'Created data table with tenant_id column';
+                    RAISE NOTICE 'Created data table with full schema';
                   ELSE
                     RAISE NOTICE 'data table already exists';
                   END IF;
