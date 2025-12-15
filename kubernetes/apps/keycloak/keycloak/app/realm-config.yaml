@@ -328,14 +328,17 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v19
+  name: keycloak-realm-import-v20
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "19"
+    config-version: "20"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
   template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: realm-import
     spec:
       restartPolicy: OnFailure
       containers:

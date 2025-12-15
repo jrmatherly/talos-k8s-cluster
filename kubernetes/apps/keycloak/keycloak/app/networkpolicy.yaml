@@ -75,6 +75,14 @@ spec:
           port: 8080
         - protocol: TCP
           port: 9000
+    # Allow realm-import job to connect to Keycloak for configuration
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: realm-import
+      ports:
+        - protocol: TCP
+          port: 8080
   egress:
     # DNS
     - to:
