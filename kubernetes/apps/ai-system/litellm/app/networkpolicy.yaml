@@ -116,6 +116,18 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
+    # Allow from Cognee MCP server (in obot-mcp namespace)
+    # Required for LLM completion and embedding requests
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot-mcp
+          podSelector:
+            matchLabels:
+              obot.obot.ai/mcp-server: cognee-mcp
+      ports:
+        - protocol: TCP
+          port: 4000
     # Allow Prometheus scraping
     - from:
         - namespaceSelector:

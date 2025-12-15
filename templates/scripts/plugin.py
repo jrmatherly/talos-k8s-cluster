@@ -269,6 +269,11 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_entra_id_client_id", "")
         data.setdefault("keycloak_entra_id_client_secret", "")
 
+        # Keycloak Google Identity Provider defaults
+        data.setdefault("keycloak_google_enabled", False)
+        data.setdefault("keycloak_google_client_id", "")
+        data.setdefault("keycloak_google_client_secret", "")
+
         # agentgateway defaults (MCP 2025-11-25 OAuth Proxy)
         data.setdefault("agentgateway_enabled", False)
         data.setdefault("agentgateway_addr", "")
@@ -399,6 +404,20 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("litellm_langfuse_host", "https://cloud.langfuse.com")
         data.setdefault("litellm_langfuse_public_key", "")
         data.setdefault("litellm_langfuse_secret_key", "")
+
+        # Cognee Graph RAG defaults
+        data.setdefault("cognee_enabled", False)
+        data.setdefault("cognee_dedicated_db", True)
+        data.setdefault("cognee_db_name", "cognee")
+        data.setdefault("cognee_db_password", "")
+        data.setdefault("cognee_neo4j_password", "")
+        data.setdefault("cognee_neo4j_version", "5.26.0")
+        data.setdefault("cognee_neo4j_storage_size", "10Gi")
+        primary_domain = data.get("primary_domain", "example.com")
+        data.setdefault("cognee_llm_base_url", f"https://llms.{primary_domain}/v1")
+        data.setdefault("cognee_embedding_model", "text-embedding-3-large")
+        data.setdefault("cognee_embedding_dimensions", 3072)
+        data.setdefault("cognee_mcp_server_name", "cognee-mcp")
 
         return data
 

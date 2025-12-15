@@ -6,4 +6,7 @@ resources:
   - ./networkpolicy.yaml
   - ./resourcequota.yaml
   - ./limitrange.yaml
+#% if cognee_enabled | default(false) %#
+  - ./cognee-networkpolicy.yaml
+#% endif %#
 #% endif %#

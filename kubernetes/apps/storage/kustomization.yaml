@@ -9,3 +9,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./minio/ks.yaml
+  - ./neo4j/ks.yaml

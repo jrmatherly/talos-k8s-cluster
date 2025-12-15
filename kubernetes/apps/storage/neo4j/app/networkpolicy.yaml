@@ -1,0 +1,76 @@
+---
+# CiliumNetworkPolicy for Neo4j - Kubernetes API access (for StatefulSet coordination)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: neo4j-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: neo4j
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+---
+# NetworkPolicy for Neo4j CE in storage namespace
+# Provides graph database services to AI workloads across namespaces
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neo4j
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: neo4j
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from Cognee MCP server (in obot-mcp namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot-mcp
+          podSelector:
+            matchLabels:
+              obot.obot.ai/mcp-server: cognee-mcp
+      ports:
+        - protocol: TCP
+          port: 7687   # Bolt protocol
+        - protocol: TCP
+          port: 7474   # HTTP browser (optional)
+    # NOTE: Neo4j Community Edition is single-instance only.
+    # Clustering ports 5000/6000/7000 are Enterprise Edition features.
+    # If upgrading to Enterprise, add these ports:
+    #   - port: 5000   # Discovery
+    #   - port: 6000   # Transaction
+    #   - port: 7000   # Raft
+    # Allow Prometheus scraping (Enterprise Edition only - CE doesn't support metrics)
+    # Keeping this conditional for future Enterprise upgrade
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 2004   # Prometheus metrics endpoint
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # NOTE: Neo4j CE is single-instance; no inter-pod clustering communication needed.
+    # If upgrading to Enterprise for clustering, add egress to self:
+    #   - to:
+    #       - podSelector: {matchLabels: {app.kubernetes.io/name: neo4j}}
+    #     ports: [5000, 6000, 7000, 7687]

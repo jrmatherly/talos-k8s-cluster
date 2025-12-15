@@ -580,6 +580,32 @@ cloudflare_token: ""
 #      2. Copy the Value (NOT the Secret ID) immediately - it's only shown once!
 # keycloak_entra_id_client_secret: ""
 
+# ------------------------------------------------------------------------------
+# Keycloak Google Identity Provider (Optional - federate with Google)
+# ------------------------------------------------------------------------------
+# Enables Google Workspace/Gmail accounts to authenticate via Keycloak.
+# Required for applications that need Google group-based RBAC.
+# REF: https://www.keycloak.org/docs/latest/server_admin/#google
+# REF: https://console.cloud.google.com/apis/credentials
+
+# -- Enable Google as Keycloak identity provider.
+#    (OPTIONAL) / (DEFAULT: false)
+#    When enabled, adds Google login option to Keycloak authentication
+# keycloak_google_enabled: false
+
+# -- Google OAuth Client ID.
+#    (REQUIRED if keycloak_google_enabled)
+#    NOTE: Create in Google Cloud Console:
+#      1. APIs & Services → Credentials → Create OAuth 2.0 Client ID
+#      2. Application type: Web application
+#      3. Authorized redirect URI: https://keycloak.${domain}/realms/${realm}/broker/google/endpoint
+# keycloak_google_client_id: ""
+
+# -- Google OAuth Client Secret.
+#    (REQUIRED if keycloak_google_enabled) - Will be encrypted with SOPS
+#    NOTE: Copy the client secret from Google Cloud Console immediately after creation
+# keycloak_google_client_secret: ""
+
 # ==============================================================================
 # AGENTGATEWAY CONFIGURATION (Optional - MCP 2025-11-25 OAuth Proxy)
 # ==============================================================================
@@ -1196,3 +1222,59 @@ kagent_kmcp_enabled: true
 # -- Langfuse secret key.
 #    (REQUIRED if litellm_langfuse_enabled) - Will be encrypted with SOPS
 # litellm_langfuse_secret_key: ""
+
+# ==============================================================================
+# COGNEE GRAPH RAG (Optional - requires obot_enabled)
+# ==============================================================================
+# Cognee provides Graph RAG capabilities using Neo4j for graph storage and
+# pgvector for vector embeddings. Integrates with obot as an MCP server.
+# REF: https://docs.cognee.ai/
+
+# -- Enable Cognee Graph RAG integration.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Requires: obot_enabled: true
+# cognee_enabled: false
+
+# -- Use dedicated CNPG cluster instead of extending obot-db.
+#    (OPTIONAL) / (DEFAULT: true)
+#    Recommended: true for resource isolation; false to share obot-db cluster
+# cognee_dedicated_db: true
+
+# -- PostgreSQL database name for Cognee.
+#    (OPTIONAL) / (DEFAULT: "cognee")
+# cognee_db_name: "cognee"
+
+# -- PostgreSQL password for Cognee database.
+#    (REQUIRED if cognee_enabled) - Generate with: openssl rand -base64 24
+# cognee_db_password: ""
+
+# -- Neo4j Community Edition password.
+#    (REQUIRED if cognee_enabled) - Generate with: openssl rand -base64 24
+# cognee_neo4j_password: ""
+
+# -- Neo4j Community Edition version.
+#    (OPTIONAL) / (DEFAULT: "5.26.0")
+# cognee_neo4j_version: "5.26.0"
+
+# -- Neo4j PVC storage size.
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+# cognee_neo4j_storage_size: "10Gi"
+
+# -- Embedding model for vector storage.
+#    (OPTIONAL) / (DEFAULT: "text-embedding-3-large")
+#    Options: text-embedding-3-large (3072 dim), text-embedding-3-small (1536 dim)
+# cognee_embedding_model: "text-embedding-3-large"
+
+# -- Embedding dimensions (must match model).
+#    (OPTIONAL) / (DEFAULT: 3072 for text-embedding-3-large)
+# cognee_embedding_dimensions: 3072
+
+# -- LLM endpoint for Cognee processing.
+#    (OPTIONAL) / (DEFAULT: "https://llms.${SECRET_DOMAIN}/v1")
+#    Use ai-gw.${SECRET_DOMAIN} if using agentgateway instead of LiteLLM
+# cognee_llm_base_url: "https://llms.${SECRET_DOMAIN}/v1"
+
+# -- MCP server name for Cognee (used in NetworkPolicy selectors).
+#    (OPTIONAL) / (DEFAULT: "cognee-mcp")
+#    Must match the MCP server registration name in Obot
+# cognee_mcp_server_name: "cognee-mcp"

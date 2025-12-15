@@ -134,6 +134,11 @@ import (
 	keycloak_entra_id_client_id?: string & !="" // Azure App Registration client ID (GUID)
 	keycloak_entra_id_client_secret?: string & !="" // Azure App Registration client secret
 
+	// Keycloak Google Identity Provider (optional - federation with Google)
+	keycloak_google_enabled?: bool               // Enable Google as identity provider
+	keycloak_google_client_id?: string & !=""    // Google OAuth client ID
+	keycloak_google_client_secret?: string & !="" // Google OAuth client secret
+
 	// agentgateway Configuration (MCP 2025-11-25 OAuth Proxy)
 	// Wraps Keycloak for MCP spec-compliant authentication (DCR, CIMD, Protected Resource Metadata)
 	agentgateway_enabled?: bool                 // Enable agentgateway for MCP authentication
@@ -258,6 +263,20 @@ import (
 	litellm_langfuse_host?: string & !=""       // Langfuse host URL (default: https://cloud.langfuse.com)
 	litellm_langfuse_public_key?: string & !="" // Langfuse public key
 	litellm_langfuse_secret_key?: string & !="" // Langfuse secret key
+
+	// Cognee Graph RAG Configuration (optional - requires obot_enabled)
+	// Graph RAG capabilities using Neo4j for graph storage and pgvector for vector embeddings
+	cognee_enabled?: bool                       // Enable Cognee Graph RAG integration
+	cognee_dedicated_db?: bool                  // Use dedicated CNPG cluster (vs extending obot-db)
+	cognee_db_name?: string & !=""              // Database name (default: cognee)
+	cognee_db_password?: string & !=""          // PostgreSQL password for Cognee database
+	cognee_neo4j_password?: string & !=""       // Neo4j password (required if cognee_enabled)
+	cognee_neo4j_version?: string & !=""        // Neo4j CE version (default: 5.26.0)
+	cognee_neo4j_storage_size?: string & !=""   // Neo4j PVC size (default: 10Gi)
+	cognee_llm_base_url?: string & !=""         // LLM endpoint (default: https://llms.${SECRET_DOMAIN}/v1)
+	cognee_embedding_model?: string & !=""      // Embedding model name (default: text-embedding-3-large)
+	cognee_embedding_dimensions?: int & >=1    // Embedding dimensions (default: 3072)
+	cognee_mcp_server_name?: string & !=""     // MCP server name for NetworkPolicy selectors (default: cognee-mcp)
 }
 
 #Config

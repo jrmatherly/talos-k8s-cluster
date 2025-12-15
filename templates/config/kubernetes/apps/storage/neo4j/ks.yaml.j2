@@ -1,0 +1,32 @@
+#% if cognee_enabled | default(false) %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: neo4j
+spec:
+  dependsOn:
+    - name: flux-instance
+      namespace: flux-system
+    - name: cilium
+      namespace: kube-system
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+    - name: proxmox-csi
+      namespace: csi-proxmox
+#% endif %#
+  interval: 30m
+  retryInterval: 1m
+  timeout: 15m
+  path: ./kubernetes/apps/storage/neo4j/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: storage
+  wait: false
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
+#% endif %#

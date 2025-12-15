@@ -78,6 +78,10 @@ proxmox_csi_token_secret: "fake-secret"
 # keycloak_entra_id_tenant_id: ""
 # keycloak_entra_id_client_id: ""
 # keycloak_entra_id_client_secret: ""
+# Keycloak Google Identity Provider (disabled for private repo testing)
+# keycloak_google_enabled: false
+# keycloak_google_client_id: ""
+# keycloak_google_client_secret: ""
 # agentgateway (disabled for private repo testing)
 # agentgateway_enabled: false
 # agentgateway_addr: ""
@@ -154,3 +158,15 @@ proxmox_csi_token_secret: "fake-secret"
 # litellm_langfuse_host: ""
 # litellm_langfuse_public_key: ""
 # litellm_langfuse_secret_key: ""
+# Cognee Graph RAG (disabled for private repo testing)
+# cognee_enabled: false
+# cognee_dedicated_db: false
+# cognee_db_name: ""
+# cognee_db_password: ""
+# cognee_neo4j_password: ""
+# cognee_neo4j_version: ""
+# cognee_neo4j_storage_size: ""
+# cognee_llm_base_url: ""
+# cognee_embedding_model: ""
+# cognee_embedding_dimensions:
+# cognee_mcp_server_name: ""

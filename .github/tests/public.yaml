@@ -92,6 +92,10 @@ keycloak_entra_id_enabled: true
 keycloak_entra_id_tenant_id: "12345678-1234-1234-1234-123456789abc"
 keycloak_entra_id_client_id: "87654321-4321-4321-4321-cba987654321"
 keycloak_entra_id_client_secret: "test-entra-id-client-secret"
+# Keycloak Google Identity Provider (Google federation)
+keycloak_google_enabled: true
+keycloak_google_client_id: "123456789012-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com"
+keycloak_google_client_secret: "GOCSPX-test-google-client-secret"
 # agentgateway Configuration (MCP 2025-11-25 OAuth Proxy)
 agentgateway_enabled: true
 agentgateway_addr: "10.10.10.147"
@@ -216,3 +220,15 @@ litellm_langfuse_enabled: true
 litellm_langfuse_host: "https://cloud.langfuse.com"
 litellm_langfuse_public_key: "pk-lf-test-public-key"
 litellm_langfuse_secret_key: "sk-lf-test-secret-key"
+# Cognee Graph RAG Configuration (Knowledge Graph + Vector Search)
+cognee_enabled: true
+cognee_dedicated_db: true
+cognee_db_name: "cognee"
+cognee_db_password: "test-cognee-db-password"
+cognee_neo4j_password: "test-neo4j-password"
+cognee_neo4j_version: "5.26.0"
+cognee_neo4j_storage_size: "10Gi"
+cognee_llm_base_url: "https://llms.example.com/v1"
+cognee_embedding_model: "text-embedding-3-large"
+cognee_embedding_dimensions: 3072
+cognee_mcp_server_name: "cognee-mcp"

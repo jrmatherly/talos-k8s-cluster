@@ -5,3 +5,4 @@ resources:
   - ./networkpolicy.yaml
   - ./resourcequota.yaml
   - ./limitrange.yaml
+  - ./cognee-networkpolicy.yaml

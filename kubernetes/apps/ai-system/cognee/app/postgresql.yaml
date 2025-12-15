@@ -1,0 +1,104 @@
+---
+# CloudNativePG Cluster for Cognee (dedicated database)
+# Uses PostgreSQL 18 minimal image with pgvector extension via ImageVolume
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cognee-db
+spec:
+  # Use PostgreSQL 18 minimal image for extension_control_path support
+  imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie
+
+  instances: 3
+
+  # Storage Configuration
+  storage:
+    size: 20Gi
+    storageClass: proxmox-csi
+
+  # PostgreSQL Configuration optimized for vector workloads
+  postgresql:
+    parameters:
+      # Memory Configuration (optimized for 3072-dimension vectors)
+      shared_buffers: "256MB"
+      effective_cache_size: "768MB"
+      work_mem: "64MB"
+      maintenance_work_mem: "256MB"
+
+      # Parallelism for HNSW index builds
+      max_parallel_maintenance_workers: "4"
+      max_parallel_workers_per_gather: "2"
+      max_parallel_workers: "8"
+
+      # SSD-optimized settings
+      effective_io_concurrency: "200"
+      random_page_cost: "1.1"
+
+      # Connection handling
+      max_connections: "100"
+      idle_in_transaction_session_timeout: "30s"
+
+      # WAL settings
+      min_wal_size: "1GB"
+      max_wal_size: "4GB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+
+      # Logging for performance analysis
+      log_min_duration_statement: "1000"
+      log_statement: "none"
+
+    # pgvector extension for vector embeddings
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector:0.8.1-18-trixie
+
+  # Bootstrap Configuration
+  bootstrap:
+    initdb:
+      database: cognee
+      owner: cognee
+      secret:
+        name: cognee-db-secret
+
+  # Monitoring
+  monitoring:
+    enablePodMonitor: true
+
+  # Resources
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "512Mi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+  # Anti-affinity for HA
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: preferred
+---
+# Database resource to declaratively manage cognee database with pgvector extension
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: cognee-db-cognee
+spec:
+  name: cognee
+  owner: cognee
+  cluster:
+    name: cognee-db
+  extensions:
+    - name: vector
+---
+# Secret for Cognee dedicated database credentials
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cognee-db-secret
+type: kubernetes.io/basic-auth
+stringData:
+  username: cognee
+  password: "HuTpS52kFwJPkhOMfM16qPKW"
