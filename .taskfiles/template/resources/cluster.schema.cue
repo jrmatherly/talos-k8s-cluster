@@ -274,6 +274,7 @@ import (
 	cognee_neo4j_version?: string & !=""        // Neo4j CE version (default: 5.26.0)
 	cognee_neo4j_storage_size?: string & !=""   // Neo4j PVC size (default: 10Gi)
 	cognee_llm_base_url?: string & !=""         // LLM endpoint (default: https://llms.${SECRET_DOMAIN}/v1)
+	cognee_llm_model?: string & !=""            // LLM model name (default: gpt-4o-mini)
 	cognee_embedding_model?: string & !=""      // Embedding model name (default: text-embedding-3-large)
 	cognee_embedding_dimensions?: int & >=1    // Embedding dimensions (default: 3072)
 	cognee_mcp_server_name?: string & !=""     // MCP server name for NetworkPolicy selectors (default: cognee-mcp)

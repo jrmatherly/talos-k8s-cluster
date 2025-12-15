@@ -112,61 +112,93 @@ spec:
               pullPolicy: IfNotPresent
 
             env:
-              # Core settings
+              # =================================================================
+              # Core Server Settings
+              # =================================================================
               TZ: "America/New_York"
               ENVIRONMENT: "production"
               DEBUG: "false"
               HOST: "0.0.0.0"
-              HTTP_PORT: "8000"
+              PYTHONPATH: "."
               LOG_LEVEL: "INFO"
 
-              # Database Configuration - PostgreSQL with pgvector
+              # =================================================================
+              # Relational Database Configuration (PostgreSQL)
+              # Used for core data, ACLs, and application state
+              # =================================================================
               DB_PROVIDER: "postgres"
               DB_HOST: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
               DB_PORT: "5432"
               DB_NAME: "#{ cognee_db_name | default('cognee') }#"
               DB_USERNAME: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
 
-              # Migration Database - Use same PostgreSQL for migration tracking
-              # Required for consistent migration state when using PostgreSQL
+              # =================================================================
+              # Migration Database Configuration
+              # Same as relational DB for consistent migration tracking
+              # =================================================================
               MIGRATION_DB_PROVIDER: "postgres"
               MIGRATION_DB_HOST: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
               MIGRATION_DB_PORT: "5432"
               MIGRATION_DB_NAME: "#{ cognee_db_name | default('cognee') }#"
               MIGRATION_DB_USERNAME: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
 
-              # Vector Database - pgvector (same PostgreSQL instance)
+              # =================================================================
+              # Vector Database Configuration (pgvector)
+              # Used for vector embeddings storage and similarity search
+              # =================================================================
               VECTOR_DB_PROVIDER: "pgvector"
               VECTOR_DB_URL:
                 valueFrom:
                   secretKeyRef:
                     name: cognee-api-secrets
                     key: COGNEE_DB_DSN
+              VECTOR_DATASET_DATABASE_HANDLER: "pgvector"
 
-              # Graph Database - Neo4j
+              # =================================================================
+              # Graph Database Configuration (Neo4j)
+              # Used for knowledge graph storage and traversal
+              # =================================================================
               GRAPH_DATABASE_PROVIDER: "neo4j"
               GRAPH_DATABASE_URL: "bolt://neo4j.storage.svc.cluster.local:7687"
               GRAPH_DATABASE_NAME: "neo4j"
               GRAPH_DATABASE_USERNAME: "neo4j"
+              GRAPH_DATABASE_PORT: "7687"
+              GRAPH_DATASET_DATABASE_HANDLER: "neo4j"
 
-              # LLM Configuration - Use LiteLLM proxy
+              # =================================================================
+              # LLM Configuration
+              # Uses LiteLLM proxy for multi-provider routing
+              # =================================================================
               LLM_PROVIDER: "openai"
               LLM_ENDPOINT: "#{ cognee_llm_base_url | default('http://litellm.ai-system.svc.cluster.local:4000/v1') }#"
-              LLM_MODEL: "gpt-4o-mini"
-              LLM_MAX_TOKENS: "16384"
+              LLM_MODEL: "#{ cognee_llm_model | default('gpt-4o-mini') }#"
+              LLM_TEMPERATURE: "0.0"
+              LLM_MAX_COMPLETION_TOKENS: "16384"
+              LLM_STREAMING: "false"
+              STRUCTURED_OUTPUT_FRAMEWORK: "instructor"
 
+              # =================================================================
               # Embedding Configuration
+              # Also uses LiteLLM proxy for embedding models
+              # =================================================================
               EMBEDDING_PROVIDER: "openai"
+              EMBEDDING_ENDPOINT: "#{ cognee_llm_base_url | default('http://litellm.ai-system.svc.cluster.local:4000/v1') }#"
               EMBEDDING_MODEL: "#{ cognee_embedding_model | default('text-embedding-3-large') }#"
               EMBEDDING_DIMENSIONS: "#{ cognee_embedding_dimensions | default(3072) }#"
               EMBEDDING_BATCH_SIZE: "36"
+              EMBEDDING_MAX_COMPLETION_TOKENS: "8191"
 
-              # Storage - local filesystem
+              # =================================================================
+              # Storage Configuration
+              # Local filesystem for data/document storage
+              # =================================================================
               STORAGE_BACKEND: "local"
               DATA_ROOT_DIRECTORY: "/data"
               SYSTEM_ROOT_DIRECTORY: "/data/system"
 
-              # Security settings
+              # =================================================================
+              # Security & Access Control Settings
+              # =================================================================
               REQUIRE_AUTHENTICATION: "false"
               ENABLE_BACKEND_ACCESS_CONTROL: "false"
               ACCEPT_LOCAL_FILE_PATH: "true"
