@@ -165,18 +165,28 @@ spec:
                   END IF;
 
                   -- Create users table if not exists
-                  -- Fixes: multi_tenant_support migration needs users table for FK
+                  -- Fixes: multi_tenant_support migration needs users table with tenant_id column
+                  -- Migration c946955da633 does: SELECT users.id, users.tenant_id FROM users WHERE users.tenant_id IS NOT NULL
                   IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users') THEN
                     CREATE TABLE users (
                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                       external_id VARCHAR,
                       email VARCHAR,
+                      tenant_id UUID,
                       created_at TIMESTAMPTZ DEFAULT NOW(),
                       updated_at TIMESTAMPTZ DEFAULT NOW()
                     );
-                    RAISE NOTICE 'Created users table';
+                    CREATE INDEX ix_users_tenant_id ON users(tenant_id);
+                    RAISE NOTICE 'Created users table with tenant_id column';
                   ELSE
-                    RAISE NOTICE 'users table already exists';
+                    -- Add tenant_id column if missing (for existing tables)
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'tenant_id') THEN
+                      ALTER TABLE users ADD COLUMN tenant_id UUID;
+                      CREATE INDEX IF NOT EXISTS ix_users_tenant_id ON users(tenant_id);
+                      RAISE NOTICE 'Added tenant_id column to existing users table';
+                    ELSE
+                      RAISE NOTICE 'users table already has tenant_id column';
+                    END IF;
                   END IF;
                 END\$\$;
                 " && echo "Database schema prerequisites initialized successfully"
