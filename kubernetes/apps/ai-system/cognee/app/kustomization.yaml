@@ -14,3 +14,5 @@ resources:
   # Cognee Frontend resources
   - frontend-secret.sops.yaml
   - frontend-networkpolicy.yaml
+  # Cognee MCP Server resources
+  - mcp-networkpolicy.yaml

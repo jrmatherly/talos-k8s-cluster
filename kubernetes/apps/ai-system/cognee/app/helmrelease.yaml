@@ -53,7 +53,7 @@ spec:
           init-db:
             image:
               repository: postgres
-              tag: 16-alpine
+              tag: 18-alpine
             securityContext:
               allowPrivilegeEscalation: false
               capabilities:
@@ -94,7 +94,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee
-              tag: "0.5.2"
+              tag: "0.5.4"
               pullPolicy: Always
 
             env:
@@ -296,6 +296,7 @@ spec:
               # Server-side only vars for Next.js rewrites (NOT exposed to browser)
               # These are used by next.config.mjs to proxy API calls to backend services
               BACKEND_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
+              MCP_URL: "http://cognee-mcp.ai-system.svc.cluster.local:8001"
               # Frontend base URL (external hostname for OAuth callbacks)
               APP_BASE_URL: "https://cognee.matherly.net"
 
@@ -347,6 +348,106 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 3
 
+      # ========================================================================
+      # MCP Server Controller
+      # ========================================================================
+      mcp:
+        type: deployment
+        replicas: 1
+        strategy: RollingUpdate
+        rollingUpdate:
+          unavailable: 0
+          surge: 1
+
+        pod:
+          labels:
+            app.kubernetes.io/component: mcp
+            obot.obot.ai/mcp-server: cognee-mcp
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/jrmatherly/cognee-mcp
+              tag: "main"
+              pullPolicy: Always
+
+            env:
+              # MCP Server Configuration
+              ENVIRONMENT: "production"
+              LOG_LEVEL: "INFO"
+              TRANSPORT_MODE: "sse"
+              HTTP_PORT: "8001"
+              # Database configuration - matches backend
+              DB_PROVIDER: "postgres"
+              DB_HOST: "cognee-db-rw.ai-system.svc.cluster.local"
+              DB_PORT: "5432"
+              DB_NAME: "cognee"
+              DB_USERNAME: "cognee"
+              # Vector DB configuration
+              VECTOR_DB_PROVIDER: "pgvector"
+              # Graph DB configuration
+              GRAPH_DATABASE_PROVIDER: "neo4j"
+              GRAPH_DATABASE_URL: "bolt://neo4j.storage.svc.cluster.local:7687"
+              GRAPH_DATABASE_NAME: "neo4j"
+              GRAPH_DATABASE_USERNAME: "neo4j"
+              # LLM configuration
+              LLM_PROVIDER: "openai"
+              LLM_ENDPOINT: "http://litellm.ai-system.svc.cluster.local:4000/v1"
+              LLM_MODEL: "gpt-5-mini"
+              # Embedding configuration
+              EMBEDDING_PROVIDER: "openai"
+              EMBEDDING_ENDPOINT: "http://litellm.ai-system.svc.cluster.local:4000/v1"
+              EMBEDDING_MODEL: "text-embedding-3-large"
+              EMBEDDING_DIMENSIONS: "3072"
+
+            envFrom:
+              - secretRef:
+                  name: cognee-api-secrets
+
+            resources:
+              requests:
+                cpu: "100m"
+                memory: "512Mi"
+              limits:
+                cpu: "1000m"
+                memory: "2Gi"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              seccompProfile:
+                type: RuntimeDefault
+
+            probes:
+              startup:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
 
     # ==========================================================================
     # Service Configuration
@@ -365,6 +466,13 @@ spec:
           http:
             port: 3000
             targetPort: 3000
+            protocol: HTTP
+      mcp:
+        controller: mcp
+        ports:
+          http:
+            port: 8001
+            targetPort: 8001
             protocol: HTTP
 
     # ==========================================================================
