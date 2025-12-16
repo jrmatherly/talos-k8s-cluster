@@ -150,6 +150,35 @@ spec:
                   ELSE
                     RAISE NOTICE 'data table already exists';
                   END IF;
+
+                  -- Create tenants table if not exists
+                  -- Fixes: multi_tenant_support migration needs tenants table for FK
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'tenants') THEN
+                    CREATE TABLE tenants (
+                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      name VARCHAR NOT NULL,
+                      created_at TIMESTAMPTZ DEFAULT NOW(),
+                      updated_at TIMESTAMPTZ DEFAULT NOW()
+                    );
+                    RAISE NOTICE 'Created tenants table';
+                  ELSE
+                    RAISE NOTICE 'tenants table already exists';
+                  END IF;
+
+                  -- Create users table if not exists
+                  -- Fixes: multi_tenant_support migration needs users table for FK
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users') THEN
+                    CREATE TABLE users (
+                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      external_id VARCHAR,
+                      email VARCHAR,
+                      created_at TIMESTAMPTZ DEFAULT NOW(),
+                      updated_at TIMESTAMPTZ DEFAULT NOW()
+                    );
+                    RAISE NOTICE 'Created users table';
+                  ELSE
+                    RAISE NOTICE 'users table already exists';
+                  END IF;
                 END\$\$;
                 " && echo "Database schema prerequisites initialized successfully"
             securityContext:
