@@ -49,9 +49,47 @@ spec:
           unavailable: 0
           surge: 1
 
-        # Note: Database initialization (table creation, migrations) is now handled
-        # by the updated entrypoint.sh in the Cognee image, which runs
-        # create_db_and_tables() before Alembic migrations.
+        # Database initialization - Pre-create schema objects for Alembic migrations
+        initContainers:
+          init-db:
+            image:
+              repository: postgres
+              tag: 16-alpine
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              runAsNonRoot: true
+              runAsUser: 70
+            env:
+              - name: PGHOST
+                value: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
+              - name: PGPORT
+                value: "5432"
+              - name: PGDATABASE
+                value: "#{ cognee_db_name | default('cognee') }#"
+              - name: PGUSER
+                value: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-api-secrets
+                    key: DB_PASSWORD
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "Initializing database schema..."
+                psql -v ON_ERROR_STOP=0 <<'EOF'
+                DO $$
+                BEGIN
+                  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'pipelinerunstatus') THEN
+                    CREATE TYPE pipelinerunstatus AS ENUM ('DATASET_PROCESSING_STARTED', 'DATASET_PROCESSING_COMPLETED', 'DATASET_PROCESSING_ERROR');
+                  END IF;
+                END $$;
+                CREATE EXTENSION IF NOT EXISTS vector;
+                EOF
+                echo "Database schema initialization complete"
 
         containers:
           app:
@@ -154,6 +192,45 @@ spec:
               ALLOW_HTTP_REQUESTS: "true"
               ALLOW_CYPHER_QUERY: "true"
 
+              # =================================================================
+              # Security Settings (v0.5.2+)
+              # =================================================================
+              # Rate Limiting - Login
+              AUTH_RATE_LIMIT_ENABLED: "#{ cognee_auth_rate_limit_enabled | default(true) | lower }#"
+              AUTH_RATE_LIMIT_LOGIN_REQUESTS: "#{ cognee_auth_rate_limit_login_requests | default(5) }#"
+              AUTH_RATE_LIMIT_LOGIN_WINDOW: "#{ cognee_auth_rate_limit_login_window | default(300) }#"
+
+              # Rate Limiting - OAuth
+              AUTH_RATE_LIMIT_OAUTH_REQUESTS: "#{ cognee_auth_rate_limit_oauth_requests | default(10) }#"
+              AUTH_RATE_LIMIT_OAUTH_WINDOW: "#{ cognee_auth_rate_limit_oauth_window | default(60) }#"
+
+              # Rate Limiting - Callback
+              AUTH_RATE_LIMIT_CALLBACK_REQUESTS: "#{ cognee_auth_rate_limit_callback_requests | default(5) }#"
+              AUTH_RATE_LIMIT_CALLBACK_WINDOW: "#{ cognee_auth_rate_limit_callback_window | default(60) }#"
+
+              # SSRF Protection
+              SSRF_PROTECTION_ENABLED: "#{ cognee_ssrf_protection_enabled | default(true) | lower }#"
+              ALLOW_PRIVATE_URLS: "#{ cognee_allow_private_urls | default(false) | lower }#"
+
+              # OAuth State Storage (Redis URL for multi-pod deployments)
+              OAUTH_STATE_REDIS_URL: "#{ cognee_oauth_state_redis_url | default('') }#"
+              OAUTH_STATE_TTL: "#{ cognee_oauth_state_ttl | default(600) }#"
+
+#% if cognee_oidc_enabled | default(false) %#
+              # =================================================================
+              # OIDC/Keycloak Authentication
+              # =================================================================
+              OIDC_ENABLED: "true"
+              OIDC_PROVIDER_NAME: "#{ cognee_oidc_provider_name | default('keycloak') }#"
+              OIDC_SERVER_METADATA_URL: "#{ cognee_oidc_server_metadata_url }#"
+              OIDC_BASE_URL: "#{ cognee_frontend_url | default('https://cognee.' ~ primary_domain) }#"
+              OIDC_REDIRECT_URI: "#{ cognee_frontend_url | default('https://cognee.' ~ primary_domain) }#/api/v1/auth/oidc/callback"
+              OIDC_SCOPES: "#{ cognee_oidc_scopes | default('openid profile email') }#"
+              OIDC_GROUP_CLAIM: "#{ cognee_oidc_group_claim | default('groups') }#"
+              OIDC_DEFAULT_ROLE: "#{ cognee_oidc_default_role | default('viewer') }#"
+              OIDC_AUTO_PROVISION_USERS: "#{ cognee_oidc_auto_provision_users | default(true) | lower }#"
+#% endif %#
+
             envFrom:
               - secretRef:
                   name: cognee-api-secrets
@@ -232,9 +309,13 @@ spec:
               pullPolicy: Always
 
             env:
-              # Backend API URL (internal service)
-              NEXT_PUBLIC_BACKEND_API_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
-              # Frontend base URL (external hostname)
+              # Server-side only vars for Next.js rewrites (NOT exposed to browser)
+              # These are used by next.config.mjs to proxy API calls to backend services
+              BACKEND_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
+#% if cognee_mcp_enabled | default(false) %#
+              MCP_URL: "http://cognee-mcp.ai-system.svc.cluster.local:8001"
+#% endif %#
+              # Frontend base URL (external hostname for OAuth callbacks)
               APP_BASE_URL: "#{ cognee_frontend_url | default('https://cognee.' ~ primary_domain) }#"
 #% if cognee_auth0_domain | default('') != '' %#
             # Auth0 configuration (when Auth0 credentials are configured)
@@ -292,6 +373,109 @@ spec:
                   failureThreshold: 3
 #% endif %#
 
+#% if cognee_mcp_enabled | default(false) %#
+      # ========================================================================
+      # MCP Server Controller
+      # ========================================================================
+      mcp:
+        type: deployment
+        replicas: #{ cognee_mcp_replicas | default(1) }#
+        strategy: RollingUpdate
+        rollingUpdate:
+          unavailable: 0
+          surge: 1
+
+        pod:
+          labels:
+            app.kubernetes.io/component: mcp
+            obot.obot.ai/mcp-server: #{ cognee_mcp_server_name | default('cognee-mcp') }#
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/jrmatherly/cognee-mcp
+              tag: "#{ cognee_mcp_version | default('main') }#"
+              pullPolicy: Always
+
+            env:
+              # MCP Server Configuration
+              ENVIRONMENT: "production"
+              LOG_LEVEL: "INFO"
+              TRANSPORT_MODE: "sse"
+              HTTP_PORT: "8001"
+              # Database configuration - matches backend
+              DB_PROVIDER: "postgres"
+              DB_HOST: "#{ 'cognee-db-rw.ai-system.svc.cluster.local' if cognee_dedicated_db | default(false) else 'obot-db-rw.obot.svc.cluster.local' }#"
+              DB_PORT: "5432"
+              DB_NAME: "#{ cognee_db_name | default('cognee') }#"
+              DB_USERNAME: "#{ 'cognee' if cognee_dedicated_db | default(false) else 'obot' }#"
+              # Vector DB configuration
+              VECTOR_DB_PROVIDER: "pgvector"
+              # Graph DB configuration
+              GRAPH_DATABASE_PROVIDER: "neo4j"
+              GRAPH_DATABASE_URL: "bolt://neo4j.storage.svc.cluster.local:7687"
+              GRAPH_DATABASE_NAME: "neo4j"
+              GRAPH_DATABASE_USERNAME: "neo4j"
+              # LLM configuration
+              LLM_PROVIDER: "openai"
+              LLM_ENDPOINT: "#{ cognee_llm_base_url | default('http://litellm.ai-system.svc.cluster.local:4000/v1') }#"
+              LLM_MODEL: "#{ cognee_llm_model | default('gpt-5-mini') }#"
+              # Embedding configuration
+              EMBEDDING_PROVIDER: "openai"
+              EMBEDDING_ENDPOINT: "#{ cognee_llm_base_url | default('http://litellm.ai-system.svc.cluster.local:4000/v1') }#"
+              EMBEDDING_MODEL: "#{ cognee_embedding_model | default('text-embedding-3-large') }#"
+              EMBEDDING_DIMENSIONS: "#{ cognee_embedding_dimensions | default(3072) }#"
+
+            envFrom:
+              - secretRef:
+                  name: cognee-api-secrets
+
+            resources:
+              requests:
+                cpu: "#{ cognee_mcp_resources_requests_cpu | default('100m') }#"
+                memory: "#{ cognee_mcp_resources_requests_memory | default('512Mi') }#"
+              limits:
+                cpu: "#{ cognee_mcp_resources_limits_cpu | default('1000m') }#"
+                memory: "#{ cognee_mcp_resources_limits_memory | default('2Gi') }#"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              seccompProfile:
+                type: RuntimeDefault
+
+            probes:
+              startup:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  initialDelaySeconds: 10
+                  periodSeconds: 5
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+              liveness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: http
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+#% endif %#
+
     # ==========================================================================
     # Service Configuration
     # ==========================================================================
@@ -310,6 +494,15 @@ spec:
           http:
             port: 3000
             targetPort: 3000
+            protocol: HTTP
+#% endif %#
+#% if cognee_mcp_enabled | default(false) %#
+      mcp:
+        controller: mcp
+        ports:
+          http:
+            port: 8001
+            targetPort: 8001
             protocol: HTTP
 #% endif %#
 

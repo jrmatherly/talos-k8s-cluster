@@ -233,6 +233,11 @@ cognee_llm_model: "gpt-5-mini"
 cognee_embedding_model: "text-embedding-3-large"
 cognee_embedding_dimensions: 3072
 cognee_mcp_server_name: "cognee-mcp"
+cognee_litellm_api_key: "sk-test-litellm-api-key"
+# Cognee MCP Server Configuration
+cognee_mcp_enabled: true
+cognee_mcp_version: "main"
+cognee_mcp_replicas: 1
 # Cognee API Server Configuration
 cognee_api_enabled: true
 cognee_api_hostname: "cognee"
@@ -249,3 +254,5 @@ cognee_auth0_domain: "test-tenant.auth0.com"
 cognee_auth0_client_id: "test-client-id"
 cognee_auth0_client_secret: "test-client-secret"
 cognee_auth0_secret: "test-auth0-session-secret"
+# Cognee JWT Security (REQUIRED - v0.5.2+)
+cognee_jwt_secret: "test-jwt-secret-must-be-at-least-32-characters-long-for-security"

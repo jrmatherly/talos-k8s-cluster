@@ -24,4 +24,8 @@ resources:
   - frontend-secret.sops.yaml
   - frontend-networkpolicy.yaml
 #% endif %#
+#% if cognee_mcp_enabled | default(false) %#
+  # Cognee MCP Server resources
+  - mcp-networkpolicy.yaml
+#% endif %#
 #% endif %#

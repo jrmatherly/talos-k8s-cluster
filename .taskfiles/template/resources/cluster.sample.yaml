@@ -386,6 +386,18 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: 1)
 # prometheus_replicas: 1
 
+# -- Number of Alertmanager replicas for HA.
+#    (OPTIONAL) / (DEFAULT: 1)
+# prometheus_alertmanager_replicas: 1
+
+# -- Storage size for Alertmanager PVC.
+#    (OPTIONAL) / (DEFAULT: "5Gi")
+# alertmanager_storage_size: "5Gi"
+
+# -- Storage size for Grafana PVC.
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+# grafana_storage_size: "10Gi"
+
 # ==============================================================================
 # ONEDEV CONFIGURATION (Optional - Git Server with CI/CD)
 # ==============================================================================
@@ -630,6 +642,13 @@ cloudflare_token: ""
 #   - email
 #   - offline_access
 
+# -- Keycloak client secret for agentgateway.
+#    (OPTIONAL) - Defaults to keycloak_oidc_client_secret if not set
+#    Will be encrypted with SOPS
+#    NOTE: Use a separate client secret if agentgateway needs different
+#    permissions than the main OIDC client.
+# keycloak_agentgateway_client_secret: ""
+
 # ==============================================================================
 # OBOT CONFIGURATION (Optional - Multi-Tenant MCP Gateway)
 # ==============================================================================
@@ -667,6 +686,19 @@ cloudflare_token: ""
 #    (REQUIRED if obot_enabled) - Will be encrypted with SOPS
 #    Generate with: openssl rand -base64 24
 # obot_postgres_password: ""
+
+# ==============================================================================
+# OBOT CLOUDNATIVEPG CONFIGURATION
+# ==============================================================================
+
+# -- Number of PostgreSQL replicas (CloudNativePG cluster).
+#    (OPTIONAL) / (DEFAULT: 3)
+#    NOTE: Uses CloudNativePG for high-availability PostgreSQL
+# obot_postgresql_replicas: 3
+
+# -- PostgreSQL storage size per replica.
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+# obot_postgresql_storage_size: "10Gi"
 
 # ==============================================================================
 # OBOT MCP SERVER CONFIGURATION
@@ -1274,6 +1306,11 @@ kagent_kmcp_enabled: true
 #    Use ai-gw.${SECRET_DOMAIN} if using agentgateway instead of LiteLLM
 # cognee_llm_base_url: "https://llms.${SECRET_DOMAIN}/v1"
 
+# -- LiteLLM API key for Cognee LLM and embedding access.
+#    (REQUIRED if cognee_enabled) - Use LiteLLM master key or dedicated key
+#    This key is used for both LLM and embedding model access via LiteLLM proxy
+# cognee_litellm_api_key: ""
+
 # -- LLM model for Cognee processing.
 #    (OPTIONAL) / (DEFAULT: "gpt-5-mini")
 #    Model name or alias from LiteLLM config
@@ -1283,6 +1320,42 @@ kagent_kmcp_enabled: true
 #    (OPTIONAL) / (DEFAULT: "cognee-mcp")
 #    Must match the MCP server registration name in Obot
 # cognee_mcp_server_name: "cognee-mcp"
+
+# ============================================================================
+# COGNEE MCP SERVER CONFIGURATION (optional - enables MCP service deployment)
+# ============================================================================
+# Deploy Cognee MCP server for Model Context Protocol integration.
+# Required for Cognee frontend UI MCP features and Obot MCP integration.
+
+# -- Enable Cognee MCP server deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Deploys cognee-mcp service accessible by frontend and Obot
+# cognee_mcp_enabled: false
+
+# -- Cognee MCP Docker image version.
+#    (OPTIONAL) / (DEFAULT: "main")
+#    Uses ghcr.io/jrmatherly/cognee-mcp:<version>
+# cognee_mcp_version: "main"
+
+# -- Number of Cognee MCP replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# cognee_mcp_replicas: 1
+
+# -- CPU request for Cognee MCP pods.
+#    (OPTIONAL) / (DEFAULT: "100m")
+# cognee_mcp_resources_requests_cpu: "100m"
+
+# -- Memory request for Cognee MCP pods.
+#    (OPTIONAL) / (DEFAULT: "512Mi")
+# cognee_mcp_resources_requests_memory: "512Mi"
+
+# -- CPU limit for Cognee MCP pods.
+#    (OPTIONAL) / (DEFAULT: "1000m")
+# cognee_mcp_resources_limits_cpu: "1000m"
+
+# -- Memory limit for Cognee MCP pods.
+#    (OPTIONAL) / (DEFAULT: "2Gi")
+# cognee_mcp_resources_limits_memory: "2Gi"
 
 # ============================================================================
 # COGNEE API SERVER CONFIGURATION (optional - requires cognee_enabled)
@@ -1396,3 +1469,120 @@ kagent_kmcp_enabled: true
 #    (OPTIONAL) / (DEFAULT: "") - Should be SOPS encrypted
 #    Generate with: openssl rand -base64 32
 # cognee_auth0_secret: ""
+
+# ============================================================================
+# COGNEE JWT SECURITY (REQUIRED - v0.5.2+)
+# ============================================================================
+# JWT secrets are REQUIRED for the backend to start.
+# Generate with: python -c "import secrets; print(secrets.token_urlsafe(64))"
+
+# -- JWT secret for FastAPI Users authentication.
+#    (REQUIRED if cognee_api_enabled) - Must be at least 32 characters
+#    SOPS encrypt: sops --encrypt --age <AGE_PUBLIC_KEY>
+# cognee_jwt_secret: ""
+
+# -- Reset password token secret.
+#    (OPTIONAL) / (DEFAULT: uses cognee_jwt_secret)
+#    For production, use a unique secret per token type
+# cognee_reset_password_token_secret: ""
+
+# -- Verification token secret.
+#    (OPTIONAL) / (DEFAULT: uses cognee_jwt_secret)
+#    For production, use a unique secret per token type
+# cognee_verification_token_secret: ""
+
+# ============================================================================
+# COGNEE SECURITY SETTINGS (v0.5.2+)
+# ============================================================================
+
+# -- Enable authentication rate limiting.
+#    (OPTIONAL) / (DEFAULT: true)
+#    Protects against brute force login attacks
+# cognee_auth_rate_limit_enabled: true
+
+# -- Maximum login attempts per window.
+#    (OPTIONAL) / (DEFAULT: 5)
+# cognee_auth_rate_limit_login_requests: 5
+
+# -- Login rate limit window in seconds.
+#    (OPTIONAL) / (DEFAULT: 300)
+# cognee_auth_rate_limit_login_window: 300
+
+# -- Maximum OAuth route attempts per window.
+#    (OPTIONAL) / (DEFAULT: 10)
+# cognee_auth_rate_limit_oauth_requests: 10
+
+# -- OAuth rate limit window in seconds.
+#    (OPTIONAL) / (DEFAULT: 60)
+# cognee_auth_rate_limit_oauth_window: 60
+
+# -- Maximum callback route attempts per window.
+#    (OPTIONAL) / (DEFAULT: 5)
+# cognee_auth_rate_limit_callback_requests: 5
+
+# -- Callback rate limit window in seconds.
+#    (OPTIONAL) / (DEFAULT: 60)
+# cognee_auth_rate_limit_callback_window: 60
+
+# -- Enable SSRF protection.
+#    (OPTIONAL) / (DEFAULT: true)
+#    Prevents server-side request forgery attacks
+# cognee_ssrf_protection_enabled: true
+
+# -- Allow fetching private/internal IPs.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Set to true only in trusted environments
+# cognee_allow_private_urls: false
+
+# -- Redis URL for OAuth state storage (multi-pod deployments).
+#    (OPTIONAL) / (DEFAULT: "")
+#    REQUIRED for multi-replica deployments - OAuth login will fail across pods without Redis
+#    Example: redis://redis.ai-system.svc.cluster.local:6379/0
+# cognee_oauth_state_redis_url: ""
+
+# -- OAuth state time-to-live in seconds.
+#    (OPTIONAL) / (DEFAULT: 600)
+# cognee_oauth_state_ttl: 600
+
+# ============================================================================
+# COGNEE OIDC/KEYCLOAK AUTHENTICATION (OPTIONAL)
+# ============================================================================
+# Integrate with Keycloak or other OIDC providers for enterprise SSO.
+
+# -- Enable OIDC authentication for backend.
+#    (OPTIONAL) / (DEFAULT: false)
+# cognee_oidc_enabled: false
+
+# -- OIDC provider name (for display).
+#    (OPTIONAL) / (DEFAULT: "keycloak")
+# cognee_oidc_provider_name: "keycloak"
+
+# -- OIDC client ID.
+#    (REQUIRED if cognee_oidc_enabled) - SOPS encrypted
+# cognee_oidc_client_id: ""
+
+# -- OIDC client secret.
+#    (REQUIRED if cognee_oidc_enabled) - SOPS encrypted
+# cognee_oidc_client_secret: ""
+
+# -- OIDC discovery/metadata URL.
+#    (REQUIRED if cognee_oidc_enabled)
+#    Example: https://keycloak.example.com/realms/cognee/.well-known/openid-configuration
+# cognee_oidc_server_metadata_url: ""
+
+# -- OIDC scopes to request.
+#    (OPTIONAL) / (DEFAULT: "openid profile email")
+# cognee_oidc_scopes: "openid profile email"
+
+# -- OIDC claim for group membership.
+#    (OPTIONAL) / (DEFAULT: "groups")
+# cognee_oidc_group_claim: "groups"
+
+# -- Default role for new OIDC users.
+#    (OPTIONAL) / (DEFAULT: "viewer")
+# cognee_oidc_default_role: "viewer"
+
+# -- Auto-provision new users from OIDC.
+#    (OPTIONAL) / (DEFAULT: true)
+#    When true, creates user accounts automatically on first OIDC login
+# cognee_oidc_auto_provision_users: true

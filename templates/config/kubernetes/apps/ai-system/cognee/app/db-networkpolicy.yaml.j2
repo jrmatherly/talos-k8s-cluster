@@ -43,6 +43,17 @@ spec:
         - protocol: TCP
           port: 5432
 #% endif %#
+#% if cognee_mcp_enabled | default(false) %#
+    # Allow from Cognee MCP server (in ai-system namespace)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cognee
+              app.kubernetes.io/component: mcp
+      ports:
+        - protocol: TCP
+          port: 5432
+#% endif %#
     # Allow from Cognee MCP server (in obot-mcp namespace)
     - from:
         - namespaceSelector:

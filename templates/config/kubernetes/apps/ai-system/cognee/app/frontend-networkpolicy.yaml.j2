@@ -50,6 +50,17 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+#% if cognee_mcp_enabled | default(false) %#
+    # To Cognee MCP Server (same namespace)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cognee
+              app.kubernetes.io/component: mcp
+      ports:
+        - protocol: TCP
+          port: 8001
+#% endif %#
     # External HTTPS (for Auth0 OAuth)
     - to:
         - ipBlock:

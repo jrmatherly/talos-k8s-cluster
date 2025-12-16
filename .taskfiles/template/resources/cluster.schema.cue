@@ -274,10 +274,20 @@ import (
 	cognee_neo4j_version?: string & !=""        // Neo4j CE version (default: 5.26.0)
 	cognee_neo4j_storage_size?: string & !=""   // Neo4j PVC size (default: 10Gi)
 	cognee_llm_base_url?: string & !=""         // LLM endpoint (default: https://llms.${SECRET_DOMAIN}/v1)
+	cognee_litellm_api_key?: string & !=""     // LiteLLM API key for LLM/embedding access (required if cognee_enabled)
 	cognee_llm_model?: string & !=""            // LLM model name (default: gpt-5-mini)
 	cognee_embedding_model?: string & !=""      // Embedding model name (default: text-embedding-3-large)
 	cognee_embedding_dimensions?: int & >=1    // Embedding dimensions (default: 3072)
 	cognee_mcp_server_name?: string & !=""     // MCP server name for NetworkPolicy selectors (default: cognee-mcp)
+
+	// Cognee MCP Server Configuration (optional - enables MCP service deployment)
+	cognee_mcp_enabled?: bool                   // Enable Cognee MCP server deployment
+	cognee_mcp_version?: string & !=""          // MCP Docker image version (default: main)
+	cognee_mcp_replicas?: int & >=1             // Number of MCP replicas (default: 1)
+	cognee_mcp_resources_requests_cpu?: string & !=""     // CPU request (default: 100m)
+	cognee_mcp_resources_requests_memory?: string & !=""  // Memory request (default: 512Mi)
+	cognee_mcp_resources_limits_cpu?: string & !=""       // CPU limit (default: 1000m)
+	cognee_mcp_resources_limits_memory?: string & !=""    // Memory limit (default: 2Gi)
 
 	// Cognee API Server Configuration (optional - requires cognee_enabled)
 	cognee_api_enabled?: bool                   // Enable Cognee API server deployment with UI
@@ -306,6 +316,35 @@ import (
 	cognee_auth0_client_id?: string                       // Auth0 application client ID
 	cognee_auth0_client_secret?: string                   // Auth0 application client secret
 	cognee_auth0_secret?: string                          // Auth0 session secret for NextAuth
+
+	// Cognee JWT Security (REQUIRED - v0.5.2+)
+	cognee_jwt_secret?: string & !=""                     // JWT secret for authentication (min 32 chars, SOPS encrypted)
+	cognee_reset_password_token_secret?: string & !=""    // Reset password token secret (defaults to jwt_secret)
+	cognee_verification_token_secret?: string & !=""      // Verification token secret (defaults to jwt_secret)
+
+	// Cognee Security Settings (v0.5.2+)
+	cognee_auth_rate_limit_enabled?: bool                 // Enable auth rate limiting (default: true)
+	cognee_auth_rate_limit_login_requests?: int & >=1     // Login attempts per window (default: 5)
+	cognee_auth_rate_limit_login_window?: int & >=1       // Login rate limit window in seconds (default: 300)
+	cognee_auth_rate_limit_oauth_requests?: int & >=1     // OAuth attempts per window (default: 10)
+	cognee_auth_rate_limit_oauth_window?: int & >=1       // OAuth rate limit window in seconds (default: 60)
+	cognee_auth_rate_limit_callback_requests?: int & >=1  // Callback attempts per window (default: 5)
+	cognee_auth_rate_limit_callback_window?: int & >=1    // Callback rate limit window in seconds (default: 60)
+	cognee_ssrf_protection_enabled?: bool                 // Enable SSRF protection (default: true)
+	cognee_allow_private_urls?: bool                      // Allow fetching private IPs (default: false)
+	cognee_oauth_state_redis_url?: string                 // Redis URL for OAuth state storage (multi-pod)
+	cognee_oauth_state_ttl?: int & >=1                    // OAuth state TTL in seconds (default: 600)
+
+	// Cognee OIDC/Keycloak Configuration (optional - for backend authentication)
+	cognee_oidc_enabled?: bool                            // Enable OIDC authentication
+	cognee_oidc_provider_name?: string & !=""             // OIDC provider name (default: keycloak)
+	cognee_oidc_client_id?: string & !=""                 // OIDC client ID (SOPS encrypted)
+	cognee_oidc_client_secret?: string & !=""             // OIDC client secret (SOPS encrypted)
+	cognee_oidc_server_metadata_url?: string & !=""       // OIDC discovery URL
+	cognee_oidc_scopes?: string & !=""                    // OIDC scopes (default: openid profile email)
+	cognee_oidc_group_claim?: string & !=""               // OIDC claim for group membership (default: groups)
+	cognee_oidc_default_role?: string & !=""              // Default role for new users (default: viewer)
+	cognee_oidc_auto_provision_users?: bool               // Auto-provision new OIDC users (default: true)
 }
 
 #Config

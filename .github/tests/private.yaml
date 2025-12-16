@@ -170,6 +170,11 @@ proxmox_csi_token_secret: "fake-secret"
 # cognee_embedding_model: ""
 # cognee_embedding_dimensions:
 # cognee_mcp_server_name: ""
+# cognee_litellm_api_key: ""
+# Cognee MCP Server (disabled for private repo testing)
+# cognee_mcp_enabled: false
+# cognee_mcp_version: ""
+# cognee_mcp_replicas:
 # Cognee API Server (disabled for private repo testing)
 # cognee_api_enabled: false
 # cognee_api_hostname: ""
@@ -186,3 +191,5 @@ proxmox_csi_token_secret: "fake-secret"
 # cognee_auth0_client_id: ""
 # cognee_auth0_client_secret: ""
 # cognee_auth0_secret: ""
+# Cognee JWT Security (REQUIRED - v0.5.2+)
+# cognee_jwt_secret: ""

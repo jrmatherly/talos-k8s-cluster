@@ -419,6 +419,15 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_embedding_model", "text-embedding-3-large")
         data.setdefault("cognee_embedding_dimensions", 3072)
         data.setdefault("cognee_mcp_server_name", "cognee-mcp")
+        data.setdefault("cognee_litellm_api_key", "")
+        # Cognee MCP Server defaults
+        data.setdefault("cognee_mcp_enabled", False)
+        data.setdefault("cognee_mcp_version", "main")
+        data.setdefault("cognee_mcp_replicas", 1)
+        data.setdefault("cognee_mcp_resources_requests_cpu", "100m")
+        data.setdefault("cognee_mcp_resources_requests_memory", "512Mi")
+        data.setdefault("cognee_mcp_resources_limits_cpu", "1000m")
+        data.setdefault("cognee_mcp_resources_limits_memory", "2Gi")
         # Cognee API Server defaults
         data.setdefault("cognee_api_enabled", False)
         data.setdefault("cognee_api_hostname", "cognee-api")
@@ -444,6 +453,35 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_auth0_client_id", "")
         data.setdefault("cognee_auth0_client_secret", "")
         data.setdefault("cognee_auth0_secret", "")
+
+        # Cognee JWT Security defaults (v0.5.2+ - REQUIRED when cognee_api_enabled)
+        # NOTE: cognee_jwt_secret has no default - must be explicitly set
+        data.setdefault("cognee_reset_password_token_secret", data.get("cognee_jwt_secret", ""))
+        data.setdefault("cognee_verification_token_secret", data.get("cognee_jwt_secret", ""))
+
+        # Cognee Security Settings defaults (v0.5.2+)
+        data.setdefault("cognee_auth_rate_limit_enabled", True)
+        data.setdefault("cognee_auth_rate_limit_login_requests", 5)
+        data.setdefault("cognee_auth_rate_limit_login_window", 300)
+        data.setdefault("cognee_auth_rate_limit_oauth_requests", 10)
+        data.setdefault("cognee_auth_rate_limit_oauth_window", 60)
+        data.setdefault("cognee_auth_rate_limit_callback_requests", 5)
+        data.setdefault("cognee_auth_rate_limit_callback_window", 60)
+        data.setdefault("cognee_ssrf_protection_enabled", True)
+        data.setdefault("cognee_allow_private_urls", False)
+        data.setdefault("cognee_oauth_state_redis_url", "")
+        data.setdefault("cognee_oauth_state_ttl", 600)
+
+        # Cognee OIDC defaults (optional)
+        data.setdefault("cognee_oidc_enabled", False)
+        data.setdefault("cognee_oidc_provider_name", "keycloak")
+        data.setdefault("cognee_oidc_client_id", "")
+        data.setdefault("cognee_oidc_client_secret", "")
+        data.setdefault("cognee_oidc_server_metadata_url", "")
+        data.setdefault("cognee_oidc_scopes", "openid profile email")
+        data.setdefault("cognee_oidc_group_claim", "groups")
+        data.setdefault("cognee_oidc_default_role", "viewer")
+        data.setdefault("cognee_oidc_auto_provision_users", True)
 
         return data
 
