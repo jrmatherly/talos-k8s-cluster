@@ -342,31 +342,6 @@ spec:
               NEXT_PUBLIC_BACKEND_API_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
               # Frontend base URL (external hostname)
               APP_BASE_URL: "https://cognee.matherly.net"
-              # Auth0 configuration (optional)
-              AUTH0_DOMAIN:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_DOMAIN
-                    optional: true
-              AUTH0_CLIENT_ID:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_CLIENT_ID
-                    optional: true
-              AUTH0_CLIENT_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_CLIENT_SECRET
-                    optional: true
-              AUTH0_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_SECRET
-                    optional: true
 
             resources:
               requests:

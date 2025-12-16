@@ -344,31 +344,12 @@ spec:
               NEXT_PUBLIC_BACKEND_API_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
               # Frontend base URL (external hostname)
               APP_BASE_URL: "#{ cognee_frontend_url | default('https://cognee.' ~ primary_domain) }#"
-              # Auth0 configuration (optional)
-              AUTH0_DOMAIN:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_DOMAIN
-                    optional: true
-              AUTH0_CLIENT_ID:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_CLIENT_ID
-                    optional: true
-              AUTH0_CLIENT_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_CLIENT_SECRET
-                    optional: true
-              AUTH0_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: cognee-frontend-secrets
-                    key: AUTH0_SECRET
-                    optional: true
+#% if cognee_auth0_domain | default('') != '' %#
+            # Auth0 configuration (when Auth0 credentials are configured)
+            envFrom:
+              - secretRef:
+                  name: cognee-frontend-secrets
+#% endif %#
 
             resources:
               requests:
