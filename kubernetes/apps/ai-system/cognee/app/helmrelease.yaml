@@ -193,7 +193,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee
-              tag: "main"
+              tag: "v0.5.0"
               pullPolicy: Always
 
             env:
@@ -363,7 +363,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee-frontend
-              tag: "main"
+              tag: "v0.5.0"
               pullPolicy: Always
 
             env:
