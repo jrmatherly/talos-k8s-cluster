@@ -188,6 +188,33 @@ spec:
                       RAISE NOTICE 'users table already has tenant_id column';
                     END IF;
                   END IF;
+
+                  -- Create datasets table if not exists
+                  -- Fixes: multi_tenant_support migration checks datasets.tenant_id column
+                  -- Migration c946955da633 does: _get_column(insp, "datasets", "tenant_id")
+                  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'datasets') THEN
+                    CREATE TABLE datasets (
+                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                      name VARCHAR NOT NULL,
+                      description VARCHAR,
+                      owner_id UUID,
+                      tenant_id UUID,
+                      created_at TIMESTAMPTZ DEFAULT NOW(),
+                      updated_at TIMESTAMPTZ DEFAULT NOW()
+                    );
+                    CREATE INDEX ix_datasets_owner_id ON datasets(owner_id);
+                    CREATE INDEX ix_datasets_tenant_id ON datasets(tenant_id);
+                    RAISE NOTICE 'Created datasets table with tenant_id column';
+                  ELSE
+                    -- Add tenant_id column if missing (for existing tables)
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'datasets' AND column_name = 'tenant_id') THEN
+                      ALTER TABLE datasets ADD COLUMN tenant_id UUID;
+                      CREATE INDEX IF NOT EXISTS ix_datasets_tenant_id ON datasets(tenant_id);
+                      RAISE NOTICE 'Added tenant_id column to existing datasets table';
+                    ELSE
+                      RAISE NOTICE 'datasets table already has tenant_id column';
+                    END IF;
+                  END IF;
                 END\$\$;
                 " && echo "Database schema prerequisites initialized successfully"
             securityContext:
