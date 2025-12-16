@@ -32,7 +32,6 @@ spec:
           type: RuntimeDefault
       labels:
         app.kubernetes.io/name: cognee
-        app.kubernetes.io/component: api
       terminationGracePeriodSeconds: 60
 
     # ==========================================================================
@@ -42,6 +41,9 @@ spec:
       cognee:
         type: deployment
         replicas: #{ cognee_replicas | default(1) }#
+        pod:
+          labels:
+            app.kubernetes.io/component: api
         strategy: RollingUpdate
         rollingUpdate:
           unavailable: 0
@@ -162,9 +164,9 @@ spec:
         containers:
           app:
             image:
-              repository: cognee/cognee
-              tag: "#{ cognee_version | default('0.5.0') }#"
-              pullPolicy: IfNotPresent
+              repository: ghcr.io/jrmatherly/cognee
+              tag: "#{ cognee_version | default('main') }#"
+              pullPolicy: Always
 
             env:
               # =================================================================
@@ -309,6 +311,114 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 3
 
+#% if cognee_frontend_enabled | default(false) %#
+      # ========================================================================
+      # Frontend Controller
+      # ========================================================================
+      frontend:
+        type: deployment
+        replicas: #{ cognee_frontend_replicas | default(1) }#
+        strategy: RollingUpdate
+        rollingUpdate:
+          unavailable: 0
+          surge: 1
+
+        pod:
+          labels:
+            app.kubernetes.io/component: frontend
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            runAsNonRoot: true
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/jrmatherly/cognee-frontend
+              tag: "#{ cognee_frontend_version | default('main') }#"
+              pullPolicy: Always
+
+            env:
+              # Backend API URL (internal service)
+              NEXT_PUBLIC_BACKEND_API_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
+              # Frontend base URL (external hostname)
+              APP_BASE_URL: "#{ cognee_frontend_url | default('https://cognee.' ~ primary_domain) }#"
+              # Auth0 configuration (optional)
+              AUTH0_DOMAIN:
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-frontend-secrets
+                    key: AUTH0_DOMAIN
+                    optional: true
+              AUTH0_CLIENT_ID:
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-frontend-secrets
+                    key: AUTH0_CLIENT_ID
+                    optional: true
+              AUTH0_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-frontend-secrets
+                    key: AUTH0_CLIENT_SECRET
+                    optional: true
+              AUTH0_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: cognee-frontend-secrets
+                    key: AUTH0_SECRET
+                    optional: true
+
+            resources:
+              requests:
+                cpu: "#{ cognee_frontend_resources_requests_cpu | default('100m') }#"
+                memory: "#{ cognee_frontend_resources_requests_memory | default('256Mi') }#"
+              limits:
+                cpu: "#{ cognee_frontend_resources_limits_cpu | default('500m') }#"
+                memory: "#{ cognee_frontend_resources_limits_memory | default('512Mi') }#"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              runAsNonRoot: true
+              runAsUser: 10001
+              runAsGroup: 10001
+              seccompProfile:
+                type: RuntimeDefault
+
+            probes:
+              startup:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: http
+                  initialDelaySeconds: 5
+                  periodSeconds: 3
+                  timeoutSeconds: 3
+                  failureThreshold: 20
+              liveness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: http
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                spec:
+                  httpGet:
+                    path: /api/health
+                    port: http
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+#% endif %#
+
     # ==========================================================================
     # Service Configuration
     # ==========================================================================
@@ -320,6 +430,15 @@ spec:
             port: 8000
             targetPort: 8000
             protocol: HTTP
+#% if cognee_frontend_enabled | default(false) %#
+      frontend:
+        controller: frontend
+        ports:
+          http:
+            port: 3000
+            targetPort: 3000
+            protocol: HTTP
+#% endif %#
 
     # ==========================================================================
     # Persistence - Data storage for Cognee

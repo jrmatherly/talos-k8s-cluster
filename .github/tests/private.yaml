@@ -175,3 +175,13 @@ proxmox_csi_token_secret: "fake-secret"
 # cognee_hostname: ""
 # cognee_version: ""
 # cognee_replicas:
+# Cognee Frontend (disabled for private repo testing)
+# cognee_frontend_enabled: false
+# cognee_frontend_hostname: ""
+# cognee_frontend_version: ""
+# cognee_frontend_replicas:
+# Cognee Auth0 (disabled for private repo testing)
+# cognee_auth0_domain: ""
+# cognee_auth0_client_id: ""
+# cognee_auth0_client_secret: ""
+# cognee_auth0_secret: ""

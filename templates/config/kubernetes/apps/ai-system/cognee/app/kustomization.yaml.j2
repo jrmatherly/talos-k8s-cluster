@@ -19,4 +19,9 @@ resources:
   - api-networkpolicy.yaml
   - httproute.yaml
 #% endif %#
+#% if cognee_frontend_enabled | default(false) %#
+  # Cognee Frontend resources
+  - frontend-secret.sops.yaml
+  - frontend-networkpolicy.yaml
+#% endif %#
 #% endif %#

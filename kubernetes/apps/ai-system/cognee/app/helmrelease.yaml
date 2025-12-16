@@ -31,7 +31,6 @@ spec:
           type: RuntimeDefault
       labels:
         app.kubernetes.io/name: cognee
-        app.kubernetes.io/component: api
       terminationGracePeriodSeconds: 60
 
     # ==========================================================================
@@ -41,6 +40,9 @@ spec:
       cognee:
         type: deployment
         replicas: 1
+        pod:
+          labels:
+            app.kubernetes.io/component: api
         strategy: RollingUpdate
         rollingUpdate:
           unavailable: 0
@@ -161,9 +163,9 @@ spec:
         containers:
           app:
             image:
-              repository: cognee/cognee
+              repository: ghcr.io/jrmatherly/cognee
               tag: "0.5.0"
-              pullPolicy: IfNotPresent
+              pullPolicy: Always
 
             env:
               # =================================================================
@@ -307,6 +309,7 @@ spec:
                   periodSeconds: 10
                   timeoutSeconds: 5
                   failureThreshold: 3
+
 
     # ==========================================================================
     # Service Configuration

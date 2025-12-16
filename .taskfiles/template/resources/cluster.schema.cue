@@ -288,6 +288,23 @@ import (
 	cognee_api_resources_requests_memory?: string & !=""  // Memory request (default: 512Mi)
 	cognee_api_resources_limits_cpu?: string & !=""       // CPU limit (default: 2000m)
 	cognee_api_resources_limits_memory?: string & !=""    // Memory limit (default: 4Gi)
+
+	// Cognee Frontend Configuration (optional - requires cognee_api_enabled)
+	cognee_frontend_enabled?: bool                        // Enable Cognee frontend UI
+	cognee_frontend_hostname?: string & !=""              // Frontend hostname subdomain (default: cognee)
+	cognee_frontend_version?: string & !=""               // Frontend Docker image version (default: main)
+	cognee_frontend_replicas?: int & >=1                  // Number of frontend replicas (default: 1)
+	cognee_frontend_url?: string & !=""                   // Full frontend URL (default: https://cognee.${domain})
+	cognee_frontend_resources_requests_cpu?: string & !=""     // CPU request (default: 100m)
+	cognee_frontend_resources_requests_memory?: string & !=""  // Memory request (default: 256Mi)
+	cognee_frontend_resources_limits_cpu?: string & !=""       // CPU limit (default: 500m)
+	cognee_frontend_resources_limits_memory?: string & !=""    // Memory limit (default: 512Mi)
+
+	// Cognee Auth0 Configuration (optional - for frontend authentication)
+	cognee_auth0_domain?: string                          // Auth0 tenant domain (e.g., your-tenant.auth0.com)
+	cognee_auth0_client_id?: string                       // Auth0 application client ID
+	cognee_auth0_client_secret?: string                   // Auth0 application client secret
+	cognee_auth0_secret?: string                          // Auth0 session secret for NextAuth
 }
 
 #Config

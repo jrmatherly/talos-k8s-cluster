@@ -421,13 +421,29 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_mcp_server_name", "cognee-mcp")
         # Cognee API Server defaults
         data.setdefault("cognee_api_enabled", False)
-        data.setdefault("cognee_hostname", "cognee")
-        data.setdefault("cognee_version", "0.5.0")
+        data.setdefault("cognee_api_hostname", "cognee-api")
+        data.setdefault("cognee_version", "main")
         data.setdefault("cognee_replicas", 1)
+        data.setdefault("cognee_gateway", "envoy-external")
         data.setdefault("cognee_api_resources_requests_cpu", "100m")
         data.setdefault("cognee_api_resources_requests_memory", "512Mi")
         data.setdefault("cognee_api_resources_limits_cpu", "2000m")
         data.setdefault("cognee_api_resources_limits_memory", "4Gi")
+        # Cognee Frontend defaults
+        data.setdefault("cognee_frontend_enabled", False)
+        data.setdefault("cognee_frontend_hostname", "cognee")
+        data.setdefault("cognee_frontend_version", "main")
+        data.setdefault("cognee_frontend_replicas", 1)
+        data.setdefault("cognee_frontend_url", f"https://cognee.{primary_domain}")
+        data.setdefault("cognee_frontend_resources_requests_cpu", "100m")
+        data.setdefault("cognee_frontend_resources_requests_memory", "256Mi")
+        data.setdefault("cognee_frontend_resources_limits_cpu", "500m")
+        data.setdefault("cognee_frontend_resources_limits_memory", "512Mi")
+        # Cognee Auth0 defaults (optional)
+        data.setdefault("cognee_auth0_domain", "")
+        data.setdefault("cognee_auth0_client_id", "")
+        data.setdefault("cognee_auth0_client_secret", "")
+        data.setdefault("cognee_auth0_secret", "")
 
         return data
 

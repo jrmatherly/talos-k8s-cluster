@@ -238,3 +238,13 @@ cognee_api_enabled: true
 cognee_hostname: "cognee"
 cognee_version: "0.5.0"
 cognee_replicas: 1
+# Cognee Frontend Configuration
+cognee_frontend_enabled: true
+cognee_frontend_hostname: "cognee"
+cognee_frontend_version: "main"
+cognee_frontend_replicas: 1
+# Cognee Auth0 Configuration (for frontend authentication)
+cognee_auth0_domain: "test-tenant.auth0.com"
+cognee_auth0_client_id: "test-client-id"
+cognee_auth0_client_secret: "test-client-secret"
+cognee_auth0_secret: "test-auth0-session-secret"

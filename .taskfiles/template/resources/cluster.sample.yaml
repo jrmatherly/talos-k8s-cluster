@@ -1296,13 +1296,19 @@ kagent_kmcp_enabled: true
 # cognee_api_enabled: false
 
 # -- Cognee API hostname (subdomain).
-#    (OPTIONAL) / (DEFAULT: "cognee")
-#    Results in cognee.<primary_domain>
-# cognee_hostname: "cognee"
+#    (OPTIONAL) / (DEFAULT: "cognee-api")
+#    Results in cognee-api.<primary_domain>
+# cognee_api_hostname: "cognee-api"
 
-# -- Cognee Docker image version.
-#    (OPTIONAL) / (DEFAULT: "0.5.0")
-# cognee_version: "0.5.0"
+# -- Gateway for Cognee routing.
+#    (OPTIONAL) / (DEFAULT: "envoy-external")
+#    Options: envoy-external, envoy-internal, envoy-ai
+# cognee_gateway: "envoy-external"
+
+# -- Cognee Backend Docker image version.
+#    (OPTIONAL) / (DEFAULT: "main")
+#    Uses ghcr.io/jrmatherly/cognee:<version>
+# cognee_version: "main"
 
 # -- Number of Cognee API replicas.
 #    (OPTIONAL) / (DEFAULT: 1)
@@ -1323,3 +1329,70 @@ kagent_kmcp_enabled: true
 # -- Memory limit for Cognee API pods.
 #    (OPTIONAL) / (DEFAULT: "4Gi")
 # cognee_api_resources_limits_memory: "4Gi"
+
+# ============================================================================
+# COGNEE FRONTEND CONFIGURATION (optional - requires cognee_api_enabled)
+# ============================================================================
+# Deploy Cognee Next.js frontend UI for document ingestion, graph exploration,
+# and knowledge graph visualization.
+
+# -- Enable Cognee Frontend deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Deploys frontend at cognee.${SECRET_DOMAIN}
+# cognee_frontend_enabled: false
+
+# -- Cognee Frontend hostname (subdomain).
+#    (OPTIONAL) / (DEFAULT: "cognee")
+#    Results in cognee.<primary_domain>
+# cognee_frontend_hostname: "cognee"
+
+# -- Cognee Frontend Docker image version.
+#    (OPTIONAL) / (DEFAULT: "main")
+#    Uses ghcr.io/jrmatherly/cognee-frontend:<version>
+# cognee_frontend_version: "main"
+
+# -- Number of Cognee Frontend replicas.
+#    (OPTIONAL) / (DEFAULT: 1)
+# cognee_frontend_replicas: 1
+
+# -- Full URL for frontend (used for OAuth callbacks).
+#    (OPTIONAL) / (DEFAULT: "https://cognee.${primary_domain}")
+# cognee_frontend_url: "https://cognee.example.com"
+
+# -- CPU request for Cognee Frontend pods.
+#    (OPTIONAL) / (DEFAULT: "100m")
+# cognee_frontend_resources_requests_cpu: "100m"
+
+# -- Memory request for Cognee Frontend pods.
+#    (OPTIONAL) / (DEFAULT: "256Mi")
+# cognee_frontend_resources_requests_memory: "256Mi"
+
+# -- CPU limit for Cognee Frontend pods.
+#    (OPTIONAL) / (DEFAULT: "500m")
+# cognee_frontend_resources_limits_cpu: "500m"
+
+# -- Memory limit for Cognee Frontend pods.
+#    (OPTIONAL) / (DEFAULT: "512Mi")
+# cognee_frontend_resources_limits_memory: "512Mi"
+
+# ============================================================================
+# COGNEE AUTH0 CONFIGURATION (optional - for frontend authentication)
+# ============================================================================
+# Auth0 configuration for frontend authentication. Leave empty to disable.
+
+# -- Auth0 domain.
+#    (OPTIONAL) / (DEFAULT: "")
+# cognee_auth0_domain: ""
+
+# -- Auth0 client ID.
+#    (OPTIONAL) / (DEFAULT: "")
+# cognee_auth0_client_id: ""
+
+# -- Auth0 client secret.
+#    (OPTIONAL) / (DEFAULT: "") - Should be SOPS encrypted
+# cognee_auth0_client_secret: ""
+
+# -- Auth0 session secret.
+#    (OPTIONAL) / (DEFAULT: "") - Should be SOPS encrypted
+#    Generate with: openssl rand -base64 32
+# cognee_auth0_secret: ""

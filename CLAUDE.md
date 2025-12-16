@@ -303,6 +303,7 @@ When adding new application templates to this project, multiple files must be up
 17. **Flux Kustomization substituteFrom** - Only use `cluster-secrets` Secret (exists in each namespace); `cluster-settings` ConfigMap doesn't exist in this cluster
 18. **MinIO v3 metrics require custom ServiceMonitor** - Helm chart only scrapes v2 endpoints; for community v3 Grafana dashboard, deploy separate ServiceMonitor scraping `/minio/metrics/v3/*` paths
 19. **Cognee migration architecture bug** - Cognee's entrypoint.sh runs Alembic migrations BEFORE SQLAlchemy creates base tables; init container workaround pre-creates some tables but deployment may still fail; see `docs/ai-context/cognee-deployment.md`
+20. **Cognee frontend requires GHCR images** - Uses `ghcr.io/jrmatherly/cognee` and `ghcr.io/jrmatherly/cognee-frontend`; frontend requires `cognee_frontend_enabled: true` and optionally Auth0 credentials for authentication
 
 ## Extended Documentation
 

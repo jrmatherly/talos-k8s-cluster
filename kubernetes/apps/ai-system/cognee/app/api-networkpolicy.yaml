@@ -21,6 +21,14 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+    # Allow from Envoy Gateway (external traffic)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 8000
     # Allow from within ai-system namespace (for internal clients)
     - from:
         - namespaceSelector:
