@@ -137,6 +137,7 @@ obot_s3_secret_key: "test-minio-secret-key"
 obot_s3_use_path_style: true
 # Resources (multiple replicas enabled with S3 storage)
 obot_replicas: 3
+obot_version: "v0.2.16"
 obot_cpu_request: "500m"
 obot_cpu_limit: "2000m"
 obot_memory_request: "1Gi"

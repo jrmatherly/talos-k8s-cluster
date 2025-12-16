@@ -168,6 +168,7 @@ import (
 	obot_postgresql_replicas?: int & >=1        // PostgreSQL replicas (default: 3)
 	obot_postgresql_storage_size?: string & !="" // PostgreSQL storage size (default: 10Gi)
 	obot_replicas?: int & >=1                   // Number of replicas (default: 1 for RWO storage)
+	obot_version?: string & !=""                // obot Docker image/chart version (default: v0.2.16)
 	obot_cpu_request?: string & !=""            // CPU request (default: 500m)
 	obot_cpu_limit?: string & !=""              // CPU limit (default: 2000m)
 	obot_memory_request?: string & !=""         // Memory request (default: 1Gi)

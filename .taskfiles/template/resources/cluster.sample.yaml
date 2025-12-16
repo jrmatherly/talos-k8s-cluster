@@ -785,6 +785,10 @@ cloudflare_token: ""
 #          Set obot_workspace_provider="s3" to enable multiple replicas.
 # obot_replicas: 1
 
+# -- obot Docker image and Helm chart version.
+#    (OPTIONAL) / (DEFAULT: "v0.2.16")
+# obot_version: "v0.2.16"
+
 # -- CPU request for obot container.
 #    (OPTIONAL) / (DEFAULT: "500m")
 # obot_cpu_request: "500m"

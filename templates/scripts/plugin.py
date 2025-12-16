@@ -308,6 +308,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_postgresql_storage_size", "10Gi")
         # Resources
         data.setdefault("obot_replicas", 1)
+        data.setdefault("obot_version", "v0.2.16")
         data.setdefault("obot_cpu_request", "500m")
         data.setdefault("obot_cpu_limit", "2000m")
         data.setdefault("obot_memory_request", "1Gi")

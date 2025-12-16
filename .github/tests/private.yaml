@@ -104,6 +104,7 @@ proxmox_csi_token_secret: "fake-secret"
 # obot_s3_access_key: ""
 # obot_s3_secret_key: ""
 # obot_s3_use_path_style: true
+# obot_version: ""
 # MinIO (disabled for private repo testing)
 # minio_enabled: false
 # minio_root_password: ""
