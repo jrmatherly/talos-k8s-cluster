@@ -1,5 +1,26 @@
 #% if cognee_enabled | default(false) and cognee_mcp_enabled | default(false) %#
 ---
+# CiliumNetworkPolicy for Cognee MCP Server - External HTTPS egress
+# Required for accessing external services (GitHub, package registries, etc.)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: cognee-mcp-world-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: cognee
+      app.kubernetes.io/component: mcp
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP
+---
 # NetworkPolicy for Cognee MCP Server
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

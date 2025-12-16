@@ -14,15 +14,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from internal gateway (Cilium Gateway API)
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: cilium-gateway
-      ports:
-        - protocol: TCP
-          port: 8000
-    # Allow from Envoy Gateway (external traffic)
+    # Allow from Envoy Gateway (external traffic via network namespace)
     - from:
         - namespaceSelector:
             matchLabels:

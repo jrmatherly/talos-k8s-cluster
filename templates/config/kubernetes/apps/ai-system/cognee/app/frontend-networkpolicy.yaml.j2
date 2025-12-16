@@ -14,19 +14,11 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from Envoy Gateway (external traffic)
+    # Allow from Envoy Gateway (external traffic via network namespace)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: network
-      ports:
-        - protocol: TCP
-          port: 3000
-    # Allow from Cilium Gateway API
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: cilium-gateway
       ports:
         - protocol: TCP
           port: 3000
