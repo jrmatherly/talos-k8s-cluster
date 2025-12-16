@@ -1275,9 +1275,9 @@ kagent_kmcp_enabled: true
 # cognee_llm_base_url: "https://llms.${SECRET_DOMAIN}/v1"
 
 # -- LLM model for Cognee processing.
-#    (OPTIONAL) / (DEFAULT: "gpt-4o-mini")
+#    (OPTIONAL) / (DEFAULT: "gpt-5-mini")
 #    Model name or alias from LiteLLM config
-# cognee_llm_model: "gpt-4o-mini"
+# cognee_llm_model: "gpt-5-mini"
 
 # -- MCP server name for Cognee (used in NetworkPolicy selectors).
 #    (OPTIONAL) / (DEFAULT: "cognee-mcp")

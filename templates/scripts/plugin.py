@@ -415,7 +415,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_neo4j_storage_size", "10Gi")
         primary_domain = data.get("primary_domain", "example.com")
         data.setdefault("cognee_llm_base_url", f"https://llms.{primary_domain}/v1")
-        data.setdefault("cognee_llm_model", "gpt-4o-mini")
+        data.setdefault("cognee_llm_model", "gpt-5-mini")
         data.setdefault("cognee_embedding_model", "text-embedding-3-large")
         data.setdefault("cognee_embedding_dimensions", 3072)
         data.setdefault("cognee_mcp_server_name", "cognee-mcp")

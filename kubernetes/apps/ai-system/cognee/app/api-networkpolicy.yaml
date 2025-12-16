@@ -37,6 +37,15 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+    # Allow from Cognee Frontend (same namespace, different component)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cognee
+              app.kubernetes.io/component: frontend
+      ports:
+        - protocol: TCP
+          port: 8000
     # Allow from obot namespace (MCP integration)
     - from:
         - namespaceSelector:

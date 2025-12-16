@@ -229,13 +229,14 @@ cognee_neo4j_password: "test-neo4j-password"
 cognee_neo4j_version: "5.26.0"
 cognee_neo4j_storage_size: "10Gi"
 cognee_llm_base_url: "https://llms.example.com/v1"
-cognee_llm_model: "gpt-4o-mini"
+cognee_llm_model: "gpt-5-mini"
 cognee_embedding_model: "text-embedding-3-large"
 cognee_embedding_dimensions: 3072
 cognee_mcp_server_name: "cognee-mcp"
 # Cognee API Server Configuration
 cognee_api_enabled: true
-cognee_hostname: "cognee"
+cognee_api_hostname: "cognee"
+cognee_gateway: "envoy-external"
 cognee_version: "0.5.0"
 cognee_replicas: 1
 # Cognee Frontend Configuration

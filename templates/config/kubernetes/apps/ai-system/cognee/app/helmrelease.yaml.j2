@@ -228,7 +228,7 @@ spec:
               # =================================================================
               LLM_PROVIDER: "openai"
               LLM_ENDPOINT: "#{ cognee_llm_base_url | default('http://litellm.ai-system.svc.cluster.local:4000/v1') }#"
-              LLM_MODEL: "#{ cognee_llm_model | default('gpt-4o-mini') }#"
+              LLM_MODEL: "#{ cognee_llm_model | default('gpt-5-mini') }#"
               LLM_TEMPERATURE: "0.0"
               LLM_MAX_COMPLETION_TOKENS: "16384"
               LLM_STREAMING: "false"

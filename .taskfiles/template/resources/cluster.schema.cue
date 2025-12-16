@@ -274,14 +274,15 @@ import (
 	cognee_neo4j_version?: string & !=""        // Neo4j CE version (default: 5.26.0)
 	cognee_neo4j_storage_size?: string & !=""   // Neo4j PVC size (default: 10Gi)
 	cognee_llm_base_url?: string & !=""         // LLM endpoint (default: https://llms.${SECRET_DOMAIN}/v1)
-	cognee_llm_model?: string & !=""            // LLM model name (default: gpt-4o-mini)
+	cognee_llm_model?: string & !=""            // LLM model name (default: gpt-5-mini)
 	cognee_embedding_model?: string & !=""      // Embedding model name (default: text-embedding-3-large)
 	cognee_embedding_dimensions?: int & >=1    // Embedding dimensions (default: 3072)
 	cognee_mcp_server_name?: string & !=""     // MCP server name for NetworkPolicy selectors (default: cognee-mcp)
 
 	// Cognee API Server Configuration (optional - requires cognee_enabled)
 	cognee_api_enabled?: bool                   // Enable Cognee API server deployment with UI
-	cognee_hostname?: string & !=""             // Hostname subdomain (default: cognee)
+	cognee_api_hostname?: string & !=""         // API hostname subdomain (default: cognee-api)
+	cognee_gateway?: *"envoy-external" | "envoy-internal" | "envoy-ai"  // Gateway for routing (default: envoy-external)
 	cognee_version?: string & !=""              // Cognee Docker image version (default: 0.5.0)
 	cognee_replicas?: int & >=1                 // Number of Cognee API replicas (default: 1)
 	cognee_api_resources_requests_cpu?: string & !=""     // CPU request (default: 100m)

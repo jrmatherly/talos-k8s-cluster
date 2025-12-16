@@ -54,7 +54,7 @@ spec:
         dynamic:
           storageClassName: proxmox-csi
           requests:
-            storage: 20Gi
+            storage: 40Gi
 
     # ==========================================================================
     # Services Configuration
