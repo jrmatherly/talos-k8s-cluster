@@ -38,6 +38,14 @@
   },
   packageRules: [
     {
+      // Helm 4.x has breaking changes with helmfile post-renderer
+      // Keep on 3.x until helmfile compatibility is confirmed
+      description: "Pin Helm to 3.x (4.x has breaking changes)",
+      matchManagers: ["mise"],
+      matchPackageNames: ["helm"],
+      allowedVersions: "<4.0.0",
+    },
+    {
       // registry.k8s.io is a CDN/redirect service that doesn't support Docker Registry V2 API
       // queries for tag listing. We track these via GitHub releases using annotations instead.
       // Ref: https://github.com/kubernetes/registry.k8s.io
