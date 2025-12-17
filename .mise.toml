@@ -3,7 +3,7 @@
 task = "3.45.5"
 
 # Kubernetes tools
-helm = "3.19.4"  # Helm 4.x has breaking changes with helmfile post-renderer
+helm = "4.0.4"  # Helm 4.x has breaking changes with helmfile post-renderer
 kubeconform = "0.7.0"
 
 # Talos tools
