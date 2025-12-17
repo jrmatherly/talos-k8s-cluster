@@ -94,7 +94,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee
-              tag: "0.5.8:sha256:49cd46201cc7c41ae73af8722d404333044b61be678138fd0f61d8a31fa5bfca"
+              tag: "0.5.8"
               pullPolicy: Always
 
             env:
