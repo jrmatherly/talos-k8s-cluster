@@ -30,6 +30,19 @@ spec:
     - Ingress
     - Egress
   ingress:
+    # Allow from Cognee API, MCP, and Frontend (in ai-system namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ai-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cognee
+      ports:
+        - protocol: TCP
+          port: 7687   # Bolt protocol
+        - protocol: TCP
+          port: 7474   # HTTP browser (optional)
     # Allow from Cognee MCP server (in obot-mcp namespace)
     - from:
         - namespaceSelector:

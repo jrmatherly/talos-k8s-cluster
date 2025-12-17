@@ -64,4 +64,54 @@ spec:
       ports:
         - protocol: TCP
           port: 443
+#% if cognee_mcp_enabled | default(false) %#
+    # =========================================================================
+    # MCP Sidecar Database Access
+    # The frontend runs an MCP sidecar that needs database connectivity
+    # (Next.js rewrites are evaluated at build time, so MCP must be localhost)
+    # =========================================================================
+#% if cognee_dedicated_db | default(false) %#
+    # To dedicated Cognee PostgreSQL database (same namespace)
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: cognee-db
+      ports:
+        - protocol: TCP
+          port: 5432
+#% else %#
+    # To shared Obot PostgreSQL database (obot namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+          podSelector:
+            matchLabels:
+              cnpg.io/cluster: obot-db
+      ports:
+        - protocol: TCP
+          port: 5432
+#% endif %#
+    # To Neo4j graph database (storage namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: storage
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687   # Bolt protocol
+        - protocol: TCP
+          port: 7474   # HTTP browser (optional)
+    # To LiteLLM proxy (same namespace)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: litellm
+      ports:
+        - protocol: TCP
+          port: 4000
+#% endif %#
 #% endif %#
