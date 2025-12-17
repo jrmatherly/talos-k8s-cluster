@@ -91,6 +91,15 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    # Allow ICMP from MinIO (storage namespace) for PMTU discovery
+    # Required for proper S3 operation with large file transfers
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: storage
+          podSelector:
+            matchLabels:
+              app: minio
 ---
 # NetworkPolicy for obot namespace - egress rules
 apiVersion: networking.k8s.io/v1
