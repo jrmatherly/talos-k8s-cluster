@@ -94,7 +94,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee
-              tag: "latest"
+              tag: "0.5.7"
               pullPolicy: Always
 
             env:
@@ -368,7 +368,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee-mcp
-              tag: "latest"
+              tag: "main-a2580c5"
               pullPolicy: Always
 
             env:
