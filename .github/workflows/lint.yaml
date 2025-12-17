@@ -27,16 +27,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Run yamllint
+      - name: Run yamllint on source templates
         uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3.1.1
         with:
+          # Only lint SOURCE files (templates and GitHub configs)
+          # Generated directories (kubernetes/, talos/, bootstrap/) are excluded
+          # because they contain rendered content from Helm charts and templates
           file_or_dir: |
-            kubernetes/
-            talos/
-            bootstrap/
+            templates/
             .github/
+            .taskfiles/
           config_data: |
             extends: default
+            ignore: |
+              # SOPS encrypted files have long lines and no document start
+              *.sops.yaml
+              *.sops.yml
             rules:
               line-length:
                 max: 200
@@ -45,10 +51,69 @@ jobs:
                 check-keys: false
               comments:
                 min-spaces-from-content: 1
+              comments-indentation: disable
               document-start:
                 present: true
               indentation:
                 spaces: 2
                 indent-sequences: consistent
+              # Disable braces rule - Jinja2 templates use {{ }} which conflicts
+              braces:
+                min-spaces-inside: 0
+                max-spaces-inside: -1
+              brackets:
+                min-spaces-inside: 0
+                max-spaces-inside: 0
+              new-line-at-end-of-file: enable
+          format: github
+          strict: false
+
+  yamllint-generated:
+    name: YAML Lint (Generated - Warnings Only)
+    runs-on: ubuntu-latest
+    # This job validates generated files but never fails the workflow
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Run yamllint on generated files (informational)
+        uses: ibiqlik/action-yamllint@2576378a8e339169678f9939646ee3ee325e845c # v3.1.1
+        with:
+          file_or_dir: |
+            kubernetes/
+            talos/
+            bootstrap/
+          config_data: |
+            extends: default
+            ignore: |
+              # SOPS encrypted files
+              *.sops.yaml
+              *.sops.yml
+              # Talos secrets
+              talsecret.sops.yaml
+            rules:
+              # All rules as warnings for generated files
+              line-length:
+                max: 300
+                level: warning
+              truthy:
+                check-keys: false
+              comments:
+                min-spaces-from-content: 1
+                level: warning
+              comments-indentation: disable
+              document-start: disable
+              indentation:
+                spaces: 2
+                indent-sequences: consistent
+                level: warning
+              # Helm templates use {{ }} with spaces
+              braces: disable
+              brackets: disable
+              new-line-at-end-of-file:
+                level: warning
+              empty-lines:
+                level: warning
           format: github
           strict: false
