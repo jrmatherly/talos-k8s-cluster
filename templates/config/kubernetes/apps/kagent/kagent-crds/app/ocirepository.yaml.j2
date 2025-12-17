@@ -1,6 +1,6 @@
 #% if kagent_enabled %#
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
   name: kagent-crds
@@ -8,5 +8,5 @@ spec:
   interval: 1h
   url: oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds
   ref:
-    tag: "0.7.6"
+    tag: "0.7.7"
 #% endif %#

@@ -34,6 +34,14 @@ spec:
     - Ingress
     - Egress
   ingress:
+    # Allow from Envoy Gateway (external traffic via network namespace)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 8001
     # Allow from Cognee Frontend (same namespace)
     - from:
         - podSelector:
