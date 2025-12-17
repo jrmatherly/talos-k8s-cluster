@@ -94,6 +94,17 @@ spec:
         - protocol: TCP
           port: 8080
 #% endif %#
+#% if minio_enabled | default(false) and obot_workspace_provider | default('directory') == 's3' %#
+    # Allow ICMP from MinIO (storage namespace) for PMTU discovery
+    # Required for proper S3 operation with large file transfers
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: storage
+          podSelector:
+            matchLabels:
+              app: minio
+#% endif %#
 ---
 # NetworkPolicy for obot namespace - egress rules
 apiVersion: networking.k8s.io/v1
