@@ -311,7 +311,7 @@ spec:
             env:
               # Server-side only vars for Next.js rewrites (NOT exposed to browser)
               # These are used by next.config.mjs to proxy API calls to backend services
-              BACKEND_URL: "http://cognee-cognee.ai-system.svc.cluster.local:8000"
+              BACKEND_URL: "http://cognee.ai-system.svc.cluster.local:8000"
 #% if cognee_mcp_enabled | default(false) %#
               MCP_URL: "http://cognee-mcp.ai-system.svc.cluster.local:8001"
 #% endif %#
