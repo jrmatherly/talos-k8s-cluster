@@ -1,5 +1,27 @@
 [tools]
+# Task runner
+task = "3.45.5"
+
+# Kubernetes tools
 helm = "3.19.4"  # Helm 4.x has breaking changes with helmfile post-renderer
+kubeconform = "0.7.0"
+
+# Talos tools
+talhelper = "3.0.41"
+
+# Secret management (for CI ephemeral test keys only - real keys are gitignored)
+age = "1.2.1"
+sops = "3.11.0"
+
+# Schema validation
+cue = "0.15.1"
+
+# Utilities
+jq = "1.8.1"
+
+# Python for makejinja
+python = "3.14.2"
+"pipx:makejinja" = "2.8.2"
 
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }

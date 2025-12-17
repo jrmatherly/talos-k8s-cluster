@@ -13,7 +13,7 @@ spec:
       sectionName: https
   rules:
     - backendRefs:
-        - name: cognee-cognee
+        - name: cognee-backend
           port: 8000
 ---
 # HTTPRoute for Cognee Frontend

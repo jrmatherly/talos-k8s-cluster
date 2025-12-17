@@ -37,7 +37,7 @@ spec:
     # Controllers
     # ==========================================================================
     controllers:
-      cognee:
+      backend:
         type: deployment
         replicas: 1
         pod:
@@ -94,7 +94,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee
-              tag: "0.5.8"
+              tag: "0.5.9"
               pullPolicy: Always
 
             env:
@@ -289,13 +289,13 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee-frontend
-              tag: "main-cd6b8ef"
+              tag: "0.5.9"
               pullPolicy: Always
 
             env:
               # Server-side only vars for Next.js rewrites (NOT exposed to browser)
               # These are used by next.config.mjs to proxy API calls to backend services
-              BACKEND_URL: "http://cognee.ai-system.svc.cluster.local:8000"
+              BACKEND_URL: "http://cognee-backend.ai-system.svc.cluster.local:8000"
               MCP_URL: "http://cognee-mcp.ai-system.svc.cluster.local:8001"
               # Frontend base URL (external hostname for OAuth callbacks)
               APP_BASE_URL: "https://cognee.matherly.net"
@@ -353,7 +353,7 @@ spec:
           mcp-sidecar:
             image:
               repository: ghcr.io/jrmatherly/cognee-mcp
-              tag: "main-cd6b8ef"
+              tag: "0.5.9"
               pullPolicy: Always
 
             env:
@@ -450,7 +450,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee-mcp
-              tag: "main-cd6b8ef"
+              tag: "0.5.9"
               pullPolicy: Always
 
             env:
@@ -535,8 +535,8 @@ spec:
     # Service Configuration
     # ==========================================================================
     service:
-      cognee:
-        controller: cognee
+      backend:
+        controller: backend
         ports:
           http:
             port: 8000
