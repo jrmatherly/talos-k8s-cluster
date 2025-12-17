@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Label Sync"
 
 on:
@@ -7,13 +8,14 @@ on:
     branches: ["main"]
     paths: [".github/labels.yaml"]
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   label-sync:
     name: Label Sync
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1

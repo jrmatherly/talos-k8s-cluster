@@ -1,10 +1,17 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "Release"
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "v*"
   schedule:
     - cron: "0 0 1 * *" # 1st of every month at midnight
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -18,6 +25,14 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           result-encoding: string
           script: |
+            // If triggered by a tag push, use that tag
+            if (context.ref.startsWith('refs/tags/')) {
+              const tag = context.ref.replace('refs/tags/', '');
+              console.log(`Using pushed tag: ${tag}`);
+              return tag;
+            }
+
+            // Otherwise, generate a CalVer tag
             const { data: releases } = await github.rest.repos.listReleases({
               owner: context.repo.owner,
               repo: context.repo.repo,

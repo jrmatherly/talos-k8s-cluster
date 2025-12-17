@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: "e2e"
 
 on:
@@ -6,7 +7,12 @@ on:
   pull_request:
     branches: ["main"]
     paths-ignore:
-      - kubernetes/**
+      - "kubernetes/**"
+      - "**.md"
+      - "docs/**"
+
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
@@ -32,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          cache: false
+          cache: true
 
       - name: Run init task
         run: task init

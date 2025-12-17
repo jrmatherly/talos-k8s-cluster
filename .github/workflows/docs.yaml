@@ -1,0 +1,200 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Documentation"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "templates/**"
+      - ".taskfiles/template/resources/*.yaml"
+      - ".taskfiles/template/resources/*.cue"
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-docs:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup mise
+        uses: jdx/mise-action@146a28175021df8ca24f8ee1828cc2a60f980bd5 # v3.5.1
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          cache: true
+
+      - name: Generate Configuration Reference
+        run: |
+          mkdir -p docs-artifacts
+
+          # Extract configuration options from sample file
+          echo "# Cluster Configuration Reference" > docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "This document describes all available configuration options for \`cluster.yaml\`." >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "Generated from: \`.taskfiles/template/resources/cluster.sample.yaml\`" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "---" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+
+          # Parse sample YAML and generate markdown
+          echo "## Configuration Options" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "\`\`\`yaml" >> docs-artifacts/CONFIGURATION.md
+          cat .taskfiles/template/resources/cluster.sample.yaml >> docs-artifacts/CONFIGURATION.md
+          echo "\`\`\`" >> docs-artifacts/CONFIGURATION.md
+
+      - name: Generate Node Configuration Reference
+        run: |
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "---" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "# Node Configuration Reference" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "This section describes all available configuration options for \`nodes.yaml\`." >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "Generated from: \`.taskfiles/template/resources/nodes.sample.yaml\`" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "## Node Options" >> docs-artifacts/CONFIGURATION.md
+          echo "" >> docs-artifacts/CONFIGURATION.md
+          echo "\`\`\`yaml" >> docs-artifacts/CONFIGURATION.md
+          cat .taskfiles/template/resources/nodes.sample.yaml >> docs-artifacts/CONFIGURATION.md
+          echo "\`\`\`" >> docs-artifacts/CONFIGURATION.md
+
+      - name: Generate Template Index
+        run: |
+          echo "# Template Index" > docs-artifacts/TEMPLATES.md
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "This document lists all Jinja2 templates in the project." >> docs-artifacts/TEMPLATES.md
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "---" >> docs-artifacts/TEMPLATES.md
+          echo "" >> docs-artifacts/TEMPLATES.md
+
+          echo "## Kubernetes Templates" >> docs-artifacts/TEMPLATES.md
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "| Path | Description |" >> docs-artifacts/TEMPLATES.md
+          echo "|------|-------------|" >> docs-artifacts/TEMPLATES.md
+          find templates/config/kubernetes -name "*.j2" -type f | sort | while read -r file; do
+            rel_path="${file#templates/config/}"
+            # Extract namespace and app from path
+            namespace=$(echo "$rel_path" | cut -d'/' -f3)
+            app=$(echo "$rel_path" | cut -d'/' -f4)
+            filename=$(basename "$file")
+            echo "| \`$rel_path\` | $namespace/$app |" >> docs-artifacts/TEMPLATES.md
+          done
+
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "## Talos Templates" >> docs-artifacts/TEMPLATES.md
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "| Path | Description |" >> docs-artifacts/TEMPLATES.md
+          echo "|------|-------------|" >> docs-artifacts/TEMPLATES.md
+          find templates/config/talos -name "*.j2" -type f | sort | while read -r file; do
+            rel_path="${file#templates/config/}"
+            filename=$(basename "$file" .j2)
+            echo "| \`$rel_path\` | $filename |" >> docs-artifacts/TEMPLATES.md
+          done
+
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "## Bootstrap Templates" >> docs-artifacts/TEMPLATES.md
+          echo "" >> docs-artifacts/TEMPLATES.md
+          echo "| Path | Description |" >> docs-artifacts/TEMPLATES.md
+          echo "|------|-------------|" >> docs-artifacts/TEMPLATES.md
+          find templates/config/bootstrap -name "*.j2" -type f | sort | while read -r file; do
+            rel_path="${file#templates/config/}"
+            filename=$(basename "$file" .j2)
+            echo "| \`$rel_path\` | $filename |" >> docs-artifacts/TEMPLATES.md
+          done
+
+      - name: Generate Application Catalog
+        run: |
+          echo "# Application Catalog" > docs-artifacts/APPLICATIONS.md
+          echo "" >> docs-artifacts/APPLICATIONS.md
+          echo "This document lists all applications configured in the cluster." >> docs-artifacts/APPLICATIONS.md
+          echo "" >> docs-artifacts/APPLICATIONS.md
+          echo "---" >> docs-artifacts/APPLICATIONS.md
+          echo "" >> docs-artifacts/APPLICATIONS.md
+
+          # Find all namespaces with apps
+          for ns_dir in templates/config/kubernetes/apps/*/; do
+            namespace=$(basename "$ns_dir")
+            echo "## $namespace" >> docs-artifacts/APPLICATIONS.md
+            echo "" >> docs-artifacts/APPLICATIONS.md
+            echo "| Application | Type | Files |" >> docs-artifacts/APPLICATIONS.md
+            echo "|-------------|------|-------|" >> docs-artifacts/APPLICATIONS.md
+
+            for app_dir in "$ns_dir"*/; do
+              if [[ -d "$app_dir" ]]; then
+                app=$(basename "$app_dir")
+                if [[ "$app" != "app" ]]; then
+                  # Determine type
+                  type="Kustomization"
+                  if [[ -f "$app_dir/app/helmrelease.yaml.j2" ]]; then
+                    type="HelmRelease"
+                  fi
+
+                  # Count files
+                  file_count=$(find "$app_dir" -name "*.j2" -type f | wc -l | tr -d ' ')
+                  echo "| $app | $type | $file_count |" >> docs-artifacts/APPLICATIONS.md
+                fi
+              fi
+            done
+            echo "" >> docs-artifacts/APPLICATIONS.md
+          done
+
+      - name: Create manifest
+        run: |
+          cat > docs-artifacts/manifest.json << EOF
+          {
+            "version": "${{ github.sha }}",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "ref": "${{ github.ref }}",
+            "documents": [
+              "CONFIGURATION.md",
+              "TEMPLATES.md",
+              "APPLICATIONS.md"
+            ]
+          }
+          EOF
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: documentation-${{ github.sha }}
+          path: docs-artifacts/
+          retention-days: 90
+
+      - name: Generate Summary
+        run: |
+          echo "## Documentation Generation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Generated Documents" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Document | Description |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| \`CONFIGURATION.md\` | Cluster and node configuration reference |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`TEMPLATES.md\` | Index of all Jinja2 templates |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`APPLICATIONS.md\` | Catalog of deployed applications |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "Documentation has been exported as artifacts: \`documentation-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Template Statistics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          k8s_count=$(find templates/config/kubernetes -name "*.j2" -type f | wc -l | tr -d ' ')
+          talos_count=$(find templates/config/talos -name "*.j2" -type f | wc -l | tr -d ' ')
+          bootstrap_count=$(find templates/config/bootstrap -name "*.j2" -type f | wc -l | tr -d ' ')
+          echo "- Kubernetes templates: $k8s_count" >> $GITHUB_STEP_SUMMARY
+          echo "- Talos templates: $talos_count" >> $GITHUB_STEP_SUMMARY
+          echo "- Bootstrap templates: $bootstrap_count" >> $GITHUB_STEP_SUMMARY

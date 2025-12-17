@@ -1,0 +1,124 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: "Schema Validation"
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "cluster.yaml"
+      - "nodes.yaml"
+      - ".taskfiles/template/resources/*.cue"
+      - ".github/tests/*.yaml"
+  push:
+    branches: ["main"]
+    paths:
+      - ".taskfiles/template/resources/*.cue"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup CUE
+        uses: cue-lang/setup-cue@v1
+        with:
+          version: "latest"
+
+      - name: Validate cluster.yaml against schema
+        if: hashFiles('cluster.yaml') != ''
+        run: |
+          echo "Validating cluster.yaml..."
+          cue vet cluster.yaml .taskfiles/template/resources/cluster.schema.cue
+          echo "✅ cluster.yaml is valid"
+
+      - name: Validate nodes.yaml against schema
+        if: hashFiles('nodes.yaml') != ''
+        run: |
+          echo "Validating nodes.yaml..."
+          cue vet nodes.yaml .taskfiles/template/resources/nodes.schema.cue
+          echo "✅ nodes.yaml is valid"
+
+      - name: Validate test configurations
+        run: |
+          echo "Validating test configurations..."
+          for file in .github/tests/*.yaml; do
+            if [[ "$file" != *"nodes.yaml" ]]; then
+              echo "Validating $file..."
+              cue vet "$file" .taskfiles/template/resources/cluster.schema.cue
+            fi
+          done
+          cue vet .github/tests/nodes.yaml .taskfiles/template/resources/nodes.schema.cue
+          echo "✅ All test configurations are valid"
+
+      - name: Export CUE schemas
+        run: |
+          echo "Exporting CUE schemas..."
+          mkdir -p schema-artifacts
+
+          # Export schemas with metadata
+          cp .taskfiles/template/resources/cluster.schema.cue schema-artifacts/
+          cp .taskfiles/template/resources/nodes.schema.cue schema-artifacts/
+
+          # Generate JSON Schema from CUE (if possible)
+          cue export .taskfiles/template/resources/cluster.schema.cue --out json > schema-artifacts/cluster.schema.json 2>/dev/null || true
+          cue export .taskfiles/template/resources/nodes.schema.cue --out json > schema-artifacts/nodes.schema.json 2>/dev/null || true
+
+          # Create manifest
+          cat > schema-artifacts/manifest.json << EOF
+          {
+            "version": "${{ github.sha }}",
+            "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "ref": "${{ github.ref }}",
+            "schemas": [
+              "cluster.schema.cue",
+              "nodes.schema.cue"
+            ]
+          }
+          EOF
+
+          echo "Schema artifacts created:"
+          ls -la schema-artifacts/
+
+      - name: Upload schema artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: cue-schemas-${{ github.sha }}
+          path: schema-artifacts/
+          retention-days: 90
+
+      - name: Generate Summary
+        run: |
+          echo "## Schema Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Validated Files" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Schema | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          if [[ -f "cluster.yaml" ]]; then
+            echo "| \`cluster.yaml\` | \`cluster.schema.cue\` | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [[ -f "nodes.yaml" ]]; then
+            echo "| \`nodes.yaml\` | \`nodes.schema.cue\` | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          fi
+          for file in .github/tests/*.yaml; do
+            basename=$(basename "$file")
+            if [[ "$basename" == "nodes.yaml" ]]; then
+              echo "| \`.github/tests/$basename\` | \`nodes.schema.cue\` | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| \`.github/tests/$basename\` | \`cluster.schema.cue\` | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "CUE schemas have been exported as artifacts: \`cue-schemas-${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
