@@ -1,4 +1,3 @@
-#% if agentgateway_enabled and azure_openai_us_east2_api_key %#
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -21,4 +20,3 @@ spec:
     namespace: flux-system
   targetNamespace: ai-system
   wait: true
-#% endif %#

@@ -8,7 +8,7 @@ spec:
     - name: kube-prometheus-stack
       namespace: observability
     - name: kgateway
-      namespace: agentgateway
+      namespace: network
   interval: 1h
   timeout: 5m
   path: ./kubernetes/apps/observability/agentgateway-dashboards/app
