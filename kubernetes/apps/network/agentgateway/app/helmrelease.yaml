@@ -16,6 +16,7 @@ spec:
   dependsOn:
     - name: agentgateway-crds
   values:
+    fullnameOverride: agentgateway-controller
     serviceAccount:
       name: agentgateway-controller
 

@@ -25,10 +25,12 @@ spec:
     - name: agentgateway-crds
   values:
     #| ============================================================ #|
-    #| ServiceAccount Configuration                                  #|
-    #| Use unique name to avoid conflict with data plane SA          #|
-    #| (Gateway creates 'agentgateway' SA with automount=false)      #|
+    #| Naming Configuration                                          #|
+    #| REQUIRED: Controller and data plane both want name 'agentgateway' #|
+    #| fullnameOverride gives controller resources distinct names so     #|
+    #| data plane deployment can use 'agentgateway' without conflict     #|
     #| ============================================================ #|
+    fullnameOverride: agentgateway-controller
     serviceAccount:
       name: agentgateway-controller
 
