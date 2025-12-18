@@ -80,94 +80,6 @@ spec:
       backendRefs:
         - name: agentgateway-admin
           port: 15000
-    #| OAuth2 callback path #|
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /oauth2
-      backendRefs:
-        - name: agentgateway-admin
-          port: 15000
----
-#| ============================================================ #|
-#| TrafficPolicy: Gateway defaults with rate limiting            #|
-#| Token bucket rate limiting + buffer limits for AI traffic     #|
-#| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: TrafficPolicy
-metadata:
-  name: agentgateway-rate-limit
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: agentgateway
-      sectionName: https
-  rateLimit:
-    local:
-      tokenBucket:
-        maxTokens: 100
-        tokensPerFill: 50
-        fillInterval: "60s"
-  #| Large buffer for AI payloads #|
-  buffer:
-    maxRequestSize: 8Mi
----
-#| ============================================================ #|
-#| TrafficPolicy: MCP Route streaming                            #|
-#| Disables timeout for long-running MCP sessions                #|
-#| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: TrafficPolicy
-metadata:
-  name: mcp-route-streaming
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: mcp-route
-  #| No timeout for long-running MCP sessions #|
-  timeouts:
-    request: "0s"
-  #| Large buffer for MCP payloads #|
-  buffer:
-    maxRequestSize: 8Mi
----
-#| ============================================================ #|
-#| HTTPListenerPolicy for enhanced access logging                #|
-#| Includes AI-specific fields: tokens, cost, prompt guard       #|
-#| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: HTTPListenerPolicy
-metadata:
-  name: agentgateway-logging
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: agentgateway
-  accessLog:
-    - fileSink:
-        path: /dev/stdout
-        jsonFormat:
-          timestamp: "%START_TIME%"
-          method: "%REQ(:METHOD)%"
-          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
-          protocol: "%PROTOCOL%"
-          responseCode: "%RESPONSE_CODE%"
-          responseFlags: "%RESPONSE_FLAGS%"
-          bytesReceived: "%BYTES_RECEIVED%"
-          bytesSent: "%BYTES_SENT%"
-          duration: "%DURATION%"
-          upstreamHost: "%UPSTREAM_HOST%"
-          userAgent: "%REQ(USER-AGENT)%"
-          requestId: "%REQ(X-REQUEST-ID)%"
-          authority: "%REQ(:AUTHORITY)%"
-          xAiModel: "%REQ(X-AI-EG-MODEL)%"
-          inputTokens: "%RESP(X-INPUT-TOKENS)%"
-          outputTokens: "%RESP(X-OUTPUT-TOKENS)%"
-          costUsd: "%RESP(X-COST-USD)%"
-          promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
 #% if keycloak_enabled %#
 ---
 #| ============================================================ #|
@@ -200,18 +112,35 @@ spec:
             port: 8080
           jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
           cacheDuration: "5m"
-        resourceMetadata:
-          #| Flat key-value format matching standalone agentgateway #|
-          #| Each key maps to a google.protobuf.Value in the proto #|
-          resource: "https://mcp-gw.#{ primary_domain }#/mcp"
-          scopesSupported:
-            - openid
-            - profile
-            - email
-            - mcp:tools
-            - offline_access
-          bearerMethodsSupported:
-            - header
+        #| NOTE: resourceMetadata removed due to kgateway v2.2.0-main proto bug #|
+        #| apiextensionsv1.JSON cannot convert to google.protobuf.Value #|
+        #| MCP OAuth works without RFC 9728 metadata fields #|
+---
+#| ============================================================ #|
+#| AgentgatewayPolicy: MCP Route Traffic Settings                #|
+#| Rate limiting and timeout configuration for MCP traffic       #|
+#| NOTE: Replaces kgateway TrafficPolicy (not compatible)        #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-route-traffic
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  traffic:
+    #| No timeout for long-running MCP sessions (SSE streams) #|
+    timeouts:
+      request: "0s"
+    #| Rate limiting: 100 requests per minute with burst #|
+    rateLimit:
+      local:
+        - requests: 100
+          unit: Minutes
+          burst: 50
+#% endif %#
 ---
 #| ============================================================ #|
 #| AgentgatewayPolicy: CORS for MCP                              #|
@@ -253,81 +182,4 @@ spec:
         - WWW-Authenticate
       allowCredentials: true
       maxAge: 86400
----
-#| ============================================================ #|
-#| OAuth2 Protection for Admin UI (kgateway TrafficPolicy)       #|
-#| ============================================================ #|
-#| GatewayExtension for Keycloak OIDC configuration #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayExtension
-metadata:
-  name: agentgateway-keycloak-oauth
-spec:
-  oauth2:
-    backendRef:
-      kind: Backend
-      group: gateway.kgateway.dev
-      name: keycloak-oauth
-    issuerURI: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-    credentials:
-      clientID: "agentgateway-mcp"
-      clientSecretRef:
-        name: agentgateway-oauth-secret
-    redirectURI: "https://ai-gw.#{ primary_domain }#/oauth2/callback"
-    logoutPath: /logout
-    forwardAccessToken: true
-    scopes:
-      - openid
-      - profile
-      - email
----
-#| Backend for Keycloak OAuth endpoints #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
-metadata:
-  name: keycloak-oauth
-spec:
-  type: Static
-  static:
-    hosts:
-      - host: "auth.#{ primary_domain }#"
-        port: 443
----
-#| BackendTLSPolicy for Keycloak OAuth #|
-apiVersion: gateway.networking.k8s.io/v1
-kind: BackendTLSPolicy
-metadata:
-  name: keycloak-oauth-tls
-spec:
-  targetRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: keycloak-oauth
-  validation:
-    hostname: "auth.#{ primary_domain }#"
-    wellKnownCACertificates: System
----
-#| Secret for OAuth client credentials #|
-apiVersion: v1
-kind: Secret
-metadata:
-  name: agentgateway-oauth-secret
-type: Opaque
-stringData:
-  client-secret: "#{ keycloak_agentgateway_client_secret | default(keycloak_oidc_client_secret) }#"
----
-#| TrafficPolicy to protect admin UI with OAuth2 #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: TrafficPolicy
-metadata:
-  name: agentgateway-ui-oauth
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: HTTPRoute
-      name: agentgateway-ui
-  oauth2:
-    extensionRef:
-      name: agentgateway-keycloak-oauth
-#% endif %#
 #% endif %#

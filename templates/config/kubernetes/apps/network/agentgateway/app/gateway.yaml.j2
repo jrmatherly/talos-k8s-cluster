@@ -35,6 +35,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
   name: agentgateway
+  namespace: network
 spec:
   #| NEW controller name in v2.2.0+ #|
   controllerName: agentgateway.dev/agentgateway
@@ -53,6 +54,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: agentgateway
+  namespace: network
 spec:
   gatewayClassName: agentgateway
   infrastructure:
