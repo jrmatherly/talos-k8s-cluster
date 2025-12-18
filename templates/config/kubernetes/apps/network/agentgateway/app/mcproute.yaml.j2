@@ -171,6 +171,34 @@ spec:
 #% if keycloak_enabled %#
 ---
 #| ============================================================ #|
+#| Backend for Keycloak JWKS endpoint (MCP OAuth)                #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-jwks
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "auth.#{ primary_domain }#"
+        port: 443
+---
+#| BackendTLSPolicy for Keycloak JWKS #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-jwks-tls
+spec:
+  targetRefs:
+    - group: gateway.kgateway.dev
+      kind: Backend
+      name: keycloak-jwks
+  validation:
+    hostname: "auth.#{ primary_domain }#"
+    wellKnownCACertificates: System
+---
+#| ============================================================ #|
 #| AgentgatewayPolicy: MCP OAuth Authentication                  #|
 #| MCP backend authentication using Keycloak                     #|
 #| RFC 9728, RFC 8707 compliance                                 #|
@@ -192,7 +220,11 @@ spec:
           - "https://mcp-gw.#{ primary_domain }#/mcp"
         provider: Keycloak
         jwks:
-          uri: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
+          backendRef:
+            group: gateway.kgateway.dev
+            kind: Backend
+            name: keycloak-jwks
+          jwksPath: "/realms/k8s-cluster/protocol/openid-connect/certs"
         resourceMetadata:
           default:
             resource: "https://mcp-gw.#{ primary_domain }#/mcp"

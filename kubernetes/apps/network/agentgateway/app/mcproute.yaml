@@ -136,6 +136,30 @@ spec:
           costUsd: "%RESP(X-COST-USD)%"
           promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
 ---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-jwks
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "auth.matherly.net"
+        port: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-jwks-tls
+spec:
+  targetRefs:
+    - group: gateway.kgateway.dev
+      kind: Backend
+      name: keycloak-jwks
+  validation:
+    hostname: "auth.matherly.net"
+    wellKnownCACertificates: System
+---
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayPolicy
 metadata:
@@ -153,7 +177,11 @@ spec:
           - "https://mcp-gw.matherly.net/mcp"
         provider: Keycloak
         jwks:
-          uri: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
+          backendRef:
+            group: gateway.kgateway.dev
+            kind: Backend
+            name: keycloak-jwks
+          jwksPath: "/realms/k8s-cluster/protocol/openid-connect/certs"
         resourceMetadata:
           default:
             resource: "https://mcp-gw.matherly.net/mcp"
