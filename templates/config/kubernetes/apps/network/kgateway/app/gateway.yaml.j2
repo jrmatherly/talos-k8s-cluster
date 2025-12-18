@@ -115,7 +115,7 @@ spec:
 ---
 #| ============================================================ #|
 #| TrafficPolicy for HTTP traffic                                #|
-#| Compression, buffer limits, timeouts                          #|
+#| Compression, buffer limits, timeouts, retry, health checks    #|
 #| ============================================================ #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
@@ -132,6 +132,24 @@ spec:
   #| Connection settings #|
   connectionConfig:
     connectTimeout: 10s
+    #| Buffer limits for request/response bodies (8Mi) #|
+    perConnectionBufferLimitBytes: 8388608
+  #| Request timeout (0 = unlimited for streaming) #|
+  requestTimeout: 0s
+  #| Retry policy for transient failures #|
+  retries:
+    retryOn: "connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes"
+    numRetries: 2
+    perTryTimeout: 30s
+    retryBackOff:
+      baseInterval: 1s
+      maxInterval: 10s
+  #| Passive health checking (outlier detection) #|
+  outlierDetection:
+    consecutive5xxErrors: 5
+    consecutiveGatewayErrors: 3
+    interval: 10s
+    baseEjectionTime: 30s
 ---
 #| ============================================================ #|
 #| HTTPListenerPolicy for HTTP/2 and access logging              #|
@@ -189,4 +207,45 @@ spec:
           requestRedirect:
             scheme: https
             statusCode: 301
+---
+#| ============================================================ #|
+#| kgateway Admin UI Service                                     #|
+#| Exposes controller admin/metrics on port 9091                 #|
+#| ============================================================ #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: kgateway-admin
+  labels:
+    app.kubernetes.io/name: kgateway-admin
+spec:
+  selector:
+    app.kubernetes.io/name: kgateway
+  ports:
+    - name: admin
+      port: 9091
+      targetPort: 9091
+      protocol: TCP
+  type: ClusterIP
+---
+#| ============================================================ #|
+#| HTTPRoute to expose kgateway Admin UI via internal gateway    #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: kgateway-admin-ui
+  annotations:
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  parentRefs:
+    - name: internal
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "kgateway-ui.${SECRET_DOMAIN}"
+  rules:
+    - backendRefs:
+        - name: kgateway-admin
+          port: 9091
 #% endif %#

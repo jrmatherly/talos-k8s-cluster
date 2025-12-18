@@ -1,6 +1,6 @@
 #% set ai_gateway_has_backends = envoy_ai_gateway_enabled and (azure_openai_us_east_api_key or azure_openai_us_east2_api_key) %#
-#% set mcp_gateway_has_servers = mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
-#% if ai_gateway_has_backends or mcp_gateway_has_servers or litellm_enabled or cognee_enabled | default(false) %#
+#% set has_agentgateway_external_mcp = agentgateway_enabled | default(false) %#
+#% if ai_gateway_has_backends or has_agentgateway_external_mcp or litellm_enabled or cognee_enabled | default(false) %#
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -11,13 +11,14 @@ components:
 
 resources:
   - ./namespace.yaml
-#% if azure_openai_us_east_api_key %#
+#| DEPRECATED: Azure OpenAI backends for Envoy AI Gateway - only include if envoy_ai_gateway_enabled #|
+#% if envoy_ai_gateway_enabled and azure_openai_us_east_api_key %#
   - ./azure-openai-us-east/ks.yaml
 #% endif %#
-#% if azure_openai_us_east2_api_key %#
+#% if envoy_ai_gateway_enabled and azure_openai_us_east2_api_key %#
   - ./azure-openai-us-east2/ks.yaml
 #% endif %#
-#% if mcp_gateway_has_servers %#
+#% if has_agentgateway_external_mcp %#
   - ./mcp-servers/context7/ks.yaml
 #% endif %#
 #% if litellm_enabled %#

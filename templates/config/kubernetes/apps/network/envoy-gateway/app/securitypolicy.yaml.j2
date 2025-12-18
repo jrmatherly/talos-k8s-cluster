@@ -1,4 +1,4 @@
-#% if keycloak_enabled %#
+#% if envoy_gateway_enabled | default(false) and keycloak_enabled %#
 ---
 # Secret containing the Keycloak OIDC client secret
 # This secret must be created manually after Keycloak realm/client setup:

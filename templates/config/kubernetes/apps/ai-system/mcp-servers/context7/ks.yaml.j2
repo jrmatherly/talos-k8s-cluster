@@ -1,5 +1,10 @@
-#% if mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
+#% if agentgateway_enabled | default(false) %#
 ---
+#| ============================================================ #|
+#| Context7 MCP Server Proxy Kustomization                       #|
+#| Routes external MCP requests through agentgateway to          #|
+#| context7.upstash.io for centralized logging and metrics       #|
+#| ============================================================ #|
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -8,9 +13,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/ai-system/mcp-servers/context7/app
   dependsOn:
-    - name: ai-gateway
-      namespace: envoy-ai-gateway-system
-    - name: envoy-gateway
+    - name: kgateway
+      namespace: network
+    - name: agentgateway
       namespace: network
   prune: true
   sourceRef:

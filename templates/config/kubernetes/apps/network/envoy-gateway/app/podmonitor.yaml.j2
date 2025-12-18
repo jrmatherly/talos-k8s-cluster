@@ -1,3 +1,4 @@
+#% if envoy_gateway_enabled | default(false) %#
 ---
 # PodMonitor for Envoy proxy instances (data plane metrics)
 apiVersion: monitoring.coreos.com/v1
@@ -138,3 +139,4 @@ spec:
           annotations:
             summary: "Envoy proxy pod {{ $labels.pod }} is not ready"
             description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been not ready for 5 minutes"
+#% endif %#

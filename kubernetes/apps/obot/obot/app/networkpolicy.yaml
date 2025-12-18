@@ -20,7 +20,7 @@ spec:
 ---
 # CiliumNetworkPolicy for obot - Egress to external/world (LoadBalancer IPs + external services)
 # CRITICAL: Standard NetworkPolicy ipBlock doesn't work reliably for LoadBalancer IPs with Cilium socket-based LB
-# Must use Cilium's native toEntities: world for traffic to LoadBalancer IPs (envoy-external, envoy-internal, etc.)
+# Must use Cilium's native toEntities: world for traffic to LoadBalancer IPs (external, internal gateways, etc.)
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -40,7 +40,7 @@ spec:
             - port: "80"
               protocol: TCP
 ---
-# NetworkPolicy for obot namespace - allow ingress from envoy-gateway
+# NetworkPolicy for obot namespace - allow ingress from kgateway
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

@@ -18,12 +18,17 @@ releases:
     chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
     version: 1.19.0
 
-  - name: envoy-gateway
+  - name: kgateway-crds
     namespace: network
-    chart: oci://mirror.gcr.io/envoyproxy/gateway-helm
-    version: v1.6.1
+    chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
+    version: v2.2.0-main
+
+  - name: kgateway
+    namespace: network
+    chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
+    version: v2.2.0-main
 
   - name: kube-prometheus-stack
     namespace: observability
     chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    version: 79.12.0
+    version: 80.4.2

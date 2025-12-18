@@ -1,23 +1,39 @@
-#% if mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
+#% if agentgateway_enabled | default(false) %#
 ---
-# MCPRoute for Context7 documentation search server
-# Routes MCP protocol requests to the Context7 backend
-# Context7 provides: resolve, get-library-docs tools
-apiVersion: aigateway.envoyproxy.io/v1alpha1
-kind: MCPRoute
+#| ============================================================ #|
+#| HTTPRoute for Context7 MCP server proxy                       #|
+#| Routes /mcp/context7/* paths to context7.upstash.io          #|
+#| Provides: centralized logging, rate limiting, metrics         #|
+#|                                                               #|
+#| NOTE: This is a simple HTTPS proxy route, not MCP protocol    #|
+#| routing. For full MCP tool discovery and filtering, use the   #|
+#| Context7 MCP plugin directly in your MCP client.              #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: context7-route
 spec:
   parentRefs:
-    - name: envoy-mcp
+    - name: agentgateway
       namespace: network
-      kind: Gateway
-  backendRefs:
-    - name: context7-mcp
-      kind: Backend
-      path: "/mcp"
-      # Tool selector - expose all context7 tools (resolve, get-library-docs)
-      toolSelector:
-        includeRegex:
-          - ".*"
+      sectionName: https
+  hostnames:
+    - "mcp-gw.#{ primary_domain }#"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/context7
+      filters:
+        #| Rewrite path to remove /mcp/context7 prefix #|
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /mcp
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: context7-mcp
 #% endif %#

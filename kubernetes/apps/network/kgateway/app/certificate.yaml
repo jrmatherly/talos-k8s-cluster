@@ -9,7 +9,9 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "matherly.net"
-  dnsNames: ["matherly.net", "*.matherly.net"]
+  dnsNames:
+    - "matherly.net"
+    - "*.matherly.net"
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -21,4 +23,6 @@ spec:
     name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "spoonsofsalt.org"
-  dnsNames: ["spoonsofsalt.org", "*.spoonsofsalt.org"]
+  dnsNames:
+    - "spoonsofsalt.org"
+    - "*.spoonsofsalt.org"

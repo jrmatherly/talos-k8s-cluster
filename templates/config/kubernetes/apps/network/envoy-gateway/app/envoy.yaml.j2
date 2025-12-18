@@ -1,3 +1,4 @@
+#% if envoy_gateway_enabled | default(false) %#
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: EnvoyProxy
@@ -334,3 +335,4 @@ spec:
     - backendRefs:
         - name: envoy-gateway-admin
           port: 19000
+#% endif %#

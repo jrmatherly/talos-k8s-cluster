@@ -11,7 +11,7 @@ spec:
       namespace: cnpg-system
     - name: cert-manager
       namespace: cert-manager
-    - name: envoy-gateway
+    - name: kgateway
       namespace: network
     - name: proxmox-csi
       namespace: csi-proxmox

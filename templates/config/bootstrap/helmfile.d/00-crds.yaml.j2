@@ -17,13 +17,27 @@ releases:
     namespace: network
     chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
     version: 1.19.0
+#% if kgateway_enabled | default(true) %#
+
+  - name: kgateway-crds
+    namespace: network
+    chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
+    version: #{ kgateway_version | default('v2.2.0-main') }#
+
+  - name: kgateway
+    namespace: network
+    chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
+    version: #{ kgateway_version | default('v2.2.0-main') }#
+#% endif %#
+#% if envoy_gateway_enabled | default(false) %#
 
   - name: envoy-gateway
     namespace: network
     chart: oci://mirror.gcr.io/envoyproxy/gateway-helm
     version: v1.6.1
+#% endif %#
 
   - name: kube-prometheus-stack
     namespace: observability
     chart: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
-    version: 79.12.0
+    version: 80.4.2

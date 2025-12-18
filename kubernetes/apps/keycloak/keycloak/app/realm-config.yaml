@@ -66,9 +66,9 @@ data:
           }
         },
         {
-          "clientId": "envoy-gateway",
-          "name": "Envoy Gateway OIDC Client",
-          "description": "OIDC client for Envoy Gateway SecurityPolicy authentication",
+          "clientId": "kgateway",
+          "name": "kgateway OIDC Client",
+          "description": "OIDC client for kgateway SecurityPolicy authentication",
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
           "secret": "YKFIU9KVXEc6kKYciTVPmWkSnYKQjqQu",

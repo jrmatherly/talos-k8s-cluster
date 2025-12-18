@@ -1,0 +1,22 @@
+#% if kgateway_enabled | default(true) %#
+#% for domain in cloudflare_domains %#
+---
+#| ============================================================ #|
+#| Certificate for #{ domain }# (wildcard)                       #|
+#| Used by kgateway external and internal listeners              #|
+#| ============================================================ #|
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "#{ domain | replace('.', '-') }#-production"
+spec:
+  secretName: "#{ domain | replace('.', '-') }#-production-tls"
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "#{ domain }#"
+  dnsNames:
+    - "#{ domain }#"
+    - "*.#{ domain }#"
+#% endfor %#
+#% endif %#

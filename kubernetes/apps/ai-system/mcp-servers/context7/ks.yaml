@@ -7,9 +7,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/ai-system/mcp-servers/context7/app
   dependsOn:
-    - name: ai-gateway
-      namespace: envoy-ai-gateway-system
-    - name: envoy-gateway
+    - name: kgateway
+      namespace: network
+    - name: agentgateway
       namespace: network
   prune: true
   sourceRef:

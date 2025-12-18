@@ -1,3 +1,4 @@
+#% if envoy_gateway_enabled | default(false) %#
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
@@ -11,3 +12,4 @@ spec:
   ref:
     tag: v1.6.1
   url: oci://mirror.gcr.io/envoyproxy/gateway-helm
+#% endif %#

@@ -1,24 +1,22 @@
 ---
-# Backend endpoint definition for Context7 MCP Server
-# Context7 provides documentation search and context retrieval for AI agents
-apiVersion: gateway.envoyproxy.io/v1alpha1
+apiVersion: gateway.kgateway.dev/v1alpha1
 kind: Backend
 metadata:
   name: context7-mcp
 spec:
-  endpoints:
-    - fqdn:
-        hostname: context7.upstash.io
+  type: Static
+  static:
+    hosts:
+      - host: context7.upstash.io
         port: 443
 ---
-# BackendTLSPolicy for TLS validation (Gateway API standard)
 apiVersion: gateway.networking.k8s.io/v1alpha3
 kind: BackendTLSPolicy
 metadata:
   name: context7-mcp-tls
 spec:
   targetRefs:
-    - group: gateway.envoyproxy.io
+    - group: gateway.kgateway.dev
       kind: Backend
       name: context7-mcp
   validation:

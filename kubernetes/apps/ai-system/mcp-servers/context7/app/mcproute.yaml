@@ -1,21 +1,27 @@
 ---
-# MCPRoute for Context7 documentation search server
-# Routes MCP protocol requests to the Context7 backend
-# Context7 provides: resolve, get-library-docs tools
-apiVersion: aigateway.envoyproxy.io/v1alpha1
-kind: MCPRoute
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: context7-route
 spec:
   parentRefs:
-    - name: envoy-mcp
+    - name: agentgateway
       namespace: network
-      kind: Gateway
-  backendRefs:
-    - name: context7-mcp
-      kind: Backend
-      path: "/mcp"
-      # Tool selector - expose all context7 tools (resolve, get-library-docs)
-      toolSelector:
-        includeRegex:
-          - ".*"
+      sectionName: https
+  hostnames:
+    - "mcp-gw.matherly.net"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/context7
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /mcp
+      backendRefs:
+        - group: gateway.kgateway.dev
+          kind: Backend
+          name: context7-mcp

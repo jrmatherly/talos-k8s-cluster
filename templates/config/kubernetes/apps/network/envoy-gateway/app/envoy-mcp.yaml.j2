@@ -1,4 +1,4 @@
-#% if mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
+#% if envoy_gateway_enabled | default(false) and mcp_gateway_enabled | default(false) and mcp_gateway_addr %#
 ---
 # MCP Gateway for Model Context Protocol routing
 # Uses Envoy AI Gateway's native MCPRoute CRD for tool multiplexing

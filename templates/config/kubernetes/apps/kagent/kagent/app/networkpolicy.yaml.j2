@@ -298,11 +298,14 @@ spec:
 #% endif %#
 #% if agentgateway_enabled %#
     # agentgateway (ai-gw.matherly.net) - internal LLM gateway via kgateway
-    # Located in agentgateway namespace at 192.168.22.147:443
+    # Located in network namespace
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: agentgateway
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: agentgateway
       ports:
         - protocol: TCP
           port: 443
