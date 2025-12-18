@@ -62,6 +62,14 @@ spec:
         - ports:
             - port: "9978"
               protocol: TCP
+    #| Allow Keycloak for JWKS fetching (MCP OAuth) #|
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: keycloak
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
 ---
 #| NetworkPolicy for agentgateway data plane pods #|
 apiVersion: cilium.io/v2
