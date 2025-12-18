@@ -1,4 +1,5 @@
-#% if agentgateway_enabled and azure_openai_us_east2_api_key %#
+#| DEPRECATED: Azure OpenAI backends are now handled by agentgateway/app/azure-backends.yaml #|
+#% if envoy_ai_gateway_enabled and azure_openai_us_east2_api_key %#
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -8,7 +9,9 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/ai-system/azure-openai-us-east2/app
   dependsOn:
-    - name: agentgateway
+    - name: ai-gateway
+      namespace: envoy-ai-gateway-system
+    - name: envoy-gateway
       namespace: network
   postBuild:
     substituteFrom:
