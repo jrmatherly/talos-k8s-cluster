@@ -11,6 +11,15 @@ spec:
       app.kubernetes.io/name: agentgateway
       app.kubernetes.io/component: controller
   ingress:
+    #| Allow xDS connections from agentgateway data plane #|
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: agentgateway
+            gateway.networking.k8s.io/gateway-name: agentgateway
+      toPorts:
+        - ports:
+            - port: "9978"
+              protocol: TCP
     #| Allow Prometheus scraping #|
     - fromEndpoints:
         - matchLabels:
@@ -49,7 +58,7 @@ spec:
             gateway.networking.k8s.io/gateway-name: agentgateway
       toPorts:
         - ports:
-            - port: "9977"
+            - port: "9978"
               protocol: TCP
 ---
 #| NetworkPolicy for agentgateway data plane pods #|
@@ -104,7 +113,7 @@ spec:
             app.kubernetes.io/component: controller
       toPorts:
         - ports:
-            - port: "9977"
+            - port: "9978"
               protocol: TCP
     #| Allow traffic to Azure OpenAI #|
     - toEntities:

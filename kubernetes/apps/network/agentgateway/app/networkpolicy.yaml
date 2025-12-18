@@ -11,6 +11,14 @@ spec:
   ingress:
     - fromEndpoints:
         - matchLabels:
+            app.kubernetes.io/name: agentgateway
+            gateway.networking.k8s.io/gateway-name: agentgateway
+      toPorts:
+        - ports:
+            - port: "9978"
+              protocol: TCP
+    - fromEndpoints:
+        - matchLabels:
             app.kubernetes.io/name: prometheus
       toPorts:
         - ports:
@@ -42,7 +50,7 @@ spec:
             gateway.networking.k8s.io/gateway-name: agentgateway
       toPorts:
         - ports:
-            - port: "9977"
+            - port: "9978"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2
@@ -91,7 +99,7 @@ spec:
             app.kubernetes.io/component: controller
       toPorts:
         - ports:
-            - port: "9977"
+            - port: "9978"
               protocol: TCP
     - toEntities:
         - world

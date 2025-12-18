@@ -1,0 +1,26 @@
+#% if keycloak_enabled and agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| ReferenceGrant: Allow agentgateway to access Keycloak service #|
+#| Required for MCP OAuth JWKS validation                        #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: agentgateway-keycloak-access
+spec:
+  from:
+    #| Allow AgentgatewayPolicy from network namespace #|
+    - group: agentgateway.dev
+      kind: AgentgatewayPolicy
+      namespace: network
+    #| Allow HTTPRoute from network namespace (for backend refs) #|
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: network
+  to:
+    #| Grant access to Keycloak HTTP service #|
+    - group: ""
+      kind: Service
+      name: keycloak-http
+#% endif %#
