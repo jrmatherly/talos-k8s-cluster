@@ -33,13 +33,17 @@ spec:
       #| For dev builds (v2.2.0-main), use Always to get latest images #|
       image:
         pullPolicy: Always
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
-        limits:
-          cpu: 500m
-          memory: 512Mi
+
+    #| ============================================================ #|
+    #| Resource Limits (required for GOMEMLIMIT/GOMAXPROCS env vars) #|
+    #| ============================================================ #|
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
 
     #| ============================================================ #|
     #| Namespace Discovery                                          #|
