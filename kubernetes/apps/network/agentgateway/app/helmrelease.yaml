@@ -16,6 +16,9 @@ spec:
   dependsOn:
     - name: agentgateway-crds
   values:
+    serviceAccount:
+      name: agentgateway-controller
+
     controller:
       logLevel: info
       replicaCount: 1

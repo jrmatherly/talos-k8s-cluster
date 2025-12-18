@@ -25,6 +25,14 @@ spec:
     - name: agentgateway-crds
   values:
     #| ============================================================ #|
+    #| ServiceAccount Configuration                                  #|
+    #| Use unique name to avoid conflict with data plane SA          #|
+    #| (Gateway creates 'agentgateway' SA with automount=false)      #|
+    #| ============================================================ #|
+    serviceAccount:
+      name: agentgateway-controller
+
+    #| ============================================================ #|
     #| Controller Configuration                                     #|
     #| ============================================================ #|
     controller:
