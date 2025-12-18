@@ -9,3 +9,4 @@ resources:
   - servicemonitor.yaml
   - prometheusrule.yaml
   - oidc.yaml
+  - rbac.yaml

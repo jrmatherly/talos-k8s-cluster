@@ -12,4 +12,7 @@ resources:
 #% if keycloak_enabled %#
   - oidc.yaml
 #% endif %#
+#% if agentgateway_enabled | default(true) %#
+  - rbac.yaml
+#% endif %#
 #% endif %#
