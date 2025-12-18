@@ -201,18 +201,17 @@ spec:
           jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
           cacheDuration: "5m"
         resourceMetadata:
-          default:
-            resource: "https://mcp-gw.#{ primary_domain }#/mcp"
-            authorizationServers:
-              - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-            scopesSupported:
-              - openid
-              - profile
-              - email
-              - mcp:tools
-              - offline_access
-            bearerMethodsSupported:
-              - header
+          #| Flat key-value format matching standalone agentgateway #|
+          #| Each key maps to a google.protobuf.Value in the proto #|
+          resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+          scopesSupported:
+            - openid
+            - profile
+            - email
+            - mcp:tools
+            - offline_access
+          bearerMethodsSupported:
+            - header
 ---
 #| ============================================================ #|
 #| AgentgatewayPolicy: CORS for MCP                              #|
