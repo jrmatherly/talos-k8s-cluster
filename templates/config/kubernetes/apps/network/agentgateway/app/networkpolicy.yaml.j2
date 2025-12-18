@@ -20,9 +20,10 @@ spec:
         - ports:
             - port: "9978"
               protocol: TCP
-    #| Allow Prometheus scraping #|
+    #| Allow Prometheus scraping from observability namespace #|
     - fromEndpoints:
         - matchLabels:
+            io.kubernetes.pod.namespace: observability
             app.kubernetes.io/name: prometheus
       toPorts:
         - ports:
@@ -81,9 +82,10 @@ spec:
               protocol: TCP
             - port: "8080"
               protocol: TCP
-    #| Allow Prometheus scraping #|
+    #| Allow Prometheus scraping from observability namespace #|
     - fromEndpoints:
         - matchLabels:
+            io.kubernetes.pod.namespace: observability
             app.kubernetes.io/name: prometheus
       toPorts:
         - ports:
