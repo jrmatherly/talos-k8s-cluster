@@ -11,6 +11,8 @@ spec:
     spec:
       type: LoadBalancer
   env:
+    - name: XDS_ADDRESS
+      value: "http://kgateway.network.svc.cluster.local:9977"
     - name: ADMIN_ADDR
       value: "0.0.0.0:15000"
 ---
