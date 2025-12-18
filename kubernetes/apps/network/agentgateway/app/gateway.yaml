@@ -5,9 +5,11 @@ metadata:
   name: agentgateway-params
 spec:
   deployment:
-    replicas: 1
+    spec:
+      replicas: 1
   service:
-    type: LoadBalancer
+    spec:
+      type: LoadBalancer
   env:
     - name: ADMIN_ADDR
       value: "0.0.0.0:15000"

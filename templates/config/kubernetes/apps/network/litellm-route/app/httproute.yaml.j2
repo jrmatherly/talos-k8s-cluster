@@ -41,7 +41,7 @@ spec:
 ---
 #| ============================================================ #|
 #| TrafficPolicy for LLM traffic                                 #|
-#| Larger buffers and longer timeouts for LLM payloads           #|
+#| No timeout + large buffer for streaming LLM responses         #|
 #| ============================================================ #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
@@ -52,7 +52,10 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       name: litellm
-  #| Connection settings for LLM traffic #|
-  connectionConfig:
-    connectTimeout: 30s
+  #| No timeout for streaming LLM responses #|
+  timeouts:
+    request: "0s"
+  #| Large buffer for LLM payloads #|
+  buffer:
+    maxRequestSize: 8Mi
 #% endif %#

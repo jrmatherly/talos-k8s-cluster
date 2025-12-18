@@ -13,10 +13,14 @@ kind: AgentgatewayParameters
 metadata:
   name: agentgateway-params
 spec:
+  #| Deployment overrides (Strategic Merge Patch) #|
   deployment:
-    replicas: 1
+    spec:
+      replicas: 1
+  #| Service overrides (Strategic Merge Patch) #|
   service:
-    type: LoadBalancer
+    spec:
+      type: LoadBalancer
   #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
   env:
     - name: ADMIN_ADDR
