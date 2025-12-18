@@ -4,15 +4,13 @@ kind: AgentgatewayParameters
 metadata:
   name: agentgateway-params
 spec:
-  kube:
-    deployment:
-      replicas: 1
-    service:
-      type: LoadBalancer
-    agentgateway:
-      env:
-        - name: ADMIN_ADDR
-          value: "0.0.0.0:15000"
+  deployment:
+    replicas: 1
+  service:
+    type: LoadBalancer
+  env:
+    - name: ADMIN_ADDR
+      value: "0.0.0.0:15000"
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass

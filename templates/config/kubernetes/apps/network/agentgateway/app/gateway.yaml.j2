@@ -13,17 +13,14 @@ kind: AgentgatewayParameters
 metadata:
   name: agentgateway-params
 spec:
-  kube:
-    deployment:
-      replicas: 1
-    service:
-      type: LoadBalancer
-    #| Configure agentgateway container environment #|
-    agentgateway:
-      env:
-        #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
-        - name: ADMIN_ADDR
-          value: "0.0.0.0:15000"
+  deployment:
+    replicas: 1
+  service:
+    type: LoadBalancer
+  #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
+  env:
+    - name: ADMIN_ADDR
+      value: "0.0.0.0:15000"
 ---
 #| ============================================================ #|
 #| GatewayClass for agentgateway (AI/MCP data plane)             #|
