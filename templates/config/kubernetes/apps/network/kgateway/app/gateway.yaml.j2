@@ -115,7 +115,7 @@ spec:
 ---
 #| ============================================================ #|
 #| TrafficPolicy for HTTP traffic                                #|
-#| Compression, buffer limits, timeouts, retry, health checks    #|
+#| Timeouts, retry, and buffer limits for Gateway traffic        #|
 #| ============================================================ #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
@@ -129,27 +129,22 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: internal
-  #| Connection settings #|
-  connectionConfig:
-    connectTimeout: 10s
-    #| Buffer limits for request/response bodies (8Mi) #|
-    perConnectionBufferLimitBytes: 8388608
-  #| Request timeout (0 = unlimited for streaming) #|
-  requestTimeout: 0s
+  #| Request timeout (empty/unset = no timeout, suitable for streaming) #|
+  timeouts:
+    request: "0s"
   #| Retry policy for transient failures #|
-  retries:
-    retryOn: "connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes"
-    numRetries: 2
+  retry:
+    retryOn:
+      - connect-failure
+      - refused-stream
+      - unavailable
+      - cancelled
+    attempts: 2
     perTryTimeout: 30s
-    retryBackOff:
-      baseInterval: 1s
-      maxInterval: 10s
-  #| Passive health checking (outlier detection) #|
-  outlierDetection:
-    consecutive5xxErrors: 5
-    consecutiveGatewayErrors: 3
-    interval: 10s
-    baseEjectionTime: 30s
+    backoffBaseInterval: 1s
+  #| Buffer limits for request bodies (8Mi max) #|
+  buffer:
+    maxRequestSize: 8Mi
 ---
 #| ============================================================ #|
 #| HTTPListenerPolicy for HTTP/2 and access logging              #|

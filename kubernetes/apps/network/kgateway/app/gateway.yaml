@@ -108,22 +108,19 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: internal
-  connectionConfig:
-    connectTimeout: 10s
-    perConnectionBufferLimitBytes: 8388608
-  requestTimeout: 0s
-  retries:
-    retryOn: "connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes"
-    numRetries: 2
+  timeouts:
+    request: "0s"
+  retry:
+    retryOn:
+      - connect-failure
+      - refused-stream
+      - unavailable
+      - cancelled
+    attempts: 2
     perTryTimeout: 30s
-    retryBackOff:
-      baseInterval: 1s
-      maxInterval: 10s
-  outlierDetection:
-    consecutive5xxErrors: 5
-    consecutiveGatewayErrors: 3
-    interval: 10s
-    baseEjectionTime: 30s
+    backoffBaseInterval: 1s
+  buffer:
+    maxRequestSize: 8Mi
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: HTTPListenerPolicy
