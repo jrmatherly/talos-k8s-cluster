@@ -9,7 +9,8 @@ spec:
       replicas: 2
     envoyContainer:
       image:
-        repository: mirror.gcr.io/envoyproxy/envoy
+        registry: ghcr.io/kgateway-dev
+        repository: envoy-wrapper
       resources:
         requests:
           cpu: 100m

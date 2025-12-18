@@ -14,7 +14,11 @@ spec:
       replicas: 2
     envoyContainer:
       image:
-        repository: mirror.gcr.io/envoyproxy/envoy
+        #| Use kgateway's envoy-wrapper image from ghcr.io #|
+        #| See: https://github.com/kgateway-dev/kgateway/pkgs/container/envoy-wrapper #|
+        registry: ghcr.io/kgateway-dev
+        repository: envoy-wrapper
+        #| Tag defaults to chart version if not specified #|
       resources:
         requests:
           cpu: 100m
