@@ -8,8 +8,9 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
+      #| Controller pod uses 'agentgateway: agentgateway' label (not component label) #|
       app.kubernetes.io/name: agentgateway
-      app.kubernetes.io/component: controller
+      agentgateway: agentgateway
   ingress:
     #| Allow xDS connections from agentgateway data plane #|
     - fromEndpoints:
@@ -112,7 +113,7 @@ spec:
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: agentgateway
-            app.kubernetes.io/component: controller
+            agentgateway: agentgateway
       toPorts:
         - ports:
             - port: "9978"
