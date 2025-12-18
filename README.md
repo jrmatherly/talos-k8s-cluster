@@ -310,6 +310,9 @@ task talos:apply-node IP=? MODE=?
 
 > [!TIP]
 > Ensure the `talosVersion` and `kubernetesVersion` in `talenv.yaml` are up-to-date with the version you wish to upgrade to.
+>
+> [!IMPORTANT]
+> **The `talosctl` client version must match your cluster's Talos version.** Version mismatches cause "unsupported upgrade path" errors even for valid upgrades. Verify with `talosctl version` - the Client and Server tags should match (e.g., both `v1.11.6`). If using mise, update with `mise install talosctl@<version>` or check your global config at `~/.config/mise/config.toml`.
 
 ```sh
 # Upgrade node to a newer Talos version
