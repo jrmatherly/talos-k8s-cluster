@@ -12,4 +12,5 @@ resources:
   - httproute.yaml
   - trafficpolicy.yaml
   - networkpolicy.yaml
+  - referencegrant.yaml
   - servicemonitor.yaml

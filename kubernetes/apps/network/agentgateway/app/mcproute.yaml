@@ -99,7 +99,7 @@ spec:
       name: mcp-route
   traffic:
     timeouts:
-      request: "0s"
+      request: "8h"
     rateLimit:
       local:
         - requests: 100

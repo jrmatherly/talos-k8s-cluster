@@ -131,9 +131,10 @@ spec:
       kind: HTTPRoute
       name: mcp-route
   traffic:
-    #| No timeout for long-running MCP sessions (SSE streams) #|
+    #| Very long timeout for MCP sessions (SSE streams) - 8 hours #|
+    #| Note: "0s" is invalid, minimum is 1ms #|
     timeouts:
-      request: "0s"
+      request: "8h"
     #| Rate limiting: 100 requests per minute with burst #|
     rateLimit:
       local:
