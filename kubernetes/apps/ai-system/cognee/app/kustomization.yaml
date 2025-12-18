@@ -11,6 +11,7 @@ resources:
   - api-secret.sops.yaml
   - api-networkpolicy.yaml
   - httproute.yaml
+  - trafficpolicy.yaml
   # Cognee Frontend resources
   - frontend-secret.sops.yaml
   - frontend-networkpolicy.yaml

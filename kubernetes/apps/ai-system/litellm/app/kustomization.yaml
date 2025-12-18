@@ -10,5 +10,6 @@ resources:
   - dragonfly.yaml
   - postgresql.yaml
   - httproute.yaml
+  - trafficpolicy.yaml
   - networkpolicy.yaml
   - servicemonitor.yaml

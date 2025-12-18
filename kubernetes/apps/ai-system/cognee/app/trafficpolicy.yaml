@@ -1,0 +1,28 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: cognee-api-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: cognee-api
+  timeouts:
+    request: "0s"
+  buffer:
+    maxRequestSize: 8Mi
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: cognee-frontend-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: cognee-frontend
+  timeouts:
+    request: "0s"
+  buffer:
+    maxRequestSize: 8Mi

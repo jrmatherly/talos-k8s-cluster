@@ -1,0 +1,45 @@
+#% if cognee_enabled | default(false) and cognee_api_enabled | default(false) %#
+---
+#| ============================================================ #|
+#| TrafficPolicy for Cognee API                                  #|
+#| Disables timeout for long-running Graph RAG operations        #|
+#| Overrides Gateway-level defaults                              #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: cognee-api-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: cognee-api
+  #| No timeout for long-running AI/graph operations #|
+  timeouts:
+    request: "0s"
+  #| Large buffer for document ingestion #|
+  buffer:
+    maxRequestSize: 8Mi
+#% endif %#
+#% if cognee_enabled | default(false) and cognee_frontend_enabled | default(false) %#
+---
+#| ============================================================ #|
+#| TrafficPolicy for Cognee Frontend                             #|
+#| Disables timeout for backend API calls through frontend       #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: cognee-frontend-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: cognee-frontend
+  #| No timeout for long-running AI/graph operations #|
+  timeouts:
+    request: "0s"
+  #| Large buffer for document ingestion #|
+  buffer:
+    maxRequestSize: 8Mi
+#% endif %#

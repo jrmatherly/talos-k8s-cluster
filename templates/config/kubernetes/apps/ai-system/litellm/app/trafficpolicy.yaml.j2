@@ -1,0 +1,23 @@
+#% if litellm_enabled %#
+---
+#| ============================================================ #|
+#| TrafficPolicy for LiteLLM AI Proxy                            #|
+#| Disables timeout/retry for streaming LLM responses            #|
+#| Overrides Gateway-level defaults                              #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: litellm-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: litellm
+  #| No timeout for streaming AI responses #|
+  timeouts:
+    request: "0s"
+  #| Large buffer for AI payloads (context windows, embeddings) #|
+  buffer:
+    maxRequestSize: 8Mi
+#% endif %#

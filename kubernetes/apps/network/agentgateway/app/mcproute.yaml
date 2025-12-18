@@ -80,12 +80,29 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: agentgateway
+      sectionName: https
   rateLimit:
     local:
       tokenBucket:
         maxTokens: 100
         tokensPerFill: 50
         fillInterval: "60s"
+  buffer:
+    maxRequestSize: 8Mi
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: mcp-route-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  timeouts:
+    request: "0s"
+  buffer:
+    maxRequestSize: 8Mi
 ---
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: HTTPListenerPolicy

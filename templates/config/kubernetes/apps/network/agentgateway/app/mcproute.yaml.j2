@@ -90,8 +90,8 @@ spec:
           port: 15000
 ---
 #| ============================================================ #|
-#| TrafficPolicy: Rate Limiting                                  #|
-#| Token bucket rate limiting for MCP traffic                    #|
+#| TrafficPolicy: Gateway defaults with rate limiting            #|
+#| Token bucket rate limiting + buffer limits for AI traffic     #|
 #| ============================================================ #|
 apiVersion: gateway.kgateway.dev/v1alpha1
 kind: TrafficPolicy
@@ -102,12 +102,36 @@ spec:
     - group: gateway.networking.k8s.io
       kind: Gateway
       name: agentgateway
+      sectionName: https
   rateLimit:
     local:
       tokenBucket:
         maxTokens: 100
         tokensPerFill: 50
         fillInterval: "60s"
+  #| Large buffer for AI payloads #|
+  buffer:
+    maxRequestSize: 8Mi
+---
+#| ============================================================ #|
+#| TrafficPolicy: MCP Route streaming                            #|
+#| Disables timeout for long-running MCP sessions                #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: mcp-route-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  #| No timeout for long-running MCP sessions #|
+  timeouts:
+    request: "0s"
+  #| Large buffer for MCP payloads #|
+  buffer:
+    maxRequestSize: 8Mi
 ---
 #| ============================================================ #|
 #| HTTPListenerPolicy for enhanced access logging                #|

@@ -1,0 +1,14 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: litellm-streaming
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: litellm
+  timeouts:
+    request: "0s"
+  buffer:
+    maxRequestSize: 8Mi
