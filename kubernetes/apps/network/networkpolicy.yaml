@@ -1,14 +1,14 @@
 ---
-# CiliumNetworkPolicy for envoy-gateway controller - Kubernetes API access
+# CiliumNetworkPolicy for kgateway controller - Kubernetes API access
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: envoy-gateway-kube-api-egress
+  name: kgateway-kube-api-egress
   namespace: network
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: envoy-gateway
+      app.kubernetes.io/name: kgateway
   egress:
     - toEntities:
         - kube-apiserver
@@ -16,6 +16,183 @@ spec:
         - ports:
             - port: "6443"
               protocol: TCP
+---
+# CiliumNetworkPolicy for kgateway proxies - Ingress from world (LoadBalancer traffic)
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kgateway-proxies-world-ingress
+  namespace: network
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: gateway.networking.k8s.io/gateway-name
+        operator: In
+        values: ["external", "internal"]
+  ingress:
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+            - port: "10080"
+              protocol: TCP
+            - port: "10443"
+              protocol: TCP
+---
+# NetworkPolicy for kgateway controller
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kgateway-controller
+  namespace: network
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kgateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow xDS connections from kgateway proxy pods
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: gateway.networking.k8s.io/gateway-name
+                operator: In
+                values: ["external", "internal"]
+      ports:
+        - protocol: TCP
+          port: 9977   # xDS
+    # Allow Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9091
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 8081
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# NetworkPolicy for kgateway proxy pods (external, internal)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kgateway-proxies
+  namespace: network
+spec:
+  podSelector:
+    matchExpressions:
+      - key: gateway.networking.k8s.io/gateway-name
+        operator: In
+        values: ["external", "internal"]
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow LoadBalancer traffic
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 10080
+        - protocol: TCP
+          port: 10443
+    # Allow from cloudflare-tunnel
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cloudflare-tunnel
+      ports:
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 10443
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 19001
+        - protocol: TCP
+          port: 15000
+    # Kubelet probes
+    - from:
+        - ipBlock:
+            cidr: 192.168.20.0/22
+      ports:
+        - protocol: TCP
+          port: 19001
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # xDS to kgateway controller
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kgateway
+      ports:
+        - protocol: TCP
+          port: 9977
+    # Backend traffic to all namespaces
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+    # External backends
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
 ---
 # CiliumNetworkPolicy for cloudflare-dns - Kubernetes API access
 apiVersion: cilium.io/v2
@@ -52,171 +229,6 @@ spec:
         - ports:
             - port: "6443"
               protocol: TCP
----
-# NetworkPolicy for envoy-gateway controller
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: envoy-gateway-controller
-  namespace: network
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: envoy-gateway
-  policyTypes:
-    - Ingress
-    - Egress
-  ingress:
-    # Allow xDS connections from Envoy proxy pods
-    - from:
-        - podSelector:
-            matchLabels:
-              gateway.envoyproxy.io/owning-gateway-namespace: network
-      ports:
-        - protocol: TCP
-          port: 18000  # xDS
-        - protocol: TCP
-          port: 18001  # xDS rate limit
-        - protocol: TCP
-          port: 19001  # Metrics
-    # Allow Prometheus scraping
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: observability
-      ports:
-        - protocol: TCP
-          port: 19001
-    # Kubelet probes
-    - from:
-        - ipBlock:
-            cidr: 192.168.20.0/22
-      ports:
-        - protocol: TCP
-          port: 8081
-  egress:
-    # DNS
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
-    # Note: Kubernetes API access handled by CiliumNetworkPolicy
----
-# NetworkPolicy for Envoy proxy pods (internal, external, ai, mcp)
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: envoy-proxies
-  namespace: network
-spec:
-  podSelector:
-    matchLabels:
-      gateway.envoyproxy.io/owning-gateway-namespace: network
-  policyTypes:
-    - Ingress
-    - Egress
-  ingress:
-    # Allow LoadBalancer traffic (external access)
-    # CRITICAL: Cilium socket-based LB evaluates policy with ORIGINAL port before DNAT
-    # Must allow both Service ports (80, 443) AND container ports (10080, 10443, etc.)
-    # Includes both TCP and UDP for HTTP/3 (QUIC) support
-    - from:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-      ports:
-        - protocol: TCP
-          port: 80      # LoadBalancer service port (pre-DNAT)
-        - protocol: TCP
-          port: 443     # LoadBalancer service port (pre-DNAT)
-        - protocol: UDP
-          port: 443     # HTTP/3 (QUIC) service port (pre-DNAT)
-        - protocol: TCP
-          port: 10080   # HTTP container port (post-DNAT)
-        - protocol: TCP
-          port: 10443   # HTTPS container port (post-DNAT)
-        - protocol: UDP
-          port: 10443   # HTTP/3 (QUIC) container port (post-DNAT)
-        - protocol: TCP
-          port: 8080    # HTTP alt container port
-        - protocol: TCP
-          port: 8443    # HTTPS alt container port
-    # Allow from cloudflare-tunnel
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: cloudflare-tunnel
-      ports:
-        - protocol: TCP
-          port: 10443
-    # Allow from kgateway for JWKS fetching (auth.matherly.net via LoadBalancer)
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agentgateway
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: kgateway
-      ports:
-        - protocol: TCP
-          port: 10443  # HTTPS container port
-    # Prometheus metrics
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: observability
-      ports:
-        - protocol: TCP
-          port: 19001
-    # Kubelet probes
-    - from:
-        - ipBlock:
-            cidr: 192.168.20.0/22
-      ports:
-        - protocol: TCP
-          port: 19001
-  egress:
-    # DNS
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
-    # xDS to envoy-gateway controller
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: envoy-gateway
-      ports:
-        - protocol: TCP
-          port: 18000
-        - protocol: TCP
-          port: 18001
-    # Backend traffic to all internal namespaces
-    # This is intentionally broad as gateways route to many services
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - protocol: TCP
-    # External backends (Cloudflare, external APIs)
-    - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-            except:
-              - 10.0.0.0/8
-              - 172.16.0.0/12
-              - 192.168.0.0/16
-      ports:
-        - protocol: TCP
-          port: 443
 ---
 # NetworkPolicy for cloudflare-dns (external-dns)
 apiVersion: networking.k8s.io/v1
@@ -294,37 +306,6 @@ spec:
             - port: "7844"
               protocol: UDP
 ---
-# CiliumNetworkPolicy for Envoy proxies - Ingress from world (LoadBalancer traffic)
-# CRITICAL: Must use Cilium's native fromEntities: world for LoadBalancer service traffic
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: envoy-proxies-world-ingress
-  namespace: network
-spec:
-  endpointSelector:
-    matchLabels:
-      gateway.envoyproxy.io/owning-gateway-namespace: network
-  ingress:
-    # Allow ingress from world on both service ports (pre-DNAT) and container ports (post-DNAT)
-    # Includes both TCP and UDP for HTTP/3 (QUIC) support
-    - fromEntities:
-        - world
-      toPorts:
-        - ports:
-            - port: "80"
-              protocol: TCP
-            - port: "443"
-              protocol: TCP
-            - port: "443"
-              protocol: UDP
-            - port: "10080"
-              protocol: TCP
-            - port: "10443"
-              protocol: TCP
-            - port: "10443"
-              protocol: UDP
----
 # NetworkPolicy for cloudflare-tunnel (DNS and external access)
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -365,15 +346,17 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Pod-to-pod traffic (fallback for non-service traffic)
+    # Pod-to-pod traffic to kgateway external proxy (fallback for non-service traffic)
     - to:
         - podSelector:
             matchLabels:
-              gateway.envoyproxy.io/owning-gateway-namespace: network
+              gateway.networking.k8s.io/gateway-name: external
       ports:
         - protocol: TCP
           port: 10443   # Container port (HTTPS)
-    # envoy-external LoadBalancer IP (tunnel config uses external hostname)
+        - protocol: TCP
+          port: 8443    # Alternate HTTPS container port
+    # kgateway external LoadBalancer IP (tunnel config uses external hostname)
     # Required because Cilium socket-based LB blocks ClusterIP service traffic before policy evaluation
     - to:
         - ipBlock:

@@ -1,0 +1,141 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| AgentgatewayParameters for agentgateway data plane            #|
+#| API Group: agentgateway.dev/v1alpha1 (v2.2.0+)                #|
+#| Kubernetes deployment settings for agentgateway proxies       #|
+#| ============================================================ #|
+#| NOTE: If AgentgatewayParameters causes issues, fall back to   #|
+#| GatewayParameters from gateway.kgateway.dev/v1alpha1          #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayParameters
+metadata:
+  name: agentgateway-params
+spec:
+  kube:
+    deployment:
+      replicas: 1
+    service:
+      type: LoadBalancer
+    #| Configure agentgateway container environment #|
+    agentgateway:
+      env:
+        #| Bind admin UI to all interfaces for external access (default: 127.0.0.1:15000) #|
+        - name: ADMIN_ADDR
+          value: "0.0.0.0:15000"
+---
+#| ============================================================ #|
+#| GatewayClass for agentgateway (AI/MCP data plane)             #|
+#| Controller: agentgateway.dev/agentgateway (v2.2.0+)           #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: agentgateway
+spec:
+  #| NEW controller name in v2.2.0+ #|
+  controllerName: agentgateway.dev/agentgateway
+  description: "agentgateway for MCP protocol support with OAuth authentication"
+  parametersRef:
+    group: agentgateway.dev
+    kind: AgentgatewayParameters
+    name: agentgateway-params
+    namespace: network
+---
+#| ============================================================ #|
+#| agentgateway Gateway (192.168.22.147)                         #|
+#| Provides MCP OAuth proxy and AI gateway functionality         #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: agentgateway
+spec:
+  gatewayClassName: agentgateway
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: "#{ agentgateway_addr }#"
+  listeners:
+    #| HTTPS listener for admin UI and AI traffic #|
+    - name: https
+      protocol: HTTPS
+      port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: agentgateway-tls
+            kind: Secret
+      allowedRoutes:
+        namespaces:
+          from: All
+    #| MCP listener for MCP protocol traffic #|
+    #| Requires Backend with type: MCP and HTTPRoute to function #|
+    - name: mcp
+      protocol: HTTP
+      port: 8080
+      allowedRoutes:
+        namespaces:
+          from: All
+    #| Note: Admin UI (port 15000) is exposed via separate agentgateway-admin Service #|
+    #| Port 15000 is reserved by kgateway and cannot be used as a Gateway listener #|
+---
+#| ============================================================ #|
+#| Certificate for agentgateway                                  #|
+#| Includes mcp-gw (admin UI) and ai-gw (AI Gateway) hostnames   #|
+#| ============================================================ #|
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: agentgateway-tls
+spec:
+  secretName: agentgateway-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    - "mcp-gw.#{ primary_domain }#"
+#% if azure_openai_us_east_api_key or azure_openai_us_east2_api_key %#
+    - "ai-gw.#{ primary_domain }#"
+#% endif %#
+---
+#| ============================================================ #|
+#| Services for agentgateway admin and metrics                   #|
+#| ============================================================ #|
+#| Service for agentgateway stats/metrics endpoint #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-metrics
+  labels:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+spec:
+  selector:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+  ports:
+    - name: metrics
+      port: 15020
+      targetPort: 15020
+      protocol: TCP
+  type: ClusterIP
+---
+#| Service for agentgateway admin UI (port 15000 is reserved in Gateway) #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentgateway-admin
+  labels:
+    app.kubernetes.io/name: agentgateway-admin
+spec:
+  selector:
+    app.kubernetes.io/name: agentgateway
+    gateway.networking.k8s.io/gateway-name: agentgateway
+  ports:
+    - name: admin
+      port: 15000
+      targetPort: 15000
+      protocol: TCP
+  type: ClusterIP
+#% endif %#

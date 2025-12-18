@@ -190,9 +190,11 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("proxmox_region", "talos-k8s")
         data.setdefault("proxmox_storage", "local-lvm")
 
-        # Envoy AI Gateway defaults
+        # DEPRECATED: Envoy AI Gateway defaults (use kgateway + LiteLLM instead)
+        # TODO: Remove after kgateway migration is complete
         data.setdefault("envoy_ai_gateway_enabled", False)
-        # Azure OpenAI region defaults (empty strings to prevent undefined errors)
+        # Azure OpenAI region defaults (used by LiteLLM for multi-region routing)
+        # NOTE: NOT deprecated - still required for LiteLLM model configuration
         data.setdefault("azure_openai_us_east_api_key", "")
         data.setdefault("azure_openai_us_east_resource_name", "")
         data.setdefault("azure_openai_us_east2_api_key", "")
@@ -273,6 +275,14 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_google_enabled", False)
         data.setdefault("keycloak_google_client_id", "")
         data.setdefault("keycloak_google_client_secret", "")
+
+        # kgateway defaults (Envoy Control Plane - replaces envoy-gateway)
+        data.setdefault("kgateway_enabled", True)
+        data.setdefault("kgateway_version", "v2.2.0-main")
+        data.setdefault("agentgateway_version", "v2.2.0-main")
+        # DEPRECATED: Legacy envoy-gateway (use kgateway instead)
+        # TODO: Remove after kgateway migration is complete
+        data.setdefault("envoy_gateway_enabled", False)
 
         # agentgateway defaults (MCP 2025-11-25 OAuth Proxy)
         data.setdefault("agentgateway_enabled", False)
@@ -434,7 +444,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_api_hostname", "cognee-api")
         data.setdefault("cognee_version", "main")
         data.setdefault("cognee_replicas", 1)
-        data.setdefault("cognee_gateway", "envoy-external")
+        data.setdefault("cognee_gateway", "external")
         data.setdefault("cognee_api_resources_requests_cpu", "100m")
         data.setdefault("cognee_api_resources_requests_memory", "512Mi")
         data.setdefault("cognee_api_resources_limits_cpu", "2000m")

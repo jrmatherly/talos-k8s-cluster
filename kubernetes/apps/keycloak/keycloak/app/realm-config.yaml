@@ -71,7 +71,7 @@ data:
           "description": "OIDC client for Envoy Gateway SecurityPolicy authentication",
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
-          "secret": "FBzeqO/AtSLZqIP+dMHZXV9NapLL5iUKUghSiZElgXA=",
+          "secret": "YKFIU9KVXEc6kKYciTVPmWkSnYKQjqQu",
           "redirectUris": [
             "https://*.matherly.net/oauth2/callback",
             "https://*.matherly.net/*"
@@ -111,7 +111,7 @@ data:
           "description": "OAuth client for agentgateway MCP authentication proxy - MCP 2025-11-25 compliant",
           "enabled": true,
           "clientAuthenticatorType": "client-secret",
-          "secret": "",
+          "secret": "ieZAAJ8H0joNsCKWwsYHXOQ5sNSkjoUP",
           "redirectUris": [
             "https://mcp-gw.matherly.net/*",
             "https://ai-gw.matherly.net/*",

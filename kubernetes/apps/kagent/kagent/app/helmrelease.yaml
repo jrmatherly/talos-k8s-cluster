@@ -65,7 +65,7 @@ spec:
         apiKeySecretRef: kagent-provider-secret
         apiKeySecretKey: OPENAI_API_KEY
         config:
-          baseUrl: "https://ai-gateway.matherly.net"
+          baseUrl: "http://litellm.ai-system.svc.cluster.local:4000/v1"
 
     # ============================================================
     # Pre-built Agents Configuration

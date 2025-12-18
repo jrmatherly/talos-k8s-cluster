@@ -1,0 +1,60 @@
+#% if kgateway_enabled | default(true) %#
+---
+#| kgateway controller - Envoy data plane control plane #|
+#| Controller: kgateway.dev/kgateway #|
+#| IMPORTANT: agentgateway.enabled is FALSE - separate deployment in v2.2.0+ #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway
+spec:
+  chart:
+    spec:
+      chart: kgateway
+      version: "#{ kgateway_version | default('v2.2.0-main') }#"
+      sourceRef:
+        kind: HelmRepository
+        name: kgateway
+  interval: 1h
+  timeout: 15m
+  dependsOn:
+    - name: kgateway-crds
+  values:
+    #| ============================================================ #|
+    #| CRITICAL: Disable agentgateway integration                   #|
+    #| In v2.2.0+, agentgateway is a SEPARATE deployment            #|
+    #| ============================================================ #|
+    agentgateway:
+      enabled: false
+
+    #| ============================================================ #|
+    #| Controller Configuration                                     #|
+    #| ============================================================ #|
+    controller:
+      logLevel: info
+      replicaCount: 1
+      #| For dev builds (v2.2.0-main), use Always to get latest images #|
+      image:
+        pullPolicy: Always
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      extraEnv:
+        KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
+
+    #| ============================================================ #|
+    #| Namespace Discovery                                          #|
+    #| Allow kgateway to discover resources across namespaces       #|
+    #| ============================================================ #|
+    discoveryNamespaceSelectors:
+      - matchLabels:
+          kubernetes.io/metadata.name: network
+      - matchLabels:
+          kubernetes.io/metadata.name: ai-system
+      - matchLabels:
+          kubernetes.io/metadata.name: keycloak
+#% endif %#

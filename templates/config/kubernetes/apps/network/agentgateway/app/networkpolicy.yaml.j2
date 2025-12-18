@@ -1,0 +1,127 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| NetworkPolicy for agentgateway controller #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: agentgateway-controller
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+      app.kubernetes.io/component: controller
+  ingress:
+    #| Allow Prometheus scraping #|
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9091"
+              protocol: TCP
+    #| Allow webhook traffic from API server #|
+    - fromEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "9443"
+              protocol: TCP
+  egress:
+    #| Allow DNS #|
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+    #| Allow Kubernetes API access #|
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    #| Allow xDS updates to agentgateway proxies #|
+    - toEndpoints:
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: agentgateway
+      toPorts:
+        - ports:
+            - port: "9977"
+              protocol: TCP
+---
+#| NetworkPolicy for agentgateway data plane pods #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: agentgateway-proxy
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+      gateway.networking.k8s.io/gateway-name: agentgateway
+  ingress:
+    #| Allow external HTTPS and MCP traffic #|
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+    #| Allow Prometheus scraping #|
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "15020"
+              protocol: TCP
+    #| Allow admin UI access from internal services #|
+    - fromEntities:
+        - cluster
+      toPorts:
+        - ports:
+            - port: "15000"
+              protocol: TCP
+  egress:
+    #| Allow DNS #|
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+    #| Allow xDS from controller #|
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: agentgateway
+            app.kubernetes.io/component: controller
+      toPorts:
+        - ports:
+            - port: "9977"
+              protocol: TCP
+    #| Allow traffic to Azure OpenAI #|
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    #| Allow traffic to backend services (MCP servers, LiteLLM) #|
+    - toEntities:
+        - cluster
+    #| Allow Keycloak for OAuth #|
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: keycloak
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+#% endif %#

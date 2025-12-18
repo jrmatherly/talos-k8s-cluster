@@ -1,0 +1,257 @@
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: mcp-backend
+spec:
+  mcp:
+    targets:
+      - name: mcp-servers
+        selector:
+          services:
+            matchLabels:
+              agentgateway.dev/mcp: "true"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-route
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "mcp-gw.matherly.net"
+  rules:
+    - backendRefs:
+        - group: agentgateway.dev
+          kind: AgentgatewayBackend
+          name: mcp-backend
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: agentgateway-ui
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "mcp-gw.matherly.net"
+    - "ai-gw.matherly.net"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /ui
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /config
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /config_dump
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /oauth2
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: agentgateway-rate-limit
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: agentgateway
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 100
+        tokensPerFill: 50
+        fillInterval: "60s"
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: agentgateway-logging
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: agentgateway
+  accessLog:
+    - fileSink:
+        path: /dev/stdout
+        jsonFormat:
+          timestamp: "%START_TIME%"
+          method: "%REQ(:METHOD)%"
+          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+          protocol: "%PROTOCOL%"
+          responseCode: "%RESPONSE_CODE%"
+          responseFlags: "%RESPONSE_FLAGS%"
+          bytesReceived: "%BYTES_RECEIVED%"
+          bytesSent: "%BYTES_SENT%"
+          duration: "%DURATION%"
+          upstreamHost: "%UPSTREAM_HOST%"
+          userAgent: "%REQ(USER-AGENT)%"
+          requestId: "%REQ(X-REQUEST-ID)%"
+          authority: "%REQ(:AUTHORITY)%"
+          xAiModel: "%REQ(X-AI-EG-MODEL)%"
+          inputTokens: "%RESP(X-INPUT-TOKENS)%"
+          outputTokens: "%RESP(X-OUTPUT-TOKENS)%"
+          costUsd: "%RESP(X-COST-USD)%"
+          promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-authentication
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  backend:
+    mcp:
+      authentication:
+        issuer: "https://auth.matherly.net/realms/k8s-cluster"
+        audiences:
+          - "https://mcp-gw.matherly.net/mcp"
+        provider: Keycloak
+        jwks:
+          uri: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
+        resourceMetadata:
+          default:
+            resource: "https://mcp-gw.matherly.net/mcp"
+            authorizationServers:
+              - "https://auth.matherly.net/realms/k8s-cluster"
+            scopesSupported:
+              - openid
+              - profile
+              - email
+              - mcp:tools
+              - offline_access
+            bearerMethodsSupported:
+              - header
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  traffic:
+    cors:
+      allowOrigins:
+        - "https://mcp-gw.matherly.net"
+        - "https://ai-gw.matherly.net"
+        - "https://*.matherly.net"
+        - "http://localhost"
+        - "http://localhost:3000"
+        - "http://localhost:5173"
+        - "http://localhost:8080"
+        - "http://127.0.0.1"
+        - "http://127.0.0.1:3000"
+        - "http://127.0.0.1:5173"
+        - "http://127.0.0.1:8080"
+      allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-ID
+      exposeHeaders:
+        - X-Request-ID
+        - WWW-Authenticate
+      allowCredentials: true
+      maxAge: 86400
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: agentgateway-keycloak-oauth
+spec:
+  oauth2:
+    backendRef:
+      kind: Backend
+      group: gateway.kgateway.dev
+      name: keycloak-oauth
+    issuerURI: "https://auth.matherly.net/realms/k8s-cluster"
+    credentials:
+      clientID: "agentgateway-mcp"
+      clientSecretRef:
+        name: agentgateway-oauth-secret
+    redirectURI: "https://ai-gw.matherly.net/oauth2/callback"
+    logoutPath: /logout
+    forwardAccessToken: true
+    scopes:
+      - openid
+      - profile
+      - email
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-oauth
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "auth.matherly.net"
+        port: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-oauth-tls
+spec:
+  targetRefs:
+    - group: gateway.kgateway.dev
+      kind: Backend
+      name: keycloak-oauth
+  validation:
+    hostname: "auth.matherly.net"
+    wellKnownCACertificates: System
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agentgateway-oauth-secret
+type: Opaque
+stringData:
+  client-secret: "ieZAAJ8H0joNsCKWwsYHXOQ5sNSkjoUP"
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: agentgateway-ui-oauth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: agentgateway-ui
+  oauth2:
+    extensionRef:
+      name: agentgateway-keycloak-oauth

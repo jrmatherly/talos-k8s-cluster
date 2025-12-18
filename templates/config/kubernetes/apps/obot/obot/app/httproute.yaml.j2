@@ -8,7 +8,7 @@ spec:
   hostnames:
     - "#{ obot_hostname | default('obot') }#.${SECRET_DOMAIN}"
   parentRefs:
-    - name: envoy-external
+    - name: external
       namespace: network
       sectionName: https
   rules:

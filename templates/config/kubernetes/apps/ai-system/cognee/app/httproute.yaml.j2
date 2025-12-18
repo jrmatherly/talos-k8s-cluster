@@ -9,7 +9,7 @@ spec:
   hostnames:
     - "#{ cognee_api_hostname | default('cognee-api') }#.${SECRET_DOMAIN}"
   parentRefs:
-    - name: "#{ cognee_gateway | default('envoy-external') }#"
+    - name: "#{ cognee_gateway | default('external') }#"
       namespace: network
       sectionName: https
   rules:
@@ -30,7 +30,7 @@ spec:
   hostnames:
     - "#{ cognee_frontend_hostname | default('cognee') }#.${SECRET_DOMAIN}"
   parentRefs:
-    - name: "#{ cognee_gateway | default('envoy-external') }#"
+    - name: "#{ cognee_gateway | default('external') }#"
       namespace: network
       sectionName: https
   rules:

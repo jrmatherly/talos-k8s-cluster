@@ -86,19 +86,19 @@ cluster_api_addr: ""
 #    TIP: See docs/udm-split-dns.md for router configuration examples.
 cluster_dns_gateway_addr: ""
 
-# -- IP for the internal ingress gateway (envoy-internal).
+# -- IP for the internal ingress gateway (internal).
 #    Used for services only accessible from your local network.
 #    (REQUIRED) - Must be an UNUSED IP within node_cidr
 cluster_gateway_addr: ""
 
-# -- IP for the external ingress gateway (envoy-external via Cloudflare Tunnel).
+# -- IP for the external ingress gateway (external via Cloudflare Tunnel).
 #    Used for services accessible from the public internet.
 #    (REQUIRED) - Must be an UNUSED IP within node_cidr
 cloudflare_gateway_addr: ""
 
-# -- Load balancer IP for the AI Gateway.
-#    (REQUIRED if envoy_ai_gateway_enabled) - Must be an UNUSED IP within node_cidr
-#    Example: "192.168.1.145"
+# -- DEPRECATED: Load balancer IP for the Envoy AI Gateway.
+#    TODO: Remove after kgateway migration is complete
+#    Use kgateway + LiteLLM instead of Envoy AI Gateway
 # envoy_ai_gateway_addr: ""
 
 # -- Load balancer IP for the MCP Gateway.
@@ -240,15 +240,39 @@ cloudflare_token: ""
 # proxmox_ccm_token_secret: ""
 
 # ==============================================================================
-# ENVOY AI GATEWAY (Optional)
+# KGATEWAY CONFIGURATION (Optional - Envoy Control Plane)
 # ==============================================================================
-# Configuration for AI/LLM traffic routing via Envoy AI Gateway.
-# This extends the existing Envoy Gateway with AI-specific capabilities.
+# kgateway is the next-generation Gateway API control plane, providing better
+# performance and AI integration than the legacy Envoy Gateway.
+# REF: https://kgateway.dev/
+# REF: docs/ai-context/agentgateway-mcp.md
+
+# -- Enable kgateway deployment.
+#    (OPTIONAL) / (DEFAULT: true)
+#    When enabled, deploys kgateway as the Gateway API control plane.
+# kgateway_enabled: true
+
+# -- kgateway Helm chart version.
+#    (OPTIONAL) / (DEFAULT: "v2.2.0-main")
+# kgateway_version: "v2.2.0-main"
+
+# -- agentgateway Helm chart version.
+#    (OPTIONAL) / (DEFAULT: "v2.2.0-main")
+#    Used when agentgateway_enabled is true.
+# agentgateway_version: "v2.2.0-main"
+
+# ==============================================================================
+# ENVOY AI GATEWAY (DEPRECATED - use kgateway + LiteLLM)
+# ==============================================================================
+# DEPRECATED: Configuration for AI/LLM traffic routing via Envoy AI Gateway.
+# TODO: Remove this entire section after kgateway migration is complete.
+# This has been replaced by kgateway + LiteLLM for unified AI Gateway.
 # REF: https://aigateway.envoyproxy.io/docs/
 
-# -- Enable Envoy AI Gateway integration.
+# -- DEPRECATED: Enable Envoy AI Gateway integration.
 #    (OPTIONAL) / (DEFAULT: false)
-# envoy_ai_gateway_enabled: true
+#    TODO: Remove after kgateway migration is complete
+# envoy_ai_gateway_enabled: false
 
 # ==============================================================================
 # MCP GATEWAY (Optional - Model Context Protocol)
@@ -495,7 +519,7 @@ cloudflare_token: ""
 # KEYCLOAK CONFIGURATION (Optional - OIDC Authentication Provider)
 # ==============================================================================
 # Keycloak provides enterprise-grade identity and access management.
-# Integrates with Envoy Gateway via SecurityPolicy for OIDC authentication.
+# Integrates with kgateway via SecurityPolicy for OIDC authentication.
 # REF: docs/keycloak-envoy-gateway-integration-research.md
 
 # -- Enable Keycloak deployment.
@@ -514,7 +538,7 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: 2)
 # keycloak_replicas: 2
 
-# -- OIDC client secret for Envoy Gateway integration.
+# -- OIDC client secret for kgateway integration.
 #    (REQUIRED if keycloak_enabled) - Will be created in Keycloak after deployment
 #    NOTE: Generate this value after configuring Keycloak realm and client.
 #    Leave as placeholder until Keycloak is running and client is configured.
@@ -647,6 +671,7 @@ cloudflare_token: ""
 #    Will be encrypted with SOPS
 #    NOTE: Use a separate client secret if agentgateway needs different
 #    permissions than the main OIDC client.
+#    Generate with: openssl rand -base64 32 | tr -d '/+=' | head -c 32
 # keycloak_agentgateway_client_secret: ""
 
 # ==============================================================================
@@ -814,12 +839,12 @@ cloudflare_token: ""
 #    Options: "custom", "azure-keyvault", "aws-kms", "gcp-kms"
 # obot_encryption_provider: "custom"
 
-# -- Use existing envoy-ai gateway for LLM requests.
+# -- DEPRECATED: Use existing Envoy AI Gateway for LLM requests.
 #    (OPTIONAL) / (DEFAULT: false)
-#    Set to false if configuring model providers directly in obot
+#    TODO: Remove after kgateway migration - use agentgateway instead
 # obot_use_ai_gateway: false
 
-# -- Use agentgateway (ai-gw) instead of Envoy AI Gateway (llms) for LLM requests.
+# -- Use agentgateway for LLM requests with advanced features.
 #    (OPTIONAL) / (DEFAULT: false)
 #    When enabled, routes LLM traffic through agentgateway for rate limiting,
 #    prompt guards, FinOps metrics, and MCP-focused features.
@@ -933,7 +958,7 @@ cloudflare_token: ""
 # MINIO CONSOLE INGRESS
 # ==============================================================================
 
-# -- Enable console HTTPRoute via Envoy Gateway.
+# -- Enable console HTTPRoute via kgateway.
 #    (OPTIONAL) / (DEFAULT: false)
 #    Creates minio.<domain> route for web console access
 # minio_ingress_enabled: true
@@ -996,7 +1021,7 @@ cloudflare_token: ""
 #    (REQUIRED if using OpenAI) - Will be encrypted with SOPS
 # kagent_openai_api_key: "sk-xxx"
 
-# -- OpenAI-compatible API base URL (for routing through Envoy AI Gateway).
+# -- OpenAI-compatible API base URL (for routing through LiteLLM).
 #    (OPTIONAL) - Use this to route kagent requests through the AI Gateway
 #    Example: "https://llms.<your-domain>/v1"
 # kagent_openai_api_base: ""
@@ -1378,9 +1403,9 @@ kagent_kmcp_enabled: true
 # cognee_api_hostname: "cognee-api"
 
 # -- Gateway for Cognee routing.
-#    (OPTIONAL) / (DEFAULT: "envoy-external")
-#    Options: envoy-external, envoy-internal, envoy-ai
-# cognee_gateway: "envoy-external"
+#    (OPTIONAL) / (DEFAULT: "external")
+#    Options: external, internal
+# cognee_gateway: "external"
 
 # -- Cognee Backend Docker image version.
 #    (OPTIONAL) / (DEFAULT: "main")

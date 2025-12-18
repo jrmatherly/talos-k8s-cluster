@@ -1,0 +1,43 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway
+spec:
+  chart:
+    spec:
+      chart: kgateway
+      version: "v2.2.0-main"
+      sourceRef:
+        kind: HelmRepository
+        name: kgateway
+  interval: 1h
+  timeout: 15m
+  dependsOn:
+    - name: kgateway-crds
+  values:
+    agentgateway:
+      enabled: false
+
+    controller:
+      logLevel: info
+      replicaCount: 1
+      image:
+        pullPolicy: Always
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      extraEnv:
+        KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
+
+    discoveryNamespaceSelectors:
+      - matchLabels:
+          kubernetes.io/metadata.name: network
+      - matchLabels:
+          kubernetes.io/metadata.name: ai-system
+      - matchLabels:
+          kubernetes.io/metadata.name: keycloak

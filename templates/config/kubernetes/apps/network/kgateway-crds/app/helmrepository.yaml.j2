@@ -1,0 +1,13 @@
+#% if kgateway_enabled | default(true) %#
+---
+#| HelmRepository for kgateway charts (Envoy control plane) #|
+#| Uses cr.kgateway.dev registry (NOT ghcr.io) #|
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: kgateway
+spec:
+  interval: 1h
+  type: oci
+  url: oci://cr.kgateway.dev/kgateway-dev/charts
+#% endif %#

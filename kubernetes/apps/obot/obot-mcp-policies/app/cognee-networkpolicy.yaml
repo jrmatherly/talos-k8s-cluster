@@ -19,6 +19,16 @@ spec:
         - ports:
             - port: "443"
               protocol: TCP
+    # Google OAuth/OIDC for group membership lookup
+    - toFQDNs:
+        - matchPattern: "accounts.google.com"
+        - matchPattern: "oauth2.googleapis.com"
+        - matchPattern: "www.googleapis.com"
+        - matchPattern: "*.googleapis.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
 ---
 # NetworkPolicy for Cognee MCP Server - extends base mcp-server-isolation
 apiVersion: networking.k8s.io/v1

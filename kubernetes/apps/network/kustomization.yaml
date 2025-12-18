@@ -11,5 +11,9 @@ resources:
   - ./networkpolicy.yaml
   - ./cloudflare-dns/ks.yaml
   - ./cloudflare-tunnel/ks.yaml
-  - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
+  - ./kgateway-crds/ks.yaml
+  - ./kgateway/ks.yaml
+  - ./agentgateway-crds/ks.yaml
+  - ./agentgateway/ks.yaml
+  - ./litellm-route/ks.yaml

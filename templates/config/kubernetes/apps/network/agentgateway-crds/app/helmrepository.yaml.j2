@@ -1,0 +1,16 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| HelmRepository for agentgateway charts (MCP/AI control plane) #|
+#| IMPORTANT: Uses ghcr.io registry (NOT cr.kgateway.dev)        #|
+#| This is a SEPARATE registry from kgateway charts              #|
+#| ============================================================ #|
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: agentgateway
+spec:
+  interval: 1h
+  type: oci
+  url: oci://ghcr.io/kgateway-dev/charts
+#% endif %#

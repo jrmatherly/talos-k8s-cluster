@@ -6,7 +6,7 @@ metadata:
 spec:
   hostnames: ["onedev.${SECRET_DOMAIN}"]
   parentRefs:
-    - name: envoy-internal
+    - name: internal
       namespace: network
       sectionName: https
   rules:

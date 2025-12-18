@@ -6,7 +6,7 @@ metadata:
   name: minio-console
 spec:
   parentRefs:
-    - name: envoy-internal
+    - name: internal
       namespace: network
       sectionName: https
   hostnames:

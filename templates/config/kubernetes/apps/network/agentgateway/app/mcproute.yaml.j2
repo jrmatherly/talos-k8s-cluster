@@ -1,0 +1,303 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| MCP Backend for routing to MCP servers                        #|
+#| Uses label selector to dynamically discover MCP server pods   #|
+#| Requires Services with appProtocol: kgateway.dev/mcp          #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: mcp-backend
+spec:
+  mcp:
+    targets:
+      - name: mcp-servers
+        selector:
+          services:
+            matchLabels:
+              agentgateway.dev/mcp: "true"
+---
+#| ============================================================ #|
+#| HTTPRoute for MCP traffic on HTTPS listener                   #|
+#| Routes mcp-gw.<domain> to MCP backend with OAuth authentication #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-route
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "mcp-gw.#{ primary_domain }#"
+  rules:
+    - backendRefs:
+        - group: agentgateway.dev
+          kind: AgentgatewayBackend
+          name: mcp-backend
+---
+#| ============================================================ #|
+#| HTTPRoute for agentgateway admin UI                           #|
+#| Routes /ui, /config, /config_dump path prefixes to admin      #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: agentgateway-ui
+spec:
+  parentRefs:
+    - name: agentgateway
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "mcp-gw.#{ primary_domain }#"
+    - "ai-gw.#{ primary_domain }#"
+  rules:
+    #| Route /ui paths to admin UI service #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /ui
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+    #| Route /config paths to admin UI service #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /config
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+    #| Route /config_dump path to admin UI service #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /config_dump
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+    #| OAuth2 callback path #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /oauth2
+      backendRefs:
+        - name: agentgateway-admin
+          port: 15000
+---
+#| ============================================================ #|
+#| TrafficPolicy: Rate Limiting                                  #|
+#| Token bucket rate limiting for MCP traffic                    #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: agentgateway-rate-limit
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: agentgateway
+  rateLimit:
+    local:
+      tokenBucket:
+        maxTokens: 100
+        tokensPerFill: 50
+        fillInterval: "60s"
+---
+#| ============================================================ #|
+#| HTTPListenerPolicy for enhanced access logging                #|
+#| Includes AI-specific fields: tokens, cost, prompt guard       #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: agentgateway-logging
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: agentgateway
+  accessLog:
+    - fileSink:
+        path: /dev/stdout
+        jsonFormat:
+          timestamp: "%START_TIME%"
+          method: "%REQ(:METHOD)%"
+          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+          protocol: "%PROTOCOL%"
+          responseCode: "%RESPONSE_CODE%"
+          responseFlags: "%RESPONSE_FLAGS%"
+          bytesReceived: "%BYTES_RECEIVED%"
+          bytesSent: "%BYTES_SENT%"
+          duration: "%DURATION%"
+          upstreamHost: "%UPSTREAM_HOST%"
+          userAgent: "%REQ(USER-AGENT)%"
+          requestId: "%REQ(X-REQUEST-ID)%"
+          authority: "%REQ(:AUTHORITY)%"
+          xAiModel: "%REQ(X-AI-EG-MODEL)%"
+          inputTokens: "%RESP(X-INPUT-TOKENS)%"
+          outputTokens: "%RESP(X-OUTPUT-TOKENS)%"
+          costUsd: "%RESP(X-COST-USD)%"
+          promptGuardAction: "%RESP(X-PROMPT-GUARD-ACTION)%"
+#% if keycloak_enabled %#
+---
+#| ============================================================ #|
+#| AgentgatewayPolicy: MCP OAuth Authentication                  #|
+#| MCP backend authentication using Keycloak                     #|
+#| RFC 9728, RFC 8707 compliance                                 #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-authentication
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  backend:
+    mcp:
+      authentication:
+        issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+        audiences:
+          - "https://mcp-gw.#{ primary_domain }#/mcp"
+        provider: Keycloak
+        jwks:
+          uri: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
+        resourceMetadata:
+          default:
+            resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+            authorizationServers:
+              - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+            scopesSupported:
+              - openid
+              - profile
+              - email
+              - mcp:tools
+              - offline_access
+            bearerMethodsSupported:
+              - header
+---
+#| ============================================================ #|
+#| AgentgatewayPolicy: CORS for MCP                              #|
+#| Enables browser-based MCP clients                             #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-route
+  traffic:
+    cors:
+      allowOrigins:
+        - "https://mcp-gw.#{ primary_domain }#"
+        - "https://ai-gw.#{ primary_domain }#"
+        - "https://*.#{ primary_domain }#"
+        - "http://localhost"
+        - "http://localhost:3000"
+        - "http://localhost:5173"
+        - "http://localhost:8080"
+        - "http://127.0.0.1"
+        - "http://127.0.0.1:3000"
+        - "http://127.0.0.1:5173"
+        - "http://127.0.0.1:8080"
+      allowMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-ID
+      exposeHeaders:
+        - X-Request-ID
+        - WWW-Authenticate
+      allowCredentials: true
+      maxAge: 86400
+---
+#| ============================================================ #|
+#| OAuth2 Protection for Admin UI (kgateway TrafficPolicy)       #|
+#| ============================================================ #|
+#| GatewayExtension for Keycloak OIDC configuration #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: agentgateway-keycloak-oauth
+spec:
+  oauth2:
+    backendRef:
+      kind: Backend
+      group: gateway.kgateway.dev
+      name: keycloak-oauth
+    issuerURI: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+    credentials:
+      clientID: "agentgateway-mcp"
+      clientSecretRef:
+        name: agentgateway-oauth-secret
+    redirectURI: "https://ai-gw.#{ primary_domain }#/oauth2/callback"
+    logoutPath: /logout
+    forwardAccessToken: true
+    scopes:
+      - openid
+      - profile
+      - email
+---
+#| Backend for Keycloak OAuth endpoints #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-oauth
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "auth.#{ primary_domain }#"
+        port: 443
+---
+#| BackendTLSPolicy for Keycloak OAuth #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-oauth-tls
+spec:
+  targetRefs:
+    - group: gateway.kgateway.dev
+      kind: Backend
+      name: keycloak-oauth
+  validation:
+    hostname: "auth.#{ primary_domain }#"
+    wellKnownCACertificates: System
+---
+#| Secret for OAuth client credentials #|
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agentgateway-oauth-secret
+type: Opaque
+stringData:
+  client-secret: "#{ keycloak_agentgateway_client_secret | default(keycloak_oidc_client_secret) }#"
+---
+#| TrafficPolicy to protect admin UI with OAuth2 #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: agentgateway-ui-oauth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: agentgateway-ui
+  oauth2:
+    extensionRef:
+      name: agentgateway-keycloak-oauth
+#% endif %#
+#% endif %#

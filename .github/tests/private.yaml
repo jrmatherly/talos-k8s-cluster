@@ -30,7 +30,12 @@ proxmox_api_url: "https://10.10.10.1:8006/api2/json"
 proxmox_csi_token_id: "test-csi@pve!token"
 proxmox_csi_token_secret: "fake-secret"
 # CCM tokens not needed for Approach A
-# Envoy AI Gateway Configuration (disabled for private repo testing)
+# kgateway Configuration (uses defaults: kgateway_enabled=true, kgateway_version=v2.2.0-main)
+# kgateway_enabled: true
+# kgateway_version: "v2.2.0-main"
+# agentgateway_version: "v2.2.0-main"
+# DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
+# TODO: Remove these fields after kgateway migration is complete
 # envoy_ai_gateway_enabled: false
 # Azure OpenAI - US East Region (commented - disabled)
 # azure_openai_us_east_api_key: ""

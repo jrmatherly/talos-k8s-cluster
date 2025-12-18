@@ -1,0 +1,57 @@
+---
+
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: Backend
+metadata:
+  name: keycloak-oidc
+spec:
+  type: Static
+  static:
+    hosts:
+      - host: "auth.matherly.net"
+        port: 443
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: keycloak-oidc-tls
+spec:
+  targetRefs:
+    - group: gateway.kgateway.dev
+      kind: Backend
+      name: keycloak-oidc
+  validation:
+    hostname: "auth.matherly.net"
+    wellKnownCACertificates: System
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: keycloak-oidc
+spec:
+  oauth2:
+    backendRef:
+      kind: Backend
+      group: gateway.kgateway.dev
+      name: keycloak-oidc
+    issuerURI: "https://auth.matherly.net/realms/k8s-cluster"
+    credentials:
+      clientID: "kgateway"
+      clientSecretRef:
+        name: kgateway-oidc-secret
+    redirectURI: "https://*.matherly.net/oauth2/callback"
+    logoutPath: /logout
+    forwardAccessToken: true
+    scopes:
+      - openid
+      - profile
+      - email
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kgateway-oidc-secret
+type: Opaque
+stringData:
+  client-secret: "YKFIU9KVXEc6kKYciTVPmWkSnYKQjqQu"
+---

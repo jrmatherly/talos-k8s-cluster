@@ -1,0 +1,58 @@
+#% if litellm_enabled | default(true) and kgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| HTTPRoute for LiteLLM via external Gateway                    #|
+#| Routes llms.{SECRET_DOMAIN} to LiteLLM service                #|
+#| Replaces Envoy AI Gateway for LLM traffic                     #|
+#| ============================================================ #|
+#| Benefits:                                                     #|
+#| - Unified LLM endpoint for chat completions AND embeddings    #|
+#| - Multi-provider support (Azure, Anthropic, etc.)             #|
+#| - Response caching via Dragonfly                              #|
+#| - Cost tracking and token usage metrics                       #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: litellm
+  annotations:
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  parentRefs:
+    #| Route via external gateway for Cloudflare Tunnel access #|
+    - name: external
+      namespace: network
+      sectionName: https
+  hostnames:
+    - "llms.${SECRET_DOMAIN}"
+  rules:
+    #| Route all LLM traffic to LiteLLM #|
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: litellm
+          namespace: ai-system
+          port: 4000
+      timeouts:
+        #| Extended timeout for LLM requests (streaming, large prompts) #|
+        request: 120s
+---
+#| ============================================================ #|
+#| TrafficPolicy for LLM traffic                                 #|
+#| Larger buffers and longer timeouts for LLM payloads           #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: litellm-traffic
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: litellm
+  #| Connection settings for LLM traffic #|
+  connectionConfig:
+    connectTimeout: 30s
+#% endif %#

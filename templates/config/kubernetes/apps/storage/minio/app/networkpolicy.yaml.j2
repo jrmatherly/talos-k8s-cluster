@@ -28,14 +28,14 @@ spec:
         - protocol: TCP
           port: 9000  # S3 API
 #% if minio_ingress_enabled | default(false) %#
-    # Allow Console access from envoy-gateway proxies
+    # Allow Console access from kgateway internal gateway proxies
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
-              gateway.envoyproxy.io/owning-gateway-namespace: network
+              gateway.networking.k8s.io/gateway-name: internal
       ports:
         - protocol: TCP
           port: 9001  # Console

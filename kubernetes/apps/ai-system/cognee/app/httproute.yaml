@@ -8,7 +8,7 @@ spec:
   hostnames:
     - "cognee-api.${SECRET_DOMAIN}"
   parentRefs:
-    - name: "envoy-external"
+    - name: "external"
       namespace: network
       sectionName: https
   rules:
@@ -27,7 +27,7 @@ spec:
   hostnames:
     - "cognee.${SECRET_DOMAIN}"
   parentRefs:
-    - name: "envoy-external"
+    - name: "external"
       namespace: network
       sectionName: https
   rules:

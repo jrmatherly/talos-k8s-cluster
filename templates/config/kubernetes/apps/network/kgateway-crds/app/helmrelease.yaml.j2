@@ -1,0 +1,23 @@
+#% if kgateway_enabled | default(true) %#
+---
+#| kgateway CRDs for Envoy-related resources #|
+#| API Group: gateway.kgateway.dev/v1alpha1 #|
+#| Resources: TrafficPolicy, HTTPListenerPolicy, Backend, GatewayParameters #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kgateway-crds
+spec:
+  chart:
+    spec:
+      chart: kgateway-crds
+      version: "#{ kgateway_version | default('v2.2.0-main') }#"
+      sourceRef:
+        kind: HelmRepository
+        name: kgateway
+  interval: 1h
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
+#% endif %#

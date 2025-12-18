@@ -52,14 +52,21 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    # Allow from envoy-gateway proxies
+    # Allow from kgateway proxies (external/internal gateways)
     - from:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
-              gateway.envoyproxy.io/owning-gateway-namespace: network
+              gateway.networking.k8s.io/gateway-name: external
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: internal
       ports:
         - protocol: TCP
           port: 8080
@@ -83,11 +90,14 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8099
-    # Allow from agentgateway for MCP-proxied requests
+    # Allow from agentgateway for MCP-proxied requests (now in network namespace)
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: agentgateway
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: agentgateway
       ports:
         - protocol: TCP
           port: 8080
@@ -158,37 +168,19 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8099
-    # Allow to envoy-ai gateway for LLM requests via internal service
-    # Note: envoy-ai pods listen on 10443 (targetPort), not 443 (service port)
+    # Allow to agentgateway pods in network namespace for MCP/LLM routing
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
-              gateway.envoyproxy.io/owning-gateway-name: envoy-ai
+              gateway.networking.k8s.io/gateway-name: agentgateway
       ports:
+        - protocol: TCP
+          port: 8443
         - protocol: TCP
           port: 10443
-    # Allow to envoy-ai LoadBalancer IP for LLM requests via external hostname (llms.matherly.net)
-    # Required because TLS cert is valid for *.matherly.net, not internal service name
-    - to:
-        - ipBlock:
-            cidr: 192.168.22.145/32
-      ports:
-        - protocol: TCP
-          port: 443
-    # Allow to agentgateway namespace for AI/LLM routing via ai-gw hostname
-    # Used when obot_use_agentgateway is enabled
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agentgateway
-      ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 8080
     # Allow to agentgateway LoadBalancer IP for LLM requests via external hostname (ai-gw.matherly.net)
     # Required because TLS cert is valid for *.matherly.net, not internal service name
     - to:
@@ -209,27 +201,29 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
-    # Option 2: Access LiteLLM via envoy-internal gateway (litellm → internal)
-    # Requires HTTPRoute attached to envoy-internal and k8s-gateway DNS update
+    # Option 2: Access LiteLLM via kgateway internal gateway
+    # Requires HTTPRoute attached to internal gateway and k8s-gateway DNS update
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
-              gateway.envoyproxy.io/owning-gateway-name: envoy-internal
+              gateway.networking.k8s.io/gateway-name: internal
       ports:
         - protocol: TCP
+          port: 8443
+        - protocol: TCP
           port: 10443
-    # envoy-internal LoadBalancer IP for TLS hostname validation
+    # kgateway internal LoadBalancer IP for TLS hostname validation
     - to:
         - ipBlock:
             cidr: 192.168.22.140/32
       ports:
         - protocol: TCP
           port: 443
-    # Option 3: Access LiteLLM via envoy-external gateway (current HTTPRoute location)
-    # envoy-external LoadBalancer IP (litellm currently resolves here)
+    # Option 3: Access LiteLLM via kgateway external gateway (current HTTPRoute location)
+    # kgateway external LoadBalancer IP (litellm currently resolves here)
     - to:
         - ipBlock:
             cidr: 192.168.22.130/32

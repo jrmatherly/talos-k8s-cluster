@@ -33,7 +33,12 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens (Approach B only)
 proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
-# Envoy AI Gateway Configuration (testing full deployment)
+# kgateway Configuration (Envoy Control Plane - replaces envoy-gateway)
+kgateway_enabled: true
+kgateway_version: "v2.2.0-main"
+agentgateway_version: "v2.2.0-main"
+# DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
+# TODO: Remove these fields after kgateway migration is complete
 envoy_ai_gateway_enabled: true
 envoy_ai_gateway_addr: "10.10.10.145"
 # Azure OpenAI - US East Region
@@ -242,7 +247,7 @@ cognee_mcp_replicas: 1
 # Cognee API Server Configuration
 cognee_api_enabled: true
 cognee_api_hostname: "cognee"
-cognee_gateway: "envoy-external"
+cognee_gateway: "external"
 cognee_version: "0.5.0"
 cognee_replicas: 1
 # Cognee Frontend Configuration

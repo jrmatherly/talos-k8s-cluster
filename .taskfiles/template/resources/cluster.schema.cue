@@ -43,9 +43,20 @@ import (
 	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
 	proxmox_ccm_token_secret?: string & !=""
 
-	// Envoy AI Gateway Configuration (optional - for AI/LLM routing)
+	// kgateway Configuration (Envoy Control Plane - replaces envoy-gateway)
+	// Next-generation Gateway API control plane with better performance and AI integration
+	kgateway_enabled?: bool                     // Enable kgateway deployment (default: true)
+	kgateway_version?: string & !=""            // kgateway chart version (default: v2.2.0-main)
+	agentgateway_version?: string & !=""        // agentgateway chart version (default: v2.2.0-main)
+
+	// DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
+	// TODO: Remove these fields after kgateway migration is complete
 	envoy_ai_gateway_enabled?: bool
 	envoy_ai_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
+
+	// DEPRECATED: Legacy Envoy Gateway (use kgateway instead)
+	// TODO: Remove this field after kgateway migration is complete
+	envoy_gateway_enabled?: bool                // Enable legacy envoy-gateway (default: false)
 
 	// Azure OpenAI - US East Region (optional)
 	azure_openai_us_east_api_key?: string & !=""
@@ -110,7 +121,7 @@ import (
 
 	// MCP Gateway Configuration (Model Context Protocol)
 	mcp_gateway_enabled?: bool
-	mcp_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr
+	mcp_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
 	mcp_session_timeout?: int & >=60            // Session timeout in seconds, default 3600
 
 	// Keycloak Configuration (OIDC Authentication Provider)
@@ -125,7 +136,7 @@ import (
 	keycloak_postgresql_enabled?: bool          // Enable built-in CloudNativePG PostgreSQL (default: true)
 	keycloak_postgresql_replicas?: int & >=1    // PostgreSQL replicas (default: 3)
 	keycloak_postgresql_storage_size?: string & !=""  // e.g., "10Gi"
-	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for Envoy Gateway integration
+	keycloak_oidc_client_secret?: string & !="" // OIDC client secret for kgateway integration
 	keycloak_oidc_cookie_domain?: string & !="" // Cookie domain for SSO across subdomains (optional)
 
 	// Keycloak Entra ID Identity Provider (optional - federation with Microsoft Entra ID)
@@ -142,7 +153,7 @@ import (
 	// agentgateway Configuration (MCP 2025-11-25 OAuth Proxy)
 	// Wraps Keycloak for MCP spec-compliant authentication (DCR, CIMD, Protected Resource Metadata)
 	agentgateway_enabled?: bool                 // Enable agentgateway for MCP authentication
-	agentgateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr & !=envoy_ai_gateway_addr & !=mcp_gateway_addr
+	agentgateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
 	agentgateway_scopes?: [...string]           // OAuth scopes (default: openid, profile, email, offline_access)
 	keycloak_agentgateway_client_secret?: string & !="" // Client secret for agentgateway (defaults to keycloak_oidc_client_secret)
 
@@ -174,8 +185,8 @@ import (
 	obot_memory_request?: string & !=""         // Memory request (default: 1Gi)
 	obot_memory_limit?: string & !=""           // Memory limit (default: 4Gi)
 	obot_encryption_provider?: *"custom" | "azure-keyvault" | "aws-kms" | "gcp-kms"  // Encryption provider
-	obot_use_ai_gateway?: *false | bool          // Use existing envoy-ai gateway for LLM requests
-	obot_use_agentgateway?: *false | bool       // Use agentgateway (ai-gw) instead of envoy-ai (llms) for LLM requests
+	obot_use_ai_gateway?: *false | bool          // DEPRECATED: Use existing Envoy AI Gateway for LLM requests - TODO: Remove after kgateway migration
+	obot_use_agentgateway?: *false | bool       // Use agentgateway for LLM requests with rate limiting, prompt guards, FinOps
 
 	// obot S3/MinIO Workspace Storage (enables multi-replica scaling)
 	obot_workspace_provider?: *"directory" | "s3" | "azure"  // Workspace storage backend (default: directory)
@@ -199,7 +210,7 @@ import (
 	minio_memory_request?: string & !=""        // Memory request (default: 512Mi)
 	minio_memory_limit?: string & !=""          // Memory limit (default: 2Gi)
 	minio_cpu_request?: string & !=""           // CPU request (default: 250m)
-	minio_ingress_enabled?: bool                // Enable console HTTPRoute via Envoy Gateway
+	minio_ingress_enabled?: bool                // Enable console HTTPRoute via kgateway
 	minio_console_hostname?: string & !=""      // Console hostname subdomain (default: minio)
 	minio_buckets?: [...{                       // List of buckets to create
 		name: string & !=""                       // Bucket name
@@ -293,7 +304,7 @@ import (
 	// Cognee API Server Configuration (optional - requires cognee_enabled)
 	cognee_api_enabled?: bool                   // Enable Cognee API server deployment with UI
 	cognee_api_hostname?: string & !=""         // API hostname subdomain (default: cognee-api)
-	cognee_gateway?: *"envoy-external" | "envoy-internal" | "envoy-ai"  // Gateway for routing (default: envoy-external)
+	cognee_gateway?: *"external" | "internal"  // Gateway for routing (default: external - kgateway)
 	cognee_version?: string & !=""              // Cognee Docker image version (default: 0.5.0)
 	cognee_replicas?: int & >=1                 // Number of Cognee API replicas (default: 1)
 	cognee_api_resources_requests_cpu?: string & !=""     // CPU request (default: 100m)

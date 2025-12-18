@@ -11,5 +11,30 @@ resources:
   - ./networkpolicy.yaml
   - ./cloudflare-dns/ks.yaml
   - ./cloudflare-tunnel/ks.yaml
-  - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
+#| ============================================================ #|
+#| kgateway (Envoy control plane) - replaces Envoy Gateway       #|
+#| ============================================================ #|
+#% if kgateway_enabled | default(true) %#
+  - ./kgateway-crds/ks.yaml
+  - ./kgateway/ks.yaml
+#% endif %#
+#| ============================================================ #|
+#| agentgateway (AI/MCP control plane) - separate from kgateway  #|
+#| ============================================================ #|
+#% if agentgateway_enabled | default(true) %#
+  - ./agentgateway-crds/ks.yaml
+  - ./agentgateway/ks.yaml
+#% endif %#
+#| ============================================================ #|
+#| LiteLLM route via external gateway                            #|
+#| ============================================================ #|
+#% if litellm_enabled | default(true) and kgateway_enabled | default(true) %#
+  - ./litellm-route/ks.yaml
+#% endif %#
+#| ============================================================ #|
+#| Legacy Envoy Gateway (deprecated - use kgateway)              #|
+#| ============================================================ #|
+#% if envoy_gateway_enabled | default(false) %#
+  - ./envoy-gateway/ks.yaml
+#% endif %#

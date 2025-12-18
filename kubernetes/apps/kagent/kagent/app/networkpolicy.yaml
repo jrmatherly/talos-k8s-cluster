@@ -93,17 +93,6 @@ spec:
       ports:
         - protocol: TCP
           port: 443
-    # Envoy AI Gateway (internal LLM routing)
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: network
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: ai-system
-      ports:
-        - protocol: TCP
-          port: 443
     # agentgateway (MCP OAuth proxy and AI routing)
     - to:
         - namespaceSelector:

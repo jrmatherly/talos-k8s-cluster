@@ -1,0 +1,44 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ServiceMonitor for agentgateway controller metrics #|
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: agentgateway-controller
+  labels:
+    app.kubernetes.io/name: agentgateway
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+      app.kubernetes.io/component: controller
+  namespaceSelector:
+    matchNames:
+      - network
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+---
+#| ServiceMonitor for agentgateway data plane metrics #|
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: agentgateway-metrics
+  labels:
+    app.kubernetes.io/name: agentgateway
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+      gateway.networking.k8s.io/gateway-name: agentgateway
+  namespaceSelector:
+    matchNames:
+      - network
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /stats/prometheus
+#% endif %#
