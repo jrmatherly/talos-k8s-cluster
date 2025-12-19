@@ -1,10 +1,29 @@
 ---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayParameters
+metadata:
+  name: agw-params
+spec:
+  logging:
+    level: info
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
   name: agentgateway
 spec:
   controllerName: agentgateway.dev/agentgateway
+  parametersRef:
+    group: agentgateway.dev
+    kind: AgentgatewayParameters
+    name: agw-params
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway

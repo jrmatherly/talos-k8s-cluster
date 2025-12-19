@@ -1,6 +1,28 @@
 #% if agentgateway_enabled | default(true) %#
 ---
 #| ============================================================ #|
+#| AgentgatewayParameters - Gateway deployment configuration     #|
+#| Referenced by GatewayClass for data plane customization       #|
+#| API: agentgateway.dev/v1alpha1                                #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayParameters
+metadata:
+  name: agw-params
+spec:
+  #| Logging configuration #|
+  logging:
+    level: info
+  #| Resource limits for agentgateway data plane #|
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+---
+#| ============================================================ #|
 #| GatewayClass for agentgateway (AI/MCP data plane)             #|
 #| Controller: agentgateway.dev/agentgateway                     #|
 #| ============================================================ #|
@@ -10,6 +32,10 @@ metadata:
   name: agentgateway
 spec:
   controllerName: agentgateway.dev/agentgateway
+  parametersRef:
+    group: agentgateway.dev
+    kind: AgentgatewayParameters
+    name: agw-params
 ---
 #| ============================================================ #|
 #| AgentGateway - AI/MCP Gateway                                 #|
