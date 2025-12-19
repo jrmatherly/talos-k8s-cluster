@@ -18,7 +18,8 @@ spec:
             - port: "6443"
               protocol: TCP
 ---
-# CiliumNetworkPolicy for kgateway proxies - Ingress from world (LoadBalancer traffic)
+# CiliumNetworkPolicy for kgateway proxies - Ingress/Egress for LoadBalancer and backend traffic
+# CRITICAL: Must use Cilium native entities for traffic with socket-based LB
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -31,6 +32,7 @@ spec:
         operator: In
         values: ["external", "internal"]
   ingress:
+    #| LoadBalancer traffic from external/internal clients #|
     - fromEntities:
         - world
       toPorts:
@@ -46,6 +48,17 @@ spec:
             - port: "10080"
               protocol: TCP
             - port: "10443"
+              protocol: TCP
+  egress:
+    #| Backend traffic to cluster services #|
+    - toEntities:
+        - cluster
+    #| External backends (e.g., OAuth providers, external APIs) #|
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
               protocol: TCP
 ---
 # NetworkPolicy for kgateway controller
