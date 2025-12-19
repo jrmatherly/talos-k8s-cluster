@@ -20,12 +20,9 @@ resources:
   - ./kgateway/ks.yaml
 #% endif %#
 #| ============================================================ #|
-#| agentgateway (AI/MCP control plane) - separate from kgateway  #|
+#| NOTE: agentgateway has been moved to ai-system namespace      #|
+#| for better alignment with its AI/MCP purpose                  #|
 #| ============================================================ #|
-#% if agentgateway_enabled | default(true) %#
-  - ./agentgateway-crds/ks.yaml
-  - ./agentgateway/ks.yaml
-#% endif %#
 #| ============================================================ #|
 #| LiteLLM route via external gateway                            #|
 #| ============================================================ #|

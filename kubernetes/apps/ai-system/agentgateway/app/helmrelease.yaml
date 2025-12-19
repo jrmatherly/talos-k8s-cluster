@@ -36,8 +36,6 @@ spec:
 
     discoveryNamespaceSelectors:
       - matchLabels:
-          kubernetes.io/metadata.name: network
-      - matchLabels:
           kubernetes.io/metadata.name: ai-system
       - matchLabels:
           kubernetes.io/metadata.name: keycloak

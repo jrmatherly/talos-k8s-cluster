@@ -104,7 +104,7 @@ spec:
         #| Alert when agentgateway proxy pods are not ready #|
         - alert: AgentgatewayProxyNotReady
           expr: |
-            kube_pod_status_ready{namespace="network", pod=~"agentgateway-.*", condition="true"} == 0
+            kube_pod_status_ready{namespace="ai-system", pod=~"agentgateway-.*", condition="true"} == 0
           for: 5m
           labels:
             severity: warning

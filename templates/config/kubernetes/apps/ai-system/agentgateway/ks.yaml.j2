@@ -7,20 +7,18 @@ metadata:
 spec:
   dependsOn:
     - name: agentgateway-crds
-      namespace: network
-    - name: kgateway
-      namespace: network
+      namespace: ai-system
     - name: cilium
       namespace: kube-system
   interval: 1h
   timeout: 10m
-  path: ./kubernetes/apps/network/agentgateway/app
+  path: ./kubernetes/apps/ai-system/agentgateway/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: ai-system
   wait: true
   postBuild:
     substituteFrom:

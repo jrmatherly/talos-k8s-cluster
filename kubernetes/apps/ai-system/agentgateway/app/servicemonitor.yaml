@@ -1,6 +1,4 @@
-#% if agentgateway_enabled | default(true) %#
 ---
-#| ServiceMonitor for agentgateway controller metrics #|
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -15,13 +13,12 @@ spec:
       app.kubernetes.io/component: controller
   namespaceSelector:
     matchNames:
-      - network
+      - ai-system
   endpoints:
     - port: metrics
       interval: 30s
       path: /metrics
 ---
-#| ServiceMonitor for agentgateway data plane metrics #|
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -36,9 +33,8 @@ spec:
       gateway.networking.k8s.io/gateway-name: agentgateway
   namespaceSelector:
     matchNames:
-      - network
+      - ai-system
   endpoints:
     - port: metrics
       interval: 30s
       path: /stats/prometheus
-#% endif %#

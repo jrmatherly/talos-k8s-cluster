@@ -5,9 +5,6 @@
 #| API Group: agentgateway.dev/v1alpha1 (v2.2.0+)                #|
 #| Kubernetes deployment settings for agentgateway proxies       #|
 #| ============================================================ #|
-#| NOTE: If AgentgatewayParameters causes issues, fall back to   #|
-#| GatewayParameters from gateway.kgateway.dev/v1alpha1          #|
-#| ============================================================ #|
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayParameters
 metadata:
@@ -34,8 +31,7 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
-  name: agentgateway
-  namespace: network
+  name: agentgateway-v2
 spec:
   #| NEW controller name in v2.2.0+ #|
   controllerName: agentgateway.dev/agentgateway
@@ -44,7 +40,7 @@ spec:
     group: agentgateway.dev
     kind: AgentgatewayParameters
     name: agentgateway-params
-    namespace: network
+    namespace: ai-system
 ---
 #| ============================================================ #|
 #| agentgateway Gateway (192.168.22.147)                         #|
@@ -54,9 +50,8 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: agentgateway
-  namespace: network
 spec:
-  gatewayClassName: agentgateway
+  gatewayClassName: agentgateway-v2
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: "#{ agentgateway_addr }#"

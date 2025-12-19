@@ -4,8 +4,9 @@
 #| agentgateway controller - AI/MCP data plane control plane     #|
 #| Controller: agentgateway.dev/agentgateway                     #|
 #| ============================================================ #|
-#| IMPORTANT: This is a SEPARATE deployment from kgateway        #|
+#| IMPORTANT: This is a STANDALONE deployment in ai-system       #|
 #| Uses cr.agentgateway.dev/charts/agentgateway chart            #|
+#| Does NOT depend on kgateway (network namespace)               #|
 #| ============================================================ #|
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -60,8 +61,6 @@ spec:
     #| Allow agentgateway to discover resources across namespaces   #|
     #| ============================================================ #|
     discoveryNamespaceSelectors:
-      - matchLabels:
-          kubernetes.io/metadata.name: network
       - matchLabels:
           kubernetes.io/metadata.name: ai-system
       - matchLabels:

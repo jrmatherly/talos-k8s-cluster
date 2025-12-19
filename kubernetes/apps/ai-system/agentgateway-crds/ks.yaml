@@ -5,11 +5,11 @@ metadata:
   name: agentgateway-crds
 spec:
   interval: 1h
-  path: ./kubernetes/apps/network/agentgateway-crds/app
+  path: ./kubernetes/apps/ai-system/agentgateway-crds/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: network
+  targetNamespace: ai-system
   wait: true

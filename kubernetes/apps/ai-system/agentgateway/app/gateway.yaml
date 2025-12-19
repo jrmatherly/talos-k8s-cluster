@@ -17,8 +17,7 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
-  name: agentgateway
-  namespace: network
+  name: agentgateway-v2
 spec:
   controllerName: agentgateway.dev/agentgateway
   description: "agentgateway for MCP protocol support with OAuth authentication"
@@ -26,15 +25,14 @@ spec:
     group: agentgateway.dev
     kind: AgentgatewayParameters
     name: agentgateway-params
-    namespace: network
+    namespace: ai-system
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: agentgateway
-  namespace: network
 spec:
-  gatewayClassName: agentgateway
+  gatewayClassName: agentgateway-v2
   infrastructure:
     annotations:
       lbipam.cilium.io/ips: "192.168.22.147"
