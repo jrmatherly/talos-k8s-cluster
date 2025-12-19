@@ -1,34 +1,6 @@
 #% if kgateway_enabled | default(true) %#
 ---
 #| ============================================================ #|
-#| GatewayParameters for kgateway (Envoy data plane)            #|
-#| Kubernetes deployment settings for Envoy proxies             #|
-#| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
-metadata:
-  name: kgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 2
-    envoyContainer:
-      image:
-        #| Use kgateway's envoy-wrapper image from ghcr.io #|
-        #| See: https://github.com/kgateway-dev/kgateway/pkgs/container/envoy-wrapper #|
-        registry: ghcr.io/kgateway-dev
-        repository: envoy-wrapper
-        #| Tag defaults to chart version if not specified #|
-      resources:
-        requests:
-          cpu: 100m
-        limits:
-          memory: 1Gi
-    service:
-      type: LoadBalancer
-      externalTrafficPolicy: Cluster
----
-#| ============================================================ #|
 #| GatewayClass for kgateway (Envoy data plane)                  #|
 #| Controller: kgateway.dev/kgateway                             #|
 #| ============================================================ #|
@@ -38,216 +10,66 @@ metadata:
   name: kgateway
 spec:
   controllerName: kgateway.dev/kgateway
-  description: "kgateway for HTTP traffic using Envoy data plane"
-  parametersRef:
-    group: gateway.kgateway.dev
-    kind: GatewayParameters
-    name: kgateway-params
-    namespace: network
 ---
 #| ============================================================ #|
-#| External Gateway - Cloudflare Tunnel (192.168.22.130)         #|
-#| Handles external traffic via Cloudflare                       #|
-#| ============================================================ #|
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: external
-  annotations:
-    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-spec:
-  gatewayClassName: kgateway
-  infrastructure:
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
-      lbipam.cilium.io/ips: "#{ cloudflare_gateway_addr }#"
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: https
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        certificateRefs:
-#% for domain in cloudflare_domains %#
-          - kind: Secret
-            name: #{ domain | replace('.', '-') }#-production-tls
-#% endfor %#
----
-#| ============================================================ #|
-#| Internal Gateway - Local network (192.168.22.140)             #|
-#| Handles internal HTTP traffic                                 #|
+#| Internal Gateway - for internal cluster services              #|
+#| LoadBalancer IP: #{ cluster_gateway_addr }#                   #|
 #| ============================================================ #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+    io.cilium/lb-ipam-ips: "#{ cluster_gateway_addr }#"
 spec:
   gatewayClassName: kgateway
-  infrastructure:
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: internal.${SECRET_DOMAIN}
-      lbipam.cilium.io/ips: "#{ cluster_gateway_addr }#"
   listeners:
     - name: http
       protocol: HTTP
       port: 80
       allowedRoutes:
         namespaces:
-          from: Same
+          from: All
     - name: https
       protocol: HTTPS
       port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: "#{ primary_domain | replace('.', '-') }#-tls"
+            namespace: network
       allowedRoutes:
         namespaces:
           from: All
+---
+#| ============================================================ #|
+#| External Gateway - for Cloudflare tunnel ingress              #|
+#| LoadBalancer IP: #{ cloudflare_gateway_addr }#                #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: external
+  annotations:
+    io.cilium/lb-ipam-ips: "#{ cloudflare_gateway_addr }#"
+spec:
+  gatewayClassName: kgateway
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
       tls:
+        mode: Terminate
         certificateRefs:
-#% for domain in cloudflare_domains %#
-          - kind: Secret
-            name: #{ domain | replace('.', '-') }#-production-tls
-#% endfor %#
----
-#| ============================================================ #|
-#| TrafficPolicy for HTTPS traffic (default for non-AI routes)   #|
-#| Timeout, retry, and buffer limits - AI routes override this   #|
-#| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: TrafficPolicy
-metadata:
-  name: kgateway-traffic
-spec:
-  targetRefs:
-    #| Target HTTPS listeners only (retry requires sectionName) #|
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: external
-      sectionName: https
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: internal
-      sectionName: https
-  #| Request timeout (60s default, AI routes override to 0s) #|
-  timeouts:
-    request: 60s
-  #| Retry policy for transient failures #|
-  retry:
-    retryOn:
-      - connect-failure
-      - refused-stream
-      - unavailable
-      - cancelled
-    attempts: 2
-    perTryTimeout: 30s
-    backoffBaseInterval: 1s
-  #| Buffer limits for request bodies (8Mi max) #|
-  buffer:
-    maxRequestSize: 8Mi
----
-#| ============================================================ #|
-#| HTTPListenerPolicy for HTTP/2 and access logging              #|
-#| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: HTTPListenerPolicy
-metadata:
-  name: kgateway-listener
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: external
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: internal
-  accessLog:
-    - fileSink:
-        path: /dev/stdout
-        jsonFormat:
-          timestamp: "%START_TIME%"
-          method: "%REQ(:METHOD)%"
-          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
-          protocol: "%PROTOCOL%"
-          responseCode: "%RESPONSE_CODE%"
-          responseFlags: "%RESPONSE_FLAGS%"
-          bytesReceived: "%BYTES_RECEIVED%"
-          bytesSent: "%BYTES_SENT%"
-          duration: "%DURATION%"
-          upstreamHost: "%UPSTREAM_HOST%"
-          userAgent: "%REQ(USER-AGENT)%"
-          requestId: "%REQ(X-REQUEST-ID)%"
-          authority: "%REQ(:AUTHORITY)%"
----
-#| ============================================================ #|
-#| HTTP to HTTPS redirect                                        #|
-#| ============================================================ #|
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: https-redirect
-  annotations:
-    external-dns.alpha.kubernetes.io/controller: none
-spec:
-  parentRefs:
-    - name: external
-      namespace: network
-      sectionName: http
-    - name: internal
-      namespace: network
-      sectionName: http
-  rules:
-    - filters:
-        - type: RequestRedirect
-          requestRedirect:
-            scheme: https
-            statusCode: 301
----
-#| ============================================================ #|
-#| kgateway Admin UI Service                                     #|
-#| Exposes controller admin/metrics on port 9091                 #|
-#| ============================================================ #|
-apiVersion: v1
-kind: Service
-metadata:
-  name: kgateway-admin
-  labels:
-    app.kubernetes.io/name: kgateway-admin
-spec:
-  selector:
-    app.kubernetes.io/name: kgateway
-  ports:
-    - name: admin
-      port: 9091
-      targetPort: 9091
-      protocol: TCP
-  type: ClusterIP
----
-#| ============================================================ #|
-#| HTTPRoute to expose kgateway Admin UI via internal gateway    #|
-#| ============================================================ #|
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: kgateway-admin-ui
-  annotations:
-    external-dns.alpha.kubernetes.io/controller: none
-spec:
-  parentRefs:
-    - name: internal
-      namespace: network
-      sectionName: https
-  hostnames:
-    - "kgateway-ui.${SECRET_DOMAIN}"
-  rules:
-    - backendRefs:
-        - name: kgateway-admin
-          port: 9091
+          - name: "#{ primary_domain | replace('.', '-') }#-tls"
+            namespace: network
+      allowedRoutes:
+        namespaces:
+          from: All
 #% endif %#

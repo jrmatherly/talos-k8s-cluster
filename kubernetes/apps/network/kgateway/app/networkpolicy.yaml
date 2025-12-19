@@ -10,9 +10,9 @@ spec:
   ingress:
     - fromEndpoints:
         - matchLabels:
-            gateway.networking.k8s.io/gateway-name: external
-        - matchLabels:
             gateway.networking.k8s.io/gateway-name: internal
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: external
       toPorts:
         - ports:
             - port: "9977"
@@ -24,21 +24,7 @@ spec:
         - ports:
             - port: "9091"
               protocol: TCP
-    - fromEntities:
-        - kube-apiserver
-      toPorts:
-        - ports:
-            - port: "9443"
-              protocol: TCP
   egress:
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: kube-system
-            k8s-app: kube-dns
-      toPorts:
-        - ports:
-            - port: "53"
-              protocol: UDP
     - toEntities:
         - kube-apiserver
       toPorts:
@@ -47,55 +33,11 @@ spec:
               protocol: TCP
     - toEndpoints:
         - matchLabels:
-            gateway.networking.k8s.io/gateway-name: external
-        - matchLabels:
-            gateway.networking.k8s.io/gateway-name: internal
-      toPorts:
-        - ports:
-            - port: "9977"
-              protocol: TCP
----
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: kgateway-envoy
-spec:
-  endpointSelector:
-    matchExpressions:
-      - key: gateway.networking.k8s.io/gateway-name
-        operator: In
-        values: ["external", "internal"]
-  ingress:
-    - fromEntities:
-        - world
-      toPorts:
-        - ports:
-            - port: "80"
-              protocol: TCP
-            - port: "443"
-              protocol: TCP
-    - fromEndpoints:
-        - matchLabels:
-            app.kubernetes.io/name: prometheus
-      toPorts:
-        - ports:
-            - port: "19001"
-              protocol: TCP
-  egress:
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: kube-system
+            k8s:io.kubernetes.pod.namespace: kube-system
             k8s-app: kube-dns
       toPorts:
         - ports:
             - port: "53"
               protocol: UDP
-    - toEndpoints:
-        - matchLabels:
-            app.kubernetes.io/name: kgateway
-      toPorts:
-        - ports:
-            - port: "9977"
+            - port: "53"
               protocol: TCP
-    - toEntities:
-        - cluster

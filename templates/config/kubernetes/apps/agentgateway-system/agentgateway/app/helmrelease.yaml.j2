@@ -1,0 +1,58 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| agentgateway controller - AI/MCP Gateway control plane        #|
+#| Controller: agentgateway.dev/agentgateway                     #|
+#| REF: https://kgateway.dev/docs/agentgateway/main/             #|
+#| ============================================================ #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: agentgateway
+spec:
+  chart:
+    spec:
+      chart: agentgateway
+      version: "#{ agentgateway_version | default('v2.2.0-beta.3') }#"
+      sourceRef:
+        kind: HelmRepository
+        name: agentgateway
+  interval: 1h
+  timeout: 15m
+  dependsOn:
+    - name: agentgateway-crds
+  values:
+    #| ============================================================ #|
+    #| Controller Configuration                                     #|
+    #| ============================================================ #|
+    controller:
+      logLevel: info
+      replicaCount: 1
+      image:
+        pullPolicy: IfNotPresent
+
+    #| ============================================================ #|
+    #| Resource Limits                                              #|
+    #| ============================================================ #|
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+    #| ============================================================ #|
+    #| Namespace Discovery                                          #|
+    #| Allow agentgateway to discover resources across namespaces   #|
+    #| ============================================================ #|
+    discoveryNamespaceSelectors:
+      - matchLabels:
+          kubernetes.io/metadata.name: agentgateway-system
+      - matchLabels:
+          kubernetes.io/metadata.name: ai-system
+      - matchLabels:
+          kubernetes.io/metadata.name: keycloak
+      - matchLabels:
+          kubernetes.io/metadata.name: obot
+#% endif %#

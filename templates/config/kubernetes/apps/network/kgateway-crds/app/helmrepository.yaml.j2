@@ -1,7 +1,10 @@
 #% if kgateway_enabled | default(true) %#
 ---
-#| HelmRepository for kgateway charts (Envoy control plane) #|
-#| Uses cr.kgateway.dev registry (NOT ghcr.io) #|
+#| ============================================================ #|
+#| HelmRepository for kgateway charts (Envoy control plane)      #|
+#| Uses cr.kgateway.dev registry                                 #|
+#| REF: https://kgateway.dev/docs/agentgateway/main/quickstart/  #|
+#| ============================================================ #|
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:

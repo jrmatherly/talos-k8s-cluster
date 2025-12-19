@@ -1,211 +1,61 @@
 ---
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: GatewayParameters
-metadata:
-  name: kgateway-params
-spec:
-  kube:
-    deployment:
-      replicas: 2
-    envoyContainer:
-      image:
-        registry: ghcr.io/kgateway-dev
-        repository: envoy-wrapper
-      resources:
-        requests:
-          cpu: 100m
-        limits:
-          memory: 1Gi
-    service:
-      type: LoadBalancer
-      externalTrafficPolicy: Cluster
----
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
   name: kgateway
 spec:
   controllerName: kgateway.dev/kgateway
-  description: "kgateway for HTTP traffic using Envoy data plane"
-  parametersRef:
-    group: gateway.kgateway.dev
-    kind: GatewayParameters
-    name: kgateway-params
-    namespace: network
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: external
-  annotations:
-    external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-spec:
-  gatewayClassName: kgateway
-  infrastructure:
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
-      lbipam.cilium.io/ips: "192.168.22.130"
-  listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: Same
-    - name: https
-      protocol: HTTPS
-      port: 443
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        certificateRefs:
-          - kind: Secret
-            name: matherly-net-production-tls
-          - kind: Secret
-            name: spoonsofsalt-org-production-tls
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+    io.cilium/lb-ipam-ips: "192.168.22.140"
 spec:
   gatewayClassName: kgateway
-  infrastructure:
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: internal.${SECRET_DOMAIN}
-      lbipam.cilium.io/ips: "192.168.22.140"
   listeners:
     - name: http
       protocol: HTTP
       port: 80
       allowedRoutes:
         namespaces:
-          from: Same
+          from: All
     - name: https
       protocol: HTTPS
       port: 443
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: "matherly-net-tls"
+            namespace: network
       allowedRoutes:
         namespaces:
           from: All
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: external
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.22.130"
+spec:
+  gatewayClassName: kgateway
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
       tls:
+        mode: Terminate
         certificateRefs:
-          - kind: Secret
-            name: matherly-net-production-tls
-          - kind: Secret
-            name: spoonsofsalt-org-production-tls
----
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: TrafficPolicy
-metadata:
-  name: kgateway-traffic
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: external
-      sectionName: https
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: internal
-      sectionName: https
-  timeouts:
-    request: 60s
-  retry:
-    retryOn:
-      - connect-failure
-      - refused-stream
-      - unavailable
-      - cancelled
-    attempts: 2
-    perTryTimeout: 30s
-    backoffBaseInterval: 1s
-  buffer:
-    maxRequestSize: 8Mi
----
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: HTTPListenerPolicy
-metadata:
-  name: kgateway-listener
-spec:
-  targetRefs:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: external
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: internal
-  accessLog:
-    - fileSink:
-        path: /dev/stdout
-        jsonFormat:
-          timestamp: "%START_TIME%"
-          method: "%REQ(:METHOD)%"
-          path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
-          protocol: "%PROTOCOL%"
-          responseCode: "%RESPONSE_CODE%"
-          responseFlags: "%RESPONSE_FLAGS%"
-          bytesReceived: "%BYTES_RECEIVED%"
-          bytesSent: "%BYTES_SENT%"
-          duration: "%DURATION%"
-          upstreamHost: "%UPSTREAM_HOST%"
-          userAgent: "%REQ(USER-AGENT)%"
-          requestId: "%REQ(X-REQUEST-ID)%"
-          authority: "%REQ(:AUTHORITY)%"
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: https-redirect
-  annotations:
-    external-dns.alpha.kubernetes.io/controller: none
-spec:
-  parentRefs:
-    - name: external
-      namespace: network
-      sectionName: http
-    - name: internal
-      namespace: network
-      sectionName: http
-  rules:
-    - filters:
-        - type: RequestRedirect
-          requestRedirect:
-            scheme: https
-            statusCode: 301
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: kgateway-admin
-  labels:
-    app.kubernetes.io/name: kgateway-admin
-spec:
-  selector:
-    app.kubernetes.io/name: kgateway
-  ports:
-    - name: admin
-      port: 9091
-      targetPort: 9091
-      protocol: TCP
-  type: ClusterIP
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: kgateway-admin-ui
-  annotations:
-    external-dns.alpha.kubernetes.io/controller: none
-spec:
-  parentRefs:
-    - name: internal
-      namespace: network
-      sectionName: https
-  hostnames:
-    - "kgateway-ui.${SECRET_DOMAIN}"
-  rules:
-    - backendRefs:
-        - name: kgateway-admin
-          port: 9091
+          - name: "matherly-net-tls"
+            namespace: network
+      allowedRoutes:
+        namespaces:
+          from: All

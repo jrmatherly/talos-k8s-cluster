@@ -18,6 +18,7 @@ releases:
     chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
     version: 1.19.0
 
+
   - name: kgateway-crds
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
@@ -26,6 +27,16 @@ releases:
   - name: kgateway
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
+    version: v2.2.0-beta.3
+
+  - name: agentgateway-crds
+    namespace: agentgateway-system
+    chart: oci://cr.agentgateway.dev/charts/agentgateway-crds
+    version: v2.2.0-beta.3
+
+  - name: agentgateway
+    namespace: agentgateway-system
+    chart: oci://cr.agentgateway.dev/charts/agentgateway
     version: v2.2.0-beta.3
 
   - name: kube-prometheus-stack

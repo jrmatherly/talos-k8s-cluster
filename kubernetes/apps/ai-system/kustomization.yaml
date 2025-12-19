@@ -8,8 +8,6 @@ components:
 
 resources:
   - ./namespace.yaml
-  - ./agentgateway-crds/ks.yaml
-  - ./agentgateway/ks.yaml
   - ./mcp-servers/context7/ks.yaml
   - ./litellm/ks.yaml
   - ./cognee/ks.yaml

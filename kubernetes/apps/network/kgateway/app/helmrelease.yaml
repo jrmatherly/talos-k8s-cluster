@@ -16,9 +16,6 @@ spec:
   dependsOn:
     - name: kgateway-crds
   values:
-    agentgateway:
-      enabled: false
-
     controller:
       logLevel: info
       replicaCount: 1
@@ -39,6 +36,8 @@ spec:
           kubernetes.io/metadata.name: network
       - matchLabels:
           kubernetes.io/metadata.name: ai-system
+      - matchLabels:
+          kubernetes.io/metadata.name: agentgateway-system
       - matchLabels:
           kubernetes.io/metadata.name: keycloak
       - matchLabels:

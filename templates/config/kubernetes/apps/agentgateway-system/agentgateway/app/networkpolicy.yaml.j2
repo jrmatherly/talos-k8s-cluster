@@ -1,0 +1,52 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| NetworkPolicy for agentgateway controller                     #|
+#| ============================================================ #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: agentgateway-controller
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: agentgateway
+  ingress:
+    #| xDS from agentgateway proxies #|
+    - fromEndpoints:
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: agentgateway
+      toPorts:
+        - ports:
+            - port: "9977"
+              protocol: TCP
+    #| Metrics from Prometheus #|
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: prometheus
+      toPorts:
+        - ports:
+            - port: "9091"
+              protocol: TCP
+            - port: "15020"
+              protocol: TCP
+  egress:
+    #| K8s API access #|
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    #| DNS resolution #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+#% endif %#

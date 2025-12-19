@@ -5,9 +5,12 @@ kind: Kustomization
 metadata:
   name: kgateway-crds
 spec:
+  dependsOn:
+    - name: gateway-api-crds
+      namespace: kube-system
   interval: 1h
   path: ./kubernetes/apps/network/kgateway-crds/app
-  prune: true
+  prune: false
   sourceRef:
     kind: GitRepository
     name: flux-system

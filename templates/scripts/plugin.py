@@ -278,6 +278,7 @@ class Plugin(makejinja.plugin.Plugin):
 
         # kgateway defaults (Envoy Control Plane - replaces envoy-gateway)
         data.setdefault("kgateway_enabled", True)
+        data.setdefault("gateway_api_version", "v1.4.0")
         data.setdefault("kgateway_version", "v2.2.0-beta.3")
         data.setdefault("agentgateway_version", "v2.2.0-beta.3")
         # DEPRECATED: Legacy envoy-gateway (use kgateway instead)

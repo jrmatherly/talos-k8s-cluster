@@ -35,6 +35,7 @@ proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
 # kgateway Configuration (Envoy Control Plane - replaces envoy-gateway)
 kgateway_enabled: true
+gateway_api_version: "v1.4.0"
 kgateway_version: "v2.2.0-beta.3"
 agentgateway_version: "v2.2.0-beta.3"
 # DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)

@@ -17,7 +17,11 @@ releases:
     namespace: network
     chart: oci://ghcr.io/home-operations/charts-mirror/external-dns
     version: 1.19.0
-#% if kgateway_enabled | default(true) %#
+#% if kgateway_enabled | default(true) or agentgateway_enabled | default(false) %#
+
+  #| Gateway API CRDs from kubernetes-sigs (base for kgateway and agentgateway) #|
+  #| Note: Gateway API uses kustomize, not Helm - CRDs installed via Flux Kustomization #|
+  #| This section only handles Helm-based CRDs #|
 
   - name: kgateway-crds
     namespace: network
@@ -28,6 +32,18 @@ releases:
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
     version: #{ kgateway_version | default('v2.2.0-beta.3') }#
+#% endif %#
+#% if agentgateway_enabled | default(false) %#
+
+  - name: agentgateway-crds
+    namespace: agentgateway-system
+    chart: oci://cr.agentgateway.dev/charts/agentgateway-crds
+    version: #{ agentgateway_version | default('v2.2.0-beta.3') }#
+
+  - name: agentgateway
+    namespace: agentgateway-system
+    chart: oci://cr.agentgateway.dev/charts/agentgateway
+    version: #{ agentgateway_version | default('v2.2.0-beta.3') }#
 #% endif %#
 #% if envoy_gateway_enabled | default(false) %#
 

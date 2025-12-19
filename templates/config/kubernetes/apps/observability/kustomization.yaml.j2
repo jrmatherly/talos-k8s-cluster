@@ -10,9 +10,6 @@ components:
 resources:
   - ./namespace.yaml
   - ./kube-prometheus-stack/ks.yaml
-#% if agentgateway_enabled %#
-  - ./agentgateway-dashboards/ks.yaml
-#% endif %#
 #% if minio_enabled %#
   - ./minio-dashboards/ks.yaml
 #% endif %#

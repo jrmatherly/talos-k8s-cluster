@@ -1,0 +1,18 @@
+#% if agentgateway_enabled | default(true) %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: agentgateway-system
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+#| ============================================================ #|
+#| agentgateway (AI/MCP Gateway) - v2.2.0+ architecture          #|
+#| Uses dedicated agentgateway.dev API group and OCI registry    #|
+#| ============================================================ #|
+  - ./agentgateway-crds/ks.yaml
+  - ./agentgateway/ks.yaml
+#% endif %#

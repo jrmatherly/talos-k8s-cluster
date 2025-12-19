@@ -9,8 +9,6 @@ spec:
       namespace: kube-system
     - name: cloudnative-pg
       namespace: cnpg-system
-    - name: kgateway
-      namespace: network
     # Neo4j graph database (shared resource in storage namespace)
     - name: neo4j
       namespace: storage

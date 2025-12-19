@@ -1,0 +1,22 @@
+#% if kgateway_enabled | default(true) or agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| Gateway API CRDs (kubernetes-sigs)                            #|
+#| Experimental channel required for kgateway features           #|
+#| REF: https://gateway-api.sigs.k8s.io/guides/getting-started/  #|
+#| ============================================================ #|
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gateway-api-crds
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/kube-system/gateway-api-crds/app
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: kube-system
+  wait: true
+#% endif %#

@@ -2,17 +2,9 @@
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
 resources:
   - helmrelease.yaml
   - gateway.yaml
-  - certificate.yaml
   - networkpolicy.yaml
-  - servicemonitor.yaml
-  - prometheusrule.yaml
-#% if keycloak_enabled %#
-  - oidc.yaml
-#% endif %#
-#% if agentgateway_enabled | default(true) %#
-  - rbac.yaml
-#% endif %#
 #% endif %#

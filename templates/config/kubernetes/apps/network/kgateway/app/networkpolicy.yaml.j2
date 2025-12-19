@@ -1,6 +1,8 @@
 #% if kgateway_enabled | default(true) %#
 ---
-#| NetworkPolicy for kgateway controller #|
+#| ============================================================ #|
+#| NetworkPolicy for kgateway controller                         #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -10,17 +12,17 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kgateway
   ingress:
-    #| Allow xDS connections from Envoy proxy pods #|
+    #| xDS from Envoy proxies #|
     - fromEndpoints:
         - matchLabels:
-            gateway.networking.k8s.io/gateway-name: external
-        - matchLabels:
             gateway.networking.k8s.io/gateway-name: internal
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: external
       toPorts:
         - ports:
             - port: "9977"
               protocol: TCP
-    #| Allow Prometheus scraping #|
+    #| Metrics from Prometheus #|
     - fromEndpoints:
         - matchLabels:
             app.kubernetes.io/name: prometheus
@@ -28,89 +30,23 @@ spec:
         - ports:
             - port: "9091"
               protocol: TCP
-    #| Allow webhook traffic from API server #|
-    - fromEntities:
-        - kube-apiserver
-      toPorts:
-        - ports:
-            - port: "9443"
-              protocol: TCP
   egress:
-    #| Allow DNS #|
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: kube-system
-            k8s-app: kube-dns
-      toPorts:
-        - ports:
-            - port: "53"
-              protocol: UDP
-    #| Allow Kubernetes API access #|
+    #| K8s API access #|
     - toEntities:
         - kube-apiserver
       toPorts:
         - ports:
             - port: "6443"
               protocol: TCP
-    #| Allow xDS updates to Envoy proxies #|
+    #| DNS resolution #|
     - toEndpoints:
         - matchLabels:
-            gateway.networking.k8s.io/gateway-name: external
-        - matchLabels:
-            gateway.networking.k8s.io/gateway-name: internal
-      toPorts:
-        - ports:
-            - port: "9977"
-              protocol: TCP
----
-#| NetworkPolicy for kgateway Envoy data plane pods (external, internal) #|
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
-metadata:
-  name: kgateway-envoy
-spec:
-  endpointSelector:
-    matchExpressions:
-      - key: gateway.networking.k8s.io/gateway-name
-        operator: In
-        values: ["external", "internal"]
-  ingress:
-    #| Allow external HTTP/HTTPS traffic #|
-    - fromEntities:
-        - world
-      toPorts:
-        - ports:
-            - port: "80"
-              protocol: TCP
-            - port: "443"
-              protocol: TCP
-    #| Allow Prometheus scraping #|
-    - fromEndpoints:
-        - matchLabels:
-            app.kubernetes.io/name: prometheus
-      toPorts:
-        - ports:
-            - port: "19001"
-              protocol: TCP
-  egress:
-    #| Allow DNS #|
-    - toEndpoints:
-        - matchLabels:
-            io.kubernetes.pod.namespace: kube-system
+            k8s:io.kubernetes.pod.namespace: kube-system
             k8s-app: kube-dns
       toPorts:
         - ports:
             - port: "53"
               protocol: UDP
-    #| Allow xDS from controller #|
-    - toEndpoints:
-        - matchLabels:
-            app.kubernetes.io/name: kgateway
-      toPorts:
-        - ports:
-            - port: "9977"
+            - port: "53"
               protocol: TCP
-    #| Allow traffic to backend services #|
-    - toEntities:
-        - cluster
 #% endif %#

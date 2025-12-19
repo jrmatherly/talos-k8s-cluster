@@ -9,5 +9,4 @@ components:
 resources:
   - ./namespace.yaml
   - ./kube-prometheus-stack/ks.yaml
-  - ./agentgateway-dashboards/ks.yaml
   - ./minio-dashboards/ks.yaml

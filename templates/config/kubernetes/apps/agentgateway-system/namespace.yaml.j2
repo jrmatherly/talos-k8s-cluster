@@ -1,0 +1,11 @@
+#% if agentgateway_enabled | default(true) %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentgateway-system
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+#% endif %#

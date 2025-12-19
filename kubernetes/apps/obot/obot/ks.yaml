@@ -11,8 +11,6 @@ spec:
       namespace: cnpg-system
     - name: cert-manager
       namespace: cert-manager
-    - name: kgateway
-      namespace: network
     - name: proxmox-csi
       namespace: csi-proxmox
   interval: 1h

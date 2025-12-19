@@ -46,6 +46,7 @@ import (
 	// kgateway Configuration (Envoy Control Plane - replaces envoy-gateway)
 	// Next-generation Gateway API control plane with better performance and AI integration
 	kgateway_enabled?: bool                     // Enable kgateway deployment (default: true)
+	gateway_api_version?: string & !=""         // Gateway API CRDs version (default: v1.4.0)
 	kgateway_version?: string & !=""            // kgateway chart version (default: v2.2.0-beta.3)
 	agentgateway_version?: string & !=""        // agentgateway chart version (default: v2.2.0-beta.3)
 

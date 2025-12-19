@@ -1,0 +1,16 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| HelmRepository for agentgateway charts (AI/MCP Gateway)       #|
+#| Uses cr.agentgateway.dev registry (dedicated v2.2.0+)         #|
+#| REF: https://kgateway.dev/docs/agentgateway/main/quickstart/  #|
+#| ============================================================ #|
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: agentgateway
+spec:
+  interval: 1h
+  type: oci
+  url: oci://cr.agentgateway.dev/charts
+#% endif %#
