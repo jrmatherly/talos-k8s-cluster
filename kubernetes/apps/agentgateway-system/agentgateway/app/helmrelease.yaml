@@ -30,6 +30,13 @@ spec:
         cpu: 500m
         memory: 512Mi
 
+    gatewayClassParametersRefs:
+      agentgateway:
+        group: agentgateway.dev
+        kind: AgentgatewayParameters
+        name: agw-params
+        namespace: agentgateway-system
+
     discoveryNamespaceSelectors:
       - matchLabels:
           kubernetes.io/metadata.name: agentgateway-system
@@ -39,3 +46,5 @@ spec:
           kubernetes.io/metadata.name: keycloak
       - matchLabels:
           kubernetes.io/metadata.name: obot
+      - matchLabels:
+          kubernetes.io/metadata.name: network
