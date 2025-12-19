@@ -19,10 +19,13 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: internal
+  annotations:
+    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
 spec:
   gatewayClassName: kgateway
   infrastructure:
     annotations:
+      external-dns.alpha.kubernetes.io/hostname: internal.${SECRET_DOMAIN}
       io.cilium/lb-ipam-ips: "#{ cluster_gateway_addr }#"
   listeners:
     - name: http
@@ -30,20 +33,19 @@ spec:
       port: 80
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: https
       protocol: HTTPS
       port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
       tls:
-        mode: Terminate
         certificateRefs:
 #% for domain in cloudflare_domains %#
           - kind: Secret
             name: #{ domain | replace('.', '-') }#-production-tls
 #% endfor %#
-      allowedRoutes:
-        namespaces:
-          from: All
 ---
 #| ============================================================ #|
 #| External Gateway - for Cloudflare tunnel ingress              #|
@@ -61,6 +63,7 @@ spec:
   gatewayClassName: kgateway
   infrastructure:
     annotations:
+      external-dns.alpha.kubernetes.io/hostname: external.${SECRET_DOMAIN}
       io.cilium/lb-ipam-ips: "#{ cloudflare_gateway_addr }#"
   listeners:
     - name: http
@@ -68,18 +71,126 @@ spec:
       port: 80
       allowedRoutes:
         namespaces:
-          from: All
+          from: Same
     - name: https
       protocol: HTTPS
       port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
       tls:
-        mode: Terminate
         certificateRefs:
 #% for domain in cloudflare_domains %#
           - kind: Secret
             name: #{ domain | replace('.', '-') }#-production-tls
 #% endfor %#
-      allowedRoutes:
-        namespaces:
-          from: All
+---
+#| ============================================================ #|
+#| HTTPListenerPolicy - Equivalent to envoy-gateway's           #|
+#| ClientTrafficPolicy settings                                  #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: kgateway-listener-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+  #| X-Forwarded-For trusted hops (Cloudflare adds 1 hop) #|
+  xffNumTrustedHops: 1
+  #| Use remote address for client IP detection #|
+  useRemoteAddress: true
+  #| Idle timeout for connections #|
+  idleTimeout: 0s
+  #| Stream idle timeout #|
+  streamIdleTimeout: 0s
+---
+#| ============================================================ #|
+#| ListenerPolicy - Buffer limits and connection settings        #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: ListenerPolicy
+metadata:
+  name: kgateway-connection-policy
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+  default:
+    #| Connection buffer limit (4Mi) - equivalent to ClientTrafficPolicy connection.bufferLimit #|
+    perConnectionBufferLimitBytes: 4194304
+---
+#| ============================================================ #|
+#| HTTPS Redirect HTTPRoute - Redirect HTTP to HTTPS             #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: https-redirect
+  annotations:
+    external-dns.alpha.kubernetes.io/controller: none
+spec:
+  parentRefs:
+    - name: external
+      namespace: network
+      sectionName: http
+    - name: internal
+      namespace: network
+      sectionName: http
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+---
+#| ============================================================ #|
+#| TrafficPolicy for Internal Gateway - Compression & Buffer     #|
+#| Equivalent to envoy-gateway's BackendTrafficPolicy            #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: kgateway-internal-traffic
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal
+  #| Enable gzip response compression (envoy-gateway had Brotli + Gzip) #|
+  compression:
+    responseCompression: {}
+    requestDecompression: {}
+  #| Buffer limit (equivalent to BackendTrafficPolicy connection.bufferLimit) #|
+  buffer:
+    maxRequestSize: 8Mi
+---
+#| ============================================================ #|
+#| TrafficPolicy for External Gateway - Compression & Buffer     #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: kgateway-external-traffic
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+  #| Enable gzip response compression #|
+  compression:
+    responseCompression: {}
+    requestDecompression: {}
+  #| Buffer limit #|
+  buffer:
+    maxRequestSize: 8Mi
 #% endif %#
