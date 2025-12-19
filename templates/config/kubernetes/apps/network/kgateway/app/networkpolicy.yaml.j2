@@ -10,6 +10,16 @@ spec:
     matchLabels:
       app.kubernetes.io/name: kgateway
   ingress:
+    #| Allow xDS connections from Envoy proxy pods #|
+    - fromEndpoints:
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: external
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: internal
+      toPorts:
+        - ports:
+            - port: "9977"
+              protocol: TCP
     #| Allow Prometheus scraping #|
     - fromEndpoints:
         - matchLabels:
@@ -53,15 +63,17 @@ spec:
             - port: "9977"
               protocol: TCP
 ---
-#| NetworkPolicy for Envoy Gateway data plane pods #|
+#| NetworkPolicy for kgateway Envoy data plane pods (external, internal) #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: kgateway-envoy
 spec:
   endpointSelector:
-    matchLabels:
-      app.kubernetes.io/name: envoy
+    matchExpressions:
+      - key: gateway.networking.k8s.io/gateway-name
+        operator: In
+        values: ["external", "internal"]
   ingress:
     #| Allow external HTTP/HTTPS traffic #|
     - fromEntities:
