@@ -11,13 +11,31 @@ kind: Gateway
 metadata:
   name: agentgateway
   annotations:
-    io.cilium/lb-ipam-ips: "192.168.22.147"
+    external-dns.alpha.kubernetes.io/target: ai-gw.${SECRET_DOMAIN}
 spec:
   gatewayClassName: agentgateway
+  infrastructure:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: ai-gw.${SECRET_DOMAIN}
+      io.cilium/lb-ipam-ips: "192.168.22.147"
   listeners:
     - name: http
       protocol: HTTP
       port: 80
       allowedRoutes:
         namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
           from: All
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: matherly-net-production-tls
+            namespace: network
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
+            namespace: network
