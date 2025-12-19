@@ -36,6 +36,3 @@ spec:
           - kind: Secret
             name: matherly-net-production-tls
             namespace: network
-          - kind: Secret
-            name: spoonsofsalt-org-production-tls
-            namespace: network

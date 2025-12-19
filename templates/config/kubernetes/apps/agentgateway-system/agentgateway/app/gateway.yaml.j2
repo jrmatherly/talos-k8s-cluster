@@ -42,10 +42,9 @@ spec:
         namespaces:
           from: All
       tls:
+        #| agentgateway only supports exactly 1 certificateRef #|
         certificateRefs:
-#% for domain in cloudflare_domains %#
           - kind: Secret
-            name: #{ domain | replace('.', '-') }#-production-tls
+            name: #{ primary_domain | replace('.', '-') }#-production-tls
             namespace: network
-#% endfor %#
 #% endif %#
