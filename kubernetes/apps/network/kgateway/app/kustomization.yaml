@@ -7,3 +7,4 @@ resources:
   - certificate.yaml
   - gateway.yaml
   - networkpolicy.yaml
+  - referencegrant.yaml
