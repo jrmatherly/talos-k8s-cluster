@@ -22,22 +22,22 @@ releases:
   - name: kgateway-crds
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
-    version: v2.2.0-beta.3
+    version: v2.2.0-beta.4
 
   - name: kgateway
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
-    version: v2.2.0-beta.3
+    version: v2.2.0-beta.4
 
   - name: agentgateway-crds
     namespace: agentgateway-system
     chart: oci://cr.agentgateway.dev/charts/agentgateway-crds
-    version: v2.2.0-beta.3
+    version: v2.2.0-beta.4
 
   - name: agentgateway
     namespace: agentgateway-system
     chart: oci://cr.agentgateway.dev/charts/agentgateway
-    version: v2.2.0-beta.3
+    version: v2.2.0-beta.4
 
   - name: kube-prometheus-stack
     namespace: observability
