@@ -10,10 +10,11 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: internal
-  annotations:
-    io.cilium/lb-ipam-ips: "192.168.22.140"
 spec:
   gatewayClassName: kgateway
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "192.168.22.140"
   listeners:
     - name: http
       protocol: HTTP
@@ -37,10 +38,11 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: external
-  annotations:
-    io.cilium/lb-ipam-ips: "192.168.22.130"
 spec:
   gatewayClassName: kgateway
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "192.168.22.130"
   listeners:
     - name: http
       protocol: HTTP

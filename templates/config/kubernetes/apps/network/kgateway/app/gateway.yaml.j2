@@ -19,10 +19,11 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: internal
-  annotations:
-    io.cilium/lb-ipam-ips: "#{ cluster_gateway_addr }#"
 spec:
   gatewayClassName: kgateway
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "#{ cluster_gateway_addr }#"
   listeners:
     - name: http
       protocol: HTTP
@@ -50,10 +51,11 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: external
-  annotations:
-    io.cilium/lb-ipam-ips: "#{ cloudflare_gateway_addr }#"
 spec:
   gatewayClassName: kgateway
+  infrastructure:
+    annotations:
+      io.cilium/lb-ipam-ips: "#{ cloudflare_gateway_addr }#"
   listeners:
     - name: http
       protocol: HTTP
