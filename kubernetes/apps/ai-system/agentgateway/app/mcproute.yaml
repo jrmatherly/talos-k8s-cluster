@@ -81,11 +81,7 @@ spec:
           - "https://mcp-gw.matherly.net/mcp"
         provider: Keycloak
         jwks:
-          backendRef:
-            name: keycloak-http
-            namespace: keycloak
-            port: 8080
-          jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+          uri: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
           cacheDuration: "5m"
         resourceMetadata:
           resource: "https://mcp-gw.matherly.net/mcp"

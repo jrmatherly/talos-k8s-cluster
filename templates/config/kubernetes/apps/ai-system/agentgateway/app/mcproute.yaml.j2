@@ -105,12 +105,8 @@ spec:
           - "https://mcp-gw.#{ primary_domain }#/mcp"
         provider: Keycloak
         jwks:
-          #| Use K8s Service reference - requires ReferenceGrant in keycloak namespace #|
-          backendRef:
-            name: keycloak-http
-            namespace: keycloak
-            port: 8080
-          jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+          #| Full JWKS URI - backendRef not yet implemented in agentgateway #|
+          uri: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
           cacheDuration: "5m"
         #| RFC 9728 OAuth Protected Resource Metadata #|
         resourceMetadata:
