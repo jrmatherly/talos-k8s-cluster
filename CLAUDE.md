@@ -310,7 +310,6 @@ When adding new application templates to this project, multiple files must be up
 For detailed component documentation, see:
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)
 - `docs/ai-context/cognee-deployment.md` - Cognee Graph RAG deployment (Neo4j + pgvector, migration workarounds, known issues)
-- `docs/ai-context/envoy-ai-gateway.md` - Envoy AI Gateway integration (multi-model routing, Azure OpenAI backends, testing)
 - `docs/ai-context/agentgateway-mcp.md` - agentgateway/kgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy patterns for K8s API access
 - `docs/ai-context/obot-networking.md` - obot MCP server networking (port architecture, NetworkPolicy)

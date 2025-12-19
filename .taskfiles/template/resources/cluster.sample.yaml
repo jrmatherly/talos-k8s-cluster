@@ -96,11 +96,6 @@ cluster_gateway_addr: ""
 #    (REQUIRED) - Must be an UNUSED IP within node_cidr
 cloudflare_gateway_addr: ""
 
-# -- DEPRECATED: Load balancer IP for the Envoy AI Gateway.
-#    TODO: Remove after kgateway migration is complete
-#    Use kgateway + LiteLLM instead of Envoy AI Gateway
-# envoy_ai_gateway_addr: ""
-
 # -- Load balancer IP for the MCP Gateway.
 #    (REQUIRED if mcp_gateway_enabled) - Must be an UNUSED IP within node_cidr
 #    Example: "192.168.1.146"
@@ -265,19 +260,6 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: "v2.2.0-beta.3")
 #    Used when agentgateway_enabled is true.
 # agentgateway_version: "v2.2.0-beta.3"
-
-# ==============================================================================
-# ENVOY AI GATEWAY (DEPRECATED - use kgateway + LiteLLM)
-# ==============================================================================
-# DEPRECATED: Configuration for AI/LLM traffic routing via Envoy AI Gateway.
-# TODO: Remove this entire section after kgateway migration is complete.
-# This has been replaced by kgateway + LiteLLM for unified AI Gateway.
-# REF: https://aigateway.envoyproxy.io/docs/
-
-# -- DEPRECATED: Enable Envoy AI Gateway integration.
-#    (OPTIONAL) / (DEFAULT: false)
-#    TODO: Remove after kgateway migration is complete
-# envoy_ai_gateway_enabled: false
 
 # ==============================================================================
 # MCP GATEWAY (Optional - Model Context Protocol)
@@ -525,7 +507,6 @@ cloudflare_token: ""
 # ==============================================================================
 # Keycloak provides enterprise-grade identity and access management.
 # Integrates with kgateway via SecurityPolicy for OIDC authentication.
-# REF: docs/keycloak-envoy-gateway-integration-research.md
 
 # -- Enable Keycloak deployment.
 #    (OPTIONAL) / (DEFAULT: false)
