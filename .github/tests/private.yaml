@@ -32,8 +32,8 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens not needed for Approach A
 # kgateway Configuration (uses defaults: kgateway_enabled=true, kgateway_version=v2.2.0-main)
 # kgateway_enabled: true
-# kgateway_version: "v2.2.0-main"
-# agentgateway_version: "v2.2.0-main"
+# kgateway_version: "v2.2.0-beta.3"
+# agentgateway_version: "v2.2.0-beta.3"
 # DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
 # TODO: Remove these fields after kgateway migration is complete
 # envoy_ai_gateway_enabled: false

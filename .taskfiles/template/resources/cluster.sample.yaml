@@ -253,13 +253,13 @@ cloudflare_token: ""
 # kgateway_enabled: true
 
 # -- kgateway Helm chart version.
-#    (OPTIONAL) / (DEFAULT: "v2.2.0-main")
-# kgateway_version: "v2.2.0-main"
+#    (OPTIONAL) / (DEFAULT: "v2.2.0-beta.3")
+# kgateway_version: "v2.2.0-beta.3"
 
 # -- agentgateway Helm chart version.
-#    (OPTIONAL) / (DEFAULT: "v2.2.0-main")
+#    (OPTIONAL) / (DEFAULT: "v2.2.0-beta.3")
 #    Used when agentgateway_enabled is true.
-# agentgateway_version: "v2.2.0-main"
+# agentgateway_version: "v2.2.0-beta.3"
 
 # ==============================================================================
 # ENVOY AI GATEWAY (DEPRECATED - use kgateway + LiteLLM)
