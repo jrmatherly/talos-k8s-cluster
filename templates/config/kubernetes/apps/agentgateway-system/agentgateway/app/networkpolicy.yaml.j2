@@ -12,13 +12,13 @@ spec:
     matchLabels:
       app.kubernetes.io/name: agentgateway
   ingress:
-    #| xDS from agentgateway proxies #|
+    #| xDS from agentgateway proxies (port 9978) #|
     - fromEndpoints:
         - matchLabels:
             gateway.networking.k8s.io/gateway-name: ai-gateway
       toPorts:
         - ports:
-            - port: "9977"
+            - port: "9978"
               protocol: TCP
     #| Metrics from Prometheus #|
     - fromEndpoints:
@@ -72,14 +72,12 @@ spec:
             - port: "8443"
               protocol: TCP
   egress:
-    #| xDS to agentgateway controller #|
+    #| xDS to agentgateway controller (port 9978) #|
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: agentgateway
       toPorts:
         - ports:
-            - port: "9977"
-              protocol: TCP
             - port: "9978"
               protocol: TCP
     #| DNS resolution #|

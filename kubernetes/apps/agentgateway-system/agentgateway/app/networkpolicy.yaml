@@ -13,7 +13,7 @@ spec:
             gateway.networking.k8s.io/gateway-name: ai-gateway
       toPorts:
         - ports:
-            - port: "9977"
+            - port: "9978"
               protocol: TCP
     - fromEndpoints:
         - matchLabels:
@@ -65,8 +65,6 @@ spec:
             app.kubernetes.io/name: agentgateway
       toPorts:
         - ports:
-            - port: "9977"
-              protocol: TCP
             - port: "9978"
               protocol: TCP
     - toEndpoints:
