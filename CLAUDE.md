@@ -308,9 +308,10 @@ When adding new application templates to this project, multiple files must be up
 ## Extended Documentation
 
 For detailed component documentation, see:
+- `docs/ai-context/kgateway.md` - kgateway controller (Gateway API, Envoy data plane, OIDC, traffic policies)
+- `docs/ai-context/agentgateway-mcp.md` - agentgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)
 - `docs/ai-context/cognee-deployment.md` - Cognee Graph RAG deployment (Neo4j + pgvector, migration workarounds, known issues)
-- `docs/ai-context/agentgateway-mcp.md` - agentgateway/kgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy patterns for K8s API access
 - `docs/ai-context/obot-networking.md` - obot MCP server networking (port architecture, NetworkPolicy)
 - `docs/ai-context/kagent-a2a.md` - kagent A2A networking (controller→agent, ModelConfig)

@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [envoy-gateway](https://github.com/envoyproxy/gateway), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [Envoy AI Gateway](https://aigateway.envoyproxy.io/) (LLM routing - legacy), [agentgateway](https://agentgateway.dev/) (unified AI Gateway + MCP OAuth), [kagent](https://kagent.dev/) (Kubernetes AI agents).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [kgateway](https://kgateway.dev/) (Kubernetes Gateway API), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [agentgateway](https://agentgateway.dev/) (unified AI Gateway + MCP OAuth), [LiteLLM](https://litellm.ai/) (LLM proxy), [kagent](https://kagent.dev/) (Kubernetes AI agents).
 
 **Other features include:**
 
@@ -222,28 +222,28 @@ There are **5 stages** outlined below for completing this project, make sure you
     kubectl -n kube-system port-forward svc/hubble-ui 8080:80
     ```
 
-7. Access Envoy Gateway Admin Console (internal only):
+7. Access kgateway Admin UI (internal only):
 
-   📍 _Requires split DNS configured to resolve `envoy-ui.${cloudflare_domain}` via k8s_gateway_
+   📍 _Requires split DNS configured to resolve `kgateway.${cloudflare_domain}` via k8s_gateway_
 
     ```sh
-    # Open in browser: https://envoy-ui.${cloudflare_domain}
+    # Open in browser: https://kgateway.${cloudflare_domain}
     # Or use port-forward for direct access:
-    kubectl -n network port-forward deploy/envoy-gateway 19000:19000
+    kubectl -n network port-forward deploy/kgateway 19000:19000
     # Then open http://localhost:19000
     ```
 
 ### 🌐 Public DNS
 
 > [!TIP]
-> Use the `envoy-external` gateway on `HTTPRoutes` to make applications public to the internet. These are also accessible on your private network once you set up split DNS.
+> Use the `external` gateway on `HTTPRoutes` to make applications public to the internet. These are also accessible on your private network once you set up split DNS.
 
 The `external-dns` application created in the `network` namespace will handle creating public DNS records. By default, `echo` and the `flux-webhook` are the only subdomains reachable from the public internet. In order to make additional applications public you must **set the correct gateway** like in the HelmRelease for `echo`.
 
 ### 🏠 Internal DNS
 
 > [!TIP]
-> Use the `envoy-internal` gateway on `HTTPRoutes` to make applications private to your network. If you're having trouble with internal DNS resolution check out [this](https://github.com/onedr0p/cluster-template/discussions/719) GitHub discussion.
+> Use the `internal` gateway on `HTTPRoutes` to make applications private to your network. If you're having trouble with internal DNS resolution check out [this](https://github.com/onedr0p/cluster-template/discussions/719) GitHub discussion.
 
 `k8s_gateway` will provide DNS resolution to external Kubernetes resources (i.e. points of entry to the cluster) from any device that uses your internal DNS server. For this to work, your internal DNS server must be configured to forward DNS queries for `${cloudflare_domain}` to `${cluster_dns_gateway_addr}` instead of the upstream DNS server(s) it normally uses. This is a form of **split DNS** (aka split-horizon DNS / conditional forwarding).
 
@@ -558,58 +558,46 @@ kubectl exec -n <namespace> <cluster>-1 -- psql -U postgres -d <db> -c "SELECT *
 
 See `CLAUDE.md` for detailed ImageVolume configuration and troubleshooting.
 
-### AI Gateway (Envoy AI Gateway)
+### kgateway (Kubernetes Gateway API)
 
-**Included (optional):** This template includes [Envoy AI Gateway](https://aigateway.envoyproxy.io/) for intelligent AI/LLM traffic routing. When enabled, it extends Envoy Gateway with AI-specific capabilities including request routing to Azure OpenAI backends.
+**Included:** This template includes [kgateway](https://kgateway.dev/) as the Kubernetes Gateway API controller using Envoy as its data plane. kgateway provides standard HTTP/HTTPS routing, TLS termination, OIDC authentication, and traffic policies.
 
-Enable it by configuring the following variables in `cluster.yaml`:
+When enabled, kgateway provides:
+- **Two Gateways** in the `network` namespace:
+  - `internal` - For LAN access at `${cluster_gateway_addr}`
+  - `external` - For Cloudflare Tunnel access at `${cloudflare_gateway_addr}`
+- **GatewayClass** with `controllerName: kgateway.dev/kgateway`
+- **HTTPRoutes** for routing traffic to backend services
+- **OIDC authentication** via Keycloak integration
+- **Traffic policies** (compression, buffering, rate limiting)
+- **Prometheus metrics** and Grafana dashboards
 
-```yaml
-# Enable AI Gateway
-envoy_ai_gateway_enabled: true
-envoy_ai_gateway_addr: "192.168.22.145"  # Unused IP in node_cidr
-
-# Azure OpenAI - US East Region (Phase 1)
-azure_openai_us_east_api_key: "<api-key>"
-azure_openai_us_east_resource_name: "myopenai"  # Subdomain of endpoint
-
-# Azure OpenAI - US East2 Region (Phase 2)
-azure_openai_us_east2_api_key: "<api-key>"
-azure_openai_us_east2_resource_name: "ets-east-us2"  # Subdomain of endpoint
-```
-
-When enabled, the AI Gateway provides:
-- Dedicated `envoy-ai` Gateway at `llms.${cloudflare_domain}`
-- Multi-backend support with appropriate timeouts per model type:
-  - **Phase 1 (US East):** gpt-4.1, gpt-4.1-nano, gpt-4o-mini, o3, o4-mini, embeddings
-  - **Phase 2 (US East2):** gpt-5, gpt-5-nano, gpt-5-chat, gpt-5-mini, gpt-5.1, gpt-5.1-chat, gpt-5.1-codex, gpt-5.1-codex-mini, text-embedding-3-large
-- Larger buffers (50Mi) for LLM payloads
-- Backend security policy with API key injection
-- Header-based routing via `x-ai-eg-model` header
+**Key CRDs:**
+- `Gateway` / `GatewayClass` / `HTTPRoute` - Standard Gateway API
+- `HTTPListenerPolicy` - XFF settings, timeouts
+- `ListenerPolicy` - Connection buffer limits
+- `TrafficPolicy` - Compression, buffering
+- `GatewayExtension` - OIDC configuration
+- `Backend` / `BackendTLSPolicy` - External backend definitions
 
 **Verification:**
 
 ```sh
-# Phase 1: Test GPT-4.1-nano (US East)
-curl -X POST "https://llms.${cloudflare_domain}/v1/chat/completions" \
-  -H "Content-Type: application/json" \
-  -H "x-ai-eg-model: gpt-4.1-nano" \
-  -d '{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Hello"}]}'
+# Check kgateway controller
+kubectl get pods -n network -l app.kubernetes.io/name=kgateway
 
-# Phase 2: Test GPT-5 (US East2)
-curl -X POST "https://llms.${cloudflare_domain}/v1/chat/completions" \
-  -H "Content-Type: application/json" \
-  -H "x-ai-eg-model: gpt-5" \
-  -d '{"model":"gpt-5","messages":[{"role":"user","content":"Hello"}]}'
+# Check Gateways
+kubectl get gateway -n network
 
-# Test embeddings
-curl -X POST "https://llms.${cloudflare_domain}/v1/embeddings" \
-  -H "Content-Type: application/json" \
-  -H "x-ai-eg-model: text-embedding-3-large" \
-  -d '{"model":"text-embedding-3-large","input":"Hello world"}'
+# Check HTTPRoutes
+kubectl get httproute -A
+
+# Test gateway endpoints
+curl -I https://${cluster_gateway_addr} -k   # internal
+curl -I https://${cloudflare_gateway_addr} -k # external
 ```
 
-See `docs/envoy-ai-gateway-testing.md` for complete test commands for all models and `docs/envoy-ai-gw/REFINED-IMPLEMENTATION-PLAN.md` for detailed implementation notes.
+See `docs/ai-context/kgateway.md` for complete configuration details.
 
 ### agentgateway (Unified AI Gateway)
 
@@ -680,17 +668,20 @@ Key metrics exposed:
 
 ```sh
 # Check agentgateway deployment status
-kubectl get pods -n agentgateway
-kubectl get gateway,gatewayclass -n agentgateway
+kubectl get pods -n agentgateway-system
+kubectl get gateway,gatewayclass -n agentgateway-system
 
 # Verify xDS connectivity (should show clients:1)
-kubectl logs -n agentgateway -l app.kubernetes.io/name=kgateway | grep "XDS: Pushing"
+kubectl logs -n agentgateway-system -l app.kubernetes.io/name=agentgateway | grep "XDS: Pushing"
+
+# Check data plane logs
+kubectl logs -n agentgateway-system -l gateway.networking.k8s.io/gateway-name=ai-gateway
 
 # Test external access
 curl -I https://mcp-auth.${cloudflare_domain}/
 
 # Check observability resources
-kubectl get servicemonitor,prometheusrule -n agentgateway
+kubectl get servicemonitor,prometheusrule -n agentgateway-system
 kubectl get configmap -n observability -l grafana_dashboard=1 | grep agentgateway
 ```
 

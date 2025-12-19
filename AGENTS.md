@@ -130,9 +130,9 @@ See `.serena/memories/adding-new-templates-checklist.md` for complete checklist.
 ## Extended Documentation
 
 For detailed component documentation, see:
+- `docs/ai-context/kgateway.md` - kgateway controller (Gateway API, Envoy data plane, OIDC, traffic policies)
+- `docs/ai-context/agentgateway-mcp.md` - agentgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)
-- `docs/ai-context/envoy-ai-gateway.md` - Envoy AI Gateway integration
-- `docs/ai-context/agentgateway-mcp.md` - agentgateway/kgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy for K8s API access
 - `docs/ai-context/obot-networking.md` - obot MCP server networking
 - `docs/ai-context/kagent-a2a.md` - kagent A2A networking
