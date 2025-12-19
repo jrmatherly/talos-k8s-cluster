@@ -29,9 +29,3 @@ resources:
 #% if litellm_enabled | default(true) and kgateway_enabled | default(true) %#
   - ./litellm-route/ks.yaml
 #% endif %#
-#| ============================================================ #|
-#| Legacy Envoy Gateway (deprecated - use kgateway)              #|
-#| ============================================================ #|
-#% if envoy_gateway_enabled | default(false) %#
-  - ./envoy-gateway/ks.yaml
-#% endif %#

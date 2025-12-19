@@ -90,14 +90,14 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8099
-    # Allow from agentgateway for MCP-proxied requests (now in network namespace)
+    # Allow from agentgateway for MCP-proxied requests (in agentgateway-system)
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: network
+              kubernetes.io/metadata.name: agentgateway-system
           podSelector:
             matchLabels:
-              gateway.networking.k8s.io/gateway-name: agentgateway
+              gateway.networking.k8s.io/gateway-name: ai-gateway
       ports:
         - protocol: TCP
           port: 8080
@@ -168,14 +168,14 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8099
-    # Allow to agentgateway pods in network namespace for MCP/LLM routing
+    # Allow to agentgateway pods in agentgateway-system for MCP/LLM routing
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: network
+              kubernetes.io/metadata.name: agentgateway-system
           podSelector:
             matchLabels:
-              gateway.networking.k8s.io/gateway-name: agentgateway
+              gateway.networking.k8s.io/gateway-name: ai-gateway
       ports:
         - protocol: TCP
           port: 8443

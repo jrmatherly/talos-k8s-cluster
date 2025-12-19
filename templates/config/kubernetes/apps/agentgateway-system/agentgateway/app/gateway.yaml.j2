@@ -38,14 +38,16 @@ spec:
     name: agw-params
 ---
 #| ============================================================ #|
-#| AgentGateway - AI/MCP Gateway                                 #|
+#| AI Gateway - AI/MCP Gateway data plane                        #|
 #| LoadBalancer IP: #{ agentgateway_addr }#                      #|
 #| Handles: LLM routing, MCP OAuth, AI traffic                   #|
+#| NOTE: Named "ai-gateway" to avoid conflict with controller    #|
+#|       Deployment which is named "agentgateway"                #|
 #| ============================================================ #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: agentgateway
+  name: ai-gateway
   annotations:
     external-dns.alpha.kubernetes.io/target: ai-gw.${SECRET_DOMAIN}
 spec:

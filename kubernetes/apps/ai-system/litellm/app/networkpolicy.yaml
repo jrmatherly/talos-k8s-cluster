@@ -108,11 +108,11 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
-    # Allow from agentgateway (AI Gateway)
+    # Allow from agentgateway (AI Gateway data plane)
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: agentgateway
+              kubernetes.io/metadata.name: agentgateway-system
       ports:
         - protocol: TCP
           port: 4000

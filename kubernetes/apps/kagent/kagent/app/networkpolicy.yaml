@@ -266,15 +266,15 @@ spec:
     - ports:
         - protocol: TCP
           port: 443
-    # agentgateway (ai-gw.matherly.net) - internal LLM gateway via kgateway
-    # Located in network namespace
+    # agentgateway (ai-gw.matherly.net) - AI/MCP gateway data plane
+    # Located in agentgateway-system namespace
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: network
+              kubernetes.io/metadata.name: agentgateway-system
           podSelector:
             matchLabels:
-              gateway.networking.k8s.io/gateway-name: agentgateway
+              gateway.networking.k8s.io/gateway-name: ai-gateway
       ports:
         - protocol: TCP
           port: 443
