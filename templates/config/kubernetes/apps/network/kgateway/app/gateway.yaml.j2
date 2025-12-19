@@ -37,8 +37,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: "#{ primary_domain | replace('.', '-') }#-tls"
-            namespace: network
+#% for domain in cloudflare_domains %#
+          - kind: Secret
+            name: #{ domain | replace('.', '-') }#-production-tls
+#% endfor %#
       allowedRoutes:
         namespaces:
           from: All
@@ -73,8 +75,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: "#{ primary_domain | replace('.', '-') }#-tls"
-            namespace: network
+#% for domain in cloudflare_domains %#
+          - kind: Secret
+            name: #{ domain | replace('.', '-') }#-production-tls
+#% endfor %#
       allowedRoutes:
         namespaces:
           from: All

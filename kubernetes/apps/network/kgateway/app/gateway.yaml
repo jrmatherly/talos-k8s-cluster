@@ -28,8 +28,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: "matherly-net-tls"
-            namespace: network
+          - kind: Secret
+            name: matherly-net-production-tls
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
       allowedRoutes:
         namespaces:
           from: All
@@ -58,8 +60,10 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - name: "matherly-net-tls"
-            namespace: network
+          - kind: Secret
+            name: matherly-net-production-tls
+          - kind: Secret
+            name: spoonsofsalt-org-production-tls
       allowedRoutes:
         namespaces:
           from: All
