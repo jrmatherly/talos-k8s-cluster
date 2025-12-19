@@ -49,4 +49,63 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
+---
+#| ============================================================ #|
+#| NetworkPolicy for ai-gateway data plane                       #|
+#| ============================================================ #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ai-gateway-dataplane
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: ai-gateway
+  ingress:
+    #| HTTP/HTTPS from external (LoadBalancer) #|
+    - fromEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+  egress:
+    #| xDS to agentgateway controller #|
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: agentgateway
+      toPorts:
+        - ports:
+            - port: "9977"
+              protocol: TCP
+            - port: "9978"
+              protocol: TCP
+    #| DNS resolution #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    #| Egress to backend services (LiteLLM, MCP servers) #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: ai-system
+      toPorts:
+        - ports:
+            - port: "4000"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: obot
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
 #% endif %#
