@@ -112,9 +112,17 @@ spec:
             port: 8080
           jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
           cacheDuration: "5m"
-        #| NOTE: resourceMetadata removed due to kgateway v2.2.0-main proto bug #|
-        #| apiextensionsv1.JSON cannot convert to google.protobuf.Value #|
-        #| MCP OAuth works without RFC 9728 metadata fields #|
+        #| RFC 9728 OAuth Protected Resource Metadata #|
+        resourceMetadata:
+          resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+          scopesSupported:
+            - openid
+            - profile
+            - email
+            - mcp:tools
+            - offline_access
+          bearerMethodsSupported:
+            - header
 ---
 #| ============================================================ #|
 #| AgentgatewayPolicy: MCP Route Traffic Settings                #|

@@ -5,7 +5,7 @@
 #| Controller: agentgateway.dev/agentgateway                     #|
 #| ============================================================ #|
 #| IMPORTANT: This is a SEPARATE deployment from kgateway        #|
-#| Uses ghcr.io/kgateway-dev/charts/agentgateway chart           #|
+#| Uses cr.agentgateway.dev/charts/agentgateway chart            #|
 #| ============================================================ #|
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -40,9 +40,9 @@ spec:
     controller:
       logLevel: info
       replicaCount: 1
-      #| For dev builds (v2.2.0-main), use Always to get latest images #|
+      #| For tagged releases, use IfNotPresent #|
       image:
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
 
     #| ============================================================ #|
     #| Resource Limits (required for GOMEMLIMIT/GOMAXPROCS env vars) #|

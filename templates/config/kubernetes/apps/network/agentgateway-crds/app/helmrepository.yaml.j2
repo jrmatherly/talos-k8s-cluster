@@ -2,8 +2,8 @@
 ---
 #| ============================================================ #|
 #| HelmRepository for agentgateway charts (MCP/AI control plane) #|
-#| IMPORTANT: Uses ghcr.io registry (NOT cr.kgateway.dev)        #|
-#| This is a SEPARATE registry from kgateway charts              #|
+#| Uses cr.agentgateway.dev registry (dedicated agentgateway)    #|
+#| See: docs/guides/agentgateway-migration.md                    #|
 #| ============================================================ #|
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
@@ -12,5 +12,5 @@ metadata:
 spec:
   interval: 1h
   type: oci
-  url: oci://ghcr.io/kgateway-dev/charts
+  url: oci://cr.agentgateway.dev/charts
 #% endif %#

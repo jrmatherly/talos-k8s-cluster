@@ -33,9 +33,9 @@ spec:
     controller:
       logLevel: info
       replicaCount: 1
-      #| For dev builds (v2.2.0-main), use Always to get latest images #|
+      #| For tagged releases, use IfNotPresent #|
       image:
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
       resources:
         requests:
           cpu: 100m

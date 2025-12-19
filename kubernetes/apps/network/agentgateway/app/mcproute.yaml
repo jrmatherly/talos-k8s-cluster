@@ -87,6 +87,16 @@ spec:
             port: 8080
           jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
           cacheDuration: "5m"
+        resourceMetadata:
+          resource: "https://mcp-gw.matherly.net/mcp"
+          scopesSupported:
+            - openid
+            - profile
+            - email
+            - mcp:tools
+            - offline_access
+          bearerMethodsSupported:
+            - header
 ---
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayPolicy
