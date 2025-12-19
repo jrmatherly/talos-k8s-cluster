@@ -1,34 +1,24 @@
 #% if agentgateway_enabled | default(false) %#
 ---
 #| ============================================================ #|
-#| Backend for Context7 external MCP server                      #|
-#| Provides HTTPS proxy routing to context7.upstash.io           #|
-#| NOTE: MCP tool filtering is not supported for external        #|
-#| services - use the Context7 MCP plugin directly for full      #|
-#| MCP protocol support.                                         #|
+#| AgentgatewayBackend for Context7 external MCP server          #|
+#| Provides MCP routing to context7.upstash.io                   #|
+#| Protocol: SSE (Server-Sent Events) - standard MCP transport   #|
 #| ============================================================ #|
-apiVersion: gateway.kgateway.dev/v1alpha1
-kind: Backend
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
 metadata:
   name: context7-mcp
 spec:
-  type: Static
-  static:
-    hosts:
-      - host: context7.upstash.io
-        port: 443
----
-#| BackendTLSPolicy for TLS validation to context7.upstash.io #|
-apiVersion: gateway.networking.k8s.io/v1alpha3
-kind: BackendTLSPolicy
-metadata:
-  name: context7-mcp-tls
-spec:
-  targetRefs:
-    - group: gateway.kgateway.dev
-      kind: Backend
-      name: context7-mcp
-  validation:
-    wellKnownCACertificates: System
-    hostname: context7.upstash.io
+  mcp:
+    targets:
+      - name: context7
+        static:
+          host: context7.upstash.io
+          port: 443
+          protocol: SSE
+          path: /mcp
+          policies:
+            #| Enable TLS with system CA certificates #|
+            tls: {}
 #% endif %#

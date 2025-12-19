@@ -1,13 +1,9 @@
 #% if agentgateway_enabled | default(false) %#
 ---
 #| ============================================================ #|
-#| HTTPRoute for Context7 MCP server proxy                       #|
+#| HTTPRoute for Context7 MCP server                             #|
 #| Routes /mcp/context7/* paths to context7.upstash.io          #|
-#| Provides: centralized logging, rate limiting, metrics         #|
-#|                                                               #|
-#| NOTE: This is a simple HTTPS proxy route, not MCP protocol    #|
-#| routing. For full MCP tool discovery and filtering, use the   #|
-#| Context7 MCP plugin directly in your MCP client.              #|
+#| Uses AgentgatewayBackend for MCP protocol support             #|
 #| ============================================================ #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -25,15 +21,8 @@ spec:
         - path:
             type: PathPrefix
             value: /mcp/context7
-      filters:
-        #| Rewrite path to remove /mcp/context7 prefix #|
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /mcp
       backendRefs:
-        - group: gateway.kgateway.dev
-          kind: Backend
+        - group: agentgateway.dev
+          kind: AgentgatewayBackend
           name: context7-mcp
 #% endif %#

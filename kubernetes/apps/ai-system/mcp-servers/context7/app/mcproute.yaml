@@ -15,13 +15,7 @@ spec:
         - path:
             type: PathPrefix
             value: /mcp/context7
-      filters:
-        - type: URLRewrite
-          urlRewrite:
-            path:
-              type: ReplacePrefixMatch
-              replacePrefixMatch: /mcp
       backendRefs:
-        - group: gateway.kgateway.dev
-          kind: Backend
+        - group: agentgateway.dev
+          kind: AgentgatewayBackend
           name: context7-mcp
