@@ -38,6 +38,8 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: external
+  annotations:
+    external-dns.alpha.kubernetes.io/target: "52263a60-37cc-4688-b29a-1ae7bc18a9f8.cfargotunnel.com"
 spec:
   gatewayClassName: kgateway
   infrastructure:

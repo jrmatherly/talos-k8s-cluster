@@ -46,11 +46,15 @@ spec:
 #| ============================================================ #|
 #| External Gateway - for Cloudflare tunnel ingress              #|
 #| LoadBalancer IP: #{ cloudflare_gateway_addr }#                #|
+#| DNS Target: Cloudflare tunnel CNAME (for external-dns)        #|
 #| ============================================================ #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: external
+  annotations:
+    #| external-dns reads target from Gateway, creates CNAME to tunnel #|
+    external-dns.alpha.kubernetes.io/target: "#{ cloudflare_tunnel_id() }#.cfargotunnel.com"
 spec:
   gatewayClassName: kgateway
   infrastructure:
