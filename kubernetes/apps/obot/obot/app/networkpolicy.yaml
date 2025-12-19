@@ -245,7 +245,7 @@ spec:
         - protocol: TCP
           port: 80
 ---
-# CiliumNetworkPolicy for CloudNativePG obot-db - Kubernetes API access
+# CiliumNetworkPolicy for CloudNativePG obot-db - Kubernetes API and DNS access
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -255,6 +255,18 @@ spec:
     matchLabels:
       cnpg.io/cluster: obot-db
   egress:
+    # DNS resolution for CNPG service discovery (replicas need to resolve primary hostname)
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Kubernetes API access
     - toEntities:
         - kube-apiserver
       toPorts:

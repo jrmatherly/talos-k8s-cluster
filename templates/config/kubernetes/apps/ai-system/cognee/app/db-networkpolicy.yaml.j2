@@ -10,6 +10,18 @@ spec:
     matchLabels:
       cnpg.io/cluster: cognee-db
   egress:
+    # DNS resolution for CNPG service discovery (replicas need to resolve primary hostname)
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Kubernetes API access
     - toEntities:
         - kube-apiserver
       toPorts:
