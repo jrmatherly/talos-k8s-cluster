@@ -61,19 +61,19 @@ jobs:
           exit-code: "0"
 
       - name: Upload Trivy scan results (Kubernetes)
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc # v3
         with:
           sarif_file: "trivy-kubernetes.sarif"
           category: "trivy-kubernetes"
 
       - name: Upload Trivy scan results (Talos)
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc # v3
         with:
           sarif_file: "trivy-talos.sarif"
           category: "trivy-talos"
 
       - name: Upload Trivy scan results (Bootstrap)
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc # v3
         with:
           sarif_file: "trivy-bootstrap.sarif"
           category: "trivy-bootstrap"
