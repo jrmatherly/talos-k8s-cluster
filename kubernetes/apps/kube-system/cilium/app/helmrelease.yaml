@@ -122,4 +122,6 @@ spec:
           - SYS_RESOURCE
     socketLB:
       enabled: true
-      hostNamespaceOnly: true
+      # Default is false - only set to true for service mesh (Istio/Linkerd) or special runtimes
+      # Must be false for hubble-relay to connect to hubble-peer from pod namespace
+      hostNamespaceOnly: false
