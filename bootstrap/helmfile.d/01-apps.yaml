@@ -5,11 +5,15 @@ helmDefaults:
   wait: true
   waitForJobs: true
 
+repositories:
+  - name: cilium
+    url: https://helm.cilium.io
+
 releases:
   - name: cilium
     namespace: kube-system
-    chart: oci://ghcr.io/home-operations/charts-mirror/cilium
-    version: 1.18.5
+    chart: cilium/cilium
+    version: 1.19.0-pre.3
     values: ['./templates/values.yaml.gotmpl']
 
   - name: coredns
