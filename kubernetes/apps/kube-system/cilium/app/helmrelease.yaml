@@ -1,0 +1,127 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: cilium
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: cilium
+  interval: 1h
+  values:
+    autoDirectNodeRoutes: true
+    bpf:
+      masquerade: true
+      # Performance: Better multi-core BPF map scaling
+      distributedLRU:
+        enabled: true
+      # Performance: 8% of memory for BPF maps (default 0.25% is too conservative)
+      mapDynamicSizeRatio: 0.08
+    # Performance: Auto-optimize kernel clock source for BPF
+    bpfClockProbe: true
+    # Performance: BIG TCP - enables 64KB+ GSO/GRO segments (kernel 6.3+/5.19+)
+    # Requires eBPF host routing (not legacy) - enabled via Talos loopback patch
+    # REF: https://github.com/cilium/cilium/issues/36761#issuecomment-3493689525
+    enableIPv4BIGTCP: true
+    enableIPv6BIGTCP: false
+    # Performance: EDT-based pacing with BBR congestion control (kernel 5.18+)
+    bandwidthManager:
+      enabled: true
+      bbr: true
+    cni:
+      # Required for pairing with Multus CNI
+      exclusive: false
+    cgroup:
+      automount:
+        enabled: false
+      hostRoot: /sys/fs/cgroup
+    # NOTE: devices might need to be set if you have more than one active NIC on your hosts
+    # devices: eno+ eth+
+    dashboards:
+      enabled: true
+    endpointRoutes:
+      enabled: true
+    envoy:
+      enabled: false
+    gatewayAPI:
+      enabled: false
+    hubble:
+      enabled: true
+      relay:
+        enabled: true
+        replicas: 1
+        rollOutPods: true
+        prometheus:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+      ui:
+        enabled: true
+        replicas: 1
+        rollOutPods: true
+      metrics:
+        enabled:
+          - dns
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - httpV2  # HTTP/1.x + HTTP/2 + gRPC observability (replaces 'http')
+        serviceMonitor:
+          enabled: true
+        dashboards:
+          enabled: true
+    ipam:
+      mode: kubernetes
+    ipv4NativeRoutingCIDR: "10.42.0.0/16"
+    k8sServiceHost: 127.0.0.1
+    k8sServicePort: 7445
+    kubeProxyReplacement: true
+    kubeProxyReplacementHealthzBindAddr: 0.0.0.0:10256
+    l2announcements:
+      enabled: true
+    loadBalancer:
+      algorithm: maglev
+      mode: "dsr"
+    localRedirectPolicy: true
+    operator:
+      dashboards:
+        enabled: true
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+      replicas: 1
+      rollOutPods: true
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        trustCRDsExist: true
+    rollOutCiliumPods: true
+    routingMode: native
+    securityContext:
+      capabilities:
+        ciliumAgent:
+          - CHOWN
+          - KILL
+          - NET_ADMIN
+          - NET_RAW
+          - IPC_LOCK
+          - SYS_ADMIN
+          - SYS_RESOURCE
+          - PERFMON
+          - BPF
+          - DAC_OVERRIDE
+          - FOWNER
+          - SETGID
+          - SETUID
+        cleanCiliumState:
+          - NET_ADMIN
+          - SYS_ADMIN
+          - SYS_RESOURCE
+    socketLB:
+      enabled: true
+      # Default is false - only set to true for service mesh (Istio/Linkerd) or special runtimes
+      # Must be false for hubble-relay to connect to hubble-peer from pod namespace
+      hostNamespaceOnly: false
