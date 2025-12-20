@@ -12,8 +12,6 @@ spec:
     autoDirectNodeRoutes: true
     bpf:
       masquerade: true
-      # Ref: https://github.com/siderolabs/talos/issues/10002
-      hostLegacyRouting: true
       # Performance: Better multi-core BPF map scaling
       distributedLRU:
         enabled: true
@@ -22,6 +20,8 @@ spec:
     # Performance: Auto-optimize kernel clock source for BPF
     bpfClockProbe: true
     # Performance: BIG TCP - enables 64KB+ GSO/GRO segments (kernel 6.3+/5.19+)
+    # Requires eBPF host routing (not legacy) - enabled via Talos loopback patch
+    # REF: https://github.com/cilium/cilium/issues/36761#issuecomment-3493689525
     enableIPv4BIGTCP: true
     enableIPv6BIGTCP: true
     # Performance: EDT-based pacing with BBR congestion control (kernel 5.18+)
