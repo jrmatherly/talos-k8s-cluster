@@ -4,9 +4,13 @@ kind: HelmRelease
 metadata:
   name: cilium
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: cilium
+  chart:
+    spec:
+      chart: cilium
+      version: 1.19.0-pre.3
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
   interval: 1h
   values:
     autoDirectNodeRoutes: true

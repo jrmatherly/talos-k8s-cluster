@@ -20,6 +20,7 @@ cloudflare_gateway_addr: "10.10.10.251"
 # cilium_bgp_router_asn: ""
 # cilium_bgp_node_asn: ""
 # cilium_loadbalancer_mode: ""
+# cilium_use_prerelease: false  # uses default
 # Control Plane Scheduling (uses default: true)
 # allow_scheduling_on_control_planes: true
 # Proxmox Integration (optional - testing Approach A with CSI only)

@@ -27,6 +27,8 @@ import (
 	cilium_bgp_router_asn?: string & !=""
 	cilium_bgp_node_asn?: string & !=""
 	cilium_loadbalancer_mode?: *"dsr" | "snat"
+	cilium_use_prerelease?: *false | bool       // Use Cilium prerelease version (1.19.x)
+	cilium_prerelease_version?: *"1.19.0-pre.3" | string  // Cilium prerelease version
 
 	// Control Plane Scheduling
 	allow_scheduling_on_control_planes?: *false | bool  // Allow workloads on control plane nodes

@@ -178,6 +178,10 @@ class Plugin(makejinja.plugin.Plugin):
         bgp_enabled = all(data.get(key) for key in bgp_keys)
         data.setdefault("cilium_bgp_enabled", bgp_enabled)
 
+        # Cilium prerelease version toggle (stable 1.18.x vs prerelease 1.19.x)
+        data.setdefault("cilium_use_prerelease", False)
+        data.setdefault("cilium_prerelease_version", "1.19.0-pre.3")
+
         # Control plane scheduling (allow workloads on control plane nodes)
         data.setdefault("allow_scheduling_on_control_planes", True)
 

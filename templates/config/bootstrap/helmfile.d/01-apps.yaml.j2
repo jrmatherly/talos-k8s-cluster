@@ -5,11 +5,22 @@ helmDefaults:
   wait: true
   waitForJobs: true
 
+#% if cilium_use_prerelease %#
+repositories:
+  - name: cilium
+    url: https://helm.cilium.io
+
+#% endif %#
 releases:
   - name: cilium
     namespace: kube-system
+    #% if cilium_use_prerelease %#
+    chart: cilium/cilium
+    version: #{ cilium_prerelease_version }#
+    #% else %#
     chart: oci://ghcr.io/home-operations/charts-mirror/cilium
-    version: 1.18.4
+    version: 1.18.5
+    #% endif %#
     values: ['./templates/values.yaml.gotmpl']
 
   - name: coredns

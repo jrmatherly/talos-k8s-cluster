@@ -4,9 +4,13 @@ kind: HelmRelease
 metadata:
   name: cilium
 spec:
-  chartRef:
-    kind: OCIRepository
-    name: cilium
+  chart:
+    spec:
+      chart: cilium
+      version: #{ cilium_prerelease_version }#
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
   interval: 1h
   values:
     autoDirectNodeRoutes: true
@@ -28,6 +32,10 @@ spec:
     bandwidthManager:
       enabled: true
       bbr: true
+    #% if cilium_bgp_enabled %#
+    bgpControlPlane:
+      enabled: true
+    #% endif %#
     cni:
       # Required for pairing with Multus CNI
       exclusive: false
@@ -73,7 +81,7 @@ spec:
           enabled: true
     ipam:
       mode: kubernetes
-    ipv4NativeRoutingCIDR: "10.42.0.0/16"
+    ipv4NativeRoutingCIDR: "#{ cluster_pod_cidr }#"
     k8sServiceHost: 127.0.0.1
     k8sServicePort: 7445
     kubeProxyReplacement: true
@@ -82,7 +90,7 @@ spec:
       enabled: true
     loadBalancer:
       algorithm: maglev
-      mode: "dsr"
+      mode: "#{ cilium_loadbalancer_mode }#"
     localRedirectPolicy: true
     operator:
       dashboards:

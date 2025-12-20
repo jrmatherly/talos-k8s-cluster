@@ -8,7 +8,11 @@ components:
 
 resources:
   - ./namespace.yaml
+#% if cilium_use_prerelease %#
+  - ./cilium-prerelease/ks.yaml
+#% else %#
   - ./cilium/ks.yaml
+#% endif %#
   - ./coredns/ks.yaml
   - ./metrics-server/ks.yaml
   - ./reloader/ks.yaml

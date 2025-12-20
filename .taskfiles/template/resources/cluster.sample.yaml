@@ -157,6 +157,18 @@ cloudflare_token: ""
 #    REF: https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/
 # cilium_loadbalancer_mode: ""
 
+# -- Use Cilium prerelease version (1.19.x) instead of stable (1.18.x).
+#    (OPTIONAL) / (DEFAULT: false)
+#    Enables testing of new Cilium features before general availability.
+#    WARNING: Pre-release versions are not recommended for production.
+#    REF: https://github.com/cilium/cilium/releases
+# cilium_use_prerelease: false
+
+# -- Cilium prerelease version to use when cilium_use_prerelease is true.
+#    (OPTIONAL) / (DEFAULT: 1.19.0-pre.3)
+#    Check https://github.com/cilium/cilium/releases for available pre-releases.
+# cilium_prerelease_version: "1.19.0-pre.3"
+
 # -- BGP Configuration (for advanced networking setups)
 #    Enable BGP peering with your router for dynamic route advertisement.
 #    All three BGP settings must be configured together to enable BGP.
