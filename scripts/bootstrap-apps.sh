@@ -84,6 +84,49 @@ function apply_sops_secrets() {
     done
 }
 
+# Gateway API CRDs from kubernetes-sigs (required for kgateway/agentgateway)
+function apply_gateway_api_crds() {
+    log debug "Checking Gateway API CRD requirements"
+
+    local -r cluster_config="${ROOT_DIR}/cluster.yaml"
+
+    if [[ ! -f "${cluster_config}" ]]; then
+        log warn "cluster.yaml not found, skipping Gateway API CRDs"
+        return
+    fi
+
+    # Check if kgateway or agentgateway is enabled (kgateway defaults to true)
+    local kgateway_enabled agentgateway_enabled
+    kgateway_enabled=$(yq '.kgateway_enabled // true' "${cluster_config}")
+    agentgateway_enabled=$(yq '.agentgateway_enabled // false' "${cluster_config}")
+
+    if [[ "${kgateway_enabled}" != "true" && "${agentgateway_enabled}" != "true" ]]; then
+        log info "Neither kgateway nor agentgateway enabled, skipping Gateway API CRDs"
+        return
+    fi
+
+    # Get Gateway API version from cluster.yaml (default: v1.4.1)
+    local gateway_api_version
+    gateway_api_version=$(yq '.gateway_api_version // "v1.4.1"' "${cluster_config}")
+
+    log info "Installing kubernetes-sigs Gateway API CRDs" "version=${gateway_api_version}"
+
+    local -r gateway_api_url="https://github.com/kubernetes-sigs/gateway-api/releases/download/${gateway_api_version}/experimental-install.yaml"
+
+    # Check if CRDs are up-to-date
+    if kubectl diff --filename "${gateway_api_url}" &>/dev/null; then
+        log info "Gateway API CRDs are up-to-date"
+        return
+    fi
+
+    # Apply Gateway API CRDs
+    if ! kubectl apply --server-side --filename "${gateway_api_url}" &>/dev/null; then
+        log fatal "Failed to apply Gateway API CRDs" "url=${gateway_api_url}"
+    fi
+
+    log info "Gateway API CRDs applied successfully" "version=${gateway_api_version}"
+}
+
 # CRDs to be applied before the helmfile charts are installed
 function apply_crds() {
     log debug "Applying CRDs"
@@ -135,7 +178,8 @@ function main() {
     wait_for_nodes
     apply_namespaces
     apply_sops_secrets
-    apply_crds
+    apply_gateway_api_crds  # kubernetes-sigs Gateway API CRDs (before helmfile CRDs)
+    apply_crds              # Helm chart CRDs (kgateway-crds, etc.)
     sync_helm_releases
 
     log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"

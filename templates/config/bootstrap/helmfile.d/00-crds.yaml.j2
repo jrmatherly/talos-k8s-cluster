@@ -19,9 +19,13 @@ releases:
     version: 1.19.0
 #% if kgateway_enabled | default(true) or agentgateway_enabled | default(false) %#
 
-  #| Gateway API CRDs from kubernetes-sigs (base for kgateway and agentgateway) #|
-  #| Note: Gateway API uses kustomize, not Helm - CRDs installed via Flux Kustomization #|
-  #| This section only handles Helm-based CRDs #|
+  #| kubernetes-sigs Gateway API CRDs (gateway.networking.k8s.io)                      #|
+  #| Installed via bootstrap-apps.sh before this helmfile runs                         #|
+  #| Version controlled by gateway_api_version in cluster.yaml (default: v1.4.1)       #|
+  #| Flux Kustomization also reconciles them for drift correction                      #|
+  #|                                                                                    #|
+  #| kgateway-crds below provides kgateway-specific CRDs (gateway.kgateway.dev):       #|
+  #| TrafficPolicy, BackendConfigPolicy, GatewayParameters, etc.                       #|
 
   - name: kgateway-crds
     namespace: network

@@ -4,6 +4,10 @@
 #| Gateway API CRDs (kubernetes-sigs)                            #|
 #| Experimental channel required for kgateway features           #|
 #| REF: https://gateway-api.sigs.k8s.io/guides/getting-started/  #|
+#|                                                               #|
+#| NOTE: Initial installation handled by bootstrap-apps.sh       #|
+#| This Kustomization ensures CRDs stay at correct version       #|
+#| and reconciles any drift from the desired state.              #|
 #| ============================================================ #|
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

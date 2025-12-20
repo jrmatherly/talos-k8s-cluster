@@ -14,6 +14,13 @@ spec:
       masquerade: true
       # Ref: https://github.com/siderolabs/talos/issues/10002
       hostLegacyRouting: true
+      # Performance: Better multi-core BPF map scaling
+      distributedLRU:
+        enabled: true
+      # Performance: 8% of memory for BPF maps (default 0.25% is too conservative)
+      mapDynamicSizeRatio: 0.08
+    # Performance: Auto-optimize kernel clock source for BPF
+    bpfClockProbe: true
     cni:
       # Required for pairing with Multus CNI
       exclusive: false
@@ -53,6 +60,7 @@ spec:
           - flow
           - icmp
           - http
+          - httpV2  # gRPC/HTTP2 observability for AI gateway workloads
         serviceMonitor:
           enabled: true
         dashboards:
