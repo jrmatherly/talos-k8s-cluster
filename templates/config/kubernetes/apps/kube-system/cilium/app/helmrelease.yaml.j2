@@ -21,6 +21,13 @@ spec:
       mapDynamicSizeRatio: 0.08
     # Performance: Auto-optimize kernel clock source for BPF
     bpfClockProbe: true
+    # Performance: BIG TCP - enables 64KB+ GSO/GRO segments (kernel 6.3+/5.19+)
+    enableIPv4BIGTCP: true
+    enableIPv6BIGTCP: true
+    # Performance: EDT-based pacing with BBR congestion control (kernel 5.18+)
+    bandwidthManager:
+      enabled: true
+      bbr: true
     #% if cilium_bgp_enabled %#
     bgpControlPlane:
       enabled: true
@@ -63,8 +70,7 @@ spec:
           - tcp
           - flow
           - icmp
-          - http
-          - httpV2  # gRPC/HTTP2 observability for AI gateway workloads
+          - httpV2  # HTTP/1.x + HTTP/2 + gRPC observability (replaces 'http')
         serviceMonitor:
           enabled: true
         dashboards:
