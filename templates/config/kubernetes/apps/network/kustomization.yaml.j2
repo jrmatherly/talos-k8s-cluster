@@ -13,18 +13,14 @@ resources:
   - ./cloudflare-tunnel/ks.yaml
   - ./k8s-gateway/ks.yaml
 #| ============================================================ #|
-#| kgateway (Envoy control plane) - replaces Envoy Gateway       #|
+#| kgateway (Envoy control plane).                              #|
 #| ============================================================ #|
 #% if kgateway_enabled | default(true) %#
   - ./kgateway-crds/ks.yaml
   - ./kgateway/ks.yaml
 #% endif %#
 #| ============================================================ #|
-#| NOTE: agentgateway is in agentgateway-system namespace        #|
-#| See: templates/config/kubernetes/apps/agentgateway-system/    #|
-#| ============================================================ #|
-#| ============================================================ #|
-#| LiteLLM route via external gateway                            #|
+#| LiteLLM route via external gateway                           #|
 #| ============================================================ #|
 #% if litellm_enabled | default(true) and kgateway_enabled | default(true) %#
   - ./litellm-route/ks.yaml

@@ -278,9 +278,9 @@ class Plugin(makejinja.plugin.Plugin):
 
         # kgateway defaults (Envoy Control Plane - replaces envoy-gateway)
         data.setdefault("kgateway_enabled", True)
-        data.setdefault("gateway_api_version", "v1.4.0")
-        data.setdefault("kgateway_version", "v2.2.0-beta.3")
-        data.setdefault("agentgateway_version", "v2.2.0-beta.3")
+        data.setdefault("gateway_api_version", "v1.4.1")
+        data.setdefault("kgateway_version", "v2.2.0-beta.4")
+        data.setdefault("agentgateway_version", "v2.2.0-beta.4")
         # DEPRECATED: Legacy envoy-gateway (use kgateway instead)
         # TODO: Remove after kgateway migration is complete
         data.setdefault("envoy_gateway_enabled", False)
@@ -468,8 +468,12 @@ class Plugin(makejinja.plugin.Plugin):
 
         # Cognee JWT Security defaults (v0.5.2+ - REQUIRED when cognee_api_enabled)
         # NOTE: cognee_jwt_secret has no default - must be explicitly set
-        data.setdefault("cognee_reset_password_token_secret", data.get("cognee_jwt_secret", ""))
-        data.setdefault("cognee_verification_token_secret", data.get("cognee_jwt_secret", ""))
+        data.setdefault(
+            "cognee_reset_password_token_secret", data.get("cognee_jwt_secret", "")
+        )
+        data.setdefault(
+            "cognee_verification_token_secret", data.get("cognee_jwt_secret", "")
+        )
 
         # Cognee Security Settings defaults (v0.5.2+)
         data.setdefault("cognee_auth_rate_limit_enabled", True)

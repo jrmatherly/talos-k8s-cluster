@@ -16,7 +16,9 @@ resources:
   - ./spegel/ks.yaml
 #% endif %#
 #| ============================================================ #|
-#| Gateway API CRDs - foundation for kgateway and agentgateway   #|
+#| Gateway API CRDs - foundation for kgateway and agentgateway  #|
+#| Required for experimental kgateway features                  #|
+#| REF: https://gateway-api.sigs.k8s.io/guides/getting-started/ #|
 #| ============================================================ #|
 #% if kgateway_enabled | default(true) or agentgateway_enabled | default(true) %#
   - ./gateway-api-crds/ks.yaml

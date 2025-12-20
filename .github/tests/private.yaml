@@ -30,11 +30,11 @@ proxmox_api_url: "https://10.10.10.1:8006/api2/json"
 proxmox_csi_token_id: "test-csi@pve!token"
 proxmox_csi_token_secret: "fake-secret"
 # CCM tokens not needed for Approach A
-# kgateway Configuration (uses defaults: kgateway_enabled=true, gateway_api_version=v1.4.0, kgateway_version=v2.2.0-beta.3)
+# kgateway Configuration (uses defaults: kgateway_enabled=true, gateway_api_version=v1.4.1, kgateway_version=v2.2.0-beta.4)
 # kgateway_enabled: true
-# gateway_api_version: "v1.4.0"
-# kgateway_version: "v2.2.0-beta.3"
-# agentgateway_version: "v2.2.0-beta.3"
+# gateway_api_version: "v1.4.1"
+# kgateway_version: "v2.2.0-beta.4"
+# agentgateway_version: "v2.2.0-beta.4"
 # DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
 # TODO: Remove these fields after kgateway migration is complete
 # envoy_ai_gateway_enabled: false

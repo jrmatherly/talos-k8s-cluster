@@ -9,8 +9,6 @@ resources:
   - db-secret.sops.yaml
   - dragonfly.yaml
   - postgresql.yaml
-  - httproute.yaml
-  - trafficpolicy.yaml
   - networkpolicy.yaml
   - referencegrant.yaml
   - servicemonitor.yaml

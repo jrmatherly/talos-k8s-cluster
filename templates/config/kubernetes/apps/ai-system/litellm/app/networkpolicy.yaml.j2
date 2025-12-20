@@ -1,6 +1,6 @@
 #% if litellm_enabled | default(false) %#
 ---
-# CiliumNetworkPolicy for LiteLLM - FQDN-based egress to Azure OpenAI
+#| CiliumNetworkPolicy for LiteLLM - FQDN-based egress to Azure OpenAI #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -10,14 +10,14 @@ spec:
     matchLabels:
       app.kubernetes.io/name: litellm
   egress:
-    # Cilium's kube-proxy replacement and reserved entity handling
+    #| Cilium's kube-proxy replacement and reserved entity handling #|
     - toEntities:
         - kube-apiserver
       toPorts:
         - ports:
             - port: "6443"
               protocol: TCP
-    # Azure OpenAI endpoints (US East)
+    #| Azure OpenAI endpoints (US East) #|
 #% if azure_openai_us_east_api_key %#
     - toFQDNs:
         - matchPattern: "*.openai.azure.com"
@@ -31,7 +31,7 @@ spec:
             - port: "443"
               protocol: TCP
 #% endif %#
-    # Azure OpenAI endpoints (US East2)
+    #| Azure OpenAI endpoints (US East2) #|
 #% if azure_openai_us_east2_api_key %#
     - toFQDNs:
         - matchPattern: "*.openai.azure.com"
@@ -45,7 +45,7 @@ spec:
             - port: "443"
               protocol: TCP
 #% endif %#
-    # Azure AI Services (Anthropic, Cohere Embed, Cognitive Services)
+    #| Azure AI Services (Anthropic, Cohere Embed, Cognitive Services) #|
 #% if azure_anthropic_api_key or azure_cohere_embed_api_key %#
     - toFQDNs:
         - matchPattern: "*.services.ai.azure.com"
@@ -55,7 +55,7 @@ spec:
             - port: "443"
               protocol: TCP
 #% endif %#
-    # Azure AI Models (Cohere Rerank)
+    #| Azure AI Models (Cohere Rerank) #|
 #% if azure_cohere_rerank_api_key %#
     - toFQDNs:
         - matchPattern: "*.models.ai.azure.com"
@@ -64,7 +64,7 @@ spec:
             - port: "443"
               protocol: TCP
 #% endif %#
-    # Azure Speech Services (TTS/STT)
+    #| Azure Speech Services (TTS/STT) #|
     - toFQDNs:
         - matchPattern: "*.stt.speech.microsoft.com"
         - matchPattern: "*.tts.speech.microsoft.com"
@@ -73,7 +73,7 @@ spec:
             - port: "443"
               protocol: TCP
 #% if litellm_langfuse_enabled %#
-    # Langfuse observability (cloud and self-hosted)
+    #| Langfuse observability (cloud and self-hosted) #|
     - toFQDNs:
         - matchPattern: "*.langfuse.com"
 #% if litellm_langfuse_host and 'langfuse.com' not in litellm_langfuse_host %#
@@ -85,7 +85,7 @@ spec:
               protocol: TCP
 #% endif %#
 ---
-# NetworkPolicy for LiteLLM proxy
+#| NetworkPolicy for LiteLLM proxy #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -98,7 +98,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from Envoy Gateway (external access)
+    #| Allow from KGateway (external access) #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -106,7 +106,7 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
-    # Allow from internal services (e.g., kagent, obot)
+    #| Allow from internal services (e.g., kagent, obot) #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -121,7 +121,7 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
-    # Allow from agentgateway (AI Gateway data plane)
+    #| Allow from agentgateway (AI Gateway data plane) #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -130,8 +130,8 @@ spec:
         - protocol: TCP
           port: 4000
 #% if cognee_enabled | default(false) %#
-    # Allow from Cognee MCP server (in obot-mcp namespace)
-    # Required for LLM completion and embedding requests
+    #| Allow from Cognee MCP server (in obot-mcp namespace) #|
+    #| Required for LLM completion and embedding requests #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -143,7 +143,7 @@ spec:
         - protocol: TCP
           port: 4000
 #% endif %#
-    # Allow Prometheus scraping
+    #| Allow Prometheus scraping #|
 #% if observability_enabled %#
     - from:
         - namespaceSelector:
@@ -154,7 +154,7 @@ spec:
           port: 4000
 #% endif %#
   egress:
-    # Allow DNS queries
+    #| Allow DNS queries #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -164,7 +164,7 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Allow PostgreSQL connection to CloudNativePG cluster
+    #| Allow PostgreSQL connection to CloudNativePG cluster #|
     - to:
         - podSelector:
             matchLabels:
@@ -172,7 +172,7 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    # Dragonfly (Redis-compatible cache)
+    #| Dragonfly (Redis-compatible cache) #|
     - to:
         - podSelector:
             matchLabels:
@@ -182,7 +182,7 @@ spec:
         - protocol: TCP
           port: 6379
 #% if minio_enabled | default(false) %#
-    # MinIO S3 storage (for file uploads, batch processing, etc.)
+    #| MinIO S3 storage (for file uploads, batch processing, etc.) #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -194,8 +194,8 @@ spec:
         - protocol: TCP
           port: 9000
 #% endif %#
-    # External LLM providers (Azure OpenAI, Langfuse)
-    # Note: FQDN-based egress is handled by CiliumNetworkPolicy above
+    #| External LLM providers (Azure OpenAI, Langfuse) #|
+    #| Note: FQDN-based egress is handled by CiliumNetworkPolicy above #|
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -207,7 +207,7 @@ spec:
         - protocol: TCP
           port: 443
 ---
-# NetworkPolicy for Dragonfly cache
+#| NetworkPolicy for Dragonfly cache #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -221,7 +221,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from LiteLLM pods
+    #| Allow from LiteLLM pods #|
     - from:
         - podSelector:
             matchLabels:
@@ -230,7 +230,7 @@ spec:
         - protocol: TCP
           port: 6379
   egress:
-    # DNS only - Dragonfly doesn't need external access
+    #| DNS only - Dragonfly doesn't need external access #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -241,7 +241,7 @@ spec:
         - protocol: TCP
           port: 53
 ---
-# CiliumNetworkPolicy for CloudNativePG database - Kubernetes API and DNS access
+#| CiliumNetworkPolicy for CloudNativePG database - Kubernetes API and DNS access #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -251,7 +251,7 @@ spec:
     matchLabels:
       cnpg.io/cluster: litellm-db
   egress:
-    # DNS resolution for CNPG service discovery (replicas need to resolve primary hostname)
+    #| DNS resolution for CNPG service discovery (replicas need to resolve primary hostname) #|
     - toEndpoints:
         - matchLabels:
             k8s-app: kube-dns
@@ -262,7 +262,7 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    # Kubernetes API access
+    #| Kubernetes API access #|
     - toEntities:
         - kube-apiserver
       toPorts:
@@ -272,7 +272,7 @@ spec:
             - port: "6443"
               protocol: TCP
 ---
-# NetworkPolicy for CloudNativePG database
+#| NetworkPolicy for CloudNativePG database #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -285,7 +285,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from LiteLLM pods
+    #| Allow from LiteLLM pods #|
     - from:
         - podSelector:
             matchLabels:
@@ -293,17 +293,19 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
-    # Allow from other database replicas (replication and health checks)
+    #| Allow from other database replicas (replication and health checks) #|
     - from:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: litellm-db
       ports:
+        #| PostgreSQL replication #|
         - protocol: TCP
-          port: 5432   # PostgreSQL replication
+          port: 5432
+        #| CNPG instance manager HTTP API #|
         - protocol: TCP
-          port: 8000   # CNPG instance manager HTTP API
-    # Allow from CNPG operator (instance manager HTTP port)
+          port: 8000
+    #| Allow from CNPG operator (instance manager HTTP port) #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -312,7 +314,7 @@ spec:
         - protocol: TCP
           port: 8000
 #% if observability_enabled %#
-    # Allow Prometheus scraping of PostgreSQL metrics
+    #| Allow Prometheus scraping of PostgreSQL metrics #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -322,7 +324,7 @@ spec:
           port: 9187
 #% endif %#
   egress:
-    # DNS
+    #| DNS #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -332,14 +334,16 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Replication and health checks between database pods
+    #| Replication and health checks between database pods #|
     - to:
         - podSelector:
             matchLabels:
               cnpg.io/cluster: litellm-db
       ports:
+        #| PostgreSQL replication #|
         - protocol: TCP
-          port: 5432   # PostgreSQL replication
+          port: 5432
+        #| CNPG instance manager HTTP API (health checks, orchestration) #|
         - protocol: TCP
-          port: 8000   # CNPG instance manager HTTP API (health checks, orchestration)
+          port: 8000
 #% endif %#

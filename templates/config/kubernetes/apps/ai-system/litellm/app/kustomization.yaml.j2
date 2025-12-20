@@ -10,10 +10,11 @@ resources:
   - db-secret.sops.yaml
   - dragonfly.yaml
   - postgresql.yaml
-  - httproute.yaml
-  - trafficpolicy.yaml
   - networkpolicy.yaml
+  #| ReferenceGrant allows network/litellm-route to access this service #|
   - referencegrant.yaml
+  #| NOTE: HTTPRoute and TrafficPolicy removed - using network/litellm-route instead #|
+  #| llms.${SECRET_DOMAIN} is the preferred endpoint for LiteLLM access #|
 #% if observability_enabled %#
   - servicemonitor.yaml
 #% endif %#

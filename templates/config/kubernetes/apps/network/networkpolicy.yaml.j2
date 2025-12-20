@@ -1,6 +1,9 @@
 #% if kgateway_enabled | default(true) %#
 ---
-# CiliumNetworkPolicy for kgateway controller - Kubernetes API access
+#| ============================================================ #|
+#| CiliumNetworkPolicy for kgateway controller                  #|
+#| Purpose: Allow kgateway controller to communicate with Kubernetes API server #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -18,8 +21,11 @@ spec:
             - port: "6443"
               protocol: TCP
 ---
-# CiliumNetworkPolicy for kgateway proxies - Ingress/Egress for LoadBalancer and backend traffic
-# CRITICAL: Must use Cilium native entities for traffic with socket-based LB
+#| ============================================================ #|
+#| CiliumNetworkPolicy for kgateway proxies                     #|
+#| Purpose: Allow kgateway proxies to accept LoadBalancer and backend traffic #|
+#| CRITICAL: Must use Cilium native entities for traffic with socket-based LB #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -61,7 +67,10 @@ spec:
             - port: "443"
               protocol: TCP
 ---
-# NetworkPolicy for kgateway controller
+#| ============================================================ #|
+#| NetworkPolicy for kgateway controller                        #|
+#| Purpose: Restrict traffic to kgateway controller pod         #|
+#| ============================================================ #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -75,7 +84,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow xDS connections from kgateway proxy pods
+    #| Allow xDS connections from kgateway proxy pods #|
     - from:
         - podSelector:
             matchExpressions:
@@ -86,7 +95,7 @@ spec:
         - protocol: TCP
           port: 9977   # xDS
 #% if observability_enabled %#
-    # Allow Prometheus scraping
+    #| Allow Prometheus scraping #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -95,7 +104,7 @@ spec:
         - protocol: TCP
           port: 9091
 #% endif %#
-    # Kubelet probes
+    #| Kubelet probes #|
     - from:
         - ipBlock:
             cidr: #{ node_cidr }#
@@ -114,7 +123,10 @@ spec:
         - protocol: TCP
           port: 53
 ---
-# NetworkPolicy for kgateway proxy pods (external, internal)
+#| ============================================================ #|
+#| NetworkPolicy for kgateway proxy pods (external, internal)   #|
+#| Purpose: Allow LoadBalancer and backend traffic to proxies   #|
+#| ============================================================ #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -130,7 +142,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow LoadBalancer traffic
+    #| Allow LoadBalancer traffic #|
     - from:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -147,7 +159,7 @@ spec:
           port: 10080
         - protocol: TCP
           port: 10443
-    # Allow from cloudflare-tunnel
+    #| Allow from cloudflare-tunnel #|
     - from:
         - podSelector:
             matchLabels:
@@ -158,7 +170,7 @@ spec:
         - protocol: TCP
           port: 10443
 #% if observability_enabled %#
-    # Prometheus metrics
+    #| Prometheus metrics #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -169,7 +181,7 @@ spec:
         - protocol: TCP
           port: 15000
 #% endif %#
-    # Kubelet probes
+    #| Kubelet probes #|
     - from:
         - ipBlock:
             cidr: #{ node_cidr }#
@@ -177,7 +189,7 @@ spec:
         - protocol: TCP
           port: 19001
   egress:
-    # DNS
+    #| DNS #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -187,7 +199,7 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # xDS to kgateway controller
+    #| xDS to kgateway controller #|
     - to:
         - podSelector:
             matchLabels:
@@ -195,12 +207,12 @@ spec:
       ports:
         - protocol: TCP
           port: 9977
-    # Backend traffic to all namespaces
+    #| Backend traffic to all namespaces #|
     - to:
         - namespaceSelector: {}
       ports:
         - protocol: TCP
-    # External backends
+    #| External backends #|
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -213,7 +225,10 @@ spec:
           port: 443
 #% endif %#
 ---
-# CiliumNetworkPolicy for cloudflare-dns - Kubernetes API access
+#| ============================================================ #|
+#| CiliumNetworkPolicy for cloudflare-dns - Kubernetes API access #|
+#| Purpose: Allow cloudflare-dns to access Kubernetes API server  #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -231,7 +246,10 @@ spec:
             - port: "6443"
               protocol: TCP
 ---
-# CiliumNetworkPolicy for k8s-gateway - Kubernetes API access
+#| ============================================================ #|
+#| CiliumNetworkPolicy for k8s-gateway - Kubernetes API access  #|
+#| Purpose: Allow k8s-gateway to access Kubernetes API server   #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -249,7 +267,10 @@ spec:
             - port: "6443"
               protocol: TCP
 ---
-# NetworkPolicy for cloudflare-dns (external-dns)
+#| ============================================================ #|
+#| NetworkPolicy for cloudflare-dns (external-dns)                #|
+#| Purpose: Allow external-dns to access Kubernetes API server   #|
+#| ============================================================ #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -304,9 +325,12 @@ spec:
         - protocol: TCP
           port: 443
 ---
-# CiliumNetworkPolicy for cloudflare-tunnel - Egress to external/world (LoadBalancer + Cloudflare edge)
-# CRITICAL: Standard NetworkPolicy ipBlock doesn't work reliably for external IPs with Cilium socket-based LB
-# Must use Cilium's native toEntities: world for traffic to LoadBalancer IPs and external services
+#| ============================================================ #|
+#| CiliumNetworkPolicy for cloudflare-tunnel - Egress to external/world #|
+#| Purpose: Allow cloudflare-tunnel to reach LoadBalancer IPs and Cloudflare edge #|
+#| CRITICAL: Standard NetworkPolicy ipBlock doesn't work reliably for external IPs with Cilium socket-based LB #|
+#| Must use Cilium's native toEntities: world for traffic to LoadBalancer IPs and external services        #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -317,7 +341,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: cloudflare-tunnel
   egress:
-    # Allow egress to world (external IPs including LoadBalancer IPs and Cloudflare edge)
+    #| Allow egress to world (external IPs including LoadBalancer IPs and Cloudflare edge) #|
+    #| This is required for Cloudflare Tunnel to reach external services and LoadBalancer IPs #|
     - toEntities:
         - world
       toPorts:
@@ -328,8 +353,10 @@ spec:
               protocol: UDP
 #% if envoy_gateway_enabled | default(false) %#
 ---
-# CiliumNetworkPolicy for Envoy proxies - Ingress from world (LoadBalancer traffic)
-# CRITICAL: Must use Cilium's native fromEntities: world for LoadBalancer service traffic
+#| ============================================================ #|
+#| CiliumNetworkPolicy for Envoy proxies - Ingress from world (LoadBalancer traffic) #|
+#| CRITICAL: Must use Cilium's native fromEntities: world for LoadBalancer service traffic #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -340,8 +367,8 @@ spec:
     matchLabels:
       gateway.envoyproxy.io/owning-gateway-namespace: network
   ingress:
-    # Allow ingress from world on both service ports (pre-DNAT) and container ports (post-DNAT)
-    # Includes both TCP and UDP for HTTP/3 (QUIC) support
+    #| Allow ingress from world on both service ports (pre-DNAT) and container ports (post-DNAT) #|
+    #| Includes both TCP and UDP for HTTP/3 (QUIC) support                                #|
     - fromEntities:
         - world
       toPorts:
@@ -360,7 +387,9 @@ spec:
               protocol: UDP
 #% endif %#
 ---
-# NetworkPolicy for cloudflare-tunnel (DNS and external access)
+#| ============================================================ #|
+#| NetworkPolicy for cloudflare-tunnel (DNS and external access) #|
+#| ============================================================ #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -375,7 +404,7 @@ spec:
     - Egress
   ingress:
 #% if observability_enabled %#
-    # Prometheus metrics
+    #| Prometheus metrics - allow observability namespace to scrape metrics #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -384,7 +413,7 @@ spec:
         - protocol: TCP
           port: 8080
 #% endif %#
-    # Kubelet probes
+    #| Kubelet probes - allow node CIDR to probe health checks #|
     - from:
         - ipBlock:
             cidr: #{ node_cidr }#
@@ -392,7 +421,7 @@ spec:
         - protocol: TCP
           port: 8080
   egress:
-    # DNS
+    #| DNS - allow kube-dns resolution #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -434,12 +463,14 @@ spec:
         - protocol: UDP
           port: 7844  # QUIC tunnel
 ---
-# CiliumNetworkPolicy for k8s-gateway - Ingress from world AND cluster (LoadBalancer DNS traffic)
-# CRITICAL: Standard NetworkPolicy ipBlock doesn't work for LoadBalancer IPs with Cilium socket-based LB
-# Must use Cilium's native fromEntities for DNS queries to LoadBalancer service
-# - world: External clients accessing via LoadBalancer IP
-# - cluster: Internal pods (e.g., CoreDNS) accessing via LoadBalancer IP for split-horizon DNS
-# CRITICAL: Must allow BOTH service port (53) AND container port (1053) due to Cilium socket-based LB
+#| ============================================================ #|
+#| CiliumNetworkPolicy for k8s-gateway - Ingress from world AND cluster (LoadBalancer DNS traffic) #|
+#| CRITICAL: Standard NetworkPolicy ipBlock doesn't work for LoadBalancer IPs with Cilium socket-based LB #|
+#| Must use Cilium's native fromEntities for DNS queries to LoadBalancer service                                #|
+#| - world: External clients accessing via LoadBalancer IP                                                      #|
+#| - cluster: Internal pods (e.g., CoreDNS) accessing via LoadBalancer IP for split-horizon DNS                 #|
+#| CRITICAL: Must allow BOTH service port (53) AND container port (1053) due to Cilium socket-based LB          #|
+#| ============================================================ #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -466,7 +497,9 @@ spec:
             - port: "1053"
               protocol: TCP
 ---
-# NetworkPolicy for k8s-gateway (split DNS)
+#| ============================================================ #|
+#| NetworkPolicy for k8s-gateway (split DNS)                    #|
+#| ============================================================ #|
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -480,8 +513,8 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow DNS queries from cluster (LoadBalancer)
-    # CRITICAL: Include both service port (53) AND container port (1053) for Cilium socket-based LB
+    #| Allow DNS queries from cluster (LoadBalancer) #|
+    #| CRITICAL: Include both service port (53) AND container port (1053) for Cilium socket-based LB #|
     - from:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -495,7 +528,7 @@ spec:
         - protocol: TCP
           port: 1053
 #% if observability_enabled %#
-    # Prometheus metrics
+    #| Prometheus metrics - allow observability namespace to scrape metrics #|
     - from:
         - namespaceSelector:
             matchLabels:
@@ -504,7 +537,7 @@ spec:
         - protocol: TCP
           port: 9153
 #% endif %#
-    # Kubelet probes
+    #| Kubelet probes - allow node CIDR to probe health checks #|
     - from:
         - ipBlock:
             cidr: #{ node_cidr }#
@@ -512,7 +545,7 @@ spec:
         - protocol: TCP
           port: 9153
   egress:
-    # DNS (upstream DNS servers)
+    #| DNS (upstream DNS servers) #|
     - to:
         - namespaceSelector:
             matchLabels:
@@ -522,8 +555,8 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Note: Kubernetes API access handled by CiliumNetworkPolicy
-    # External DNS servers (fallback)
+    #| Note: Kubernetes API access handled by CiliumNetworkPolicy #|
+    #| External DNS servers (fallback) #|
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -537,4 +570,4 @@ spec:
         - protocol: TCP
           port: 53
         - protocol: TCP
-          port: 443  # DNS-over-HTTPS
+          port: 443
