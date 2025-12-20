@@ -23,7 +23,7 @@ spec:
     # Requires eBPF host routing (not legacy) - enabled via Talos loopback patch
     # REF: https://github.com/cilium/cilium/issues/36761#issuecomment-3493689525
     enableIPv4BIGTCP: true
-    enableIPv6BIGTCP: true
+    enableIPv6BIGTCP: false
     # Performance: EDT-based pacing with BBR congestion control (kernel 5.18+)
     bandwidthManager:
       enabled: true
