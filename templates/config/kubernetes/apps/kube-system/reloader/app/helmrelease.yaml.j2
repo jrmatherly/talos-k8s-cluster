@@ -10,7 +10,11 @@ spec:
   interval: 1h
   values:
     fullnameOverride: reloader
+    # Network policy labels for CCNP tiered policies
     reloader:
+      deployment:
+        labels:
+          network.cilium.io/api-access: "true"
       readOnlyRootFileSystem: true
       podMonitor:
         enabled: true

@@ -18,3 +18,13 @@ spec:
       enabled: true
       servicemonitor:
         enabled: true
+    # Network policy labels for CCNP tiered policies
+    # cert-manager controller needs K8s API access
+    podLabels:
+      network.cilium.io/api-access: "true"
+    webhook:
+      podLabels:
+        network.cilium.io/api-access: "true"
+    cainjector:
+      podLabels:
+        network.cilium.io/api-access: "true"

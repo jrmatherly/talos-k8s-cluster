@@ -90,7 +90,7 @@ import (
 	observability_enabled?: bool
 	grafana_admin_password?: string & !=""
 
-	// Prometheus configuration
+	// Prometheus configuration (legacy - being replaced by VictoriaMetrics)
 	prometheus_retention?: string & !=""        // e.g., "7d"
 	prometheus_retention_size?: string & !=""   // e.g., "45GB"
 	prometheus_storage_size?: string & !=""     // e.g., "50Gi"
@@ -99,6 +99,48 @@ import (
 	prometheus_alertmanager_replicas?: int & >=1
 	alertmanager_storage_size?: string & !=""
 	grafana_storage_size?: string & !=""
+
+	// VictoriaMetrics Stack Configuration (replaces kube-prometheus-stack)
+	victoria_metrics_enabled?: bool              // Enable VictoriaMetrics (default: false)
+	vm_storage_size?: string & !=""              // VMSingle storage size (default: 50Gi)
+	vm_retention_days?: int & >=1                // Metrics retention in days (default: 14)
+	vm_storage_class?: string & !=""             // Storage class (default: proxmox-csi)
+	vm_cpu_request?: string & !=""               // CPU request (default: 200m)
+	vm_cpu_limit?: string & !=""                 // CPU limit (default: 1000m)
+	vm_memory_request?: string & !=""            // Memory request (default: 512Mi)
+	vm_memory_limit?: string & !=""              // Memory limit (default: 2Gi)
+
+	// VictoriaLogs Configuration (replaces Loki)
+	victoria_logs_enabled?: bool                 // Enable VictoriaLogs (default: false)
+	vl_storage_size?: string & !=""              // VictoriaLogs storage size (default: 20Gi)
+	vl_retention_days?: int & >=1                // Log retention in days (default: 14)
+	vl_storage_class?: string & !=""             // Storage class (default: proxmox-csi)
+	vl_cpu_request?: string & !=""               // CPU request (default: 100m)
+	vl_cpu_limit?: string & !=""                 // CPU limit (default: 500m)
+	vl_memory_request?: string & !=""            // Memory request (default: 256Mi)
+	vl_memory_limit?: string & !=""              // Memory limit (default: 1Gi)
+
+	// Vector Agent Configuration (log collection for VictoriaLogs)
+	vector_enabled?: bool                        // Enable Vector DaemonSet (default: victoria_logs_enabled)
+	vector_cpu_request?: string & !=""           // CPU request per node (default: 50m)
+	vector_cpu_limit?: string & !=""             // CPU limit per node (default: 200m)
+	vector_memory_request?: string & !=""        // Memory request per node (default: 128Mi)
+	vector_memory_limit?: string & !=""          // Memory limit per node (default: 512Mi)
+
+	// Tempo Configuration (distributed tracing)
+	tempo_enabled?: bool                         // Enable Tempo (default: false)
+	tempo_storage_size?: string & !=""           // Tempo storage size (default: 10Gi)
+	tempo_retention_days?: int & >=1             // Trace retention in days (default: 7)
+	tempo_storage_class?: string & !=""          // Storage class (default: proxmox-csi)
+	tempo_s3_bucket?: string & !=""              // S3 bucket for trace storage (default: tempo-traces)
+	tempo_cpu_request?: string & !=""            // CPU request (default: 100m)
+	tempo_cpu_limit?: string & !=""              // CPU limit (default: 500m)
+	tempo_memory_request?: string & !=""         // Memory request (default: 256Mi)
+	tempo_memory_limit?: string & !=""           // Memory limit (default: 1Gi)
+
+	// kgateway Observability Configuration
+	kgateway_tracing_enabled?: bool              // Enable tracing for kgateway (default: false)
+	kgateway_trace_sampling_percentage?: int & >=0 & <=100  // Trace sampling % (default: 100)
 
 	// OneDev Configuration (Git Server with CI/CD)
 	onedev_enabled?: bool

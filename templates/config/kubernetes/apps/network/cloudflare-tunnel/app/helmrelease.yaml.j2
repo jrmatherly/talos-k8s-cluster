@@ -55,6 +55,10 @@ spec:
         runAsNonRoot: true
         runAsUser: 65534
         runAsGroup: 65534
+      # Network policy labels for CCNP tiered policies
+      labels:
+        network.cilium.io/world-egress: "true"
+        network.cilium.io/gateway-proxy: "true"
     service:
       app:
         ports:

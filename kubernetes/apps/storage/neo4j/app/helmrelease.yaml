@@ -126,6 +126,8 @@ spec:
     podLabels:
       app.kubernetes.io/name: neo4j
       app.kubernetes.io/component: graph-database
+      # Network policy labels for CCNP tiered policies
+      network.cilium.io/api-access: "true"
 
     # ==========================================================================
     # Environment Variables

@@ -1,0 +1,10 @@
+#% if vector_enabled | default(victoria_logs_enabled) %#
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: vector
+spec:
+  interval: 12h
+  url: https://helm.vector.dev
+#% endif %#

@@ -1,0 +1,117 @@
+#% if vector_enabled | default(victoria_logs_enabled) %#
+---
+#| Vector Agent - log collector DaemonSet sending to VictoriaLogs #|
+#| REF: https://vector.dev/docs/ #|
+#| REF: https://docs.victoriametrics.com/victorialogs/data-ingestion/vector/ #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vector
+spec:
+  chart:
+    spec:
+      chart: vector
+      version: "0.40.1"
+      sourceRef:
+        kind: HelmRepository
+        name: vector
+  interval: 1h
+  values:
+    role: Agent
+    #| DaemonSet to collect logs from all nodes #|
+    resources:
+      requests:
+        cpu: "#{ vector_cpu_request }#"
+        memory: "#{ vector_memory_request }#"
+      limits:
+        cpu: "#{ vector_cpu_limit }#"
+        memory: "#{ vector_memory_limit }#"
+    #| Vector configuration #|
+    customConfig:
+      data_dir: /vector-data-dir
+      api:
+        enabled: true
+        address: 0.0.0.0:8686
+        playground: false
+      sources:
+        #| Kubernetes logs from container runtime #|
+        kubernetes_logs:
+          type: kubernetes_logs
+          auto_partial_merge: true
+          #| Exclude Vector's own logs to prevent recursion #|
+          exclude_paths_glob_patterns:
+            - "**/vector*/**"
+      transforms:
+        #| Parse Kubernetes metadata #|
+        kubernetes_transform:
+          type: remap
+          inputs:
+            - kubernetes_logs
+          source: |
+            # Extract Kubernetes metadata for VictoriaLogs labels
+            .namespace = .kubernetes.pod_namespace
+            .pod = .kubernetes.pod_name
+            .container = .kubernetes.container_name
+            .node = .kubernetes.pod_node_name
+            # Keep original message
+            if exists(.message) {
+              .log = .message
+            }
+            # Add stream type (stdout/stderr)
+            .stream = .stream
+        #| Filter out noisy logs (optional) #|
+        kubernetes_filter:
+          type: filter
+          inputs:
+            - kubernetes_transform
+          condition:
+            type: vrl
+            source: |
+              # Drop health check logs
+              !match(string!(.log), r'(health|ready|alive)')
+      sinks:
+        #| Send to VictoriaLogs via Elasticsearch bulk API #|
+        victorialogs:
+          type: elasticsearch
+          inputs:
+            - kubernetes_filter
+          endpoints:
+            - http://victoria-logs-server.observability.svc.cluster.local:9428/insert/elasticsearch/
+          api_version: v8
+          mode: bulk
+          compression: gzip
+          healthcheck:
+            enabled: false
+          query:
+            _msg_field: log
+            _time_field: timestamp
+            _stream_fields: namespace,pod,container,node,stream
+          request:
+            headers:
+              AccountID: "0"
+              ProjectID: "0"
+          bulk:
+            index: "logs"
+    #| Service account and RBAC #|
+    serviceAccount:
+      create: true
+    #| Pod security context #|
+    podSecurityContext:
+      runAsNonRoot: false
+      runAsUser: 0
+    #| Mount host logs #|
+    extraVolumes:
+      - name: var-log
+        hostPath:
+          path: /var/log
+      - name: var-lib-docker
+        hostPath:
+          path: /var/lib/docker/containers
+    extraVolumeMounts:
+      - name: var-log
+        mountPath: /var/log
+        readOnly: true
+      - name: var-lib-docker
+        mountPath: /var/lib/docker/containers
+        readOnly: true
+#% endif %#

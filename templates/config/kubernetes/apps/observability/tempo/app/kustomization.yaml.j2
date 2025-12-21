@@ -1,0 +1,13 @@
+#% if tempo_enabled %#
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+resources:
+  - helmrepository.yaml
+  - helmrelease.yaml
+  - networkpolicy.yaml
+#% if kgateway_tracing_enabled %#
+  - referencegrant.yaml
+#% endif %#
+#% endif %#

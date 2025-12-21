@@ -40,6 +40,9 @@ spec:
       extraEnv:
         #| Enable experimental Gateway API features #|
         KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
+      # Network policy labels for CCNP tiered policies
+      podLabels:
+        network.cilium.io/api-access: "true"
 
     #| ============================================================ #|
     #| Namespace Discovery                                          #|

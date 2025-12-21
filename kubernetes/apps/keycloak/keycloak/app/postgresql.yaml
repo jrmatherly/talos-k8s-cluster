@@ -4,6 +4,9 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: keycloak-db
+  labels:
+    # Network policy labels for CCNP tiered policies (inherited to pods via operator config)
+    network.cilium.io/api-access: "true"
 spec:
   instances: 3
 

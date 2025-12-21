@@ -6,6 +6,9 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: cognee-db
+  labels:
+    # Network policy labels for CCNP tiered policies (inherited to pods via operator config)
+    network.cilium.io/api-access: "true"
 spec:
   # Use PostgreSQL 18 minimal image for extension_control_path support
   imageName: ghcr.io/cloudnative-pg/postgresql:18-minimal-trixie

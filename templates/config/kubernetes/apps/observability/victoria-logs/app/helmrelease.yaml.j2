@@ -1,0 +1,42 @@
+#% if victoria_logs_enabled %#
+---
+#| VictoriaLogs - lightweight log storage (30x less RAM than Loki) #|
+#| REF: https://docs.victoriametrics.com/victorialogs/ #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-logs
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-logs-single
+  interval: 1h
+  values:
+    server:
+      enabled: true
+      #| Storage configuration #|
+      persistentVolume:
+        enabled: true
+        storageClass: "#{ vl_storage_class }#"
+        size: "#{ vl_storage_size }#"
+      #| Resource limits #|
+      resources:
+        requests:
+          cpu: "#{ vl_cpu_request }#"
+          memory: "#{ vl_memory_request }#"
+        limits:
+          cpu: "#{ vl_cpu_limit }#"
+          memory: "#{ vl_memory_limit }#"
+      #| Retention configuration #|
+      extraArgs:
+        retentionPeriod: "#{ vl_retention_days }#d"
+        #| Memory management #|
+        memory.allowedPercent: "80"
+      #| Service configuration #|
+      service:
+        servicePort: 9428
+        type: ClusterIP
+    #| Fluent Bit sidecar (disabled - using Vector instead) #|
+    fluent-bit:
+      enabled: false
+#% endif %#

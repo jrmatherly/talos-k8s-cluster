@@ -9,6 +9,9 @@ spec:
     name: metrics-server
   interval: 1h
   values:
+    # Network policy labels for CCNP tiered policies
+    podLabels:
+      network.cilium.io/api-access: "true"
     args:
       - --kubelet-insecure-tls
       - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname

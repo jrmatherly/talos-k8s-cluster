@@ -1,0 +1,48 @@
+#% if kgateway_enabled | default(true) and observability_enabled %#
+---
+#| PodMonitor for kgateway data plane (Envoy proxy pods) #|
+#| REF: https://kgateway.dev/docs/agentgateway/main/observability/otel-stack/ #|
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kgateway-dataplane
+  labels:
+    release: victoria-metrics
+spec:
+  namespaceSelector:
+    matchNames:
+      - network
+#% if agentgateway_enabled %#
+      - agentgateway-system
+#% endif %#
+  selector:
+    matchLabels:
+      kgateway: kube-gateway
+  podMetricsEndpoints:
+    - port: http-monitoring
+      interval: 30s
+      path: /stats/prometheus
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: "true"
+---
+#| PodMonitor for kgateway control plane #|
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kgateway-controlplane
+  labels:
+    release: victoria-metrics
+spec:
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      kgateway: kgateway
+  podMetricsEndpoints:
+    - port: http-monitoring
+      interval: 30s
+      path: /metrics
+#% endif %#

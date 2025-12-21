@@ -241,4 +241,11 @@ spec:
     # ============================================================
     rbac:
       create: true
+
+    # ============================================================
+    # Network Policy Labels for CCNP tiered policies
+    # obot needs K8s API access for MCP server lifecycle management
+    # ============================================================
+    podLabels:
+      network.cilium.io/api-access: "true"
 #% endif %#

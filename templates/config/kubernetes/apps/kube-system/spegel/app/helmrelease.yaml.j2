@@ -10,6 +10,9 @@ spec:
     name: spegel
   interval: 1h
   values:
+    # Network policy labels for CCNP tiered policies
+    podLabels:
+      network.cilium.io/api-access: "true"
     spegel:
       containerdSock: /run/containerd/containerd.sock
       containerdRegistryConfigPath: /etc/cri/conf.d/hosts

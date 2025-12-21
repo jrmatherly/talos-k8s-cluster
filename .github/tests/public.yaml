@@ -61,6 +61,30 @@ azure_anthropic_api_base: "https://test-anthropic.eastus2.models.ai.azure.com"
 # Observability Stack (Prometheus/Grafana for K8s metrics)
 observability_enabled: true
 grafana_admin_password: "test-password"
+# VictoriaMetrics Stack (replaces kube-prometheus-stack)
+victoria_metrics_enabled: true
+vm_storage_size: "50Gi"
+vm_retention_days: 14
+vm_storage_class: "proxmox-csi"
+vm_cpu_request: "200m"
+vm_cpu_limit: "1000m"
+vm_memory_request: "512Mi"
+vm_memory_limit: "2Gi"
+# VictoriaLogs (replaces Loki)
+victoria_logs_enabled: true
+vl_storage_size: "20Gi"
+vl_retention_days: 14
+vl_storage_class: "proxmox-csi"
+# Vector Agent (log collection)
+vector_enabled: true
+# Tempo (distributed tracing)
+tempo_enabled: true
+tempo_storage_size: "10Gi"
+tempo_retention_days: 7
+tempo_s3_bucket: "tempo-traces"
+# kgateway Observability
+kgateway_tracing_enabled: true
+kgateway_trace_sampling_percentage: 100
 # OneDev Git Server (testing full deployment with external DB)
 onedev_enabled: true
 onedev_admin_password: "test-admin-password"

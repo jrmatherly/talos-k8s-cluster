@@ -9,8 +9,24 @@ components:
 
 resources:
   - ./namespace.yaml
+#% if victoria_metrics_enabled %#
+  #| VictoriaMetrics Stack (replaces kube-prometheus-stack) #|
+  - ./victoria-metrics/ks.yaml
+#% else %#
+  #| Legacy kube-prometheus-stack #|
   - ./kube-prometheus-stack/ks.yaml
+#% endif %#
+#% if victoria_logs_enabled %#
+  - ./victoria-logs/ks.yaml
+#% endif %#
+#% if vector_enabled | default(victoria_logs_enabled) %#
+  - ./vector/ks.yaml
+#% endif %#
+#% if tempo_enabled %#
+  - ./tempo/ks.yaml
+#% endif %#
 #% if minio_enabled %#
   - ./minio-dashboards/ks.yaml
 #% endif %#
 #% endif %#
+

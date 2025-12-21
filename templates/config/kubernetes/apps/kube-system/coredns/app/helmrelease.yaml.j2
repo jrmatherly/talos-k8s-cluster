@@ -10,6 +10,9 @@ spec:
   interval: 1h
   values:
     fullnameOverride: coredns
+    # Network policy labels for CCNP tiered policies
+    podLabels:
+      network.cilium.io/api-access: "true"
     image:
       repository: mirror.gcr.io/coredns/coredns
     k8sAppLabelOverride: kube-dns

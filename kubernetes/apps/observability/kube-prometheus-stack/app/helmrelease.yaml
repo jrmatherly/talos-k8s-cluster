@@ -188,6 +188,9 @@ spec:
     # ============================================================
     prometheusOperator:
       enabled: true
+      # Network policy labels for CCNP tiered policies
+      podLabels:
+        network.cilium.io/api-access: "true"
       admissionWebhooks:
         certManager:
           enabled: true
@@ -230,6 +233,9 @@ spec:
 
     kube-state-metrics:
       fullnameOverride: kube-state-metrics
+      # Network policy labels for CCNP tiered policies
+      podLabels:
+        network.cilium.io/api-access: "true"
       metricLabelsAllowlist:
         - pods=[*]
         - deployments=[*]

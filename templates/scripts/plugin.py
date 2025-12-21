@@ -217,7 +217,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("observability_enabled", False)
         data.setdefault("grafana_admin_password", "admin")
 
-        # Prometheus defaults
+        # Prometheus defaults (legacy - being replaced by VictoriaMetrics)
         data.setdefault("prometheus_retention", "7d")
         data.setdefault("prometheus_retention_size", "45GB")
         data.setdefault("prometheus_storage_size", "50Gi")
@@ -226,6 +226,49 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("prometheus_alertmanager_replicas", 1)
         data.setdefault("alertmanager_storage_size", "5Gi")
         data.setdefault("grafana_storage_size", "10Gi")
+
+        # VictoriaMetrics Stack defaults (replaces kube-prometheus-stack)
+        data.setdefault("victoria_metrics_enabled", False)
+        data.setdefault("vm_storage_size", "50Gi")
+        data.setdefault("vm_retention_days", 14)
+        data.setdefault("vm_storage_class", "proxmox-csi")
+        data.setdefault("vm_cpu_request", "200m")
+        data.setdefault("vm_cpu_limit", "1000m")
+        data.setdefault("vm_memory_request", "512Mi")
+        data.setdefault("vm_memory_limit", "2Gi")
+
+        # VictoriaLogs defaults (replaces Loki)
+        data.setdefault("victoria_logs_enabled", False)
+        data.setdefault("vl_storage_size", "20Gi")
+        data.setdefault("vl_retention_days", 14)
+        data.setdefault("vl_storage_class", "proxmox-csi")
+        data.setdefault("vl_cpu_request", "100m")
+        data.setdefault("vl_cpu_limit", "500m")
+        data.setdefault("vl_memory_request", "256Mi")
+        data.setdefault("vl_memory_limit", "1Gi")
+
+        # Vector Agent defaults (log collection for VictoriaLogs)
+        # Defaults to victoria_logs_enabled if not explicitly set
+        data.setdefault("vector_enabled", data.get("victoria_logs_enabled", False))
+        data.setdefault("vector_cpu_request", "50m")
+        data.setdefault("vector_cpu_limit", "200m")
+        data.setdefault("vector_memory_request", "128Mi")
+        data.setdefault("vector_memory_limit", "512Mi")
+
+        # Tempo defaults (distributed tracing)
+        data.setdefault("tempo_enabled", False)
+        data.setdefault("tempo_storage_size", "10Gi")
+        data.setdefault("tempo_retention_days", 7)
+        data.setdefault("tempo_storage_class", "proxmox-csi")
+        data.setdefault("tempo_s3_bucket", "tempo-traces")
+        data.setdefault("tempo_cpu_request", "100m")
+        data.setdefault("tempo_cpu_limit", "500m")
+        data.setdefault("tempo_memory_request", "256Mi")
+        data.setdefault("tempo_memory_limit", "1Gi")
+
+        # kgateway Observability defaults
+        data.setdefault("kgateway_tracing_enabled", False)
+        data.setdefault("kgateway_trace_sampling_percentage", 100)
 
         # OneDev defaults (Git Server with CI/CD)
         data.setdefault("onedev_enabled", False)

@@ -57,6 +57,21 @@ proxmox_csi_token_secret: "fake-secret"
 # Observability Stack (disabled for private repo testing)
 # observability_enabled: false
 # grafana_admin_password: ""
+# VictoriaMetrics Stack (disabled for private repo testing)
+# victoria_metrics_enabled: false
+# vm_storage_size: ""
+# vm_retention_days:
+# VictoriaLogs (disabled for private repo testing)
+# victoria_logs_enabled: false
+# vl_storage_size: ""
+# vl_retention_days:
+# Tempo (disabled for private repo testing)
+# tempo_enabled: false
+# tempo_storage_size: ""
+# tempo_retention_days:
+# kgateway Observability (disabled for private repo testing)
+# kgateway_tracing_enabled: false
+# kgateway_trace_sampling_percentage:
 # OneDev Git Server (disabled for private repo testing)
 # onedev_enabled: false
 # onedev_admin_password: ""

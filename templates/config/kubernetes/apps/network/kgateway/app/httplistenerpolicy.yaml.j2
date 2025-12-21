@@ -1,0 +1,45 @@
+#% if kgateway_enabled | default(true) and kgateway_tracing_enabled %#
+---
+#| HTTPListenerPolicy for kgateway tracing - internal gateway #|
+#| Sends traces to Tempo via OTLP gRPC #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: internal-tracing
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal
+      sectionName: https
+  tracing:
+    samplingPercentage: #{ kgateway_trace_sampling_percentage }#
+    dataProvider:
+      openTelemetry:
+        collectorUpstreamRef:
+          name: tempo
+          namespace: observability
+          kind: Service
+          port: 4317
+---
+#| HTTPListenerPolicy for kgateway tracing - external gateway #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: HTTPListenerPolicy
+metadata:
+  name: external-tracing
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: external
+      sectionName: https
+  tracing:
+    samplingPercentage: #{ kgateway_trace_sampling_percentage }#
+    dataProvider:
+      openTelemetry:
+        collectorUpstreamRef:
+          name: tempo
+          namespace: observability
+          kind: Service
+          port: 4317
+#% endif %#

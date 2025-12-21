@@ -21,6 +21,9 @@ spec:
       replicaCount: 1
       image:
         pullPolicy: IfNotPresent
+      # Network policy labels for CCNP tiered policies
+      podLabels:
+        network.cilium.io/api-access: "true"
 
     resources:
       requests:

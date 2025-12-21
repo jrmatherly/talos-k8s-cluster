@@ -1,0 +1,41 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kgateway-dataplane
+  labels:
+    release: victoria-metrics
+spec:
+  namespaceSelector:
+    matchNames:
+      - network
+      - agentgateway-system
+  selector:
+    matchLabels:
+      kgateway: kube-gateway
+  podMetricsEndpoints:
+    - port: http-monitoring
+      interval: 30s
+      path: /stats/prometheus
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: "true"
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kgateway-controlplane
+  labels:
+    release: victoria-metrics
+spec:
+  namespaceSelector:
+    matchNames:
+      - network
+  selector:
+    matchLabels:
+      kgateway: kgateway
+  podMetricsEndpoints:
+    - port: http-monitoring
+      interval: 30s
+      path: /metrics

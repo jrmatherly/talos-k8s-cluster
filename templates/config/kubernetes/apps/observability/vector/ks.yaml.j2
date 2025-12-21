@@ -1,0 +1,25 @@
+#% if vector_enabled | default(victoria_logs_enabled) %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: vector
+  namespace: flux-system
+spec:
+  targetNamespace: observability
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: vector
+  path: ./kubernetes/apps/observability/vector/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: true
+  interval: 30m
+  retryInterval: 1m
+  timeout: 10m
+  dependsOn:
+    - name: cluster-apps-observability-namespace
+    - name: victoria-logs
+#% endif %#

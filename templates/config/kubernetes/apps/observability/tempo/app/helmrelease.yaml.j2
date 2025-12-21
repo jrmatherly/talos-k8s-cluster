@@ -1,0 +1,69 @@
+#% if tempo_enabled %#
+---
+#| Grafana Tempo - distributed tracing backend #|
+#| REF: https://grafana.com/docs/tempo/latest/ #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo
+spec:
+  chart:
+    spec:
+      chart: tempo
+      version: "1.24.1"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+  interval: 1h
+  values:
+    #| Single binary mode for simplicity #|
+    tempo:
+      repository: grafana/tempo
+      #| OTLP receivers #|
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "0.0.0.0:4317"
+            http:
+              endpoint: "0.0.0.0:4318"
+      #| Retention #|
+      retention: "#{ tempo_retention_days * 24 }#h"
+      #| Storage backend #|
+#% if minio_enabled %#
+      storage:
+        trace:
+          backend: s3
+          s3:
+            bucket: "#{ tempo_s3_bucket }#"
+            endpoint: "minio.storage.svc.cluster.local:9000"
+            access_key: "#{ minio_root_user }#"
+            secret_key: "#{ minio_root_password }#"
+            insecure: true
+#% else %#
+      storage:
+        trace:
+          backend: local
+          local:
+            path: /var/tempo/traces
+#% endif %#
+      #| Resource limits #|
+      resources:
+        requests:
+          cpu: "#{ tempo_cpu_request }#"
+          memory: "#{ tempo_memory_request }#"
+        limits:
+          cpu: "#{ tempo_cpu_limit }#"
+          memory: "#{ tempo_memory_limit }#"
+    #| Service configuration #|
+    service:
+      type: ClusterIP
+    #| Persistence for WAL #|
+    persistence:
+      enabled: true
+      storageClassName: "#{ tempo_storage_class }#"
+      size: "#{ tempo_storage_size }#"
+    #| Service Monitor for metrics #|
+    serviceMonitor:
+      enabled: true
+#% endif %#

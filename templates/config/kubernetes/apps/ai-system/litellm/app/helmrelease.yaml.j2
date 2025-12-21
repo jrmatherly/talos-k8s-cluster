@@ -36,6 +36,9 @@ spec:
         prometheus.io/port: "4000"
         prometheus.io/path: "/metrics"
       terminationGracePeriodSeconds: 60
+      # Network policy labels for CCNP tiered policies
+      labels:
+        network.cilium.io/api-access: "true"
 
     # ==========================================================================
     # Controllers

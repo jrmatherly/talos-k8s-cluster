@@ -1,0 +1,22 @@
+#% if tempo_enabled and kgateway_tracing_enabled %#
+---
+#| ReferenceGrant allowing kgateway in network namespace to send traces to Tempo #|
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: tempo-allow-kgateway
+spec:
+  from:
+    - group: gateway.kgateway.dev
+      kind: HTTPListenerPolicy
+      namespace: network
+#% if agentgateway_enabled %#
+    - group: gateway.kgateway.dev
+      kind: HTTPListenerPolicy
+      namespace: agentgateway-system
+#% endif %#
+  to:
+    - group: ""
+      kind: Service
+      name: tempo
+#% endif %#

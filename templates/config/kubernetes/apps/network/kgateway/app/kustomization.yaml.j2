@@ -9,4 +9,11 @@ resources:
   - gateway.yaml
   - networkpolicy.yaml
   - referencegrant.yaml
+#% if observability_enabled %#
+  - podmonitor.yaml
 #% endif %#
+#% if kgateway_tracing_enabled %#
+  - httplistenerpolicy.yaml
+#% endif %#
+#% endif %#
+

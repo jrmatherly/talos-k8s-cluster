@@ -30,6 +30,9 @@ spec:
           memory: 512Mi
       extraEnv:
         KGW_ENABLE_GATEWAY_API_EXPERIMENTAL_FEATURES: "true"
+      # Network policy labels for CCNP tiered policies
+      podLabels:
+        network.cilium.io/api-access: "true"
 
     discoveryNamespaceSelectors:
       - matchLabels:

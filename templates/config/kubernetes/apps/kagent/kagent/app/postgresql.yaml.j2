@@ -5,6 +5,9 @@ apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: kagent-db
+  labels:
+    # Network policy labels for CCNP tiered policies (inherited to pods via operator config)
+    network.cilium.io/api-access: "true"
 spec:
   imageName: ghcr.io/cloudnative-pg/postgresql:17-bookworm
 

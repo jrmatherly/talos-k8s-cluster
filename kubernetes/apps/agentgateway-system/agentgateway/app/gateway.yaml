@@ -37,6 +37,9 @@ spec:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: ai-gw.${SECRET_DOMAIN}
       io.cilium/lb-ipam-ips: "192.168.22.147"
+    labels:
+      network.cilium.io/lb-ingress: "true"
+      network.cilium.io/gateway-proxy: "true"
   listeners:
     - name: http
       protocol: HTTP

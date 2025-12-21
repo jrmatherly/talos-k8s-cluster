@@ -18,6 +18,9 @@ spec:
     storageClass: []
 
     controller:
+      # Network policy labels for CCNP tiered policies
+      podLabels:
+        network.cilium.io/api-access: "true"
       plugin:
         image:
           repository: ghcr.io/sergelogvinov/proxmox-csi-controller

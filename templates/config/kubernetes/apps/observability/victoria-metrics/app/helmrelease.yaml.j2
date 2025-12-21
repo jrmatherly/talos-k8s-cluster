@@ -1,0 +1,230 @@
+#% if victoria_metrics_enabled %#
+---
+#| VictoriaMetrics K8s Stack - replaces kube-prometheus-stack #|
+#| REF: https://docs.victoriametrics.com/guides/k8s-monitoring/ #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-metrics-k8s-stack
+  interval: 1h
+  values:
+    #| Disable components we don't need #|
+    argocdReleaseOverride: ""
+
+    #| VMSingle - single-node metrics storage (replaces Prometheus) #|
+    vmsingle:
+      enabled: true
+      spec:
+        retentionPeriod: "#{ vm_retention_days }#d"
+        storage:
+          storageClassName: "#{ vm_storage_class }#"
+          resources:
+            requests:
+              storage: "#{ vm_storage_size }#"
+        resources:
+          requests:
+            cpu: "#{ vm_cpu_request }#"
+            memory: "#{ vm_memory_request }#"
+          limits:
+            cpu: "#{ vm_cpu_limit }#"
+            memory: "#{ vm_memory_limit }#"
+        extraArgs:
+          #| MetricsQL is superset of PromQL - existing dashboards work #|
+          search.logSlowQueryDuration: "5s"
+          #| Bounded memory mode for predictable resource usage #|
+          memory.allowedPercent: "80"
+
+    #| VMAgent - metrics scraper (replaces Prometheus scraping) #|
+    vmagent:
+      enabled: true
+      spec:
+        scrapeInterval: "30s"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        extraArgs:
+          #| Enable Prometheus-compatible remote write #|
+          promscrape.streamParse: "true"
+
+    #| VMAlert - alerting (replaces Prometheus Alertmanager rules) #|
+    vmalert:
+      enabled: true
+      spec:
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+
+    #| Alertmanager - keep for alerting notifications #|
+    alertmanager:
+      enabled: true
+      spec:
+        storage:
+          storageClassName: "#{ vm_storage_class }#"
+          resources:
+            requests:
+              storage: "#{ alertmanager_storage_size }#"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+
+    #| Grafana - visualization (use existing or deploy new) #|
+    grafana:
+      enabled: true
+      adminPassword: "#{ grafana_admin_password }#"
+      persistence:
+        enabled: true
+        storageClassName: "#{ vm_storage_class }#"
+        size: "#{ grafana_storage_size }#"
+      #| VictoriaMetrics datasource (Prometheus-compatible) #|
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: VictoriaMetrics
+              type: prometheus
+              uid: prometheus
+              url: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8429
+              access: proxy
+              isDefault: true
+              jsonData:
+                timeInterval: "30s"
+#% if victoria_logs_enabled %#
+            - name: VictoriaLogs
+              type: victoriametrics-logs-datasource
+              uid: victorialogs
+              url: http://victoria-logs.observability.svc.cluster.local:9428
+              access: proxy
+              jsonData:
+                maxLines: 1000
+#% endif %#
+#% if tempo_enabled %#
+            - name: Tempo
+              type: tempo
+              uid: tempo
+              url: http://tempo.observability.svc.cluster.local:3200
+              access: proxy
+              jsonData:
+                tracesToLogsV2:
+                  datasourceUid: victorialogs
+                  spanStartTimeShift: "-1h"
+                  spanEndTimeShift: "1h"
+                  filterByTraceID: true
+                  filterBySpanID: true
+                tracesToMetrics:
+                  datasourceUid: prometheus
+                  spanStartTimeShift: "-1h"
+                  spanEndTimeShift: "1h"
+                serviceMap:
+                  datasourceUid: prometheus
+                nodeGraph:
+                  enabled: true
+                search:
+                  hide: false
+                lokiSearch:
+                  datasourceUid: victorialogs
+#% endif %#
+      #| Install VictoriaLogs plugin if enabled #|
+#% if victoria_logs_enabled %#
+      plugins:
+        - victoriametrics-logs-datasource
+#% endif %#
+      #| Grafana dashboards organized in folders #|
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: "kubernetes"
+              orgId: 1
+              folder: "Kubernetes"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/kubernetes
+            - name: "cilium"
+              orgId: 1
+              folder: "Cilium"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/cilium
+            - name: "victoriametrics"
+              orgId: 1
+              folder: "VictoriaMetrics"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/victoriametrics
+      dashboards:
+        kubernetes:
+          #| Core Kubernetes dashboards #|
+          kubernetes-api-server:
+            gnetId: 15761
+            revision: 19
+            datasource: VictoriaMetrics
+          kubernetes-coredns:
+            gnetId: 15762
+            revision: 18
+            datasource: VictoriaMetrics
+          kubernetes-global:
+            gnetId: 15757
+            revision: 42
+            datasource: VictoriaMetrics
+          kubernetes-namespaces:
+            gnetId: 15758
+            revision: 42
+            datasource: VictoriaMetrics
+          kubernetes-nodes:
+            gnetId: 15759
+            revision: 32
+            datasource: VictoriaMetrics
+          kubernetes-pods:
+            gnetId: 15760
+            revision: 32
+            datasource: VictoriaMetrics
+        victoriametrics:
+          #| VictoriaMetrics internal dashboards #|
+          vmagent:
+            gnetId: 12683
+            revision: 23
+            datasource: VictoriaMetrics
+          vmalert:
+            gnetId: 14950
+            revision: 12
+            datasource: VictoriaMetrics
+          vmsingle:
+            gnetId: 10229
+            revision: 38
+            datasource: VictoriaMetrics
+
+    #| ServiceMonitor/PodMonitor auto-discovery #|
+    #| VictoriaMetrics operator auto-converts Prometheus CRDs #|
+    crds:
+      enabled: true
+
+    #| Node exporter for host metrics #|
+    prometheus-node-exporter:
+      enabled: true
+
+    #| kube-state-metrics for K8s object metrics #|
+    kube-state-metrics:
+      enabled: true
+#% endif %#

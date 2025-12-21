@@ -9,6 +9,9 @@ spec:
     name: flux-operator
   interval: 1h
   values:
+    # Network policy labels for CCNP tiered policies
+    podLabels:
+      network.cilium.io/api-access: "true"
     serviceMonitor:
       create: true
     # Disable the built-in NetworkPolicy which only allows port 9080 (web)

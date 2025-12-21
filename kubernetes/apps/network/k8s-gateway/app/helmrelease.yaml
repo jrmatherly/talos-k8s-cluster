@@ -39,3 +39,9 @@ spec:
         lbipam.cilium.io/ips: "192.168.22.135"
       externalTrafficPolicy: Cluster
     watchedResources: ["HTTPRoute", "Service"]
+    # Network policy labels for CCNP tiered policies
+    # k8s-gateway needs K8s API access (watches Services, HTTPRoutes)
+    # Also exposed via LoadBalancer
+    podLabels:
+      network.cilium.io/api-access: "true"
+      network.cilium.io/lb-ingress: "true"

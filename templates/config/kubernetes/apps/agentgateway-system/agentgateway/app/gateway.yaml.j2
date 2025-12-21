@@ -56,6 +56,10 @@ spec:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: ai-gw.${SECRET_DOMAIN}
       io.cilium/lb-ipam-ips: "#{ agentgateway_addr }#"
+    #| Network policy labels for CCNP tiered policies (applied to gateway proxy pods) #|
+    labels:
+      network.cilium.io/lb-ingress: "true"
+      network.cilium.io/gateway-proxy: "true"
   listeners:
     - name: http
       protocol: HTTP
