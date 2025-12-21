@@ -92,6 +92,20 @@ spec:
     #| Default datasources - chart auto-provisions VictoriaMetrics with isDefault: true #|
     #| Add extra datasources for VictoriaLogs and Tempo via defaultDatasources.extra #|
     defaultDatasources:
+      victoriametrics:
+        perReplica: false
+        datasources:
+          - name: VictoriaMetrics
+            type: prometheus
+            access: proxy
+            isDefault: true
+      alertmanager:
+        perReplica: false
+        datasources:
+          - name: Alertmanager
+            access: proxy
+            jsonData:
+              implementation: prometheus
       extra:
 #% if victoria_logs_enabled %#
         - name: VictoriaLogs
