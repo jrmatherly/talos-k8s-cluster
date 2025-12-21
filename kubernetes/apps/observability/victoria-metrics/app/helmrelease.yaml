@@ -104,14 +104,6 @@ spec:
           isDefault: false
           jsonData:
             maxLines: 1000
-        - name: Loki
-          type: loki
-          uid: loki
-          url: http://victoria-logs.observability.svc.cluster.local:9428/select/logsql
-          access: proxy
-          isDefault: false
-          jsonData:
-            maxLines: 1000
         - name: Tempo
           type: tempo
           uid: tempo
@@ -149,6 +141,7 @@ spec:
         storageClassName: "proxmox-csi"
         size: "10Gi"
       plugins:
+        - victoriametrics-metrics-datasource
         - victoriametrics-logs-datasource
       dashboardProviders:
         dashboardproviders.yaml:
@@ -178,6 +171,14 @@ spec:
               editable: true
               options:
                 path: /var/lib/grafana/dashboards/victoriametrics
+            - name: "victorialogs"
+              orgId: 1
+              folder: "VictoriaLogs"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/victorialogs
       dashboards:
         kubernetes:
           kubernetes-api-server:
@@ -229,6 +230,15 @@ spec:
           vmsingle:
             gnetId: 10229
             revision: 38
+            datasource: VictoriaMetrics
+          vmoperator:
+            gnetId: 17869
+            revision: 4
+            datasource: VictoriaMetrics
+        victorialogs:
+          victorialogs-single:
+            gnetId: 22084
+            revision: 5
             datasource: VictoriaMetrics
 
     crds:

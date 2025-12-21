@@ -124,15 +124,6 @@ spec:
           isDefault: false
           jsonData:
             maxLines: 1000
-        #| Loki-compatible datasource for Grafana Logs Drilldown app #|
-        - name: Loki
-          type: loki
-          uid: loki
-          url: http://victoria-logs.observability.svc.cluster.local:9428/select/logsql
-          access: proxy
-          isDefault: false
-          jsonData:
-            maxLines: 1000
 #% endif %#
 #% if tempo_enabled %#
         - name: Tempo
@@ -174,9 +165,10 @@ spec:
         enabled: true
         storageClassName: "#{ vm_storage_class }#"
         size: "#{ grafana_storage_size }#"
-      #| Install VictoriaLogs plugin if enabled #|
-#% if victoria_logs_enabled %#
+      #| Install VictoriaMetrics plugins #|
       plugins:
+        - victoriametrics-metrics-datasource
+#% if victoria_logs_enabled %#
         - victoriametrics-logs-datasource
 #% endif %#
       #| Grafana dashboards organized in folders #|
@@ -208,6 +200,16 @@ spec:
               editable: true
               options:
                 path: /var/lib/grafana/dashboards/victoriametrics
+#% if victoria_logs_enabled %#
+            - name: "victorialogs"
+              orgId: 1
+              folder: "VictoriaLogs"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/victorialogs
+#% endif %#
       dashboards:
         kubernetes:
           #| Core Kubernetes dashboards #|
@@ -263,6 +265,18 @@ spec:
             gnetId: 10229
             revision: 38
             datasource: VictoriaMetrics
+          vmoperator:
+            gnetId: 17869
+            revision: 4
+            datasource: VictoriaMetrics
+#% if victoria_logs_enabled %#
+        victorialogs:
+          #| VictoriaLogs dashboards #|
+          victorialogs-single:
+            gnetId: 22084
+            revision: 5
+            datasource: VictoriaMetrics
+#% endif %#
 
     #| ServiceMonitor/PodMonitor auto-discovery #|
     #| VictoriaMetrics operator auto-converts Prometheus CRDs #|
