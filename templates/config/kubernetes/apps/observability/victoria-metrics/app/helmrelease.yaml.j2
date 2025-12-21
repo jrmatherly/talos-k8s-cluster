@@ -12,6 +12,8 @@ spec:
     name: victoria-metrics-k8s-stack
   interval: 1h
   values:
+    #| Shorten resource names to avoid 63-char limit #|
+    fullnameOverride: vmstack
     #| Disable components we don't need #|
     argocdReleaseOverride: ""
 
@@ -107,7 +109,7 @@ spec:
             - name: VictoriaMetrics
               type: prometheus
               uid: prometheus
-              url: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8429
+              url: http://vmsingle-vmstack.observability.svc.cluster.local:8429
               access: proxy
               isDefault: true
               jsonData:
