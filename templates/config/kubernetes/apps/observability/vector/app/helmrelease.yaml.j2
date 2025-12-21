@@ -18,6 +18,9 @@ spec:
   interval: 1h
   values:
     role: Agent
+    #| Network policy labels for CCNP tiered policies (kubernetes_logs source) #|
+    podLabels:
+      network.cilium.io/api-access: "true"
     #| DaemonSet to collect logs from all nodes #|
     resources:
       requests:

@@ -43,6 +43,10 @@ spec:
       enabled: true
       spec:
         scrapeInterval: "30s"
+        #| Network policy labels for CCNP tiered policies (service discovery) #|
+        podMetadata:
+          labels:
+            network.cilium.io/api-access: "true"
         resources:
           requests:
             cpu: "100m"
@@ -227,4 +231,7 @@ spec:
     #| kube-state-metrics for K8s object metrics #|
     kube-state-metrics:
       enabled: true
+      #| Network policy labels for CCNP tiered policies (watches K8s resources) #|
+      podLabels:
+        network.cilium.io/api-access: "true"
 #% endif %#
