@@ -20,6 +20,7 @@ spec:
   retryInterval: 1m
   timeout: 10m
   dependsOn:
-    - name: cluster-apps-observability-namespace
+    - name: cilium
+      namespace: kube-system
     - name: victoria-logs
 #% endif %#
