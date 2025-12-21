@@ -85,7 +85,7 @@ spec:
         perReplica: false
         datasources:
           - name: VictoriaMetrics
-            type: victoriametrics-metrics-datasource
+            type: prometheus
             uid: victoriametrics
             access: proxy
             isDefault: true

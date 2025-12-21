@@ -101,12 +101,13 @@ spec:
     #| Grafana datasources - use chart's native sections for VictoriaMetrics/Alertmanager #|
     #| Extra datasources (VictoriaLogs, Tempo) added after the chart's defaults #|
     defaultDatasources:
-      #| Chart's VictoriaMetrics datasource - customize with our settings #|
+      #| Chart's VictoriaMetrics datasource - use prometheus type for dashboard compatibility #|
+      #| VictoriaMetrics is fully Prometheus-compatible; dashboards query for type=prometheus #|
       victoriametrics:
         perReplica: false
         datasources:
           - name: VictoriaMetrics
-            type: victoriametrics-metrics-datasource
+            type: prometheus
             uid: victoriametrics
             access: proxy
             isDefault: true
