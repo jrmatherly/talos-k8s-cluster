@@ -14,3 +14,4 @@ resources:
   - ./reloader/ks.yaml
   - ./spegel/ks.yaml
   - ./gateway-api-crds/ks.yaml
+  - ./cilium-policies/ks.yaml

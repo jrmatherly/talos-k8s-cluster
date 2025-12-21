@@ -1,0 +1,37 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier1-kubelet-probes-ingress
+spec:
+  description: "Allow kubelet health probes from nodes"
+  endpointSelector: {}  # All pods
+  enableDefaultDeny:
+    ingress: false
+    egress: false
+  ingress:
+    - fromEntities:
+        - host         # Local node kubelet
+        - remote-node  # Other nodes (for DaemonSets, node-local redirect)
+      toPorts:
+        - ports:
+            # Common health/metrics ports across applications
+            - port: "8080"
+              protocol: TCP
+            - port: "8081"
+              protocol: TCP
+            - port: "9090"
+              protocol: TCP
+            - port: "9091"
+              protocol: TCP
+            # Additional common ports
+            - port: "3000"
+              protocol: TCP
+            - port: "4000"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+            - port: "8083"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP

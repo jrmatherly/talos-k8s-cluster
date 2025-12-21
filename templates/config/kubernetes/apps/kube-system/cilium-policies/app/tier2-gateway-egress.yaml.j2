@@ -1,0 +1,47 @@
+#| ============================================================ #|
+#| Tier 2: Gateway Proxy Cluster Egress (Label-Based)           #|
+#| - Allows gateway proxies to reach all cluster services       #|
+#| - Pods require: network.cilium.io/gateway-proxy: "true"      #|
+#| - Consolidates per-namespace egress rules for gateways       #|
+#| REF: docs/ai-context/cilium-tiered-policies.md               #|
+#| ============================================================ #|
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier2-gateway-proxy-egress
+spec:
+  description: "Allow gateway proxies to reach all cluster services"
+  endpointSelector:
+    matchLabels:
+      network.cilium.io/gateway-proxy: "true"
+  egress:
+    - toEntities:
+        - cluster  # All pods/services within the cluster
+---
+#| ============================================================ #|
+#| Tier 2: Gateway/Tunnel World Egress (Label-Based)            #|
+#| - Allows external egress for tunnels and gateways            #|
+#| - Pods require: network.cilium.io/world-egress: "true"       #|
+#| - For cloudflare-tunnel, external API calls, etc.            #|
+#| REF: docs/ai-context/cilium-tiered-policies.md               #|
+#| ============================================================ #|
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier2-world-egress
+spec:
+  description: "Allow world egress for tunnels and external integrations"
+  endpointSelector:
+    matchLabels:
+      network.cilium.io/world-egress: "true"
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            # Cloudflare tunnel QUIC
+            - port: "7844"
+              protocol: UDP

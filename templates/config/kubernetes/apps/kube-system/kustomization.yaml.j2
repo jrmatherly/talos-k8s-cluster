@@ -27,3 +27,10 @@ resources:
 #% if kgateway_enabled | default(true) or agentgateway_enabled | default(true) %#
   - ./gateway-api-crds/ks.yaml
 #% endif %#
+#| ============================================================ #|
+#| Cilium Clusterwide Network Policies                          #|
+#| Tiered CCNP for DNS visibility, K8s API, kubelet probes,     #|
+#| LoadBalancer ingress, and gateway egress consolidation       #|
+#| REF: docs/ai-context/cilium-tiered-policies.md               #|
+#| ============================================================ #|
+  - ./cilium-policies/ks.yaml

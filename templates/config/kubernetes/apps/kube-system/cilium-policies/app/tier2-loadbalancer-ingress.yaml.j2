@@ -1,0 +1,47 @@
+#| ============================================================ #|
+#| Tier 2: LoadBalancer Ingress (Label-Based)                   #|
+#| - Allows external traffic from world/cluster entities        #|
+#| - Pods require label: network.cilium.io/lb-ingress: "true"   #|
+#| - Consolidates per-app fromEntities: world policies          #|
+#| - Resolves Cilium socket-based LB ipBlock rule issues        #|
+#| REF: docs/ai-context/cilium-tiered-policies.md               #|
+#| ============================================================ #|
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier2-loadbalancer-ingress
+spec:
+  description: "Allow external ingress for LoadBalancer services"
+  endpointSelector:
+    matchLabels:
+      network.cilium.io/lb-ingress: "true"
+  ingress:
+    - fromEntities:
+        - world    # External traffic (pre-DNAT LoadBalancer)
+        - cluster  # Internal cluster traffic
+      toPorts:
+        - ports:
+            # Standard HTTP/HTTPS
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
+            # kgateway proxy container ports
+            - port: "8080"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+            - port: "10080"
+              protocol: TCP
+            - port: "10443"
+              protocol: TCP
+            # k8s-gateway DNS (service port and container port)
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+            - port: "1053"
+              protocol: UDP
+            - port: "1053"
+              protocol: TCP

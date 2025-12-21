@@ -1,0 +1,21 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier1-kube-api-egress
+spec:
+  description: "Global K8s API access for labeled pods"
+  endpointSelector:
+    matchLabels:
+      network.cilium.io/api-access: "true"
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            # Primary K8s API port
+            - port: "6443"
+              protocol: TCP
+            # Fallback for some API server configurations
+            - port: "443"
+              protocol: TCP

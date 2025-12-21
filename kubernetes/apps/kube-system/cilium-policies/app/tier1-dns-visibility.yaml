@@ -1,0 +1,36 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier1-dns-egress-visibility
+spec:
+  description: "Global DNS egress with L7 visibility (no enforcement)"
+  endpointSelector:
+    matchExpressions:
+      # Exclude kube-system to avoid policy loops
+      - key: io.kubernetes.pod.namespace
+        operator: NotIn
+        values:
+          - kube-system
+      # Exclude kube-dns itself
+      - key: k8s-app
+        operator: NotIn
+        values:
+          - kube-dns
+  enableDefaultDeny:
+    egress: false
+    ingress: false
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: TCP
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              - matchPattern: "*"
