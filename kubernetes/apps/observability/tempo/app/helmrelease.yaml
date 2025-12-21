@@ -1,0 +1,49 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo
+spec:
+  chart:
+    spec:
+      chart: tempo
+      version: "1.24.1"
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+  interval: 1h
+  values:
+    tempo:
+      repository: grafana/tempo
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "0.0.0.0:4317"
+            http:
+              endpoint: "0.0.0.0:4318"
+      retention: "168h"
+      storage:
+        trace:
+          backend: s3
+          s3:
+            bucket: "tempo-traces"
+            endpoint: "minio.storage.svc.cluster.local:9000"
+            access_key: "admin"
+            secret_key: "Ri80K4L0YuFo7QS4jJl1XyjB"
+            insecure: true
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "1Gi"
+    service:
+      type: ClusterIP
+    persistence:
+      enabled: true
+      storageClassName: "proxmox-csi"
+      size: "10Gi"
+    serviceMonitor:
+      enabled: true

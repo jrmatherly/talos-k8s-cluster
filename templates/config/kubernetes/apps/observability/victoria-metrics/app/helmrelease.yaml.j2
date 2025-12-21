@@ -80,10 +80,12 @@ spec:
       enabled: true
       spec:
         storage:
-          storageClassName: "#{ vm_storage_class }#"
-          resources:
-            requests:
-              storage: "#{ alertmanager_storage_size }#"
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "#{ vm_storage_class }#"
+              resources:
+                requests:
+                  storage: "#{ alertmanager_storage_size }#"
         resources:
           requests:
             cpu: "50m"

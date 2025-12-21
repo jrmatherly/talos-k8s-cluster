@@ -65,10 +65,12 @@ spec:
       enabled: true
       spec:
         storage:
-          storageClassName: "proxmox-csi"
-          resources:
-            requests:
-              storage: "5Gi"
+          volumeClaimTemplate:
+            spec:
+              storageClassName: "proxmox-csi"
+              resources:
+                requests:
+                  storage: "5Gi"
         resources:
           requests:
             cpu: "50m"
@@ -93,6 +95,39 @@ spec:
             jsonData:
               implementation: prometheus
       extra:
+        - name: VictoriaLogs
+          type: victoriametrics-logs-datasource
+          uid: victorialogs
+          url: http://victoria-logs.observability.svc.cluster.local:9428
+          access: proxy
+          isDefault: false
+          jsonData:
+            maxLines: 1000
+        - name: Tempo
+          type: tempo
+          uid: tempo
+          url: http://tempo.observability.svc.cluster.local:3200
+          access: proxy
+          isDefault: false
+          jsonData:
+            tracesToLogsV2:
+              datasourceUid: victorialogs
+              spanStartTimeShift: "-1h"
+              spanEndTimeShift: "1h"
+              filterByTraceID: true
+              filterBySpanID: true
+            tracesToMetrics:
+              datasourceUid: VictoriaMetrics
+              spanStartTimeShift: "-1h"
+              spanEndTimeShift: "1h"
+            serviceMap:
+              datasourceUid: VictoriaMetrics
+            nodeGraph:
+              enabled: true
+            search:
+              hide: false
+            lokiSearch:
+              datasourceUid: victorialogs
 
     grafana:
       enabled: true
@@ -104,6 +139,8 @@ spec:
         enabled: true
         storageClassName: "proxmox-csi"
         size: "10Gi"
+      plugins:
+        - victoriametrics-logs-datasource
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
