@@ -78,6 +78,9 @@ spec:
     grafana:
       enabled: true
       adminPassword: "Uj2PpuJyUJMJiD"
+      sidecar:
+        dashboards:
+          enabled: false
       persistence:
         enabled: true
         storageClassName: "proxmox-csi"

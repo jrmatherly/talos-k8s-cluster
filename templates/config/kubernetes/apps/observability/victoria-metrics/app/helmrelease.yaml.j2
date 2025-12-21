@@ -91,6 +91,10 @@ spec:
     grafana:
       enabled: true
       adminPassword: "#{ grafana_admin_password }#"
+      #| Disable sidecar to use static dashboard definitions below #|
+      sidecar:
+        dashboards:
+          enabled: false
       persistence:
         enabled: true
         storageClassName: "#{ vm_storage_class }#"

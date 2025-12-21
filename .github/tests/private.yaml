@@ -65,6 +65,10 @@ proxmox_csi_token_secret: "fake-secret"
 # victoria_logs_enabled: false
 # vl_storage_size: ""
 # vl_retention_days:
+# Vector (disabled for private repo testing)
+# vector_enabled: false
+# vector_cpu_request: ""
+# vector_memory_request: ""
 # Tempo (disabled for private repo testing)
 # tempo_enabled: false
 # tempo_storage_size: ""
