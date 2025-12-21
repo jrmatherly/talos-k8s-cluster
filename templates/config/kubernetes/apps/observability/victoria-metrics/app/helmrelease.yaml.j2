@@ -98,35 +98,35 @@ spec:
             cpu: "100m"
             memory: "128Mi"
 
-    #| Default datasources - all in 'extra' section to control provisioning order #|
-    #| Order matters: VictoriaMetrics must be provisioned before Tempo references it #|
+    #| Grafana datasources - use chart's native sections for VictoriaMetrics/Alertmanager #|
+    #| Extra datasources (VictoriaLogs, Tempo) added after the chart's defaults #|
     defaultDatasources:
-      #| Disable chart's default datasources - we define all in extra #|
+      #| Chart's VictoriaMetrics datasource - customize with our settings #|
       victoriametrics:
-        enabled: false
+        perReplica: false
+        datasources:
+          - name: VictoriaMetrics
+            type: victoriametrics-metrics-datasource
+            uid: victoriametrics
+            access: proxy
+            isDefault: true
+            jsonData:
+              queryTimeout: "120s"
+      #| Chart's Alertmanager datasource - customize with our settings #|
       alertmanager:
-        enabled: false
+        perReplica: false
+        datasources:
+          - name: Alertmanager
+            type: alertmanager
+            uid: alertmanager
+            url: http://vmalertmanager-vmstack.observability.svc.cluster.local:9093
+            access: proxy
+            jsonData:
+              implementation: prometheus
+              handleGrafanaManagedAlerts: true
+      #| Extra datasources for VictoriaLogs and Tempo #|
       extra:
-        #| 1. VictoriaMetrics - primary metrics datasource (must be first) #|
-        - name: VictoriaMetrics
-          type: victoriametrics-metrics-datasource
-          uid: victoriametrics
-          url: http://vmsingle-vmstack.observability.svc.cluster.local:8428
-          access: proxy
-          isDefault: true
-          jsonData:
-            queryTimeout: "120s"
-        #| 2. Alertmanager - for Grafana managed alerts #|
-        - name: Alertmanager
-          type: alertmanager
-          uid: alertmanager
-          url: http://vmalertmanager-vmstack.observability.svc.cluster.local:9093
-          access: proxy
-          jsonData:
-            implementation: prometheus
-            handleGrafanaManagedAlerts: true
 #% if victoria_logs_enabled %#
-        #| 3. VictoriaLogs - log aggregation #|
         - name: VictoriaLogs
           type: victoriametrics-logs-datasource
           uid: victorialogs
@@ -137,7 +137,6 @@ spec:
             maxLines: 1000
 #% endif %#
 #% if tempo_enabled %#
-        #| 4. Tempo - distributed tracing (references VictoriaMetrics and VictoriaLogs) #|
         - name: Tempo
           type: tempo
           uid: tempo
