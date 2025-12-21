@@ -11,7 +11,10 @@ spec:
   values:
     # Network policy labels for CCNP tiered policies
     podLabels:
+      # K8s API access for getting nodes list
       network.cilium.io/api-access: "true"
+      # Kubelet access on port 10250 for metrics scraping
+      network.cilium.io/metrics-scraper: "true"
     args:
       - --kubelet-insecure-tls
       - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
