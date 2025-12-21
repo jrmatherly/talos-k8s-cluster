@@ -1,0 +1,57 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier1-metrics-scraping-ingress
+spec:
+  description: "Allow metrics scrapers to reach all pods for scraping"
+  endpointSelector: {}
+  enableDefaultDeny:
+    ingress: false
+    egress: false
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            network.cilium.io/metrics-scraper: "true"
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+            - port: "9091"
+              protocol: TCP
+            - port: "8080"
+              protocol: TCP
+            - port: "8081"
+              protocol: TCP
+            - port: "8082"
+              protocol: TCP
+            - port: "8083"
+              protocol: TCP
+            - port: "3000"
+              protocol: TCP
+            - port: "4000"
+              protocol: TCP
+            - port: "8000"
+              protocol: TCP
+            - port: "9187"
+              protocol: TCP
+            - port: "9104"
+              protocol: TCP
+            - port: "9121"
+              protocol: TCP
+            - port: "9153"
+              protocol: TCP
+            - port: "7979"
+              protocol: TCP
+            - port: "9402"
+              protocol: TCP
+            - port: "2004"
+              protocol: TCP
+            - port: "9000"
+              protocol: TCP
+            - port: "10250"
+              protocol: TCP
+            - port: "10257"
+              protocol: TCP
+            - port: "10259"
+              protocol: TCP

@@ -6,5 +6,6 @@ resources:
   - ./tier1-kube-api-egress.yaml
   - ./tier1-kubelet-probes.yaml
   - ./tier1-metrics-scraping.yaml
+  - ./tier1-metrics-ingress.yaml
   - ./tier2-loadbalancer-ingress.yaml
   - ./tier2-gateway-egress.yaml

@@ -10,6 +10,7 @@ resources:
   - ./tier1-kubelet-probes.yaml
 #% if victoria_metrics_enabled %#
   - ./tier1-metrics-scraping.yaml
+  - ./tier1-metrics-ingress.yaml
 #% endif %#
   #| ================================================ #|
   #| Tier 2: Gateway Infrastructure (always deployed) #|
