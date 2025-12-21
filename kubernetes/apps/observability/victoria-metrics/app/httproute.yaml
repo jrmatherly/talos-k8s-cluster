@@ -5,7 +5,7 @@ kind: HTTPRoute
 metadata:
   name: grafana
 spec:
-  hostnames: ["grafana.${SECRET_DOMAIN}"]
+  hostnames: ["grafana.matherly.net"]
   parentRefs:
     - name: internal
       namespace: network
@@ -22,7 +22,7 @@ kind: HTTPRoute
 metadata:
   name: victoriametrics
 spec:
-  hostnames: ["victoriametrics.${SECRET_DOMAIN}"]
+  hostnames: ["victoriametrics.matherly.net"]
   parentRefs:
     - name: internal
       namespace: network
@@ -39,7 +39,7 @@ kind: HTTPRoute
 metadata:
   name: alertmanager
 spec:
-  hostnames: ["alertmanager.${SECRET_DOMAIN}"]
+  hostnames: ["alertmanager.matherly.net"]
   parentRefs:
     - name: internal
       namespace: network

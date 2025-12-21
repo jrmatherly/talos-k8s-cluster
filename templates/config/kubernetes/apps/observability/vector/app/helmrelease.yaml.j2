@@ -102,19 +102,6 @@ spec:
     podSecurityContext:
       runAsNonRoot: false
       runAsUser: 0
-    #| Mount host logs #|
-    extraVolumes:
-      - name: var-log
-        hostPath:
-          path: /var/log
-      - name: var-lib-docker
-        hostPath:
-          path: /var/lib/docker/containers
-    extraVolumeMounts:
-      - name: var-log
-        mountPath: /var/log
-        readOnly: true
-      - name: var-lib-docker
-        mountPath: /var/lib/docker/containers
-        readOnly: true
+    #| Host log mounts are automatically provided by the Vector chart #|
+    #| when using kubernetes_logs source - no extraVolumes needed #|
 #% endif %#

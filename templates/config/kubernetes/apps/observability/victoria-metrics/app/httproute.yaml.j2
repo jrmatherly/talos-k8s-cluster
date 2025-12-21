@@ -6,7 +6,7 @@ kind: HTTPRoute
 metadata:
   name: grafana
 spec:
-  hostnames: ["grafana.${SECRET_DOMAIN}"]
+  hostnames: ["grafana.#{ primary_domain }#"]
   parentRefs:
     - name: internal
       namespace: network
@@ -23,7 +23,7 @@ kind: HTTPRoute
 metadata:
   name: victoriametrics
 spec:
-  hostnames: ["victoriametrics.${SECRET_DOMAIN}"]
+  hostnames: ["victoriametrics.#{ primary_domain }#"]
   parentRefs:
     - name: internal
       namespace: network
@@ -40,7 +40,7 @@ kind: HTTPRoute
 metadata:
   name: alertmanager
 spec:
-  hostnames: ["alertmanager.${SECRET_DOMAIN}"]
+  hostnames: ["alertmanager.#{ primary_domain }#"]
   parentRefs:
     - name: internal
       namespace: network
