@@ -1,0 +1,53 @@
+#% if victoria_metrics_enabled %#
+---
+#| VMAgent/Prometheus needs to scrape metrics from nodes, kubelets, and pods #|
+#| This policy allows labeled pods to reach all common metrics endpoints #|
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: tier1-metrics-scraping-egress
+spec:
+  description: Allow metrics scrapers to reach all cluster endpoints for scraping
+  endpointSelector:
+    matchLabels:
+      #| VMAgent pods have this label via podMetadata.labels #|
+      network.cilium.io/metrics-scraper: "true"
+  egress:
+    #| Allow scraping kubelets and node-level metrics on all nodes #|
+    - toEntities:
+        - host
+        - remote-node
+        - kube-apiserver
+      toPorts:
+        - ports:
+            #| Kubelet metrics #|
+            - port: "10250"
+              protocol: TCP
+            #| Kubelet read-only port (if enabled) #|
+            - port: "10255"
+              protocol: TCP
+            #| kube-controller-manager metrics #|
+            - port: "10257"
+              protocol: TCP
+            #| kube-scheduler metrics #|
+            - port: "10259"
+              protocol: TCP
+            #| Node exporter metrics #|
+            - port: "9100"
+              protocol: TCP
+            #| Cilium agent metrics #|
+            - port: "9962"
+              protocol: TCP
+            - port: "9963"
+              protocol: TCP
+            - port: "9964"
+              protocol: TCP
+            - port: "9965"
+              protocol: TCP
+            #| Hubble metrics #|
+            - port: "9966"
+              protocol: TCP
+    #| Allow scraping any pod in the cluster for ServiceMonitor/PodMonitor targets #|
+    - toEntities:
+        - cluster
+#% endif %#

@@ -39,6 +39,7 @@ spec:
         podMetadata:
           labels:
             network.cilium.io/api-access: "true"
+            network.cilium.io/metrics-scraper: "true"
         resources:
           requests:
             cpu: "100m"

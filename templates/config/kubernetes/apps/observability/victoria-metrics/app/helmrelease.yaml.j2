@@ -45,10 +45,13 @@ spec:
       enabled: true
       spec:
         scrapeInterval: "30s"
-        #| Network policy labels for CCNP tiered policies (service discovery) #|
+        #| Network policy labels for CCNP tiered policies #|
         podMetadata:
           labels:
+            #| K8s API access for service discovery #|
             network.cilium.io/api-access: "true"
+            #| Metrics scraping access to all cluster endpoints #|
+            network.cilium.io/metrics-scraper: "true"
         resources:
           requests:
             cpu: "100m"
