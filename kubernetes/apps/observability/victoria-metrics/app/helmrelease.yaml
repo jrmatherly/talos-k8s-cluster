@@ -104,6 +104,14 @@ spec:
           isDefault: false
           jsonData:
             maxLines: 1000
+        - name: Loki
+          type: loki
+          uid: loki
+          url: http://victoria-logs.observability.svc.cluster.local:9428/select/logsql
+          access: proxy
+          isDefault: false
+          jsonData:
+            maxLines: 1000
         - name: Tempo
           type: tempo
           uid: tempo

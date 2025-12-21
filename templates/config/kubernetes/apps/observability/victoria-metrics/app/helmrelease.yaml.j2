@@ -124,6 +124,15 @@ spec:
           isDefault: false
           jsonData:
             maxLines: 1000
+        #| Loki-compatible datasource for Grafana Logs Drilldown app #|
+        - name: Loki
+          type: loki
+          uid: loki
+          url: http://victoria-logs.observability.svc.cluster.local:9428/select/logsql
+          access: proxy
+          isDefault: false
+          jsonData:
+            maxLines: 1000
 #% endif %#
 #% if tempo_enabled %#
         - name: Tempo
