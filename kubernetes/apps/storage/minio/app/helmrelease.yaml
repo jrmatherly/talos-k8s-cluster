@@ -79,6 +79,9 @@ spec:
       - name: obot-workspaces
         policy: none
         purge: false
+      - name: tempo-traces
+        policy: none
+        purge: false
 
     # ============================================================
     # Policies to create on startup
