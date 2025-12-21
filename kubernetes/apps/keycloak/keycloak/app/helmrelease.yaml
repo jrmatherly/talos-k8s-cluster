@@ -155,3 +155,9 @@ spec:
     podSecurityContext:
       runAsUser: 1000
       runAsNonRoot: true
+
+    # ============================================================
+    # Network Policy Labels for CCNP tiered policies
+    # ============================================================
+    podLabels:
+      network.cilium.io/api-access: "true"
