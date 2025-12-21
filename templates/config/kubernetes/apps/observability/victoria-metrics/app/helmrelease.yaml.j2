@@ -37,8 +37,9 @@ spec:
         extraArgs:
           #| MetricsQL is superset of PromQL - existing dashboards work #|
           search.logSlowQueryDuration: "5s"
-          #| Bounded memory mode for predictable resource usage #|
-          memory.allowedPercent: "80"
+          #| Bounded memory mode - 70% leaves headroom for queries and OS cache #|
+          #| REF: https://docs.victoriametrics.com/victoriametrics/faq/ #|
+          memory.allowedPercent: "70"
 
     #| VMAgent - metrics scraper (replaces Prometheus scraping) #|
     vmagent:
@@ -104,16 +105,25 @@ spec:
         perReplica: false
         datasources:
           - name: VictoriaMetrics
-            type: prometheus
+            type: victoriametrics-metrics-datasource
+            uid: victoriametrics
             access: proxy
             isDefault: true
+            jsonData:
+              #| Enable MetricsQL autocomplete and vmui integration #|
+              queryTimeout: "120s"
       alertmanager:
         perReplica: false
         datasources:
           - name: Alertmanager
+            type: alertmanager
+            uid: alertmanager
+            url: http://vmalertmanager-vmstack.observability.svc.cluster.local:9093
             access: proxy
             jsonData:
               implementation: prometheus
+              #| Enable Grafana managed alerts to be sent to this Alertmanager #|
+              handleGrafanaManagedAlerts: true
       extra:
 #% if victoria_logs_enabled %#
         - name: VictoriaLogs

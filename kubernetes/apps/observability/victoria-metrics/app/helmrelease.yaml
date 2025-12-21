@@ -30,7 +30,7 @@ spec:
             memory: "2Gi"
         extraArgs:
           search.logSlowQueryDuration: "5s"
-          memory.allowedPercent: "80"
+          memory.allowedPercent: "70"
 
     vmagent:
       enabled: true
@@ -85,16 +85,23 @@ spec:
         perReplica: false
         datasources:
           - name: VictoriaMetrics
-            type: prometheus
+            type: victoriametrics-metrics-datasource
+            uid: victoriametrics
             access: proxy
             isDefault: true
+            jsonData:
+              queryTimeout: "120s"
       alertmanager:
         perReplica: false
         datasources:
           - name: Alertmanager
+            type: alertmanager
+            uid: alertmanager
+            url: http://vmalertmanager-vmstack.observability.svc.cluster.local:9093
             access: proxy
             jsonData:
               implementation: prometheus
+              handleGrafanaManagedAlerts: true
       extra:
         - name: VictoriaLogs
           type: victoriametrics-logs-datasource
