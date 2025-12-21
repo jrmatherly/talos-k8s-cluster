@@ -82,27 +82,26 @@ spec:
 
     defaultDatasources:
       victoriametrics:
-        perReplica: false
-        datasources:
-          - name: VictoriaMetrics
-            type: victoriametrics-metrics-datasource
-            uid: victoriametrics
-            access: proxy
-            isDefault: true
-            jsonData:
-              queryTimeout: "120s"
+        enabled: false
       alertmanager:
-        perReplica: false
-        datasources:
-          - name: Alertmanager
-            type: alertmanager
-            uid: alertmanager
-            url: http://vmalertmanager-vmstack.observability.svc.cluster.local:9093
-            access: proxy
-            jsonData:
-              implementation: prometheus
-              handleGrafanaManagedAlerts: true
+        enabled: false
       extra:
+        - name: VictoriaMetrics
+          type: victoriametrics-metrics-datasource
+          uid: victoriametrics
+          url: http://vmsingle-vmstack.observability.svc.cluster.local:8428
+          access: proxy
+          isDefault: true
+          jsonData:
+            queryTimeout: "120s"
+        - name: Alertmanager
+          type: alertmanager
+          uid: alertmanager
+          url: http://vmalertmanager-vmstack.observability.svc.cluster.local:9093
+          access: proxy
+          jsonData:
+            implementation: prometheus
+            handleGrafanaManagedAlerts: true
         - name: VictoriaLogs
           type: victoriametrics-logs-datasource
           uid: victorialogs
