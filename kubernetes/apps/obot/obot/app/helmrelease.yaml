@@ -15,7 +15,7 @@ spec:
     # ============================================================
     image:
       repository: ghcr.io/jrmatherly/obot-entraid
-      tag: v0.2.17
+      tag: v0.2.18
 
     # ============================================================
     # Replicas - Limited to 1 with RWO storage, multiple with S3
