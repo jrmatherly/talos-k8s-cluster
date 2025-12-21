@@ -1,4 +1,97 @@
 ---
+# CiliumNetworkPolicy for kagent CNPG database - Kubernetes API access
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kagent-db-kube-api-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      cnpg.io/cluster: kagent-db
+  egress:
+    # DNS resolution for CNPG service discovery (replicas need to resolve primary hostname)
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Kubernetes API access
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "6443"
+              protocol: TCP
+---
+# NetworkPolicy for kagent CNPG database
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kagent-db
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: kagent-db
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from kagent controller (PostgreSQL connections)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kagent
+              app.kubernetes.io/component: controller
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow from other database replicas (replication and health checks)
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: kagent-db
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000
+    # Allow from CNPG operator
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Replication and health checks between database pods
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: kagent-db
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 8000
+---
 # CiliumNetworkPolicy for kagent controller - allow egress to kube-apiserver
 # Required because standard NetworkPolicy ipBlock rules don't work with
 # Cilium's kube-proxy replacement and reserved entity handling
