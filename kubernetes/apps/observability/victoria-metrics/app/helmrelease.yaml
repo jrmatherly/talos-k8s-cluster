@@ -49,6 +49,7 @@ spec:
             memory: "512Mi"
         extraArgs:
           promscrape.streamParse: "true"
+          promscrape.dropOriginalLabels: "true"
 
     vmalert:
       enabled: true
@@ -194,6 +195,19 @@ spec:
           kubernetes-pods:
             gnetId: 15760
             revision: 32
+            datasource: VictoriaMetrics
+        cilium:
+          cilium-agent:
+            gnetId: 16611
+            revision: 1
+            datasource: VictoriaMetrics
+          cilium-operator:
+            gnetId: 16612
+            revision: 1
+            datasource: VictoriaMetrics
+          hubble:
+            gnetId: 16613
+            revision: 1
             datasource: VictoriaMetrics
         victoriametrics:
           vmagent:

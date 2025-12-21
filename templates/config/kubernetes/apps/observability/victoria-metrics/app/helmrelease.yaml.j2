@@ -62,6 +62,9 @@ spec:
         extraArgs:
           #| Enable Prometheus-compatible remote write #|
           promscrape.streamParse: "true"
+          #| Drop original __name__, job, instance labels from scraped metrics #|
+          #| Reduces memory usage and prevents label conflicts #|
+          promscrape.dropOriginalLabels: "true"
 
     #| VMAlert - alerting (replaces Prometheus Alertmanager rules) #|
     vmalert:
@@ -222,6 +225,20 @@ spec:
           kubernetes-pods:
             gnetId: 15760
             revision: 32
+            datasource: VictoriaMetrics
+        cilium:
+          #| Cilium CNI dashboards #|
+          cilium-agent:
+            gnetId: 16611
+            revision: 1
+            datasource: VictoriaMetrics
+          cilium-operator:
+            gnetId: 16612
+            revision: 1
+            datasource: VictoriaMetrics
+          hubble:
+            gnetId: 16613
+            revision: 1
             datasource: VictoriaMetrics
         victoriametrics:
           #| VictoriaMetrics internal dashboards #|
