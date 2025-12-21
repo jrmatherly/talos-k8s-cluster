@@ -64,6 +64,23 @@ spec:
             - port: "443"
               protocol: TCP
 ---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: litellm-icmp-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: litellm
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+      icmps:
+        - fields:
+            - type: 8
+              family: IPv4
+---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
