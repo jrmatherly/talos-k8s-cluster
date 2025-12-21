@@ -1,0 +1,22 @@
+#% if proxmox_csi_token_id and proxmox_csi_token_secret %#
+---
+#| Proxmox CSI Controller needs to reach the Proxmox API for volume provisioning #|
+#| Proxmox API standard port is 8006 (HTTPS) #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: proxmox-csi-controller-egress
+spec:
+  description: Allow Proxmox CSI controller to reach Proxmox API for volume operations
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: proxmox-csi-plugin
+      app.kubernetes.io/component: controller
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "8006"
+              protocol: TCP
+#% endif %#
