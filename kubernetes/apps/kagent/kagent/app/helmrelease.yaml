@@ -162,7 +162,7 @@ spec:
     # ============================================================
     tools:
       grafana-mcp:
-        enabled: true
+        enabled: false
       querydoc:
         enabled: true
 

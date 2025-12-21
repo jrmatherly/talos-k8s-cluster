@@ -40,13 +40,6 @@ spec:
     - Egress
   ingress:
     # Allow Prometheus metrics scraping
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: observability
-      ports:
-        - protocol: TCP
-          port: 8080
     # Kubelet probes from node network
     - from:
         - ipBlock:

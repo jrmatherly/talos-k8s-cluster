@@ -1,0 +1,174 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: victoria-metrics
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: victoria-metrics-k8s-stack
+  interval: 1h
+  values:
+    argocdReleaseOverride: ""
+
+    vmsingle:
+      enabled: true
+      spec:
+        retentionPeriod: "14d"
+        storage:
+          storageClassName: "proxmox-csi"
+          resources:
+            requests:
+              storage: "50Gi"
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+        extraArgs:
+          search.logSlowQueryDuration: "5s"
+          memory.allowedPercent: "80"
+
+    vmagent:
+      enabled: true
+      spec:
+        scrapeInterval: "30s"
+        podMetadata:
+          labels:
+            network.cilium.io/api-access: "true"
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        extraArgs:
+          promscrape.streamParse: "true"
+
+    vmalert:
+      enabled: true
+      spec:
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+
+    alertmanager:
+      enabled: true
+      spec:
+        storage:
+          storageClassName: "proxmox-csi"
+          resources:
+            requests:
+              storage: "5Gi"
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+
+    grafana:
+      enabled: true
+      adminPassword: "Uj2PpuJyUJMJiD"
+      persistence:
+        enabled: true
+        storageClassName: "proxmox-csi"
+        size: "10Gi"
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: VictoriaMetrics
+              type: prometheus
+              uid: prometheus
+              url: http://vmsingle-victoria-metrics.observability.svc.cluster.local:8429
+              access: proxy
+              isDefault: true
+              jsonData:
+                timeInterval: "30s"
+      dashboardProviders:
+        dashboardproviders.yaml:
+          apiVersion: 1
+          providers:
+            - name: "kubernetes"
+              orgId: 1
+              folder: "Kubernetes"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/kubernetes
+            - name: "cilium"
+              orgId: 1
+              folder: "Cilium"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/cilium
+            - name: "victoriametrics"
+              orgId: 1
+              folder: "VictoriaMetrics"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/victoriametrics
+      dashboards:
+        kubernetes:
+          kubernetes-api-server:
+            gnetId: 15761
+            revision: 19
+            datasource: VictoriaMetrics
+          kubernetes-coredns:
+            gnetId: 15762
+            revision: 18
+            datasource: VictoriaMetrics
+          kubernetes-global:
+            gnetId: 15757
+            revision: 42
+            datasource: VictoriaMetrics
+          kubernetes-namespaces:
+            gnetId: 15758
+            revision: 42
+            datasource: VictoriaMetrics
+          kubernetes-nodes:
+            gnetId: 15759
+            revision: 32
+            datasource: VictoriaMetrics
+          kubernetes-pods:
+            gnetId: 15760
+            revision: 32
+            datasource: VictoriaMetrics
+        victoriametrics:
+          vmagent:
+            gnetId: 12683
+            revision: 23
+            datasource: VictoriaMetrics
+          vmalert:
+            gnetId: 14950
+            revision: 12
+            datasource: VictoriaMetrics
+          vmsingle:
+            gnetId: 10229
+            revision: 38
+            datasource: VictoriaMetrics
+
+    crds:
+      enabled: true
+
+    prometheus-node-exporter:
+      enabled: true
+
+    kube-state-metrics:
+      enabled: true
+      podLabels:
+        network.cilium.io/api-access: "true"

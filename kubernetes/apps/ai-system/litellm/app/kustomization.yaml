@@ -11,4 +11,3 @@ resources:
   - postgresql.yaml
   - networkpolicy.yaml
   - referencegrant.yaml
-  - servicemonitor.yaml

@@ -62,15 +62,6 @@ spec:
     #   - port: 5000   # Discovery
     #   - port: 6000   # Transaction
     #   - port: 7000   # Raft
-    # Allow Prometheus scraping (Enterprise Edition only - CE doesn't support metrics)
-    # Keeping this conditional for future Enterprise upgrade
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: observability
-      ports:
-        - protocol: TCP
-          port: 2004   # Prometheus metrics endpoint
   egress:
     # DNS
     - to:

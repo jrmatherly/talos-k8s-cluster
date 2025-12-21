@@ -422,6 +422,136 @@ cloudflare_token: ""
 # grafana_storage_size: "10Gi"
 
 # ==============================================================================
+# VICTORIAMETRICS STACK (Optional - Alternative to kube-prometheus-stack)
+# ==============================================================================
+# VictoriaMetrics provides a more resource-efficient metrics stack than Prometheus.
+# When enabled, deploys VMSingle, VMAgent, and VMAlert alongside Grafana.
+# Can coexist with or replace kube-prometheus-stack.
+# REF: https://docs.victoriametrics.com/
+
+# -- Enable VictoriaMetrics stack deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+#    NOTE: When enabled alongside observability_enabled, both stacks will run.
+#    For full replacement, disable observability_enabled after VictoriaMetrics is stable.
+# victoria_metrics_enabled: false
+
+# -- VMSingle storage size for metrics data.
+#    (OPTIONAL) / (DEFAULT: "50Gi")
+# vm_storage_size: "50Gi"
+
+# -- Metrics retention period in days.
+#    (OPTIONAL) / (DEFAULT: 14)
+# vm_retention_days: 14
+
+# -- Storage class for VictoriaMetrics PVC.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# vm_storage_class: "proxmox-csi"
+
+# -- VMSingle resource requests.
+#    (OPTIONAL) / (DEFAULTs shown)
+# vm_cpu_request: "200m"
+# vm_memory_request: "512Mi"
+
+# -- VMSingle resource limits.
+#    (OPTIONAL) / (DEFAULTs shown)
+# vm_cpu_limit: "1000m"
+# vm_memory_limit: "2Gi"
+
+# ==============================================================================
+# VICTORIALOGS (Optional - Log aggregation with VictoriaMetrics)
+# ==============================================================================
+# VictoriaLogs provides efficient log storage and querying.
+# Requires Vector for log collection from nodes.
+# REF: https://docs.victoriametrics.com/victorialogs/
+
+# -- Enable VictoriaLogs deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+#    NOTE: When enabled, Vector is automatically enabled for log collection.
+# victoria_logs_enabled: false
+
+# -- VictoriaLogs storage size.
+#    (OPTIONAL) / (DEFAULT: "20Gi")
+# vl_storage_size: "20Gi"
+
+# -- Log retention period in days.
+#    (OPTIONAL) / (DEFAULT: 14)
+# vl_retention_days: 14
+
+# -- Storage class for VictoriaLogs PVC.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# vl_storage_class: "proxmox-csi"
+
+# -- VictoriaLogs resource requests.
+#    (OPTIONAL) / (DEFAULTs shown)
+# vl_cpu_request: "100m"
+# vl_memory_request: "256Mi"
+
+# -- VictoriaLogs resource limits.
+#    (OPTIONAL) / (DEFAULTs shown)
+# vl_cpu_limit: "500m"
+# vl_memory_limit: "1Gi"
+
+# ==============================================================================
+# VECTOR LOG AGENT (Optional - Log collection for VictoriaLogs)
+# ==============================================================================
+# Vector runs as a DaemonSet to collect logs from all nodes.
+# Automatically enabled when victoria_logs_enabled is true.
+# REF: https://vector.dev/docs/
+
+# -- Enable Vector DaemonSet.
+#    (OPTIONAL) / (DEFAULT: victoria_logs_enabled)
+#    Set explicitly to override the default behavior.
+# vector_enabled: false
+
+# -- Vector resource requests per node.
+#    (OPTIONAL) / (DEFAULTs shown)
+# vector_cpu_request: "50m"
+# vector_memory_request: "128Mi"
+
+# -- Vector resource limits per node.
+#    (OPTIONAL) / (DEFAULTs shown)
+# vector_cpu_limit: "200m"
+# vector_memory_limit: "512Mi"
+
+# ==============================================================================
+# TEMPO TRACING (Optional - Distributed tracing backend)
+# ==============================================================================
+# Grafana Tempo provides distributed tracing with Grafana integration.
+# Receives traces via OTLP and stores them for querying.
+# REF: https://grafana.com/docs/tempo/latest/
+
+# -- Enable Tempo deployment.
+#    (OPTIONAL) / (DEFAULT: false)
+# tempo_enabled: false
+
+# -- Tempo storage size for trace data.
+#    (OPTIONAL) / (DEFAULT: "10Gi")
+# tempo_storage_size: "10Gi"
+
+# -- Trace retention period in days.
+#    (OPTIONAL) / (DEFAULT: 7)
+# tempo_retention_days: 7
+
+# -- Storage class for Tempo PVC.
+#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
+# tempo_storage_class: "proxmox-csi"
+
+# -- S3 bucket for trace storage (if using MinIO).
+#    (OPTIONAL) / (DEFAULT: "tempo-traces")
+#    NOTE: Only used if minio_enabled is true.
+# tempo_s3_bucket: "tempo-traces"
+
+# -- Tempo resource requests.
+#    (OPTIONAL) / (DEFAULTs shown)
+# tempo_cpu_request: "100m"
+# tempo_memory_request: "256Mi"
+
+# -- Tempo resource limits.
+#    (OPTIONAL) / (DEFAULTs shown)
+# tempo_cpu_limit: "500m"
+# tempo_memory_limit: "1Gi"
+
+# ==============================================================================
 # ONEDEV CONFIGURATION (Optional - Git Server with CI/CD)
 # ==============================================================================
 # OneDev is an All-In-One DevOps Platform with Git hosting, CI/CD, and packages.

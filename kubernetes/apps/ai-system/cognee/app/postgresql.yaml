@@ -67,7 +67,7 @@ spec:
 
   # Monitoring
   monitoring:
-    enablePodMonitor: true
+    enablePodMonitor: false
 
   # Resources
   resources:

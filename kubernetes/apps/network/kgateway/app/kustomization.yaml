@@ -8,5 +8,4 @@ resources:
   - gateway.yaml
   - networkpolicy.yaml
   - referencegrant.yaml
-  - podmonitor.yaml
 

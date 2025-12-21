@@ -131,13 +131,6 @@ spec:
       ports:
         - protocol: TCP
           port: 4000
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: observability
-      ports:
-        - protocol: TCP
-          port: 4000
   egress:
     - to:
         - namespaceSelector:
@@ -278,13 +271,6 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: observability
-      ports:
-        - protocol: TCP
-          port: 9187
   egress:
     - to:
         - namespaceSelector:
