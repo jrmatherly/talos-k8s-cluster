@@ -76,6 +76,9 @@ spec:
             cpu: "100m"
             memory: "128Mi"
 
+    defaultDatasources:
+      extra:
+
     grafana:
       enabled: true
       adminPassword: "Uj2PpuJyUJMJiD"
@@ -86,18 +89,6 @@ spec:
         enabled: true
         storageClassName: "proxmox-csi"
         size: "10Gi"
-      datasources:
-        datasources.yaml:
-          apiVersion: 1
-          datasources:
-            - name: VictoriaMetrics
-              type: prometheus
-              uid: prometheus
-              url: http://vmsingle-vmstack.observability.svc.cluster.local:8429
-              access: proxy
-              isDefault: true
-              jsonData:
-                timeInterval: "30s"
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1

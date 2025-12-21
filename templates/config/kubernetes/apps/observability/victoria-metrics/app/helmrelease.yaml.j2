@@ -89,6 +89,48 @@ spec:
             cpu: "100m"
             memory: "128Mi"
 
+    #| Default datasources - chart auto-provisions VictoriaMetrics with isDefault: true #|
+    #| Add extra datasources for VictoriaLogs and Tempo via defaultDatasources.extra #|
+    defaultDatasources:
+      extra:
+#% if victoria_logs_enabled %#
+        - name: VictoriaLogs
+          type: victoriametrics-logs-datasource
+          uid: victorialogs
+          url: http://victoria-logs.observability.svc.cluster.local:9428
+          access: proxy
+          isDefault: false
+          jsonData:
+            maxLines: 1000
+#% endif %#
+#% if tempo_enabled %#
+        - name: Tempo
+          type: tempo
+          uid: tempo
+          url: http://tempo.observability.svc.cluster.local:3200
+          access: proxy
+          isDefault: false
+          jsonData:
+            tracesToLogsV2:
+              datasourceUid: victorialogs
+              spanStartTimeShift: "-1h"
+              spanEndTimeShift: "1h"
+              filterByTraceID: true
+              filterBySpanID: true
+            tracesToMetrics:
+              datasourceUid: VictoriaMetrics
+              spanStartTimeShift: "-1h"
+              spanEndTimeShift: "1h"
+            serviceMap:
+              datasourceUid: VictoriaMetrics
+            nodeGraph:
+              enabled: true
+            search:
+              hide: false
+            lokiSearch:
+              datasourceUid: victorialogs
+#% endif %#
+
     #| Grafana - visualization (use existing or deploy new) #|
     grafana:
       enabled: true
@@ -101,54 +143,6 @@ spec:
         enabled: true
         storageClassName: "#{ vm_storage_class }#"
         size: "#{ grafana_storage_size }#"
-      #| VictoriaMetrics datasource (Prometheus-compatible) #|
-      datasources:
-        datasources.yaml:
-          apiVersion: 1
-          datasources:
-            - name: VictoriaMetrics
-              type: prometheus
-              uid: prometheus
-              url: http://vmsingle-vmstack.observability.svc.cluster.local:8429
-              access: proxy
-              isDefault: true
-              jsonData:
-                timeInterval: "30s"
-#% if victoria_logs_enabled %#
-            - name: VictoriaLogs
-              type: victoriametrics-logs-datasource
-              uid: victorialogs
-              url: http://victoria-logs.observability.svc.cluster.local:9428
-              access: proxy
-              jsonData:
-                maxLines: 1000
-#% endif %#
-#% if tempo_enabled %#
-            - name: Tempo
-              type: tempo
-              uid: tempo
-              url: http://tempo.observability.svc.cluster.local:3200
-              access: proxy
-              jsonData:
-                tracesToLogsV2:
-                  datasourceUid: victorialogs
-                  spanStartTimeShift: "-1h"
-                  spanEndTimeShift: "1h"
-                  filterByTraceID: true
-                  filterBySpanID: true
-                tracesToMetrics:
-                  datasourceUid: prometheus
-                  spanStartTimeShift: "-1h"
-                  spanEndTimeShift: "1h"
-                serviceMap:
-                  datasourceUid: prometheus
-                nodeGraph:
-                  enabled: true
-                search:
-                  hide: false
-                lokiSearch:
-                  datasourceUid: victorialogs
-#% endif %#
       #| Install VictoriaLogs plugin if enabled #|
 #% if victoria_logs_enabled %#
       plugins:
