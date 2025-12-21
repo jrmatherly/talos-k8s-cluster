@@ -39,6 +39,19 @@ spec:
         limits:
           cpu: "500m"
           memory: "1Gi"
+      metricsGenerator:
+        enabled: true
+        remoteWriteUrl: "http://vmsingle-vmstack.observability.svc.cluster.local:8429/api/v1/write"
+        processor:
+          service_graphs:
+            dimensions:
+              - service.namespace
+              - service.version
+          span_metrics:
+            dimensions:
+              - service.namespace
+              - http.method
+              - http.status_code
     service:
       type: ClusterIP
     persistence:
