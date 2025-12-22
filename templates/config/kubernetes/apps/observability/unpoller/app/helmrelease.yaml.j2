@@ -16,9 +16,24 @@ spec:
         kind: HelmRepository
         name: unpoller
   interval: 1h
+  #| Post-render patch to inject envFrom since the chart doesn't support it natively #|
+  #| REF: https://fluxcd.io/flux/components/helm/helmreleases/#post-renderers #|
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: unpoller
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/envFrom
+                value:
+                  - secretRef:
+                      name: cluster-secrets
   values:
     #| UnPoller configuration in TOML format #|
     #| Credentials provided via environment variables (UP_UNIFI_DEFAULT_*) from cluster-secrets #|
+    #| The postRenderers above inject envFrom into the deployment #|
     upConfig: |
       [poller]
         debug = false
@@ -42,11 +57,6 @@ spec:
 
       [loki]
         disable = true
-
-    #| Environment variables from cluster-secrets (contains UP_UNIFI_DEFAULT_* vars) #|
-    envFrom:
-      - secretRef:
-          name: cluster-secrets
 
     #| Pod Monitor for VMAgent scraping #|
     podMonitor:

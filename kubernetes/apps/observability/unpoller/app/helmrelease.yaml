@@ -12,6 +12,18 @@ spec:
         kind: HelmRepository
         name: unpoller
   interval: 1h
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: unpoller
+            patch: |
+              - op: add
+                path: /spec/template/spec/containers/0/envFrom
+                value:
+                  - secretRef:
+                      name: cluster-secrets
   values:
     upConfig: |
       [poller]
@@ -36,10 +48,6 @@ spec:
 
       [loki]
         disable = true
-
-    envFrom:
-      - secretRef:
-          name: cluster-secrets
 
     podMonitor:
       enabled: true
