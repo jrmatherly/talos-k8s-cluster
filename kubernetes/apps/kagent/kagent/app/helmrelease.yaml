@@ -156,16 +156,6 @@ spec:
     # ============================================================
     # Observability Configuration (OpenTelemetry)
     # ============================================================
-    otel:
-      tracing:
-        enabled: true
-        exporter:
-          otlp:
-            endpoint: "http://tempo.observability.svc.cluster.local:4317"
-            insecure: true
-            timeout: 15
-      logging:
-        enabled: false
 
     # ============================================================
     # Tools Configuration
