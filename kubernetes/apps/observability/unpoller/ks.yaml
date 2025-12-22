@@ -23,4 +23,4 @@ spec:
     - name: cilium
       namespace: kube-system
     - name: victoria-metrics
-      namespace: flux-system
+      namespace: observability
