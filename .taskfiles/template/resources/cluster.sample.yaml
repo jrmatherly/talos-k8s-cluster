@@ -372,12 +372,15 @@ cloudflare_token: ""
 # azure_client_secret: ""
 
 # ==============================================================================
-# OBSERVABILITY STACK (Optional - Prometheus/Grafana for K8s metrics)
+# OBSERVABILITY STACK (VictoriaMetrics-based)
 # ==============================================================================
-# Kubernetes infrastructure metrics with Prometheus and Grafana dashboards.
+# Kubernetes infrastructure metrics with VictoriaMetrics and Grafana dashboards.
+# NOTE: Legacy kube-prometheus-stack has been moved to archive/.
 
-# -- Enable the observability stack.
-#    (OPTIONAL) / (DEFAULT: false)
+# -- Enable metrics scraping features (ServiceMonitors, PodMonitors, NetworkPolicy).
+#    (OPTIONAL) / (DEFAULT: victoria_metrics_enabled)
+#    This is auto-derived from victoria_metrics_enabled. Only set explicitly if you
+#    need to override (e.g., disable scraping while keeping metrics storage).
 # observability_enabled: true
 
 # -- Grafana admin password.
@@ -385,54 +388,20 @@ cloudflare_token: ""
 #    WARNING: Change this for production deployments!
 # grafana_admin_password: ""
 
-# ==============================================================================
-# PROMETHEUS CONFIGURATION
-# ==============================================================================
-
-# -- Prometheus data retention period.
-#    (OPTIONAL) / (DEFAULT: "7d")
-# prometheus_retention: "7d"
-
-# -- Maximum storage size before old data is removed.
-#    (OPTIONAL) / (DEFAULT: "45GB")
-# prometheus_retention_size: "45GB"
-
-# -- Prometheus PVC storage size.
-#    (OPTIONAL) / (DEFAULT: "50Gi")
-# prometheus_storage_size: "50Gi"
-
-# -- Storage class for Prometheus and other observability PVCs.
-#    (OPTIONAL) / (DEFAULT: "proxmox-csi")
-# prometheus_storage_class: "proxmox-csi"
-
-# -- Number of Prometheus replicas.
-#    (OPTIONAL) / (DEFAULT: 1)
-# prometheus_replicas: 1
-
-# -- Number of Alertmanager replicas for HA.
-#    (OPTIONAL) / (DEFAULT: 1)
-# prometheus_alertmanager_replicas: 1
-
-# -- Storage size for Alertmanager PVC.
-#    (OPTIONAL) / (DEFAULT: "5Gi")
-# alertmanager_storage_size: "5Gi"
-
 # -- Storage size for Grafana PVC.
 #    (OPTIONAL) / (DEFAULT: "10Gi")
 # grafana_storage_size: "10Gi"
 
 # ==============================================================================
-# VICTORIAMETRICS STACK (Optional - Alternative to kube-prometheus-stack)
+# VICTORIAMETRICS STACK
 # ==============================================================================
-# VictoriaMetrics provides a more resource-efficient metrics stack than Prometheus.
-# When enabled, deploys VMSingle, VMAgent, and VMAlert alongside Grafana.
-# Can coexist with or replace kube-prometheus-stack.
+# VictoriaMetrics provides a resource-efficient metrics stack.
+# Deploys VMSingle, VMAgent, VMAlert, and Grafana (vm-grafana).
 # REF: https://docs.victoriametrics.com/
 
 # -- Enable VictoriaMetrics stack deployment.
 #    (OPTIONAL) / (DEFAULT: false)
-#    NOTE: When enabled alongside observability_enabled, both stacks will run.
-#    For full replacement, disable observability_enabled after VictoriaMetrics is stable.
+#    When enabled, also auto-enables observability_enabled for ServiceMonitors/PodMonitors.
 # victoria_metrics_enabled: false
 
 # -- VMSingle storage size for metrics data.
@@ -512,6 +481,33 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULTs shown)
 # vector_cpu_limit: "200m"
 # vector_memory_limit: "512Mi"
+
+# ==============================================================================
+# ENHANCED LOG COLLECTION (Optional - Additional log sources)
+# ==============================================================================
+# Additional log sources for comprehensive observability.
+# All features automatically enabled when victoria_logs_enabled is true.
+
+# -- Enable Kubernetes Event Exporter.
+#    (OPTIONAL) / (DEFAULT: victoria_logs_enabled)
+#    Captures ephemeral K8s events (normally expire after ~1 hour) and forwards
+#    them to VictoriaLogs for persistent storage and debugging.
+#    REF: https://github.com/resmoio/kubernetes-event-exporter
+# kubernetes_event_exporter_enabled: false
+
+# -- Enable Talos system log collection.
+#    (OPTIONAL) / (DEFAULT: victoria_logs_enabled)
+#    Collects Talos kernel and service logs via Vector UDP sockets.
+#    Requires extraKernelArgs in Talos schematic for kernel logs (port 6050).
+#    Service logs forwarded via machine.logging.destinations (port 6051).
+#    REF: https://www.talos.dev/v1.9/talos-guides/configuration/logging/
+# talos_system_logs_enabled: false
+
+# -- Enable API server audit log collection.
+#    (OPTIONAL) / (DEFAULT: true)
+#    Collects Kubernetes API server audit logs from /var/log/audit/kube/*.log.
+#    Provides visibility into API server requests for security and debugging.
+# api_server_audit_logs_enabled: true
 
 # ==============================================================================
 # TEMPO TRACING (Optional - Distributed tracing backend)
@@ -938,9 +934,10 @@ cloudflare_token: ""
 #          Set obot_workspace_provider="s3" to enable multiple replicas.
 # obot_replicas: 1
 
-# -- obot Docker image and Helm chart version.
-#    (OPTIONAL) / (DEFAULT: "v0.2.16")
-# obot_version: "v0.2.16"
+# -- obot Docker image and Helm chart version (without 'v' prefix).
+#    The template automatically adds 'v' prefix for Docker image tags.
+#    (OPTIONAL) / (DEFAULT: "0.2.20")
+# obot_version: "0.2.20"
 
 # -- CPU request for obot container.
 #    (OPTIONAL) / (DEFAULT: "500m")
@@ -1277,10 +1274,10 @@ kagent_kmcp_enabled: true
 # ==============================================================================
 
 # -- Grafana URL for grafana-mcp tool.
-#    (OPTIONAL) / (DEFAULT: http://kube-prometheus-stack-grafana.observability.svc:80/api)
-#    Points to the existing cluster Grafana - NOT a separate Grafana installation.
+#    (OPTIONAL) / (DEFAULT: http://vm-grafana.observability.svc:80/api)
+#    Points to the VictoriaMetrics Grafana - NOT a separate Grafana installation.
 #    grafana-mcp is an MCP tool that lets kagent agents interact with Grafana.
-# kagent_grafana_url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
+# kagent_grafana_url: "http://vm-grafana.observability.svc:80/api"
 
 # -- Grafana API key for grafana-mcp tool authentication.
 #    (OPTIONAL) - Will be encrypted with SOPS via Flux valuesFrom

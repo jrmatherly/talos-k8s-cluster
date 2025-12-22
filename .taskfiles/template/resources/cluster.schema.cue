@@ -86,18 +86,9 @@ import (
 	azure_client_id?: string & !=""
 	azure_client_secret?: string & !=""
 
-	// Observability Stack Configuration (optional - Prometheus/Grafana for K8s metrics)
+	// Observability Stack Configuration (optional - VictoriaMetrics/Grafana for K8s metrics)
 	observability_enabled?: bool
 	grafana_admin_password?: string & !=""
-
-	// Prometheus configuration (legacy - being replaced by VictoriaMetrics)
-	prometheus_retention?: string & !=""        // e.g., "7d"
-	prometheus_retention_size?: string & !=""   // e.g., "45GB"
-	prometheus_storage_size?: string & !=""     // e.g., "50Gi"
-	prometheus_storage_class?: string & !=""    // e.g., "proxmox-csi"
-	prometheus_replicas?: int & >=1
-	prometheus_alertmanager_replicas?: int & >=1
-	alertmanager_storage_size?: string & !=""
 	grafana_storage_size?: string & !=""
 
 	// VictoriaMetrics Stack Configuration (replaces kube-prometheus-stack)

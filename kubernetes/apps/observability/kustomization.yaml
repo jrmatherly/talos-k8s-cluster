@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+
+components:
+  - ../../components/sops
+
+resources:
+  - ./namespace.yaml
+  - ./victoria-metrics/ks.yaml
+  - ./victoria-logs/ks.yaml
+  - ./vector/ks.yaml
+  - ./kubernetes-event-exporter/ks.yaml
+  - ./tempo/ks.yaml
+  - ./minio-dashboards/ks.yaml
+

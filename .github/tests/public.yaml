@@ -58,7 +58,7 @@ azure_cohere_embed_api_base: "https://test-cohere-embed.eastus.models.ai.azure.c
 # Azure Anthropic API (for Claude models)
 azure_anthropic_api_key: "fake-anthropic-api-key"
 azure_anthropic_api_base: "https://test-anthropic.eastus2.models.ai.azure.com"
-# Observability Stack (Prometheus/Grafana for K8s metrics)
+# Observability Stack (VictoriaMetrics/Grafana for K8s metrics)
 observability_enabled: true
 grafana_admin_password: "test-password"
 # VictoriaMetrics Stack (replaces kube-prometheus-stack)
@@ -77,6 +77,10 @@ vl_retention_days: 14
 vl_storage_class: "proxmox-csi"
 # Vector Agent (log collection)
 vector_enabled: true
+# Enhanced Log Collection (additional sources)
+kubernetes_event_exporter_enabled: true
+talos_system_logs_enabled: true
+api_server_audit_logs_enabled: true
 # Tempo (distributed tracing)
 tempo_enabled: true
 tempo_storage_size: "10Gi"
@@ -228,7 +232,7 @@ kagent_postgresql_replicas: 3
 kagent_postgresql_storage_size: "10Gi"
 kagent_kmcp_enabled: true
 kagent_write_operations_enabled: false
-kagent_grafana_url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
+kagent_grafana_url: "http://vm-grafana.observability.svc:80/api"
 kagent_grafana_api_key: "test-grafana-api-key"
 # LiteLLM Configuration (LLM Proxy with Multi-Provider Routing)
 litellm_enabled: true

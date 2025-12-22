@@ -213,18 +213,10 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("azure_anthropic_api_key", "")
         data.setdefault("azure_anthropic_api_base", "")
 
-        # Observability Stack defaults (Prometheus/Grafana for K8s metrics)
-        data.setdefault("observability_enabled", False)
+        # Observability Stack defaults (VictoriaMetrics/Grafana for K8s metrics)
+        # NOTE: observability_enabled is auto-set to True when victoria_metrics_enabled is True
+        # This enables metrics scraping, ServiceMonitors, and NetworkPolicy rules
         data.setdefault("grafana_admin_password", "admin")
-
-        # Prometheus defaults (legacy - being replaced by VictoriaMetrics)
-        data.setdefault("prometheus_retention", "7d")
-        data.setdefault("prometheus_retention_size", "45GB")
-        data.setdefault("prometheus_storage_size", "50Gi")
-        data.setdefault("prometheus_storage_class", "proxmox-csi")
-        data.setdefault("prometheus_replicas", 1)
-        data.setdefault("prometheus_alertmanager_replicas", 1)
-        data.setdefault("alertmanager_storage_size", "5Gi")
         data.setdefault("grafana_storage_size", "10Gi")
 
         # VictoriaMetrics Stack defaults (replaces kube-prometheus-stack)
@@ -236,6 +228,12 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("vm_cpu_limit", "1000m")
         data.setdefault("vm_memory_request", "512Mi")
         data.setdefault("vm_memory_limit", "2Gi")
+
+        # Auto-enable observability features when VictoriaMetrics is enabled
+        # This enables metrics scraping (ServiceMonitors/PodMonitors) and NetworkPolicy rules
+        data.setdefault(
+            "observability_enabled", data.get("victoria_metrics_enabled", False)
+        )
 
         # VictoriaLogs defaults (replaces Loki)
         data.setdefault("victoria_logs_enabled", False)
@@ -445,10 +443,10 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("kagent_postgres_url", "")
         data.setdefault("kagent_kmcp_enabled", True)
         data.setdefault("kagent_write_operations_enabled", False)
-        # kagent Grafana MCP settings (uses existing cluster Grafana)
+        # kagent Grafana MCP settings (uses VictoriaMetrics Grafana)
         data.setdefault(
             "kagent_grafana_url",
-            "http://kube-prometheus-stack-grafana.observability.svc:80/api",
+            "http://vm-grafana.observability.svc:80/api",
         )
         data.setdefault("kagent_grafana_api_key", "")
         # kagent CloudNativePG (CNPG) PostgreSQL settings

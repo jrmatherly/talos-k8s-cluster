@@ -1,5 +1,7 @@
-#% if observability_enabled %#
+#% if victoria_metrics_enabled %#
 ---
+#| Observability Stack - VictoriaMetrics based #|
+#| NOTE: Legacy kube-prometheus-stack moved to archive/ #|
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: observability
@@ -9,13 +11,7 @@ components:
 
 resources:
   - ./namespace.yaml
-#% if victoria_metrics_enabled %#
-  #| VictoriaMetrics Stack (replaces kube-prometheus-stack) #|
   - ./victoria-metrics/ks.yaml
-#% else %#
-  #| Legacy kube-prometheus-stack #|
-  - ./kube-prometheus-stack/ks.yaml
-#% endif %#
 #% if victoria_logs_enabled %#
   - ./victoria-logs/ks.yaml
 #% endif %#

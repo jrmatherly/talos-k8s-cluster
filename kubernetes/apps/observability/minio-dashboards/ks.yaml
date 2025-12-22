@@ -1,8 +1,4 @@
-#% if minio_enabled and victoria_metrics_enabled %#
 ---
-#| Flux Kustomization for MinIO Grafana dashboards #|
-#| Deploys dashboard ConfigMaps to observability namespace #|
-#| (separate from minio app to avoid namespace override) #|
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -23,4 +19,3 @@ spec:
     namespace: flux-system
   targetNamespace: observability
   wait: false
-#% endif %#

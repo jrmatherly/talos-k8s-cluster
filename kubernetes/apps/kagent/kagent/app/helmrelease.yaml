@@ -170,7 +170,7 @@ spec:
     # NOTE: apiKey is injected via valuesFrom from kagent-grafana-secret (SOPS-encrypted)
     grafana-mcp:
       grafana:
-        url: "http://kube-prometheus-stack-grafana.observability.svc:80/api"
+        url: "http://vm-grafana.observability.svc:80/api"
 
     kagent-tools:
       enabled: true
