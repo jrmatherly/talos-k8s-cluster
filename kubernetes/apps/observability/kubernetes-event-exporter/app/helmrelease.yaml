@@ -13,6 +13,10 @@ spec:
         name: bitnami
   interval: 1h
   values:
+    image:
+      registry: ghcr.io
+      repository: resmoio/kubernetes-event-exporter
+      tag: v1.7
     podLabels:
       network.cilium.io/api-access: "true"
     config:

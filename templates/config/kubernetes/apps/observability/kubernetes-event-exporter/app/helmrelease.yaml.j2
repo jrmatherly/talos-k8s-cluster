@@ -17,6 +17,13 @@ spec:
         name: bitnami
   interval: 1h
   values:
+    #| Override deprecated Bitnami image with official resmoio image #|
+    #| REF: https://github.com/resmoio/kubernetes-event-exporter/releases #|
+    #| NOTE: Bitnami images deprecated after Sep 29, 2025 #|
+    image:
+      registry: ghcr.io
+      repository: resmoio/kubernetes-event-exporter
+      tag: v1.7
     #| Network policy labels for CCNP tiered policies (watches K8s events) #|
     podLabels:
       network.cilium.io/api-access: "true"
