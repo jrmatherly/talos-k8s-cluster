@@ -50,6 +50,17 @@ spec:
             - port: "53"
               protocol: TCP
 #% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
+    #| OIDC discovery endpoint (via external gateway LoadBalancer) #|
+    #| Required for OAuth2 configuration validation               #|
+    #| Uses toEntities:world because LoadBalancer IPs require it   #|
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+#% endif %#
+#% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
 ---
 #| ============================================================ #|
 #| NetworkPolicy for Gateway Proxies to Keycloak                 #|
