@@ -304,6 +304,9 @@ When adding new application templates to this project, multiple files must be up
 18. **MinIO v3 metrics require custom ServiceMonitor** - Helm chart only scrapes v2 endpoints; for community v3 Grafana dashboard, deploy separate ServiceMonitor scraping `/minio/metrics/v3/*` paths
 19. **Cognee migration architecture bug** - Cognee's entrypoint.sh runs Alembic migrations BEFORE SQLAlchemy creates base tables; init container workaround pre-creates some tables but deployment may still fail; see `docs/ai-context/cognee-deployment.md`
 20. **Cognee frontend requires GHCR images** - Uses `ghcr.io/jrmatherly/cognee` and `ghcr.io/jrmatherly/cognee-frontend`; frontend requires `cognee_frontend_enabled: true` and optionally Auth0 credentials for authentication
+21. **UnPoller chart version suffix** - Use `2.11.2-Chart6` (not `2.11.2`); chart doesn't support `envFrom` natively, use Flux `postRenderers` to inject from `cluster-secrets`
+22. **Proxmox Grafana dashboards** - Community dashboards (16060, 13307) use `${DS_SHIFT-METRICS}` variable that doesn't auto-resolve; import manually via Grafana UI and map to `VictoriaMetrics` datasource
+23. **OTEL collector OTLP endpoint** - Don't append `/v1/logs` to VictoriaLogs endpoint; OTLP exporter auto-appends it. Use: `http://victoria-logs-server.observability.svc.cluster.local:9428/insert/opentelemetry`
 
 ## Extended Documentation
 
@@ -316,5 +319,7 @@ For detailed component documentation, see:
 - `docs/ai-context/obot-networking.md` - obot MCP server networking (port architecture, NetworkPolicy)
 - `docs/ai-context/kagent-a2a.md` - kagent A2A networking (controller→agent, ModelConfig)
 - `docs/ai-context/imagevolume-cnpg.md` - ImageVolume feature gate for CloudNativePG extensions
+- `docs/ai-context/unifi-metrics.md` - UnPoller UniFi monitoring (postRenderers, cluster-secrets pattern)
+- `docs/ai-context/proxmox-metrics.md` - Proxmox VE metrics (InfluxDB protocol, dashboard workarounds)
 
 For the universal agent guide, see `AGENTS.md`.
