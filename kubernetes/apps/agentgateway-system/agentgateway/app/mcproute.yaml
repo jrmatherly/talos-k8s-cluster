@@ -17,7 +17,11 @@ spec:
           - "https://ai-gw.matherly.net/mcp"
         provider: Keycloak
         jwks:
-          uri: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
+          backendRef:
+            name: keycloak
+            namespace: keycloak
+            port: 8080
+          jwksPath: "/realms/k8s-cluster/protocol/openid-connect/certs"
         resourceMetadata:
           default:
             resource: "https://mcp-gw.matherly.net/mcp"

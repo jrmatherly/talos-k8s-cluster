@@ -23,7 +23,11 @@ spec:
           - "https://ai-gw.#{ primary_domain }#/mcp"
         provider: Keycloak
         jwks:
-          uri: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
+          backendRef:
+            name: keycloak
+            namespace: keycloak
+            port: 8080
+          jwksPath: "/realms/k8s-cluster/protocol/openid-connect/certs"
         resourceMetadata:
           default:
             resource: "https://mcp-gw.#{ primary_domain }#/mcp"
