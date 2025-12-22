@@ -74,10 +74,7 @@ data:
           "clientAuthenticatorType": "client-secret",
           "secret": "#{keycloak_oidc_client_secret}#",
           "redirectUris": [
-            "https://*.#{primary_domain}#/callback",
-            "https://*.#{primary_domain}#/oauth2/callback",
-            "https://*.#{primary_domain}#/oauth2/redirect",
-            "https://*.#{primary_domain}#/*"
+            "https://sso.#{primary_domain}#/oauth2/redirect"
           ],
           "webOrigins": [
             "https://*.#{primary_domain}#"
@@ -376,35 +373,37 @@ data:
         }#% if (keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret) or (keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret) %#,#% endif %#
         #% endif %#
         #| === Google Mappers === #|
+        #| Note: Use oidc-user-attribute-idp-mapper (not google-user-attribute-mapper) #|
+        #| The google-specific mapper was deprecated in Keycloak 26.x                  #|
         #% if keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret %#
         {
           "name": "google-email",
           "identityProviderAlias": "google",
-          "identityProviderMapper": "google-user-attribute-mapper",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
             "syncMode": "INHERIT",
-            "jsonField": "email",
-            "userAttribute": "email"
+            "claim": "email",
+            "user.attribute": "email"
           }
         },
         {
           "name": "google-first-name",
           "identityProviderAlias": "google",
-          "identityProviderMapper": "google-user-attribute-mapper",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
             "syncMode": "INHERIT",
-            "jsonField": "given_name",
-            "userAttribute": "firstName"
+            "claim": "given_name",
+            "user.attribute": "firstName"
           }
         },
         {
           "name": "google-last-name",
           "identityProviderAlias": "google",
-          "identityProviderMapper": "google-user-attribute-mapper",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
             "syncMode": "INHERIT",
-            "jsonField": "family_name",
-            "userAttribute": "lastName"
+            "claim": "family_name",
+            "user.attribute": "lastName"
           }
         },
         {
