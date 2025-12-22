@@ -5,4 +5,4 @@ metadata:
   name: unpoller
 spec:
   interval: 12h
-  url: https://unpoller.github.io/helm-chart
+  url: https://unpoller.com/helm-chart
