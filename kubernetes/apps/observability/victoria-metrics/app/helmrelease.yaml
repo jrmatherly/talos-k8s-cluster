@@ -151,6 +151,7 @@ spec:
       plugins:
         - victoriametrics-metrics-datasource
         - victoriametrics-logs-datasource
+        - grafana-clock-panel
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1

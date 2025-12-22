@@ -180,11 +180,15 @@ spec:
         enabled: true
         storageClassName: "#{ vm_storage_class }#"
         size: "#{ grafana_storage_size }#"
-      #| Install VictoriaMetrics plugins #|
+      #| Install Grafana plugins #|
       plugins:
         - victoriametrics-metrics-datasource
 #% if victoria_logs_enabled %#
         - victoriametrics-logs-datasource
+#% endif %#
+#% if unifi_enabled %#
+        #| Required by UniFi dashboards #|
+        - grafana-clock-panel
 #% endif %#
       #| Grafana dashboards organized in folders #|
       dashboardProviders:
