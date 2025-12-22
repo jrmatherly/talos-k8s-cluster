@@ -10,3 +10,4 @@ resources:
   - postgresql.yaml
   - httproute.yaml
   - networkpolicy.yaml
+  - podmonitor.yaml

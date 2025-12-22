@@ -77,6 +77,13 @@ spec:
         - protocol: TCP
           port: 9977   # xDS
     - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9091
+    - from:
         - ipBlock:
             cidr: 192.168.20.0/22
       ports:
@@ -134,6 +141,15 @@ spec:
           port: 8443
         - protocol: TCP
           port: 10443
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 19001
+        - protocol: TCP
+          port: 15000
     - from:
         - ipBlock:
             cidr: 192.168.20.0/22
@@ -219,6 +235,14 @@ spec:
     - Ingress
     - Egress
   ingress:
+    # Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 7979
     # Kubelet probes
     - from:
         - ipBlock:
@@ -282,6 +306,13 @@ spec:
     - Ingress
     - Egress
   ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 8080
     - from:
         - ipBlock:
             cidr: 192.168.20.0/22
@@ -381,6 +412,13 @@ spec:
           port: 1053
         - protocol: TCP
           port: 1053
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9153
     - from:
         - ipBlock:
             cidr: 192.168.20.0/22

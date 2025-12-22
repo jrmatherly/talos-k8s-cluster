@@ -61,6 +61,15 @@ spec:
         - protocol: TCP
           port: 8080
     # Allow Prometheus scraping (metrics on port 8080, health on 9000)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9000
     # Allow JGroups clustering between Keycloak pods
     - from:
         - podSelector:
@@ -168,6 +177,14 @@ spec:
       ports:
         - protocol: TCP
           port: 8000
+    # Allow Prometheus metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9187
   egress:
     # DNS
     - to:

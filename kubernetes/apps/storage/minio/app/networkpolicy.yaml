@@ -37,6 +37,16 @@ spec:
       ports:
         - protocol: TCP
           port: 9001  # Console
+    # Allow Prometheus scraping (both API and Console metrics endpoints)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9000  # S3 API metrics
+        - protocol: TCP
+          port: 9001  # Console metrics
     # Kubelet probes
     - from:
         - ipBlock:
