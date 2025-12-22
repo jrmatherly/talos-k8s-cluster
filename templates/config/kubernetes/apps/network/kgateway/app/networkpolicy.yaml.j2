@@ -49,4 +49,40 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
+#% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
+---
+#| ============================================================ #|
+#| NetworkPolicy for Gateway Proxies to Keycloak                 #|
+#| Required for OAuth2 token exchange (internal Gateway)         #|
+#| ============================================================ #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: kgateway-proxy-keycloak
+spec:
+  endpointSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: internal
+  egress:
+    #| OAuth2 token exchange with Keycloak #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: keycloak
+            app.kubernetes.io/name: keycloak
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    #| DNS resolution #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+#% endif %#
 #% endif %#

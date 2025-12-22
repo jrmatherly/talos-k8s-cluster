@@ -1,0 +1,45 @@
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: GatewayExtension
+metadata:
+  name: keycloak-oauth2
+spec:
+  type: OAuth2
+  oauth2:
+    issuerURI: "https://auth.matherly.net/realms/k8s-cluster"
+    backendRef:
+      name: keycloak-http
+      namespace: keycloak
+      port: 8080
+    credentials:
+      clientID: "kgateway"
+      clientSecretRef:
+        name: keycloak-oidc-credentials
+    scopes:
+      - openid
+      - profile
+      - email
+    forwardAccessToken: true
+    logoutPath: "/logout"
+    endSessionEndpoint: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/logout"
+    cookies:
+      domain: "matherly.net"
+      sameSite: Lax
+    denyRedirect:
+      headers:
+        - name: "X-Requested-With"
+          value: "XMLHttpRequest"
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: kgateway-internal-oauth2
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: internal
+  oauth2:
+    extensionRef:
+      name: keycloak-oauth2
+      namespace: network

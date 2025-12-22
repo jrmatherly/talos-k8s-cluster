@@ -300,6 +300,9 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("kgateway_tracing_enabled", False)
         data.setdefault("kgateway_trace_sampling_percentage", 100)
 
+        # kgateway OAuth2 defaults (OIDC authentication for internal Gateway)
+        data.setdefault("kgateway_oauth2_enabled", False)
+
         # OneDev defaults (Git Server with CI/CD)
         data.setdefault("onedev_enabled", False)
         data.setdefault("onedev_admin_password", "")

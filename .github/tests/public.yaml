@@ -95,6 +95,8 @@ tempo_s3_bucket: "tempo-traces"
 # kgateway Observability
 kgateway_tracing_enabled: true
 kgateway_trace_sampling_percentage: 100
+# kgateway OAuth2 (OIDC authentication for internal Gateway)
+kgateway_oauth2_enabled: true
 # OneDev Git Server (testing full deployment with external DB)
 onedev_enabled: true
 onedev_admin_password: "test-admin-password"

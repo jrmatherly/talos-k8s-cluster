@@ -2,7 +2,7 @@
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: ReferenceGrant
 metadata:
-  name: agentgateway-keycloak-access
+  name: gateway-keycloak-access
 spec:
   from:
     - group: agentgateway.dev
@@ -14,6 +14,9 @@ spec:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: agentgateway-system
+    - group: gateway.kgateway.dev
+      kind: GatewayExtension
+      namespace: network
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: network

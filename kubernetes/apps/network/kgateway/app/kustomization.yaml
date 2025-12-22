@@ -9,4 +9,6 @@ resources:
   - networkpolicy.yaml
   - referencegrant.yaml
   - podmonitor.yaml
+  - secret.sops.yaml
+  - oauth2.yaml
 

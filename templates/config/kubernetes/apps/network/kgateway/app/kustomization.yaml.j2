@@ -15,5 +15,9 @@ resources:
 #% if kgateway_tracing_enabled %#
   - httplistenerpolicy.yaml
 #% endif %#
+#% if kgateway_oauth2_enabled | default(false) and keycloak_enabled and keycloak_oidc_client_secret %#
+  - secret.sops.yaml
+  - oauth2.yaml
+#% endif %#
 #% endif %#
 

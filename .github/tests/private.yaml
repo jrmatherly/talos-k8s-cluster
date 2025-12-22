@@ -87,6 +87,8 @@ proxmox_csi_token_secret: "fake-secret"
 # kgateway Observability (disabled for private repo testing)
 # kgateway_tracing_enabled: false
 # kgateway_trace_sampling_percentage:
+# kgateway OAuth2 (disabled for private repo testing)
+# kgateway_oauth2_enabled: false
 # OneDev Git Server (disabled for private repo testing)
 # onedev_enabled: false
 # onedev_admin_password: ""

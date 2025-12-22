@@ -723,6 +723,19 @@ cloudflare_token: ""
 # keycloak_oidc_cookie_domain: "example.com"
 
 # ==============================================================================
+# KGATEWAY OAUTH2 CONFIGURATION
+# ==============================================================================
+# Enables OAuth2 authentication via Keycloak for internal Gateway.
+# When enabled, all routes through the internal Gateway will require OIDC login.
+# Requires: keycloak_enabled and keycloak_oidc_client_secret
+
+# -- Enable OAuth2 for internal Gateway.
+#    (OPTIONAL) / (DEFAULT: false)
+#    When enabled, users accessing internal services (Hubble UI, etc.) will be
+#    redirected to Keycloak for authentication.
+# kgateway_oauth2_enabled: false
+
+# ==============================================================================
 # KEYCLOAK POSTGRESQL CONFIGURATION
 # ==============================================================================
 

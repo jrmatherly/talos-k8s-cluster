@@ -143,6 +143,9 @@ import (
 	kgateway_tracing_enabled?: bool              // Enable tracing for kgateway (default: false)
 	kgateway_trace_sampling_percentage?: int & >=0 & <=100  // Trace sampling % (default: 100)
 
+	// kgateway OAuth2 Configuration (OIDC authentication for internal Gateway)
+	kgateway_oauth2_enabled?: bool               // Enable OAuth2 for internal Gateway (default: false)
+
 	// OneDev Configuration (Git Server with CI/CD)
 	onedev_enabled?: bool
 	onedev_admin_password?: string & !=""
