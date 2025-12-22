@@ -122,6 +122,16 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
+#% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
+    #| OIDC discovery endpoint (external gateway LoadBalancer IP) #|
+    #| Required for OAuth2 configuration validation                #|
+    - to:
+        - ipBlock:
+            cidr: #{ cloudflare_gateway_addr }#/32
+      ports:
+        - protocol: TCP
+          port: 443
+#% endif %#
 ---
 #| ============================================================ #|
 #| NetworkPolicy for kgateway proxy pods (external, internal)   #|
