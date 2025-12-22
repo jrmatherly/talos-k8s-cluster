@@ -1,0 +1,9 @@
+#% if opentelemetry_operator_enabled | default(victoria_logs_enabled) %#
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opentelemetry-operator-system
+  labels:
+    pod-security.kubernetes.io/enforce: privileged
+#% endif %#

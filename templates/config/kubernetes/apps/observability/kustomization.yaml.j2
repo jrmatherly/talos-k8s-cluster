@@ -18,8 +18,11 @@ resources:
 #% if vector_enabled | default(victoria_logs_enabled) %#
   - ./vector/ks.yaml
 #% endif %#
-#% if kubernetes_event_exporter_enabled | default(victoria_logs_enabled) %#
-  - ./kubernetes-event-exporter/ks.yaml
+#% if opentelemetry_operator_enabled | default(victoria_logs_enabled) %#
+  - ./opentelemetry-operator/ks.yaml
+#% endif %#
+#% if opentelemetry_k8s_events_enabled | default(victoria_logs_enabled) %#
+  - ./opentelemetry-k8s-events/ks.yaml
 #% endif %#
 #% if tempo_enabled %#
   - ./tempo/ks.yaml

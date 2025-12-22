@@ -1,9 +1,0 @@
-#% if kubernetes_event_exporter_enabled | default(victoria_logs_enabled) %#
----
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-resources:
-  - ./helmrepository.yaml
-  - ./helmrelease.yaml
-#% endif %#

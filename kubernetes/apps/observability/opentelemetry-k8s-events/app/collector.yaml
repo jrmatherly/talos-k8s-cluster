@@ -1,0 +1,43 @@
+---
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: k8s-events
+  labels:
+    app.kubernetes.io/name: opentelemetry-k8s-events
+spec:
+  image: otel/opentelemetry-collector-contrib:0.142.0
+  mode: deployment
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  config:
+    receivers:
+      k8s_events:
+        namespaces: []
+    processors:
+      batch:
+        timeout: 10s
+        send_batch_size: 100
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+    exporters:
+      otlphttp/victorialogs:
+        endpoint: http://victoria-logs-server.observability.svc.cluster.local:9428/insert/opentelemetry/v1/logs
+        tls:
+          insecure: true
+      # debug:
+      #   verbosity: detailed
+    service:
+      pipelines:
+        logs:
+          receivers: [k8s_events]
+          processors: [memory_limiter, batch]
+          exporters: [otlphttp/victorialogs]

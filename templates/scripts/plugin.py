@@ -254,10 +254,17 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("vector_memory_request", "128Mi")
         data.setdefault("vector_memory_limit", "512Mi")
 
-        # Kubernetes Event Exporter defaults (captures ephemeral K8s events)
-        # Defaults to victoria_logs_enabled - requires VictoriaLogs for storage
+        # OpenTelemetry Operator defaults (manages OTEL Collectors via CRDs)
+        # Defaults to victoria_logs_enabled - required for k8s events collection
         data.setdefault(
-            "kubernetes_event_exporter_enabled", data.get("victoria_logs_enabled", False)
+            "opentelemetry_operator_enabled", data.get("victoria_logs_enabled", False)
+        )
+
+        # OpenTelemetry K8s Events Collector defaults (captures ephemeral K8s events)
+        # Defaults to victoria_logs_enabled - requires OTEL Operator and VictoriaLogs
+        # REF: Part 11 of monitoring guide - replaces abandoned kubernetes-event-exporter
+        data.setdefault(
+            "opentelemetry_k8s_events_enabled", data.get("victoria_logs_enabled", False)
         )
 
         # Talos System Logs defaults (kernel and service logs via Vector)

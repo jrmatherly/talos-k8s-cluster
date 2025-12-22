@@ -78,7 +78,9 @@ vl_storage_class: "proxmox-csi"
 # Vector Agent (log collection)
 vector_enabled: true
 # Enhanced Log Collection (additional sources)
-kubernetes_event_exporter_enabled: true
+# OpenTelemetry (K8s events collection via k8seventsreceiver)
+opentelemetry_operator_enabled: true
+opentelemetry_k8s_events_enabled: true
 talos_system_logs_enabled: true
 api_server_audit_logs_enabled: true
 # Tempo (distributed tracing)

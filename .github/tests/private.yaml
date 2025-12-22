@@ -70,7 +70,9 @@ proxmox_csi_token_secret: "fake-secret"
 # vector_cpu_request: ""
 # vector_memory_request: ""
 # Enhanced Log Collection (disabled for private repo testing)
-# kubernetes_event_exporter_enabled: false
+# OpenTelemetry (K8s events collection via k8seventsreceiver)
+# opentelemetry_operator_enabled: false
+# opentelemetry_k8s_events_enabled: false
 # talos_system_logs_enabled: false
 # api_server_audit_logs_enabled: true
 # Tempo (disabled for private repo testing)

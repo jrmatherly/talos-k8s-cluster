@@ -11,7 +11,8 @@ resources:
   - ./victoria-metrics/ks.yaml
   - ./victoria-logs/ks.yaml
   - ./vector/ks.yaml
-  - ./kubernetes-event-exporter/ks.yaml
+  - ./opentelemetry-operator/ks.yaml
+  - ./opentelemetry-k8s-events/ks.yaml
   - ./tempo/ks.yaml
   - ./minio-dashboards/ks.yaml
 

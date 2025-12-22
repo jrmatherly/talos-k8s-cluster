@@ -488,12 +488,20 @@ cloudflare_token: ""
 # Additional log sources for comprehensive observability.
 # All features automatically enabled when victoria_logs_enabled is true.
 
-# -- Enable Kubernetes Event Exporter.
+# -- Enable OpenTelemetry Operator.
+#    (OPTIONAL) / (DEFAULT: victoria_logs_enabled)
+#    Deploys the OTEL Operator which manages OpenTelemetryCollector CRDs.
+#    Required for K8s events collection via k8seventsreceiver.
+#    REF: https://opentelemetry.io/docs/kubernetes/operator/
+# opentelemetry_operator_enabled: false
+
+# -- Enable OpenTelemetry K8s Events Collector.
 #    (OPTIONAL) / (DEFAULT: victoria_logs_enabled)
 #    Captures ephemeral K8s events (normally expire after ~1 hour) and forwards
-#    them to VictoriaLogs for persistent storage and debugging.
-#    REF: https://github.com/resmoio/kubernetes-event-exporter
-# kubernetes_event_exporter_enabled: false
+#    them to VictoriaLogs via OTLP HTTP for persistent storage and debugging.
+#    NOTE: Replaces abandoned kubernetes-event-exporter (Part 11 of monitoring guide).
+#    REF: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8seventsreceiver
+# opentelemetry_k8s_events_enabled: false
 
 # -- Enable Talos system log collection.
 #    (OPTIONAL) / (DEFAULT: victoria_logs_enabled)

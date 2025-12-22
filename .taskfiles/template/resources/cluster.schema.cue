@@ -118,8 +118,10 @@ import (
 	vector_memory_request?: string & !=""        // Memory request per node (default: 128Mi)
 	vector_memory_limit?: string & !=""          // Memory limit per node (default: 512Mi)
 
-	// Kubernetes Event Exporter Configuration (captures ephemeral K8s events)
-	kubernetes_event_exporter_enabled?: bool     // Enable event exporter (default: victoria_logs_enabled)
+	// OpenTelemetry Configuration (replaces abandoned kubernetes-event-exporter)
+	// REF: Part 11 of monitoring guide - uses OTEL k8seventsreceiver
+	opentelemetry_operator_enabled?: bool        // Enable OTEL Operator (default: victoria_logs_enabled)
+	opentelemetry_k8s_events_enabled?: bool      // Enable K8s events collector (default: victoria_logs_enabled)
 
 	// Talos System Logs Configuration (kernel and service logs)
 	talos_system_logs_enabled?: bool             // Enable Talos log collection via Vector (default: victoria_logs_enabled)
