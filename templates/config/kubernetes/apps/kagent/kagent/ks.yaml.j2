@@ -10,11 +10,10 @@ spec:
       namespace: kagent
     - name: cilium
       namespace: kube-system
-#% if kagent_otlp_enabled %#
-    # Note: Depends on tracing backend (Jaeger), not kube-prometheus-stack
-    # kube-prometheus-stack does NOT expose OTLP natively
-    - name: jaeger
-      namespace: jaeger
+#% if kagent_otlp_enabled and tempo_enabled %#
+    # Note: Depends on Tempo for OTLP tracing backend
+    - name: tempo
+      namespace: observability
 #% endif %#
   interval: 1h
   timeout: 15m

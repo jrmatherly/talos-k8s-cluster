@@ -1,10 +1,13 @@
 #% if kubernetes_event_exporter_enabled | default(victoria_logs_enabled) %#
 ---
+#| Bitnami OCI registry for kubernetes-event-exporter chart #|
+#| REF: https://github.com/bitnami/charts/tree/main/bitnami/kubernetes-event-exporter #|
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: bitnami
 spec:
   interval: 2h
-  url: https://charts.bitnami.com/bitnami
+  type: oci
+  url: oci://registry-1.docker.io/bitnamicharts
 #% endif %#
