@@ -18,7 +18,7 @@ spec:
   interval: 1h
   values:
     #| UnPoller configuration in TOML format #|
-    #| Credentials injected from SOPS secret via env substitution #|
+    #| Credentials provided via environment variables (UP_UNIFI_DEFAULT_*) from cluster-secrets #|
     upConfig: |
       [poller]
         debug = false
@@ -29,10 +29,7 @@ spec:
         http_listen = "0.0.0.0:9130"
         report_errors = false
 
-      [[unifi.controller]]
-        url = "${UNIFI_URL}"
-        user = "${UNIFI_USER}"
-        pass = "${UNIFI_PASS}"
+      [unifi.defaults]
         sites = ["all"]
         save_ids = true
         save_dpi = true
@@ -46,10 +43,10 @@ spec:
       [loki]
         disable = true
 
-    #| Environment variables from secret #|
+    #| Environment variables from cluster-secrets (contains UP_UNIFI_DEFAULT_* vars) #|
     envFrom:
       - secretRef:
-          name: unpoller-secret
+          name: cluster-secrets
 
     #| Pod Monitor for VMAgent scraping #|
     podMonitor:

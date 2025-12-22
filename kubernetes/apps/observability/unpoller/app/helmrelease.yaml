@@ -23,10 +23,7 @@ spec:
         http_listen = "0.0.0.0:9130"
         report_errors = false
 
-      [[unifi.controller]]
-        url = "${UNIFI_URL}"
-        user = "${UNIFI_USER}"
-        pass = "${UNIFI_PASS}"
+      [unifi.defaults]
         sites = ["all"]
         save_ids = true
         save_dpi = true
@@ -42,7 +39,7 @@ spec:
 
     envFrom:
       - secretRef:
-          name: unpoller-secret
+          name: cluster-secrets
 
     podMonitor:
       enabled: true
