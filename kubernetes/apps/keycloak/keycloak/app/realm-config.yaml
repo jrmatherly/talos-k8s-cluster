@@ -73,6 +73,7 @@ data:
           "clientAuthenticatorType": "client-secret",
           "secret": "YKFIU9KVXEc6kKYciTVPmWkSnYKQjqQu",
           "redirectUris": [
+            "https://*.matherly.net/callback",
             "https://*.matherly.net/oauth2/callback",
             "https://*.matherly.net/*"
           ],

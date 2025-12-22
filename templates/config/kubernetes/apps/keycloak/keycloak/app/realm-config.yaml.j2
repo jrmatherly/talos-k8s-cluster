@@ -74,6 +74,7 @@ data:
           "clientAuthenticatorType": "client-secret",
           "secret": "#{keycloak_oidc_client_secret}#",
           "redirectUris": [
+            "https://*.#{primary_domain}#/callback",
             "https://*.#{primary_domain}#/oauth2/callback",
             "https://*.#{primary_domain}#/*"
           ],
