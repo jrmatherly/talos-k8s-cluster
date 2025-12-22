@@ -367,7 +367,7 @@ data:
         {
           "name": "google-manage-account-role",
           "identityProviderAlias": "google",
-          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
           "config": {
             "syncMode": "FORCE",
             "role": "account.manage-account"
@@ -376,7 +376,7 @@ data:
         {
           "name": "google-view-profile-role",
           "identityProviderAlias": "google",
-          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
           "config": {
             "syncMode": "FORCE",
             "role": "account.view-profile"
@@ -388,10 +388,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v21
+  name: keycloak-realm-import-v22
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "21"
+    config-version: "22"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
