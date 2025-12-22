@@ -224,6 +224,7 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("vm_storage_size", "50Gi")
         data.setdefault("vm_retention_days", 14)
         data.setdefault("vm_storage_class", "proxmox-csi")
+        data.setdefault("alertmanager_storage_size", "1Gi")
         data.setdefault("vm_cpu_request", "200m")
         data.setdefault("vm_cpu_limit", "1000m")
         data.setdefault("vm_memory_request", "512Mi")
