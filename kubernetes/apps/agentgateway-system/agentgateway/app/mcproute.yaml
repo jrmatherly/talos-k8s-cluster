@@ -18,7 +18,7 @@ spec:
         provider: Keycloak
         jwks:
           backendRef:
-            name: keycloak
+            name: keycloak-http
             namespace: keycloak
             port: 8080
           jwksPath: "/realms/k8s-cluster/protocol/openid-connect/certs"

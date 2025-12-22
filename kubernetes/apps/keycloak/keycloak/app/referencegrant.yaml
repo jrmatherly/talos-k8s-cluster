@@ -7,7 +7,13 @@ spec:
   from:
     - group: agentgateway.dev
       kind: AgentgatewayPolicy
+      namespace: agentgateway-system
+    - group: agentgateway.dev
+      kind: AgentgatewayPolicy
       namespace: network
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: agentgateway-system
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
       namespace: network

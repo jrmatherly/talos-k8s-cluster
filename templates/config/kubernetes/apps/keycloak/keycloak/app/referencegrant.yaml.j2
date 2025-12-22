@@ -10,10 +10,18 @@ metadata:
   name: agentgateway-keycloak-access
 spec:
   from:
+    #| Allow AgentgatewayPolicy from agentgateway-system namespace #|
+    - group: agentgateway.dev
+      kind: AgentgatewayPolicy
+      namespace: agentgateway-system
     #| Allow AgentgatewayPolicy from network namespace #|
     - group: agentgateway.dev
       kind: AgentgatewayPolicy
       namespace: network
+    #| Allow HTTPRoute from agentgateway-system namespace #|
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: agentgateway-system
     #| Allow HTTPRoute from network namespace (for backend refs) #|
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
