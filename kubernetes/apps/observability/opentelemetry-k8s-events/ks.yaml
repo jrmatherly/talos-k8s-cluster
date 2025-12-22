@@ -3,7 +3,6 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: opentelemetry-k8s-events
-  namespace: flux-system
 spec:
   path: ./kubernetes/apps/observability/opentelemetry-k8s-events/app
   targetNamespace: observability
@@ -21,6 +20,4 @@ spec:
   prune: true
   dependsOn:
     - name: opentelemetry-operator
-      namespace: flux-system
     - name: victoria-logs
-      namespace: flux-system
