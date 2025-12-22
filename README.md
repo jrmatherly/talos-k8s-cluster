@@ -15,7 +15,7 @@ With this approach, you'll gain a solid foundation to build and manage your Kube
 A Kubernetes cluster deployed with [Talos Linux](https://github.com/siderolabs/talos) and an opinionated implementation of [Flux](https://github.com/fluxcd/flux2) using [GitHub](https://github.com/) as the Git provider, [sops](https://github.com/getsops/sops) to manage secrets and [cloudflared](https://github.com/cloudflare/cloudflared) to access applications external to your local network.
 
 - **Required:** Some knowledge of [Containers](https://opencontainers.org/), [YAML](https://noyaml.com/), [Git](https://git-scm.com/), and a **Cloudflare account** with a **domain**.
-- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [kgateway](https://kgateway.dev/) (Kubernetes Gateway API), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack) (observability), [agentgateway](https://agentgateway.dev/) (unified AI Gateway + MCP OAuth), [LiteLLM](https://litellm.ai/) (LLM proxy), [kagent](https://kagent.dev/) (Kubernetes AI agents).
+- **Included components:** [flux](https://github.com/fluxcd/flux2), [cilium](https://github.com/cilium/cilium) (with [Hubble](https://docs.cilium.io/en/stable/gettingstarted/hubble/) observability), [cert-manager](https://github.com/cert-manager/cert-manager), [spegel](https://github.com/spegel-org/spegel), [reloader](https://github.com/stakater/Reloader), [kgateway](https://kgateway.dev/) (Kubernetes Gateway API), [external-dns](https://github.com/kubernetes-sigs/external-dns), and [cloudflared](https://github.com/cloudflare/cloudflared). Optional: [VictoriaMetrics](https://docs.victoriametrics.com/) stack (observability), [agentgateway](https://agentgateway.dev/) (unified AI Gateway + MCP OAuth), [LiteLLM](https://litellm.ai/) (LLM proxy), [kagent](https://kagent.dev/) (Kubernetes AI agents).
 
 **Other features include:**
 
@@ -628,7 +628,7 @@ When enabled, agentgateway provides:
 - DCR proxy wrapping Keycloak
 - CORS handling for MCP clients
 - Integration with existing Keycloak + Entra ID federation
-- Full observability integration with Prometheus and Grafana
+- Full observability integration with VictoriaMetrics and Grafana
 
 **Azure OpenAI Backends (December 2025):**
 
@@ -766,7 +766,7 @@ kagent_agents_enabled:
   - k8s        # Kubernetes cluster operations
   - helm       # Helm chart management
   - cilium-debug  # Cilium CNI debugging
-  - observability # Prometheus/Grafana integration
+  - observability # VictoriaMetrics/Grafana integration
   - promql     # PromQL query assistance
 
 # Optional: PostgreSQL backend (default: sqlite)
