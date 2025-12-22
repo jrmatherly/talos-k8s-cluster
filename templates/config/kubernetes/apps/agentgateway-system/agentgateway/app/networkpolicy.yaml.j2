@@ -106,4 +106,21 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
+    #| Egress to Keycloak for JWKS validation (MCP OAuth) #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: keycloak
+            app.kubernetes.io/name: keycloak
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+    #| Egress to kagent namespace for MCP tool servers #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kagent
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
 #% endif %#

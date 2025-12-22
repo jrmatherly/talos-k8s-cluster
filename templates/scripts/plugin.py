@@ -353,6 +353,11 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_google_client_id", "")
         data.setdefault("keycloak_google_client_secret", "")
 
+        # Keycloak GitHub Identity Provider defaults
+        data.setdefault("keycloak_github_enabled", False)
+        data.setdefault("keycloak_github_client_id", "")
+        data.setdefault("keycloak_github_client_secret", "")
+
         # kgateway defaults (Envoy Control Plane)
         data.setdefault("kgateway_enabled", True)
         data.setdefault("gateway_api_version", "v1.4.1")

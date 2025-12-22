@@ -236,8 +236,11 @@ data:
           ]
         }
 #% endif %#
-      ]#% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#,
+      ]#% set has_idp = (keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret) or (keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret) or (keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret) %##% if has_idp %#,
       "identityProviders": [
+        #% set idp_list = [] %#
+        #% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#
+        #% set _ = idp_list.append('entra-id') %#
         {
           "alias": "entra-id",
           "displayName": "Microsoft Entra ID",
@@ -265,11 +268,55 @@ data:
             "pkceEnabled": "true",
             "pkceMethod": "S256"
           }
+        }#% if (keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret) or (keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret) %#,#% endif %#
+        #% endif %#
+        #% if keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret %#
+        #% set _ = idp_list.append('google') %#
+        {
+          "alias": "google",
+          "displayName": "Google",
+          "providerId": "google",
+          "enabled": true,
+          "trustEmail": true,
+          "storeToken": false,
+          "addReadTokenRoleOnCreate": false,
+          "linkOnly": false,
+          "firstBrokerLoginFlowAlias": "first broker login",
+          "config": {
+            "clientId": "#{keycloak_google_client_id}#",
+            "clientSecret": "$$(env:GOOGLE_CLIENT_SECRET)",
+            "defaultScope": "openid profile email",
+            "syncMode": "FORCE"
+          }
+        }#% if keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret %#,#% endif %#
+        #% endif %#
+        #% if keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret %#
+        #% set _ = idp_list.append('github') %#
+        {
+          "alias": "github",
+          "displayName": "GitHub",
+          "providerId": "github",
+          "enabled": true,
+          "trustEmail": true,
+          "storeToken": false,
+          "addReadTokenRoleOnCreate": false,
+          "linkOnly": false,
+          "firstBrokerLoginFlowAlias": "first broker login",
+          "config": {
+            "clientId": "#{keycloak_github_client_id}#",
+            "clientSecret": "$$(env:GITHUB_CLIENT_SECRET)",
+            "defaultScope": "user:email read:org",
+            "syncMode": "FORCE"
+          }
         }
+        #% endif %#
       ],
       "identityProviderMappers": [
+        #% set mapper_list = [] %#
+        #| === Entra ID Mappers === #|
+        #% if keycloak_entra_id_enabled and keycloak_entra_id_tenant_id and keycloak_entra_id_client_id and keycloak_entra_id_client_secret %#
         {
-          "name": "email",
+          "name": "entra-id-email",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
@@ -279,7 +326,7 @@ data:
           }
         },
         {
-          "name": "first-name",
+          "name": "entra-id-first-name",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
@@ -289,7 +336,7 @@ data:
           }
         },
         {
-          "name": "last-name",
+          "name": "entra-id-last-name",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
@@ -299,7 +346,7 @@ data:
           }
         },
         {
-          "name": "username",
+          "name": "entra-id-username",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-username-idp-mapper",
           "config": {
@@ -308,7 +355,7 @@ data:
           }
         },
         {
-          "name": "manage-account-role",
+          "name": "entra-id-manage-account-role",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
           "config": {
@@ -317,14 +364,117 @@ data:
           }
         },
         {
-          "name": "view-profile-role",
+          "name": "entra-id-view-profile-role",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
           "config": {
             "syncMode": "FORCE",
             "role": "account.view-profile"
           }
+        }#% if (keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret) or (keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret) %#,#% endif %#
+        #% endif %#
+        #| === Google Mappers === #|
+        #% if keycloak_google_enabled and keycloak_google_client_id and keycloak_google_client_secret %#
+        {
+          "name": "google-email",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "google-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "email",
+            "userAttribute": "email"
+          }
+        },
+        {
+          "name": "google-first-name",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "google-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "given_name",
+            "userAttribute": "firstName"
+          }
+        },
+        {
+          "name": "google-last-name",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "google-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "family_name",
+            "userAttribute": "lastName"
+          }
+        },
+        {
+          "name": "google-manage-account-role",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.manage-account"
+          }
+        },
+        {
+          "name": "google-view-profile-role",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.view-profile"
+          }
+        }#% if keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret %#,#% endif %#
+        #% endif %#
+        #| === GitHub Mappers === #|
+        #% if keycloak_github_enabled and keycloak_github_client_id and keycloak_github_client_secret %#
+        {
+          "name": "github-email",
+          "identityProviderAlias": "github",
+          "identityProviderMapper": "github-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "email",
+            "userAttribute": "email"
+          }
+        },
+        {
+          "name": "github-username",
+          "identityProviderAlias": "github",
+          "identityProviderMapper": "github-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "login",
+            "userAttribute": "username"
+          }
+        },
+        {
+          "name": "github-name",
+          "identityProviderAlias": "github",
+          "identityProviderMapper": "github-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "name",
+            "userAttribute": "firstName"
+          }
+        },
+        {
+          "name": "github-manage-account-role",
+          "identityProviderAlias": "github",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.manage-account"
+          }
+        },
+        {
+          "name": "github-view-profile-role",
+          "identityProviderAlias": "github",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.view-profile"
+          }
         }
+        #% endif %#
       ]
 #% endif %#
     }
@@ -333,10 +483,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v20
+  name: keycloak-realm-import-v21
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "20"
+    config-version: "21"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -371,6 +521,20 @@ spec:
                 secretKeyRef:
                   name: keycloak-secret
                   key: entra-id-client-secret
+#% endif %#
+#% if keycloak_google_enabled and keycloak_google_client_secret %#
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: google-client-secret
+#% endif %#
+#% if keycloak_github_enabled and keycloak_github_client_secret %#
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: github-client-secret
 #% endif %#
             #| Use no-delete to preserve built-in clients (account, account-console) #|
             - name: IMPORT_MANAGED_CLIENT

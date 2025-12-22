@@ -1,0 +1,102 @@
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-authentication
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-tools-route
+  backend:
+    mcp:
+      authentication:
+        issuer: "https://auth.matherly.net/realms/k8s-cluster"
+        audiences:
+          - "https://mcp-gw.matherly.net/mcp"
+          - "https://ai-gw.matherly.net/mcp"
+        provider: Keycloak
+        jwks:
+          uri: "https://auth.matherly.net/realms/k8s-cluster/protocol/openid-connect/certs"
+        resourceMetadata:
+          default:
+            resource: "https://mcp-gw.matherly.net/mcp"
+            authorizationServers:
+              - "https://auth.matherly.net/realms/k8s-cluster"
+            scopesSupported:
+              - "openid"
+              - "profile"
+              - "email"
+              - "offline_access"
+            bearerMethodsSupported:
+              - header
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-tools-route
+  traffic:
+    cors:
+      allowOrigins:
+        - "https://mcp-gw.matherly.net"
+        - "https://ai-gw.matherly.net"
+        - "https://*.matherly.net"
+        - "http://localhost"
+        - "http://localhost:3000"
+        - "http://localhost:5173"
+        - "http://127.0.0.1"
+        - "http://127.0.0.1:3000"
+        - "http://127.0.0.1:5173"
+      allowMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-ID
+        - MCP-Protocol-Version
+      exposeHeaders:
+        - WWW-Authenticate
+        - X-Request-ID
+      allowCredentials: true
+      maxAge: 86400
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-tools-route
+spec:
+  parentRefs:
+    - name: ai-gateway
+      namespace: agentgateway-system
+      sectionName: https
+  hostnames:
+    - "mcp-gw.matherly.net"
+    - "ai-gw.matherly.net"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/obot
+      backendRefs:
+        - name: obot
+          namespace: obot
+          kind: Service
+          port: 80
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/kagent
+      backendRefs:
+        - name: kagent
+          namespace: kagent
+          kind: Service
+          port: 8080

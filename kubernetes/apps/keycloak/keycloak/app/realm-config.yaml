@@ -261,11 +261,26 @@ data:
             "pkceEnabled": "true",
             "pkceMethod": "S256"
           }
-        }
-      ],
+        },        {
+          "alias": "google",
+          "displayName": "Google",
+          "providerId": "google",
+          "enabled": true,
+          "trustEmail": true,
+          "storeToken": false,
+          "addReadTokenRoleOnCreate": false,
+          "linkOnly": false,
+          "firstBrokerLoginFlowAlias": "first broker login",
+          "config": {
+            "clientId": "976645342576-h0l683golj85f3jse02oe48dhkeq33nf.apps.googleusercontent.com",
+            "clientSecret": "$$(env:GOOGLE_CLIENT_SECRET)",
+            "defaultScope": "openid profile email",
+            "syncMode": "FORCE"
+          }
+        }      ],
       "identityProviderMappers": [
         {
-          "name": "email",
+          "name": "entra-id-email",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
@@ -275,7 +290,7 @@ data:
           }
         },
         {
-          "name": "first-name",
+          "name": "entra-id-first-name",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
@@ -285,7 +300,7 @@ data:
           }
         },
         {
-          "name": "last-name",
+          "name": "entra-id-last-name",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-user-attribute-idp-mapper",
           "config": {
@@ -295,7 +310,7 @@ data:
           }
         },
         {
-          "name": "username",
+          "name": "entra-id-username",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-username-idp-mapper",
           "config": {
@@ -304,7 +319,7 @@ data:
           }
         },
         {
-          "name": "manage-account-role",
+          "name": "entra-id-manage-account-role",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
           "config": {
@@ -313,25 +328,71 @@ data:
           }
         },
         {
-          "name": "view-profile-role",
+          "name": "entra-id-view-profile-role",
           "identityProviderAlias": "entra-id",
           "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
           "config": {
             "syncMode": "FORCE",
             "role": "account.view-profile"
           }
-        }
-      ]
+        },        {
+          "name": "google-email",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "google-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "email",
+            "userAttribute": "email"
+          }
+        },
+        {
+          "name": "google-first-name",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "google-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "given_name",
+            "userAttribute": "firstName"
+          }
+        },
+        {
+          "name": "google-last-name",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "google-user-attribute-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "jsonField": "family_name",
+            "userAttribute": "lastName"
+          }
+        },
+        {
+          "name": "google-manage-account-role",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.manage-account"
+          }
+        },
+        {
+          "name": "google-view-profile-role",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "hardcoded-role-idp-mapper",
+          "config": {
+            "syncMode": "FORCE",
+            "role": "account.view-profile"
+          }
+        }      ]
     }
 ---
 # Job to import the realm configuration using keycloak-config-cli
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v20
+  name: keycloak-realm-import-v21
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "20"
+    config-version: "21"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
@@ -365,6 +426,11 @@ spec:
                 secretKeyRef:
                   name: keycloak-secret
                   key: entra-id-client-secret
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: google-client-secret
             - name: IMPORT_MANAGED_CLIENT
               value: "no-delete"
             - name: IMPORT_MANAGED_GROUP

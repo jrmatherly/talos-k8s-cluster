@@ -6,3 +6,4 @@ resources:
   - helmrelease.yaml
   - gateway.yaml
   - networkpolicy.yaml
+  - mcproute.yaml

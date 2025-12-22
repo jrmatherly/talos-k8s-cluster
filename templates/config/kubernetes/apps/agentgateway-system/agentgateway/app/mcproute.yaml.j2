@@ -1,0 +1,123 @@
+#% if agentgateway_enabled | default(true) %#
+---
+#| ============================================================ #|
+#| AgentgatewayPolicy - MCP OAuth Authentication                 #|
+#| Implements MCP 2025-11-25 Authorization Specification         #|
+#| Ref: https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-authentication
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-tools-route
+  backend:
+    mcp:
+      authentication:
+        issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+        audiences:
+          - "https://mcp-gw.#{ primary_domain }#/mcp"
+          - "https://ai-gw.#{ primary_domain }#/mcp"
+        provider: Keycloak
+        jwks:
+          uri: "https://auth.#{ primary_domain }#/realms/k8s-cluster/protocol/openid-connect/certs"
+        resourceMetadata:
+          default:
+            resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+            authorizationServers:
+              - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+            scopesSupported:
+              #% for scope in agentgateway_scopes | default(['openid', 'profile', 'email', 'mcp:tools', 'offline_access']) %#
+              - "#{ scope }#"
+              #% endfor %#
+            bearerMethodsSupported:
+              - header
+---
+#| ============================================================ #|
+#| AgentgatewayPolicy - CORS Configuration                       #|
+#| Required for browser-based MCP clients (VS Code, web apps)    #|
+#| ============================================================ #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-cors
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-tools-route
+  traffic:
+    cors:
+      allowOrigins:
+        - "https://mcp-gw.#{ primary_domain }#"
+        - "https://ai-gw.#{ primary_domain }#"
+        - "https://*.#{ primary_domain }#"
+        - "http://localhost"
+        - "http://localhost:3000"
+        - "http://localhost:5173"
+        - "http://127.0.0.1"
+        - "http://127.0.0.1:3000"
+        - "http://127.0.0.1:5173"
+      allowMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowHeaders:
+        - Authorization
+        - Content-Type
+        - X-Request-ID
+        - MCP-Protocol-Version
+      exposeHeaders:
+        - WWW-Authenticate
+        - X-Request-ID
+      allowCredentials: true
+      maxAge: 86400
+---
+#| ============================================================ #|
+#| HTTPRoute for MCP Tool Servers                                #|
+#| Routes /mcp/* to backend MCP servers (obot, kagent, etc.)     #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-tools-route
+spec:
+  parentRefs:
+    - name: ai-gateway
+      namespace: agentgateway-system
+      sectionName: https
+  hostnames:
+    - "mcp-gw.#{ primary_domain }#"
+    - "ai-gw.#{ primary_domain }#"
+  rules:
+    #| Protected Resource Metadata endpoint (RFC 9728) #|
+    #| NOTE: This is handled automatically by agentgateway when mcp authentication is enabled #|
+    #| MCP Tool routes - add backends as needed #|
+    #% if obot_enabled | default(false) %#
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/obot
+      backendRefs:
+        - name: obot
+          namespace: obot
+          kind: Service
+          port: 80
+    #% endif %#
+    #% if kagent_enabled | default(false) %#
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/kagent
+      backendRefs:
+        - name: kagent
+          namespace: kagent
+          kind: Service
+          port: 8080
+    #% endif %#
+#% endif %#

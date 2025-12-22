@@ -196,6 +196,11 @@ import (
 	keycloak_google_client_id?: string & !=""    // Google OAuth client ID
 	keycloak_google_client_secret?: string & !="" // Google OAuth client secret
 
+	// Keycloak GitHub Identity Provider (optional - federation with GitHub)
+	keycloak_github_enabled?: bool               // Enable GitHub as identity provider
+	keycloak_github_client_id?: string & !=""    // GitHub OAuth App client ID
+	keycloak_github_client_secret?: string & !="" // GitHub OAuth App client secret
+
 	// agentgateway Configuration (MCP 2025-11-25 OAuth Proxy)
 	// Wraps Keycloak for MCP spec-compliant authentication (DCR, CIMD, Protected Resource Metadata)
 	agentgateway_enabled?: bool                 // Enable agentgateway for MCP authentication

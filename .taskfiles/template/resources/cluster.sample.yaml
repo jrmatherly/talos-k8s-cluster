@@ -815,6 +815,32 @@ cloudflare_token: ""
 # keycloak_google_client_secret: ""
 
 # ==============================================================================
+# GITHUB IDENTITY PROVIDER (Optional - Keycloak Identity Brokering)
+# ==============================================================================
+# Enable GitHub OAuth for Keycloak authentication.
+# Required for applications that need GitHub-based authentication.
+# REF: https://www.keycloak.org/docs/latest/server_admin/#github
+# REF: https://github.com/settings/developers
+
+# -- Enable GitHub as Keycloak identity provider.
+#    (OPTIONAL) / (DEFAULT: false)
+#    When enabled, adds GitHub login option to Keycloak authentication
+# keycloak_github_enabled: false
+
+# -- GitHub OAuth App Client ID.
+#    (REQUIRED if keycloak_github_enabled)
+#    NOTE: Create in GitHub Settings:
+#      1. Settings → Developer settings → OAuth Apps → New OAuth App
+#      2. Homepage URL: https://auth.${domain}
+#      3. Authorization callback URL: https://auth.${domain}/realms/k8s-cluster/broker/github/endpoint
+# keycloak_github_client_id: ""
+
+# -- GitHub OAuth App Client Secret.
+#    (REQUIRED if keycloak_github_enabled) - Will be encrypted with SOPS
+#    NOTE: Generate client secret in GitHub OAuth App settings
+# keycloak_github_client_secret: ""
+
+# ==============================================================================
 # AGENTGATEWAY CONFIGURATION (Optional - MCP 2025-11-25 OAuth Proxy)
 # ==============================================================================
 # agentgateway wraps Keycloak to provide MCP spec-compliant OAuth.
