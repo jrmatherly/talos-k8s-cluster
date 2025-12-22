@@ -36,9 +36,6 @@ proxmox_csi_token_secret: "fake-secret"
 # gateway_api_version: "v1.4.1"
 # kgateway_version: "v2.2.0-beta.4"
 # agentgateway_version: "v2.2.0-beta.4"
-# DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
-# TODO: Remove these fields after kgateway migration is complete
-# envoy_ai_gateway_enabled: false
 # Azure OpenAI - US East Region (commented - disabled)
 # azure_openai_us_east_api_key: ""
 # azure_openai_us_east_resource_name: ""
@@ -61,6 +58,8 @@ proxmox_csi_token_secret: "fake-secret"
 # victoria_metrics_enabled: false
 # vm_storage_size: ""
 # vm_retention_days:
+# Proxmox Dashboards (disabled for private repo testing)
+# proxmox_dashboards_enabled: false
 # VictoriaLogs (disabled for private repo testing)
 # victoria_logs_enabled: false
 # vl_storage_size: ""

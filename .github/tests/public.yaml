@@ -34,15 +34,11 @@ proxmox_csi_token_secret: "fake-secret"
 # CCM tokens (Approach B only)
 proxmox_ccm_token_id: "test-ccm@pve!token"
 proxmox_ccm_token_secret: "fake-secret"
-# kgateway Configuration (Envoy Control Plane - replaces envoy-gateway)
+# kgateway Configuration (Envoy Control Plane)
 kgateway_enabled: true
 gateway_api_version: "v1.4.1"
 kgateway_version: "v2.2.0-beta.4"
 agentgateway_version: "v2.2.0-beta.4"
-# DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
-# TODO: Remove these fields after kgateway migration is complete
-envoy_ai_gateway_enabled: true
-envoy_ai_gateway_addr: "10.10.10.145"
 # Azure OpenAI - US East Region
 azure_openai_us_east_api_key: "fake-api-key"
 azure_openai_us_east_resource_name: "test-openai-resource"
@@ -70,6 +66,8 @@ vm_cpu_request: "200m"
 vm_cpu_limit: "1000m"
 vm_memory_request: "512Mi"
 vm_memory_limit: "2Gi"
+# Proxmox Dashboards (enabled for public repo testing)
+proxmox_dashboards_enabled: true
 # VictoriaLogs (replaces Loki)
 victoria_logs_enabled: true
 vl_storage_size: "20Gi"

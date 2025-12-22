@@ -194,9 +194,6 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("proxmox_region", "talos-k8s")
         data.setdefault("proxmox_storage", "local-lvm")
 
-        # DEPRECATED: Envoy AI Gateway defaults (use kgateway + LiteLLM instead)
-        # TODO: Remove after kgateway migration is complete
-        data.setdefault("envoy_ai_gateway_enabled", False)
         # Azure OpenAI region defaults (used by LiteLLM for multi-region routing)
         # NOTE: NOT deprecated - still required for LiteLLM model configuration
         data.setdefault("azure_openai_us_east_api_key", "")
@@ -218,6 +215,12 @@ class Plugin(makejinja.plugin.Plugin):
         # This enables metrics scraping, ServiceMonitors, and NetworkPolicy rules
         data.setdefault("grafana_admin_password", "admin")
         data.setdefault("grafana_storage_size", "10Gi")
+
+        # Proxmox Dashboards default (enabled when Proxmox CSI is configured)
+        # Requires Proxmox to push metrics via InfluxDB protocol to VictoriaMetrics
+        data.setdefault(
+            "proxmox_dashboards_enabled", data.get("proxmox_csi_enabled", False)
+        )
 
         # VictoriaMetrics Stack defaults (replaces kube-prometheus-stack)
         data.setdefault("victoria_metrics_enabled", False)
@@ -345,14 +348,11 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("keycloak_google_client_id", "")
         data.setdefault("keycloak_google_client_secret", "")
 
-        # kgateway defaults (Envoy Control Plane - replaces envoy-gateway)
+        # kgateway defaults (Envoy Control Plane)
         data.setdefault("kgateway_enabled", True)
         data.setdefault("gateway_api_version", "v1.4.1")
         data.setdefault("kgateway_version", "v2.2.0-beta.4")
         data.setdefault("agentgateway_version", "v2.2.0-beta.4")
-        # DEPRECATED: Legacy envoy-gateway (use kgateway instead)
-        # TODO: Remove after kgateway migration is complete
-        data.setdefault("envoy_gateway_enabled", False)
 
         # agentgateway defaults (MCP 2025-11-25 OAuth Proxy)
         data.setdefault("agentgateway_enabled", False)

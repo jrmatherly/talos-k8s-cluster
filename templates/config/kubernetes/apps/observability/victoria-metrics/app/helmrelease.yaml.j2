@@ -225,6 +225,16 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/victorialogs
 #% endif %#
+#% if proxmox_dashboards_enabled %#
+            - name: "proxmox"
+              orgId: 1
+              folder: "Proxmox"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/proxmox
+#% endif %#
       dashboards:
         kubernetes:
           #| Core Kubernetes dashboards #|
@@ -290,6 +300,20 @@ spec:
           victorialogs-single:
             gnetId: 22084
             revision: 5
+            datasource: VictoriaMetrics
+#% endif %#
+#% if proxmox_dashboards_enabled %#
+        proxmox:
+          #| Proxmox VE dashboards - metrics via InfluxDB protocol to VictoriaMetrics #|
+          #| REF: https://grafana.com/grafana/dashboards/16060 #|
+          proxmox-metrics:
+            gnetId: 16060
+            revision: 1
+            datasource: VictoriaMetrics
+          #| REF: https://grafana.com/grafana/dashboards/13307 #|
+          proxmox-ve:
+            gnetId: 13307
+            revision: 14
             datasource: VictoriaMetrics
 #% endif %#
 

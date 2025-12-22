@@ -45,21 +45,12 @@ import (
 	proxmox_ccm_token_id?: string & =~"^.+@.+!.+$"  // Format: user@realm!token
 	proxmox_ccm_token_secret?: string & !=""
 
-	// kgateway Configuration (Envoy Control Plane - replaces envoy-gateway)
+	// kgateway Configuration (Envoy Control Plane)
 	// Next-generation Gateway API control plane with better performance and AI integration
 	kgateway_enabled?: bool                     // Enable kgateway deployment (default: true)
 	gateway_api_version?: string & !=""         // Gateway API CRDs version (default: v1.4.1)
 	kgateway_version?: string & !=""            // kgateway chart version (default: v2.2.0-beta.4)
 	agentgateway_version?: string & !=""        // agentgateway chart version (default: v2.2.0-beta.4)
-
-	// DEPRECATED: Envoy AI Gateway Configuration (use kgateway + LiteLLM instead)
-	// TODO: Remove these fields after kgateway migration is complete
-	envoy_ai_gateway_enabled?: bool
-	envoy_ai_gateway_addr?: net.IPv4 & !=cluster_api_addr & !=cluster_gateway_addr & !=cluster_dns_gateway_addr & !=cloudflare_gateway_addr
-
-	// DEPRECATED: Legacy Envoy Gateway (use kgateway instead)
-	// TODO: Remove this field after kgateway migration is complete
-	envoy_gateway_enabled?: bool                // Enable legacy envoy-gateway (default: false)
 
 	// Azure OpenAI - US East Region (optional)
 	azure_openai_us_east_api_key?: string & !=""
@@ -90,6 +81,7 @@ import (
 	observability_enabled?: bool
 	grafana_admin_password?: string & !=""
 	grafana_storage_size?: string & !=""
+	proxmox_dashboards_enabled?: bool              // Enable Proxmox VE dashboards (default: proxmox_csi_enabled)
 
 	// VictoriaMetrics Stack Configuration (replaces kube-prometheus-stack)
 	victoria_metrics_enabled?: bool              // Enable VictoriaMetrics (default: false)
@@ -232,7 +224,6 @@ import (
 	obot_memory_request?: string & !=""         // Memory request (default: 1Gi)
 	obot_memory_limit?: string & !=""           // Memory limit (default: 4Gi)
 	obot_encryption_provider?: *"custom" | "azure-keyvault" | "aws-kms" | "gcp-kms"  // Encryption provider
-	obot_use_ai_gateway?: *false | bool          // DEPRECATED: Use existing Envoy AI Gateway for LLM requests - TODO: Remove after kgateway migration
 	obot_use_agentgateway?: *false | bool       // Use agentgateway for LLM requests with rate limiting, prompt guards, FinOps
 
 	// obot S3/MinIO Workspace Storage (enables multi-replica scaling)

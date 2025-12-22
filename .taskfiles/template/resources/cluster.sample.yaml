@@ -249,8 +249,7 @@ cloudflare_token: ""
 # ==============================================================================
 # KGATEWAY CONFIGURATION (Optional - Envoy Control Plane)
 # ==============================================================================
-# kgateway is the next-generation Gateway API control plane, providing better
-# performance and AI integration than the legacy Envoy Gateway.
+# kgateway is the next-generation Gateway API control plane
 # REF: https://kgateway.dev/
 # REF: docs/ai-context/agentgateway-mcp.md
 
@@ -391,6 +390,13 @@ cloudflare_token: ""
 # -- Storage size for Grafana PVC.
 #    (OPTIONAL) / (DEFAULT: "10Gi")
 # grafana_storage_size: "10Gi"
+
+# -- Enable Proxmox VE dashboards in Grafana.
+#    (OPTIONAL) / (DEFAULT: proxmox_csi_enabled)
+#    Requires Proxmox to push metrics to VictoriaMetrics via InfluxDB protocol.
+#    Configure Proxmox: Datacenter > Metric Server > Add InfluxDB
+#    Dashboards: Host/VM metrics (16060), VictoriaMetrics-native (13307)
+# proxmox_dashboards_enabled: true
 
 # ==============================================================================
 # VICTORIAMETRICS STACK
@@ -971,11 +977,6 @@ cloudflare_token: ""
 #    (OPTIONAL) / (DEFAULT: "custom")
 #    Options: "custom", "azure-keyvault", "aws-kms", "gcp-kms"
 # obot_encryption_provider: "custom"
-
-# -- DEPRECATED: Use existing Envoy AI Gateway for LLM requests.
-#    (OPTIONAL) / (DEFAULT: false)
-#    TODO: Remove after kgateway migration - use agentgateway instead
-# obot_use_ai_gateway: false
 
 # -- Use agentgateway for LLM requests with advanced features.
 #    (OPTIONAL) / (DEFAULT: false)
