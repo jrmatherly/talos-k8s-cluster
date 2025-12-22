@@ -190,6 +190,8 @@ spec:
         #| Required by UniFi dashboards #|
         - grafana-clock-panel
 #% endif %#
+        #| Grafana LLM plugin for AI-powered features #|
+        - grafana-llm-app
       #| Grafana dashboards organized in folders #|
       dashboardProviders:
         dashboardproviders.yaml:
@@ -317,18 +319,11 @@ spec:
             datasource: VictoriaMetrics
 #% endif %#
 #% if proxmox_dashboards_enabled %#
-        proxmox:
-          #| Proxmox VE dashboards - metrics via InfluxDB protocol to VictoriaMetrics #|
-          #| REF: https://grafana.com/grafana/dashboards/16060 #|
-          proxmox-metrics:
-            gnetId: 16060
-            revision: 1
-            datasource: VictoriaMetrics
-          #| REF: https://grafana.com/grafana/dashboards/13307 #|
-          proxmox-ve:
-            gnetId: 13307
-            revision: 14
-            datasource: VictoriaMetrics
+        #| NOTE: Proxmox metrics are flowing (cpustat_*, memory_*, ballooninfo_*, blockstat_*) #|
+        #| but community dashboards use incompatible datasource variables. #|
+        #| Manually import compatible dashboards or create custom ones in Grafana. #|
+        #| Metrics can be explored via: Grafana > Explore > VictoriaMetrics > cpustat_cpu #|
+        proxmox: {}
 #% endif %#
 #% if unifi_enabled %#
         unifi:

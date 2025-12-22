@@ -152,6 +152,7 @@ spec:
         - victoriametrics-metrics-datasource
         - victoriametrics-logs-datasource
         - grafana-clock-panel
+        - grafana-llm-app
       dashboardProviders:
         dashboardproviders.yaml:
           apiVersion: 1
@@ -265,15 +266,7 @@ spec:
             gnetId: 22084
             revision: 5
             datasource: VictoriaMetrics
-        proxmox:
-          proxmox-metrics:
-            gnetId: 16060
-            revision: 1
-            datasource: VictoriaMetrics
-          proxmox-ve:
-            gnetId: 13307
-            revision: 14
-            datasource: VictoriaMetrics
+        proxmox: {}
         unifi:
           unifi-usw:
             gnetId: 11312
