@@ -30,24 +30,24 @@ releases:
   - name: kgateway-crds
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
-    version: #{ kgateway_version | default('v2.2.0-beta.3') }#
+    version: #{ kgateway_version | default('v2.2.0-beta.4') }#
 
   - name: kgateway
     namespace: network
     chart: oci://cr.kgateway.dev/kgateway-dev/charts/kgateway
-    version: #{ kgateway_version | default('v2.2.0-beta.3') }#
+    version: #{ kgateway_version | default('v2.2.0-beta.4') }#
 #% endif %#
 #% if agentgateway_enabled | default(false) %#
 
   - name: agentgateway-crds
     namespace: agentgateway-system
     chart: oci://cr.agentgateway.dev/charts/agentgateway-crds
-    version: #{ agentgateway_version | default('v2.2.0-beta.3') }#
+    version: #{ agentgateway_version | default('v2.2.0-beta.4') }#
 
   - name: agentgateway
     namespace: agentgateway-system
     chart: oci://cr.agentgateway.dev/charts/agentgateway
-    version: #{ agentgateway_version | default('v2.2.0-beta.3') }#
+    version: #{ agentgateway_version | default('v2.2.0-beta.4') }#
 #% endif %#
 #% if envoy_gateway_enabled | default(false) %#
 
