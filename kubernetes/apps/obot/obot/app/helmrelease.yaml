@@ -68,14 +68,14 @@ spec:
 
       # OAuth Authentication - Choose ONE: Keycloak OR Entra ID
       # Priority: Keycloak > Entra ID (if both configured, Keycloak wins)
-      # Entra ID OAuth Configuration (direct Microsoft authentication)
-      OBOT_SERVER_AUTH_PROVIDER: "entra-id"
-      OBOT_SERVER_AUTH_ENTRA_TENANT_ID: "f505346f-75cf-458b-baeb-10708d41967d"
-      OBOT_SERVER_AUTH_ENTRA_CLIENT_ID: "${OBOT_ENTRA_CLIENT_ID}"
-      OBOT_SERVER_AUTH_ENTRA_CLIENT_SECRET: "${OBOT_ENTRA_CLIENT_SECRET}"
+      # Keycloak OAuth Configuration (via local Keycloak instance)
+      OBOT_SERVER_AUTH_PROVIDER: "keycloak"
+      OBOT_SERVER_AUTH_KEYCLOAK_ISSUER_URL: "https://auth.${SECRET_DOMAIN}/realms/k8s-cluster"
+      OBOT_SERVER_AUTH_KEYCLOAK_CLIENT_ID: "obot"
+      OBOT_SERVER_AUTH_KEYCLOAK_CLIENT_SECRET: "${OBOT_KEYCLOAK_CLIENT_SECRET}"
       OBOT_SERVER_AUTH_REDIRECT_URL: "https://obot.${SECRET_DOMAIN}/oauth2/callback"
       # Token audience validation (security hardening - prevents token confusion attacks)
-      OBOT_SERVER_AUTH_AUDIENCE: "${OBOT_ENTRA_CLIENT_ID}"
+      OBOT_SERVER_AUTH_AUDIENCE: "obot"
       OBOT_SERVER_AUTH_REQUIRED_CLAIMS: "email,preferred_username"
 
       # Encryption Configuration
