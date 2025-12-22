@@ -49,6 +49,15 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
+    #| Egress to Keycloak for JWKS fetching (MCP OAuth) #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: keycloak
+            app.kubernetes.io/name: keycloak
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
 ---
 #| ============================================================ #|
 #| NetworkPolicy for ai-gateway data plane                       #|
