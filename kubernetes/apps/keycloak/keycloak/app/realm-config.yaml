@@ -75,6 +75,7 @@ data:
           "redirectUris": [
             "https://*.matherly.net/callback",
             "https://*.matherly.net/oauth2/callback",
+            "https://*.matherly.net/oauth2/redirect",
             "https://*.matherly.net/*"
           ],
           "webOrigins": [
