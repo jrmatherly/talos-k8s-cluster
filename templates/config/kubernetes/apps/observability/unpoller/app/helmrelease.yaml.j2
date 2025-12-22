@@ -68,7 +68,9 @@ spec:
         cpu: "200m"
         memory: "256Mi"
 
-    #| Disable Grafana CRDs (we configure dashboards in victoria-metrics) #|
+    #| Disable Grafana Operator CRDs (we configure dashboards in victoria-metrics) #|
     dashboards:
       create: false
+      grafana:
+        create: false
 #% endif %#
