@@ -66,7 +66,9 @@ spec:
       OBOT_SERVER_AUTH_OWNER_EMAILS: "jasonrmatherly@gmail.com"
       OBOT_BOOTSTRAP_TOKEN: "${OBOT_BOOTSTRAP_TOKEN}"
 
-      # Entra ID OAuth Configuration
+      # OAuth Authentication - Choose ONE: Keycloak OR Entra ID
+      # Priority: Keycloak > Entra ID (if both configured, Keycloak wins)
+      # Entra ID OAuth Configuration (direct Microsoft authentication)
       OBOT_SERVER_AUTH_PROVIDER: "entra-id"
       OBOT_SERVER_AUTH_ENTRA_TENANT_ID: "f505346f-75cf-458b-baeb-10708d41967d"
       OBOT_SERVER_AUTH_ENTRA_CLIENT_ID: "${OBOT_ENTRA_CLIENT_ID}"

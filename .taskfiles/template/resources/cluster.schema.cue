@@ -218,6 +218,9 @@ import (
 	obot_entra_tenant_id?: string & !=""        // Azure Entra ID tenant ID (GUID)
 	obot_entra_client_id?: string & !=""        // Azure App Registration client ID (GUID)
 	obot_entra_client_secret?: string & !=""    // Azure App Registration client secret
+	obot_keycloak_enabled?: *false | bool       // Use Keycloak instead of Entra ID for auth
+	obot_keycloak_client_id?: *"obot" | string & !="" // Keycloak client ID (default: obot)
+	obot_keycloak_client_secret?: string & !=""  // Keycloak client secret
 	obot_postgres_host?: string                 // PostgreSQL host (empty for CloudNativePG)
 	obot_postgres_db?: string & !=""            // PostgreSQL database name (default: obot)
 	obot_postgres_user?: string & !=""          // PostgreSQL username (default: obot)

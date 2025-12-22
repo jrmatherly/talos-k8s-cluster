@@ -381,6 +381,10 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_entra_tenant_id", "")
         data.setdefault("obot_entra_client_id", "")
         data.setdefault("obot_entra_client_secret", "")
+        # Keycloak authentication (alternative to Entra ID)
+        data.setdefault("obot_keycloak_enabled", False)
+        data.setdefault("obot_keycloak_client_id", "obot")
+        data.setdefault("obot_keycloak_client_secret", "")
         # PostgreSQL configuration
         data.setdefault("obot_postgres_host", "")
         data.setdefault("obot_postgres_db", "obot")

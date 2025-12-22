@@ -130,6 +130,10 @@ proxmox_csi_token_secret: "fake-secret"
 # obot_entra_tenant_id: ""
 # obot_entra_client_id: ""
 # obot_entra_client_secret: ""
+# obot Keycloak authentication (alternative to Entra ID)
+# obot_keycloak_enabled: false
+# obot_keycloak_client_id: "obot"
+# obot_keycloak_client_secret: ""
 # obot_postgres_password: ""
 # obot_mcp_namespace: ""
 # obot_cookie_secret: ""

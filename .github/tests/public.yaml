@@ -157,6 +157,10 @@ obot_hostname: "obot"
 obot_entra_tenant_id: "12345678-1234-1234-1234-123456789abc"
 obot_entra_client_id: "obot-client-id-12345678"
 obot_entra_client_secret: "obot-client-secret-here"
+# Keycloak authentication (alternative to Entra ID - disabled when using Entra ID)
+obot_keycloak_enabled: false
+obot_keycloak_client_id: "obot"
+obot_keycloak_client_secret: "test-keycloak-client-secret"
 # PostgreSQL
 obot_postgres_db: "obot"
 obot_postgres_user: "obot"

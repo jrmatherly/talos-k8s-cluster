@@ -986,6 +986,29 @@ cloudflare_token: ""
 # obot_entra_client_secret: ""
 
 # ==============================================================================
+# OBOT KEYCLOAK AUTHENTICATION (Alternative to Entra ID)
+# ==============================================================================
+# Configure Keycloak for native obot authentication.
+# NOTE: This uses the local Keycloak instance instead of Entra ID directly.
+#       Only configure ONE auth provider (Entra ID OR Keycloak).
+#       Comment out obot_entra_tenant_id above when using Keycloak.
+
+# -- Enable Keycloak as obot's auth provider.
+#    (OPTIONAL) - Set to true to use Keycloak instead of Entra ID
+#    When enabled, obot_entra_tenant_id should NOT be set
+# obot_keycloak_enabled: false
+
+# -- Keycloak client ID for obot.
+#    (OPTIONAL) / (DEFAULT: "obot")
+#    This client is automatically created in Keycloak when keycloak_enabled=true
+# obot_keycloak_client_id: "obot"
+
+# -- Keycloak client secret for obot.
+#    (REQUIRED if obot_keycloak_enabled) - Randomly generated secret
+#    Generate with: openssl rand -base64 32 | tr -d '/+=' | cut -c1-32
+# obot_keycloak_client_secret: ""
+
+# ==============================================================================
 # OBOT USER MANAGEMENT
 # ==============================================================================
 

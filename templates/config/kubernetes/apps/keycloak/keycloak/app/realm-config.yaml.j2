@@ -168,6 +168,77 @@ data:
             "backchannel.logout.session.required": "true",
             "display.on.consent.screen": "false"
           }
+        }#% endif %##% if obot_keycloak_enabled | default(false) %#,
+        {
+          "clientId": "#{obot_keycloak_client_id | default('obot')}#",
+          "name": "obot AI Agent Platform",
+          "description": "OIDC client for obot AI agent platform authentication",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "#{obot_keycloak_client_secret}#",
+          "redirectUris": [
+            "https://#{obot_hostname | default('obot')}#.#{primary_domain}#/oauth2/callback",
+            "https://#{obot_hostname | default('obot')}#.#{primary_domain}#/*"
+          ],
+          "webOrigins": [
+            "https://#{obot_hostname | default('obot')}#.#{primary_domain}#",
+            "https://*.#{primary_domain}#"
+          ],
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": false,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email",
+            "openid"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access"
+          ],
+          "protocolMappers": [
+            {
+              "name": "obot-audience",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-audience-mapper",
+              "consentRequired": false,
+              "config": {
+                "included.client.audience": "#{obot_keycloak_client_id | default('obot')}#",
+                "id.token.claim": "true",
+                "access.token.claim": "true"
+              }
+            },
+            {
+              "name": "email-verified",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-usermodel-attribute-mapper",
+              "consentRequired": false,
+              "config": {
+                "user.attribute": "emailVerified",
+                "claim.name": "email_verified",
+                "jsonType.label": "boolean",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://#{obot_hostname | default('obot')}#.#{primary_domain}#/*",
+            "backchannel.logout.session.required": "true",
+            "display.on.consent.screen": "false"
+          }
         }#% endif %#
       ],
       "roles": {
@@ -484,10 +555,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v22
+  name: keycloak-realm-import-v23
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "22"
+    config-version: "23"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
