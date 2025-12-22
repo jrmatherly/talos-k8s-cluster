@@ -7,13 +7,15 @@ spec:
   chart:
     spec:
       chart: vector
-      version: "0.38.0"
+      version: "0.46.0"
       sourceRef:
         kind: HelmRepository
         name: vector
   interval: 1h
   values:
     role: Agent
+    hostNetwork: true
+    dnsPolicy: ClusterFirstWithHostNet
     podLabels:
       network.cilium.io/api-access: "true"
     resources:
@@ -23,6 +25,13 @@ spec:
       limits:
         cpu: "200m"
         memory: "512Mi"
+    containerPorts:
+      - name: talos-kernel
+        containerPort: 6050
+        protocol: UDP
+      - name: talos-service
+        containerPort: 6051
+        protocol: UDP
     customConfig:
       data_dir: /vector-data-dir
       api:
@@ -35,6 +44,27 @@ spec:
           auto_partial_merge: true
           exclude_paths_glob_patterns:
             - "**/vector*/**"
+        talos_kernel_logs:
+          type: socket
+          address: 0.0.0.0:6050
+          mode: udp
+          max_length: 102400
+          decoding:
+            codec: bytes
+        talos_service_logs:
+          type: socket
+          address: 0.0.0.0:6051
+          mode: udp
+          max_length: 102400
+          decoding:
+            codec: json
+        kubernetes_audit_logs:
+          type: file
+          include:
+            - /var/log/audit/kube/*.log
+          read_from: beginning
+          fingerprint:
+            strategy: device_and_inode
       transforms:
         kubernetes_transform:
           type: remap
@@ -46,26 +76,63 @@ spec:
             .pod = .kubernetes.pod_name
             .container = .kubernetes.container_name
             .node = .kubernetes.pod_node_name
+            .source_type = "kubernetes"
             # Keep original message
             if exists(.message) {
               .log = .message
             }
             # Add stream type (stdout/stderr)
             .stream = .stream
-        kubernetes_filter:
+        talos_kernel_transform:
+          type: remap
+          inputs:
+            - talos_kernel_logs
+          source: |
+            .source_type = "talos_kernel"
+            .facility = "kern"
+            .log = string!(.message)
+            .node = get_env_var!("VECTOR_SELF_NODE_NAME")
+        talos_service_transform:
+          type: remap
+          inputs:
+            - talos_service_logs
+          source: |
+            .source_type = "talos_service"
+            .facility = "talos"
+            if exists(.msg) {
+              .log = .msg
+            } else if exists(.message) {
+              .log = .message
+            }
+            .node = get_env_var!("VECTOR_SELF_NODE_NAME")
+            .service = .talos_service
+        kubernetes_audit_transform:
+          type: remap
+          inputs:
+            - kubernetes_audit_logs
+          source: |
+            parsed = parse_json!(.message) ?? {}
+            . = parsed
+            .source_type = "kubernetes_audit"
+            .log = encode_json(.)
+            .node = get_env_var!("VECTOR_SELF_NODE_NAME")
+        log_filter:
           type: filter
           inputs:
             - kubernetes_transform
+            - talos_kernel_transform
+            - talos_service_transform
+            - kubernetes_audit_transform
           condition:
             type: vrl
             source: |
-              # Drop health check logs
-              !match(string!(.log), r'(health|ready|alive)')
+              # Drop health check logs from kubernetes
+              !match(string(.log) ?? "", r'(health|ready|alive|GET /healthz)')
       sinks:
         victorialogs:
           type: elasticsearch
           inputs:
-            - kubernetes_filter
+            - log_filter
           endpoints:
             - http://victoria-logs-server.observability.svc.cluster.local:9428/insert/elasticsearch/
           api_version: v8
@@ -76,7 +143,7 @@ spec:
           query:
             _msg_field: log
             _time_field: timestamp
-            _stream_fields: namespace,pod,container,node,stream
+            _stream_fields: source_type,namespace,pod,container,node,stream,facility,service
           request:
             headers:
               AccountID: "0"
@@ -88,3 +155,17 @@ spec:
     podSecurityContext:
       runAsNonRoot: false
       runAsUser: 0
+    extraVolumes:
+      - name: var-log-audit
+        hostPath:
+          path: /var/log/audit
+          type: DirectoryOrCreate
+    extraVolumeMounts:
+      - name: var-log-audit
+        mountPath: /var/log/audit
+        readOnly: true
+    env:
+      - name: VECTOR_SELF_NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName

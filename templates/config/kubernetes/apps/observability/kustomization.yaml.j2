@@ -22,6 +22,9 @@ resources:
 #% if vector_enabled | default(victoria_logs_enabled) %#
   - ./vector/ks.yaml
 #% endif %#
+#% if kubernetes_event_exporter_enabled | default(victoria_logs_enabled) %#
+  - ./kubernetes-event-exporter/ks.yaml
+#% endif %#
 #% if tempo_enabled %#
   - ./tempo/ks.yaml
 #% endif %#

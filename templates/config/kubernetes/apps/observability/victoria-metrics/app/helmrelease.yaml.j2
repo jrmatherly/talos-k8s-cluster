@@ -40,6 +40,9 @@ spec:
           #| Bounded memory mode - 70% leaves headroom for queries and OS cache #|
           #| REF: https://docs.victoriametrics.com/victoriametrics/faq/ #|
           memory.allowedPercent: "70"
+          #| Deduplication for high-availability scraping scenarios #|
+          #| Removes duplicate samples when multiple VMAgents scrape the same target #|
+          dedup.minScrapeInterval: "30s"
 
     #| VMAgent - metrics scraper (replaces Prometheus scraping) #|
     vmagent:

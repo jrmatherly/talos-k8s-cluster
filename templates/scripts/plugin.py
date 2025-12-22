@@ -255,6 +255,22 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("vector_memory_request", "128Mi")
         data.setdefault("vector_memory_limit", "512Mi")
 
+        # Kubernetes Event Exporter defaults (captures ephemeral K8s events)
+        # Defaults to victoria_logs_enabled - requires VictoriaLogs for storage
+        data.setdefault(
+            "kubernetes_event_exporter_enabled", data.get("victoria_logs_enabled", False)
+        )
+
+        # Talos System Logs defaults (kernel and service logs via Vector)
+        # Defaults to victoria_logs_enabled - requires Vector as syslog receiver
+        data.setdefault(
+            "talos_system_logs_enabled", data.get("victoria_logs_enabled", False)
+        )
+
+        # API Server Audit Logs defaults (K8s audit logs via Vector)
+        # Enabled by default when VictoriaLogs is enabled
+        data.setdefault("api_server_audit_logs_enabled", True)
+
         # Tempo defaults (distributed tracing)
         data.setdefault("tempo_enabled", False)
         data.setdefault("tempo_storage_size", "10Gi")

@@ -127,6 +127,15 @@ import (
 	vector_memory_request?: string & !=""        // Memory request per node (default: 128Mi)
 	vector_memory_limit?: string & !=""          // Memory limit per node (default: 512Mi)
 
+	// Kubernetes Event Exporter Configuration (captures ephemeral K8s events)
+	kubernetes_event_exporter_enabled?: bool     // Enable event exporter (default: victoria_logs_enabled)
+
+	// Talos System Logs Configuration (kernel and service logs)
+	talos_system_logs_enabled?: bool             // Enable Talos log collection via Vector (default: victoria_logs_enabled)
+
+	// API Server Audit Logs Configuration
+	api_server_audit_logs_enabled?: bool         // Enable K8s audit log collection (default: true)
+
 	// Tempo Configuration (distributed tracing)
 	tempo_enabled?: bool                         // Enable Tempo (default: false)
 	tempo_storage_size?: string & !=""           // Tempo storage size (default: 10Gi)
