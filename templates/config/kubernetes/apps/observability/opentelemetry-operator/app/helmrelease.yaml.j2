@@ -22,14 +22,14 @@ spec:
     manager:
       collectorImage:
         repository: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-k8s
-    #| Resource limits for the operator #|
-    resources:
-      requests:
-        cpu: "50m"
-        memory: "128Mi"
-      limits:
-        cpu: "200m"
-        memory: "256Mi"
+      #| Resource limits for the operator manager #|
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "128Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
     #| Enable admission webhooks for CRD validation #|
     admissionWebhooks:
       create: true

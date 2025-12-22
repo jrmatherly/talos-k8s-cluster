@@ -290,7 +290,7 @@ When adding new application templates to this project, multiple files must be up
 4. **Commit changes before running `task configure -y`** as it overwrites generated files
 5. **BGP requires all three settings**: `cilium_bgp_router_addr`, `cilium_bgp_router_asn`, `cilium_bgp_node_asn`
 6. **Helm chart extraZonePlugins/extraConfig** often REPLACES defaults rather than extending - include all required plugins explicitly
-7. **Flux Kustomization dependsOn** namespaces must match where the dependency actually runs (e.g., `cilium` is in `kube-system`, not `flux-system`)
+7. **Flux Kustomization dependsOn** - Parent Kustomize `namespace:` field overrides child ks.yaml `metadata.namespace`. For dependsOn: omit namespace for same-parent dependencies, only specify for cross-namespace (e.g., `cilium` in `kube-system`)
 8. **Adding new templates** requires updating multiple config files first - see checklist above
 9. **obot service port must be 80** - MCP servers generate token exchange URLs without explicit ports (defaulting to 80)
 10. **obot multi-replica requires S3 storage** - Proxmox CSI only supports RWO (ReadWriteOnce); use `obot_workspace_provider: s3` with MinIO for multiple replicas
