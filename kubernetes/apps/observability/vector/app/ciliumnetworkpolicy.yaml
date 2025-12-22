@@ -1,0 +1,18 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: vector-victorialogs-egress
+spec:
+  description: Allow Vector to send logs to VictoriaLogs
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: vector
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: victoria-logs-single
+      toPorts:
+        - ports:
+            - port: "9428"
+              protocol: TCP

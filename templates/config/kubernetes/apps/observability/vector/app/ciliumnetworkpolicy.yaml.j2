@@ -1,0 +1,23 @@
+#% if vector_enabled | default(victoria_logs_enabled) %#
+---
+#| CiliumNetworkPolicy for Vector - allow egress to VictoriaLogs #|
+#| Vector DaemonSet collects logs and forwards to VictoriaLogs Elasticsearch API #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: vector-victorialogs-egress
+spec:
+  description: Allow Vector to send logs to VictoriaLogs
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: vector
+  egress:
+    #| VictoriaLogs Elasticsearch bulk API (port 9428) #|
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: victoria-logs-single
+      toPorts:
+        - ports:
+            - port: "9428"
+              protocol: TCP
+#% endif %#
