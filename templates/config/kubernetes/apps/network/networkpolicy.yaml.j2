@@ -123,14 +123,22 @@ spec:
         - protocol: TCP
           port: 53
 #% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
-    #| OIDC discovery endpoint (external gateway LoadBalancer IP) #|
-    #| Required for OAuth2 configuration validation                #|
+    #| OIDC discovery - gateway proxy pods (external/internal)      #|
+    #| Required for OAuth2 config validation via auth.domain        #|
+    #| Cilium socket-based LB routes to pod, not LoadBalancer IP    #|
     - to:
-        - ipBlock:
-            cidr: #{ cloudflare_gateway_addr }#/32
+        - podSelector:
+            matchExpressions:
+              - key: gateway.networking.k8s.io/gateway-name
+                operator: In
+                values: ["external", "internal"]
       ports:
         - protocol: TCP
           port: 443
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 10443
 #% endif %#
 ---
 #| ============================================================ #|

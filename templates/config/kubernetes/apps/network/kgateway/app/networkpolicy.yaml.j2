@@ -50,14 +50,21 @@ spec:
             - port: "53"
               protocol: TCP
 #% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
-    #| OIDC discovery endpoint (via external gateway LoadBalancer) #|
-    #| Required for OAuth2 configuration validation               #|
-    #| Uses toEntities:world because LoadBalancer IPs require it   #|
-    - toEntities:
-        - world
+    #| OIDC discovery endpoint - gateway proxy pods (external/internal) #|
+    #| Required for OAuth2 config validation (issuerURI fetch)           #|
+    #| Cilium socket-based LB routes to pod identity, not world          #|
+    - toEndpoints:
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: external
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: internal
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+            - port: "10443"
               protocol: TCP
 #% endif %#
 #% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#

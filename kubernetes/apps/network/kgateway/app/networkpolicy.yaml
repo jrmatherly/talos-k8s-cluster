@@ -41,11 +41,18 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
-    - toEntities:
-        - world
+    - toEndpoints:
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: external
+        - matchLabels:
+            gateway.networking.k8s.io/gateway-name: internal
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP
+            - port: "10443"
               protocol: TCP
 ---
 apiVersion: cilium.io/v2
