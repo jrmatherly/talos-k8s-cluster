@@ -143,7 +143,7 @@ spec:
           inputs:
             - kubernetes_audit_logs
           source: |
-            parsed = parse_json!(.message) ?? {}
+            parsed = parse_json(.message) ?? {}
             . = parsed
             .source_type = "kubernetes_audit"
             .log = encode_json(.)

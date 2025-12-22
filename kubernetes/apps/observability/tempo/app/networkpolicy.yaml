@@ -12,6 +12,13 @@ spec:
     - Egress
   ingress:
     - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kagent
+      ports:
+        - protocol: TCP
+          port: 4317
+    - from:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: grafana
