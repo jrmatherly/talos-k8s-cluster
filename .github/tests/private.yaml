@@ -60,6 +60,12 @@ proxmox_csi_token_secret: "fake-secret"
 # vm_retention_days:
 # Proxmox Dashboards (disabled for private repo testing)
 # proxmox_dashboards_enabled: false
+# UniFi Monitoring (disabled for private repo testing)
+# unifi_enabled: false
+# unifi_url: ""
+# unifi_user: ""
+# unifi_pass: ""
+# unifi_verify_ssl: false
 # VictoriaLogs (disabled for private repo testing)
 # victoria_logs_enabled: false
 # vl_storage_size: ""

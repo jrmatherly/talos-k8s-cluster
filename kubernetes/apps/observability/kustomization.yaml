@@ -15,4 +15,5 @@ resources:
   - ./opentelemetry-k8s-events/ks.yaml
   - ./tempo/ks.yaml
   - ./minio-dashboards/ks.yaml
+  - ./unpoller/ks.yaml
 

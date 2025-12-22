@@ -222,6 +222,11 @@ class Plugin(makejinja.plugin.Plugin):
             "proxmox_dashboards_enabled", data.get("proxmox_csi_enabled", False)
         )
 
+        # UniFi Monitoring defaults (UnPoller metrics collection from UniFi Controller)
+        # REF: https://unpoller.com/
+        data.setdefault("unifi_enabled", False)
+        data.setdefault("unifi_verify_ssl", False)
+
         # VictoriaMetrics Stack defaults (replaces kube-prometheus-stack)
         data.setdefault("victoria_metrics_enabled", False)
         data.setdefault("vm_storage_size", "50Gi")

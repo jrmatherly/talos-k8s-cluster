@@ -399,6 +399,40 @@ cloudflare_token: ""
 # proxmox_dashboards_enabled: true
 
 # ==============================================================================
+# UNIFI MONITORING (Optional - UnPoller metrics collection)
+# ==============================================================================
+# UnPoller collects metrics from UniFi Controller and exports to Prometheus.
+# Provides Grafana dashboards for switches, access points, gateways, and clients.
+# REF: https://unpoller.com/
+
+# -- Enable UniFi monitoring via UnPoller.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Deploys UnPoller to collect metrics from UniFi Controller.
+#    Dashboards: USW (11312), USG/UDM (11313), UAP (11314), Clients (11315)
+# unifi_enabled: true
+
+# -- UniFi Controller URL.
+#    (REQUIRED when unifi_enabled=true)
+#    For UniFi OS devices (UDM/UDM-Pro/UXG): use port 443 or omit port
+#    For legacy CloudKey/self-hosted: use port 8443
+# unifi_url: "https://192.168.1.1"
+
+# -- UniFi Controller username.
+#    (REQUIRED when unifi_enabled=true)
+#    Create a read-only local user in UniFi Controller for polling.
+# unifi_user: "unpoller"
+
+# -- UniFi Controller password.
+#    (REQUIRED when unifi_enabled=true)
+#    WARNING: Use a strong password and consider SOPS encryption.
+# unifi_pass: "changeme"
+
+# -- Skip SSL certificate verification.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Set to true for self-signed certificates.
+# unifi_verify_ssl: false
+
+# ==============================================================================
 # VICTORIAMETRICS STACK
 # ==============================================================================
 # VictoriaMetrics provides a resource-efficient metrics stack.

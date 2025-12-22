@@ -68,6 +68,12 @@ vm_memory_request: "512Mi"
 vm_memory_limit: "2Gi"
 # Proxmox Dashboards (enabled for public repo testing)
 proxmox_dashboards_enabled: true
+# UniFi Monitoring (enabled for public repo testing)
+unifi_enabled: true
+unifi_url: "https://192.168.1.1"
+unifi_user: "unpoller"
+unifi_pass: "test-unifi-password"
+unifi_verify_ssl: false
 # VictoriaLogs (replaces Loki)
 victoria_logs_enabled: true
 vl_storage_size: "20Gi"

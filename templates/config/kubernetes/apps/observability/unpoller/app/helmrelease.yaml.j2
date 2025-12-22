@@ -1,0 +1,74 @@
+#% if unifi_enabled %#
+---
+#| UnPoller - UniFi Controller Metrics Exporter #|
+#| REF: https://unpoller.com/ #|
+#| REF: https://github.com/unpoller/helm-chart #|
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: unpoller
+spec:
+  chart:
+    spec:
+      chart: unpoller
+      version: "2.11.2"
+      sourceRef:
+        kind: HelmRepository
+        name: unpoller
+  interval: 1h
+  values:
+    #| UnPoller configuration in TOML format #|
+    #| Credentials injected from SOPS secret via env substitution #|
+    upConfig: |
+      [poller]
+        debug = false
+        quiet = false
+
+      [prometheus]
+        disable = false
+        http_listen = "0.0.0.0:9130"
+        report_errors = false
+
+      [[unifi.controller]]
+        url = "${UNIFI_URL}"
+        user = "${UNIFI_USER}"
+        pass = "${UNIFI_PASS}"
+        sites = ["all"]
+        save_ids = true
+        save_dpi = true
+        save_sites = true
+        hash_pii = false
+        verify_ssl = #{ unifi_verify_ssl | lower }#
+
+      [influxdb]
+        disable = true
+
+      [loki]
+        disable = true
+
+    #| Environment variables from secret #|
+    envFrom:
+      - secretRef:
+          name: unpoller-secret
+
+    #| Pod Monitor for VMAgent scraping #|
+    podMonitor:
+      enabled: true
+      labels:
+        app.kubernetes.io/name: unpoller
+      interval: 30s
+      scrapeTimeout: 10s
+
+    #| Resource limits #|
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+
+    #| Disable Grafana CRDs (we configure dashboards in victoria-metrics) #|
+    dashboards:
+      create: false
+#% endif %#

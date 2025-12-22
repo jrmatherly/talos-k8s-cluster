@@ -235,6 +235,16 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/proxmox
 #% endif %#
+#% if unifi_enabled %#
+            - name: "unifi"
+              orgId: 1
+              folder: "UniFi"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/unifi
+#% endif %#
       dashboards:
         kubernetes:
           #| Core Kubernetes dashboards #|
@@ -314,6 +324,31 @@ spec:
           proxmox-ve:
             gnetId: 13307
             revision: 14
+            datasource: VictoriaMetrics
+#% endif %#
+#% if unifi_enabled %#
+        unifi:
+          #| UniFi Network dashboards - metrics via UnPoller Prometheus exporter #|
+          #| REF: https://unpoller.com/docs/install/grafana/ #|
+          unifi-usw:
+            #| USW Insights - UniFi Switches #|
+            gnetId: 11312
+            revision: 9
+            datasource: VictoriaMetrics
+          unifi-usg:
+            #| USG Insights - UniFi Gateway/UDM #|
+            gnetId: 11313
+            revision: 9
+            datasource: VictoriaMetrics
+          unifi-uap:
+            #| UAP Insights - UniFi Access Points #|
+            gnetId: 11314
+            revision: 10
+            datasource: VictoriaMetrics
+          unifi-clients:
+            #| Client Insights - Connected clients #|
+            gnetId: 11315
+            revision: 9
             datasource: VictoriaMetrics
 #% endif %#
 

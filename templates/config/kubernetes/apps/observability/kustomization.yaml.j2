@@ -30,5 +30,8 @@ resources:
 #% if minio_enabled %#
   - ./minio-dashboards/ks.yaml
 #% endif %#
+#% if unifi_enabled %#
+  - ./unpoller/ks.yaml
+#% endif %#
 #% endif %#
 

@@ -1,0 +1,63 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: unpoller
+spec:
+  chart:
+    spec:
+      chart: unpoller
+      version: "2.11.2"
+      sourceRef:
+        kind: HelmRepository
+        name: unpoller
+  interval: 1h
+  values:
+    upConfig: |
+      [poller]
+        debug = false
+        quiet = false
+
+      [prometheus]
+        disable = false
+        http_listen = "0.0.0.0:9130"
+        report_errors = false
+
+      [[unifi.controller]]
+        url = "${UNIFI_URL}"
+        user = "${UNIFI_USER}"
+        pass = "${UNIFI_PASS}"
+        sites = ["all"]
+        save_ids = true
+        save_dpi = true
+        save_sites = true
+        hash_pii = false
+        verify_ssl = false
+
+      [influxdb]
+        disable = true
+
+      [loki]
+        disable = true
+
+    envFrom:
+      - secretRef:
+          name: unpoller-secret
+
+    podMonitor:
+      enabled: true
+      labels:
+        app.kubernetes.io/name: unpoller
+      interval: 30s
+      scrapeTimeout: 10s
+
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+
+    dashboards:
+      create: false

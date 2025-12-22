@@ -1,0 +1,19 @@
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: unpoller-unifi-egress
+spec:
+  description: Allow UnPoller to reach UniFi Controller
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: unpoller
+  egress:
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "8443"
+              protocol: TCP

@@ -83,6 +83,13 @@ import (
 	grafana_storage_size?: string & !=""
 	proxmox_dashboards_enabled?: bool              // Enable Proxmox VE dashboards (default: proxmox_csi_enabled)
 
+	// UniFi Monitoring (optional - UnPoller metrics collection from UniFi Controller)
+	unifi_enabled?: bool                           // Enable UnPoller deployment (default: false)
+	unifi_url?: string & !=""                      // UniFi Controller URL (required when enabled)
+	unifi_user?: string & !=""                     // UniFi Controller username (required when enabled)
+	unifi_pass?: string & !=""                     // UniFi Controller password (required when enabled)
+	unifi_verify_ssl?: bool                        // Verify SSL certificate (default: false)
+
 	// VictoriaMetrics Stack Configuration (replaces kube-prometheus-stack)
 	victoria_metrics_enabled?: bool              // Enable VictoriaMetrics (default: false)
 	vm_storage_size?: string & !=""              // VMSingle storage size (default: 50Gi)

@@ -1,0 +1,27 @@
+#% if unifi_enabled %#
+---
+#| CiliumNetworkPolicy for UnPoller - allow egress to UniFi Controller #|
+#| UnPoller needs to poll UniFi Controller API for metrics #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: unpoller-unifi-egress
+spec:
+  description: Allow UnPoller to reach UniFi Controller
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: unpoller
+  egress:
+    #| UniFi Controller API access (HTTPS) #|
+    #| Uses world entity since controller is external to cluster #|
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            #| UniFi OS (UDM/UDM-Pro/UXG) uses port 443 #|
+            - port: "443"
+              protocol: TCP
+            #| Legacy CloudKey/self-hosted uses port 8443 #|
+            - port: "8443"
+              protocol: TCP
+#% endif %#
