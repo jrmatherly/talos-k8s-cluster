@@ -12,6 +12,9 @@ spec:
     name: victoria-logs-single
   interval: 1h
   values:
+    #| Override fullname to create predictable service name (victoria-logs-server) #|
+    #| Default naming: <release>-<chart>-server = victoria-logs-victoria-logs-single-server #|
+    fullnameOverride: victoria-logs
     server:
       enabled: true
       #| Storage configuration #|
