@@ -99,6 +99,7 @@ import (
 	vm_cpu_limit?: string & !=""                 // CPU limit (default: 1000m)
 	vm_memory_request?: string & !=""            // Memory request (default: 512Mi)
 	vm_memory_limit?: string & !=""              // Memory limit (default: 2Gi)
+	victoriametrics_lb_addr?: net.IPv4           // Direct LoadBalancer IP for VMSingle (bypasses Gateway OAuth2)
 
 	// VictoriaLogs Configuration (replaces Loki)
 	victoria_logs_enabled?: bool                 // Enable VictoriaLogs (default: false)

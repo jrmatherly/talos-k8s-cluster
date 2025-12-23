@@ -466,6 +466,12 @@ cloudflare_token: ""
 # vm_cpu_limit: "1000m"
 # vm_memory_limit: "2Gi"
 
+# -- Direct LoadBalancer IP for VMSingle (bypasses Gateway OAuth2).
+#    (OPTIONAL) - Must be an UNUSED IP within node_cidr
+#    Used by Proxmox to push metrics via InfluxDB protocol without authentication.
+#    When set, a LoadBalancer service is created at <ip>:8428 for direct metric ingestion.
+# victoriametrics_lb_addr: "192.168.1.141"
+
 # ==============================================================================
 # VICTORIALOGS (Optional - Log aggregation with VictoriaMetrics)
 # ==============================================================================

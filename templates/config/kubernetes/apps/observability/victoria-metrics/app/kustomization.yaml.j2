@@ -8,4 +8,7 @@ resources:
   - helmrelease.yaml
   - httproute.yaml
   - trafficpolicy.yaml
+#% if victoriametrics_lb_addr | default('') %#
+  - vmsingle-lb-service.yaml
+#% endif %#
 #% endif %#

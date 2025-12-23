@@ -1,0 +1,25 @@
+#% if victoria_metrics_enabled and victoriametrics_lb_addr | default('') %#
+---
+#| LoadBalancer service for direct VMSingle access (bypasses Gateway OAuth2) #|
+#| Used by Proxmox to push metrics via InfluxDB protocol without authentication #|
+#| REF: docs/ai-context/proxmox-metrics.md #|
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmsingle-direct
+  labels:
+    app.kubernetes.io/name: victoria-metrics
+    app.kubernetes.io/component: vmsingle-lb
+spec:
+  type: LoadBalancer
+  loadBalancerIP: "#{ victoriametrics_lb_addr }#"
+  ports:
+    - name: http
+      port: 8428
+      targetPort: 8428
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: vmsingle
+    app.kubernetes.io/instance: vmstack
+    app.kubernetes.io/component: monitoring
+#% endif %#

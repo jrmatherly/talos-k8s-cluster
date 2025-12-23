@@ -66,6 +66,7 @@ vm_cpu_request: "200m"
 vm_cpu_limit: "1000m"
 vm_memory_request: "512Mi"
 vm_memory_limit: "2Gi"
+victoriametrics_lb_addr: "192.168.1.141"
 # Proxmox Dashboards (enabled for public repo testing)
 proxmox_dashboards_enabled: true
 # UniFi Monitoring (enabled for public repo testing)
