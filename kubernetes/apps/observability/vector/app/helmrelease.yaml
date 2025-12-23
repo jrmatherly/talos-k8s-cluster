@@ -89,10 +89,10 @@ spec:
             - talos_kernel_logs
           source: |
             .source_type = "talos_kernel"
-            # Extract structured fields from JSON
-            .facility = .facility ?? "kern"
-            .priority = .priority ?? "info"
-            .log = .msg ?? .message ?? ""
+            # Extract structured fields from JSON (use if/else for null handling)
+            .facility = if exists(.facility) { .facility } else { "kern" }
+            .priority = if exists(.priority) { .priority } else { "info" }
+            .log = if exists(.msg) { .msg } else if exists(.message) { .message } else { "" }
             .node = get_env_var!("VECTOR_SELF_NODE_NAME")
             # Use Talos timestamp if available for better accuracy
             if exists(."talos-time") {
