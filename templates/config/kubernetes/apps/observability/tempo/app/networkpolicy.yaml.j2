@@ -92,4 +92,14 @@ spec:
         - protocol: TCP
           port: 9000
 #% endif %#
+#% if victoria_metrics_enabled %#
+    #| VictoriaMetrics for metrics generator remote write #|
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmsingle
+      ports:
+        - protocol: TCP
+          port: 8428
+#% endif %#
 #% endif %#
