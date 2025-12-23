@@ -72,7 +72,7 @@ cluster.yaml + nodes.yaml → makejinja → kubernetes/, talos/, bootstrap/
 ## Key Configuration Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `cluster.yaml` | Main cluster settings (user config) |
 | `nodes.yaml` | Node definitions (user config) |
 | `templates/config/` | Jinja2 templates (source of truth) |
@@ -126,6 +126,7 @@ See `.serena/memories/adding-new-templates-checklist.md` for complete checklist.
 8. **agentgateway only supports chat completions** - Embeddings API not supported; use direct Azure endpoint
 9. **agentgateway HTTPRoute path ordering** - Longest paths first to prevent path collisions
 10. **AgentgatewayPolicy CRD schema** - Use `spec.backend.mcp.authentication` and `spec.traffic.cors`; CORS `maxAge` is integer, `allowOrigins` cannot use wildcard ports
+11. **VictoriaMetrics ports** - VMSingle uses port **8428**, VMAgent uses port **8429**. Service: `vmsingle-vmstack:8428` (storage), `vmagent-vmstack:8429` (collection)
 
 ## Extended Documentation
 
@@ -133,9 +134,12 @@ For detailed component documentation, see:
 - `docs/ai-context/kgateway.md` - kgateway controller (Gateway API, Envoy data plane, OIDC, traffic policies)
 - `docs/ai-context/agentgateway-mcp.md` - agentgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)
+- `docs/ai-context/observability-strategy.md` - VictoriaMetrics, VictoriaLogs, Tempo, OpenTelemetry architecture
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy for K8s API access
 - `docs/ai-context/obot-networking.md` - obot MCP server networking
 - `docs/ai-context/kagent-a2a.md` - kagent A2A networking
 - `docs/ai-context/imagevolume-cnpg.md` - ImageVolume for CloudNativePG extensions
+- `docs/ai-context/unifi-metrics.md` - UnPoller UniFi monitoring
+- `docs/ai-context/proxmox-metrics.md` - Proxmox VE metrics collection
 
 For Claude-specific context, see `CLAUDE.md`.

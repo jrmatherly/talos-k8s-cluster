@@ -307,6 +307,7 @@ When adding new application templates to this project, multiple files must be up
 21. **UnPoller chart version suffix** - Use `2.11.2-Chart6` (not `2.11.2`); chart doesn't support `envFrom` natively, use Flux `postRenderers` to inject from `cluster-secrets`
 22. **Proxmox Grafana dashboards** - Community dashboards (16060, 13307) use `${DS_SHIFT-METRICS}` variable that doesn't auto-resolve; import manually via Grafana UI and map to `VictoriaMetrics` datasource
 23. **OTEL collector OTLP endpoint** - Don't append `/v1/logs` to VictoriaLogs endpoint; OTLP exporter auto-appends it. Use: `http://victoria-logs-server.observability.svc.cluster.local:9428/insert/opentelemetry`
+24. **VictoriaMetrics ports** - VMSingle uses port **8428**, VMAgent uses port **8429**. Don't confuse them! Service names: `vmsingle-vmstack:8428` (storage), `vmagent-vmstack:8429` (collection)
 
 ## Extended Documentation
 

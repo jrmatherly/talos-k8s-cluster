@@ -1,10 +1,15 @@
 #% if talos_system_logs_enabled %#
-#| Talos Service Logs - forward to Vector via UDP syslog #|
-#| Vector receives on port 6051 (service logs) #|
-#| NOTE: Kernel logs require extraKernelArgs in schematic (port 6050) #|
-#| REF: https://www.talos.dev/v1.9/talos-guides/configuration/logging/ #|
+#| Talos Logging - forward kernel and service logs to Vector via UDP #|
+#| Vector receives kernel logs on port 6050 and service logs on port 6051 #|
+#| REF: https://docs.siderolabs.com/talos/v1.11/configure-your-talos-cluster/logging-and-telemetry/logging #|
 machine:
+  install:
+    #| Kernel logging via boot command line argument #|
+    #| NOTE: Requires node upgrade (not just config apply) to take effect #|
+    extraKernelArgs:
+      - talos.logging.kernel=udp://vector.observability.svc.cluster.local:6050
   logging:
+    #| Service logs (machined, kubelet, etcd, etc.) via UDP JSON lines #|
     destinations:
       - endpoint: "udp://vector.observability.svc.cluster.local:6051"
         format: json_lines

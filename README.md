@@ -35,8 +35,8 @@ There are **5 stages** outlined below for completing this project, make sure you
 >
 > **Minimum system requirements**
 >
-> | Role    | Cores    | Memory        | System Disk               |
-> |---------|----------|---------------|---------------------------|
+> | Role | Cores | Memory | System Disk |
+> | --- | --- | --- | --- |
 > | Control/Worker | 4 | 16GB | 256GB SSD/NVMe |
 
 1. Head over to the [Talos Linux Image Factory](https://factory.talos.dev) and follow the instructions. Be sure to only choose the **bare-minimum system extensions** as some might require additional configuration and prevent Talos from booting without it. Depending on your CPU start with the Intel/AMD system extensions (`i915`, `intel-ucode` & `mei` **or** `amdgpu` & `amd-ucode`), you can always add system extensions after Talos is installed and working.
@@ -842,7 +842,7 @@ obot deploys MCP servers in a separate namespace (`obot-mcp`) with strict networ
 2. **Multi-port NetworkPolicies** - Traffic between `obot` and `obot-mcp` namespaces requires ports 80, 443, 8080, and 8099
 
 | Issue | Symptom | Root Cause |
-|-------|---------|------------|
+| ----- | ------- | ---------- |
 | MCP server 503 | Health check timeout | NetworkPolicy blocking obot→MCP |
 | Token exchange timeout | 500 error on /tools | NetworkPolicy blocking MCP→obot |
 | External access 502 | Bad Gateway | HTTPRoute port mismatch |

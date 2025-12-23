@@ -1,4 +1,7 @@
 machine:
+  install:
+    extraKernelArgs:
+      - talos.logging.kernel=udp://vector.observability.svc.cluster.local:6050
   logging:
     destinations:
       - endpoint: "udp://vector.observability.svc.cluster.local:6051"
