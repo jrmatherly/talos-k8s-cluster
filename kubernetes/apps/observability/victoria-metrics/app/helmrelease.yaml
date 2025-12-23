@@ -125,10 +125,31 @@ spec:
               spanEndTimeShift: "1h"
               filterByTraceID: true
               filterBySpanID: true
+              tags:
+                - key: service.name
+                  value: service_name
+                - key: service.namespace
+                  value: service_namespace
+                - key: k8s.namespace.name
+                  value: namespace
+                - key: k8s.pod.name
+                  value: pod
             tracesToMetrics:
               datasourceUid: victoriametrics
               spanStartTimeShift: "-1h"
               spanEndTimeShift: "1h"
+              tags:
+                - key: service.name
+                  value: service_name
+                - key: span.kind
+                  value: span_kind
+              queries:
+                - name: Request Rate
+                  query: sum(rate(traces_spanmetrics_calls_total{$$__tags}[5m]))
+                - name: Error Rate
+                  query: sum(rate(traces_spanmetrics_calls_total{$$__tags, status_code="STATUS_CODE_ERROR"}[5m]))
+                - name: Duration p95
+                  query: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m])) by (le))
             serviceMap:
               datasourceUid: victoriametrics
             nodeGraph:
