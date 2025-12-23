@@ -422,6 +422,13 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("obot_s3_access_key", "")
         data.setdefault("obot_s3_secret_key", "")
         data.setdefault("obot_s3_use_path_style", False)
+        # OpenTelemetry observability (traces, metrics, logs)
+        data.setdefault("obot_otel_enabled", False)
+        data.setdefault("obot_otel_sample_prob", 0.1)
+        data.setdefault("obot_otel_cpu_request", "50m")
+        data.setdefault("obot_otel_cpu_limit", "200m")
+        data.setdefault("obot_otel_memory_request", "64Mi")
+        data.setdefault("obot_otel_memory_limit", "256Mi")
 
         # MinIO defaults (S3-compatible object storage in storage namespace)
         data.setdefault("minio_enabled", False)

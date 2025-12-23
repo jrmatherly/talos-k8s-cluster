@@ -251,6 +251,16 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/unifi
 #% endif %#
+#% if obot_otel_enabled | default(false) %#
+            - name: "obot"
+              orgId: 1
+              folder: "Obot"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/obot
+#% endif %#
       dashboards:
         kubernetes:
           #| Core Kubernetes dashboards #|
@@ -348,6 +358,25 @@ spec:
             #| Client Insights - Connected clients #|
             gnetId: 11315
             revision: 9
+            datasource: VictoriaMetrics
+#% endif %#
+#% if obot_otel_enabled | default(false) %#
+        obot:
+          #| obot OpenTelemetry dashboards #|
+          #| OTEL Collector - monitors the obot OTEL gateway collector #|
+          otel-collector:
+            gnetId: 15983
+            revision: 1
+            datasource: VictoriaMetrics
+          #| OTEL Data Flow - visualizes data flowing through the collector #|
+          otel-data-flow:
+            gnetId: 18309
+            revision: 1
+            datasource: VictoriaMetrics
+          #| OTEL APM - application performance monitoring with traces/spans #|
+          otel-apm:
+            gnetId: 19419
+            revision: 1
             datasource: VictoriaMetrics
 #% endif %#
 

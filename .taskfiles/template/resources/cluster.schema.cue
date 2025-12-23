@@ -253,6 +253,14 @@ import (
 	obot_s3_secret_key?: string & !=""          // S3 secret key (MinIO secret key)
 	obot_s3_use_path_style?: bool               // Use path-style URLs (required for MinIO without wildcard DNS)
 
+	// obot OpenTelemetry Configuration (traces, metrics, logs observability)
+	obot_otel_enabled?: bool                    // Enable OTEL observability for obot (default: false)
+	obot_otel_sample_prob?: number & >=0 & <=1  // Trace sampling probability (default: 0.1)
+	obot_otel_cpu_request?: string & !=""       // OTEL Collector CPU request (default: 50m)
+	obot_otel_cpu_limit?: string & !=""         // OTEL Collector CPU limit (default: 200m)
+	obot_otel_memory_request?: string & !=""    // OTEL Collector memory request (default: 64Mi)
+	obot_otel_memory_limit?: string & !=""      // OTEL Collector memory limit (default: 256Mi)
+
 	// MinIO Configuration (S3-compatible object storage)
 	// Shared storage namespace for S3-compatible object storage used by obot and other services
 	minio_enabled?: bool                        // Enable MinIO deployment

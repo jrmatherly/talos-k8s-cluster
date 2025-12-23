@@ -155,6 +155,15 @@ spec:
 #% endif %#
 #% endif %#
 
+#% if obot_otel_enabled | default(false) %#
+      # ============================================================
+      # OpenTelemetry Configuration
+      # Exports traces, metrics, and logs to the OTEL Collector Gateway
+      # ============================================================
+      OBOT_SERVER_OTEL_BASE_EXPORT_ENDPOINT: "obot-otel-gateway-collector.obot.svc.cluster.local:4317"
+      OBOT_SERVER_OTEL_SAMPLE_PROB: "#{ obot_otel_sample_prob | default(0.1) }#"
+#% endif %#
+
     # ============================================================
     # Storage Configuration
     # Note: PVC persistence is disabled when using S3 workspace provider

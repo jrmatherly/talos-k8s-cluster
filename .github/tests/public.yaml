@@ -197,6 +197,9 @@ obot_memory_limit: "4Gi"
 obot_encryption_provider: "custom"
 obot_use_ai_gateway: true
 obot_use_agentgateway: true
+# OpenTelemetry observability (enabled for public repo testing)
+obot_otel_enabled: true
+obot_otel_sample_prob: 0.1
 # MinIO Configuration (S3-compatible object storage)
 minio_enabled: true
 minio_chart_version: "5.4.0"

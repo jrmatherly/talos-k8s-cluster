@@ -11,3 +11,4 @@ resources:
   - ./rbac.yaml
   - ./db-secret.sops.yaml
   - ./postgresql.yaml
+  - ./otel-collector.yaml

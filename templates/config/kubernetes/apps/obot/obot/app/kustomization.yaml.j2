@@ -12,4 +12,7 @@ resources:
   - ./rbac.yaml
   - ./db-secret.sops.yaml
   - ./postgresql.yaml
+#% if obot_otel_enabled | default(false) %#
+  - ./otel-collector.yaml
+#% endif %#
 #% endif %#

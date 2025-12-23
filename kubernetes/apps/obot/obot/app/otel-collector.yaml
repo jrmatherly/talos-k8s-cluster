@@ -1,0 +1,132 @@
+---
+# OpenTelemetry Collector Gateway for obot
+# Receives all OTEL signals (traces, metrics, logs) via gRPC from obot
+# and routes them to appropriate backends:
+#   - Traces → Tempo (gRPC:4317)
+#   - Metrics → VictoriaMetrics (HTTP:8428)
+#   - Logs → VictoriaLogs (HTTP:9428)
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: obot-otel-gateway
+  labels:
+    app.kubernetes.io/name: obot-otel-gateway
+    app.kubernetes.io/component: observability
+spec:
+  image: otel/opentelemetry-collector-contrib:0.142.0
+  mode: deployment
+  replicas: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  config:
+    receivers:
+      # gRPC receiver for all signals from obot
+      # obot sends to {endpoint}/v1/traces, /v1/metrics, /v1/logs
+      otlp:
+        protocols:
+          grpc:
+            endpoint: "0.0.0.0:4317"
+          http:
+            endpoint: "0.0.0.0:4318"
+
+    processors:
+      # Memory limiter to prevent OOM
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 80
+        spike_limit_percentage: 25
+      # Batch processor for efficiency
+      batch:
+        timeout: 10s
+        send_batch_size: 100
+      # Resource processor to add obot metadata
+      resource:
+        attributes:
+          - key: service.namespace
+            value: obot
+            action: upsert
+          - key: deployment.environment
+            value: production
+            action: upsert
+
+    exporters:
+      # Traces → Tempo via gRPC
+      otlp/tempo:
+        endpoint: tempo.observability.svc.cluster.local:4317
+        tls:
+          insecure: true
+
+      # Metrics → VictoriaMetrics via HTTP
+      # VictoriaMetrics OTLP endpoint: /opentelemetry/v1/metrics
+      otlphttp/victoriametrics:
+        endpoint: http://vmsingle-vmstack.observability.svc.cluster.local:8429/opentelemetry
+        tls:
+          insecure: true
+
+      # Logs → VictoriaLogs via HTTP
+      # VictoriaLogs OTLP endpoint: /insert/opentelemetry/v1/logs
+      otlphttp/victorialogs:
+        endpoint: http://victoria-logs-server.observability.svc.cluster.local:9428/insert/opentelemetry
+        tls:
+          insecure: true
+
+      # Debug exporter for troubleshooting (disabled by default)
+      # debug:
+      #   verbosity: detailed
+
+    service:
+      pipelines:
+        # Traces pipeline → Tempo
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [otlp/tempo]
+
+        # Metrics pipeline → VictoriaMetrics
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [otlphttp/victoriametrics]
+
+        # Logs pipeline → VictoriaLogs
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [otlphttp/victorialogs]
+
+      telemetry:
+        logs:
+          level: info
+        metrics:
+          address: ":8888"
+---
+# Service for the OTEL Collector (created by operator, but define explicitly for NetworkPolicy)
+apiVersion: v1
+kind: Service
+metadata:
+  name: obot-otel-gateway-collector
+  labels:
+    app.kubernetes.io/name: obot-otel-gateway
+spec:
+  selector:
+    app.kubernetes.io/component: opentelemetry-collector
+    app.kubernetes.io/instance: obot.obot-otel-gateway
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+    - name: metrics
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+  type: ClusterIP

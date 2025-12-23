@@ -175,6 +175,19 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8099
+#% if obot_otel_enabled | default(false) %#
+    # Allow to OTEL Collector Gateway for traces, metrics, and logs
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: opentelemetry-collector
+              app.kubernetes.io/instance: obot.obot-otel-gateway
+      ports:
+        - protocol: TCP
+          port: 4317  # gRPC
+        - protocol: TCP
+          port: 4318  # HTTP
+#% endif %#
 #% if agentgateway_enabled | default(false) %#
     # Allow to agentgateway pods in agentgateway-system for MCP/LLM routing
     - to:
@@ -397,4 +410,97 @@ spec:
           port: 5432   # PostgreSQL replication
         - protocol: TCP
           port: 8000   # CNPG instance manager HTTP API
+#% if obot_otel_enabled | default(false) %#
+---
+# NetworkPolicy for OTEL Collector Gateway - Ingress from obot pods
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obot-otel-gateway-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: opentelemetry-collector
+      app.kubernetes.io/instance: obot.obot-otel-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from obot pods (OTLP gRPC/HTTP)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: obot
+      ports:
+        - protocol: TCP
+          port: 4317  # gRPC
+        - protocol: TCP
+          port: 4318  # HTTP
+#% if observability_enabled | default(false) %#
+    # Allow Prometheus scraping of collector metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 8888
+#% endif %#
+---
+# NetworkPolicy for OTEL Collector Gateway - Egress to observability backends
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obot-otel-gateway-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: opentelemetry-collector
+      app.kubernetes.io/instance: obot.obot-otel-gateway
+  policyTypes:
+    - Egress
+  egress:
+    # DNS resolution
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Traces → Tempo (gRPC)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: tempo
+      ports:
+        - protocol: TCP
+          port: 4317
+    # Metrics → VictoriaMetrics (HTTP)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: vmsingle
+      ports:
+        - protocol: TCP
+          port: 8429
+    # Logs → VictoriaLogs (HTTP)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: victoria-logs-single
+      ports:
+        - protocol: TCP
+          port: 9428
+#% endif %#
 #% endif %#

@@ -1126,6 +1126,34 @@ cloudflare_token: ""
 # obot_s3_use_path_style: true
 
 # ==============================================================================
+# OBOT OPENTELEMETRY OBSERVABILITY (Optional)
+# ==============================================================================
+# Configure OpenTelemetry observability for obot. Sends traces, metrics, and logs
+# to an OTEL Collector Gateway which routes to Tempo, VictoriaMetrics, and VictoriaLogs.
+# Requires: observability_enabled=true and tempo_enabled=true
+# REF: https://docs.obot.ai/configuration/server-configuration
+
+# -- Enable OTEL observability for obot.
+#    (OPTIONAL) / (DEFAULT: false)
+#    Deploys an OTEL Collector Gateway in the obot namespace.
+# obot_otel_enabled: false
+
+# -- Trace sampling probability (0.0 to 1.0).
+#    (OPTIONAL) / (DEFAULT: 0.1 = 10% of traces)
+#    Set to 1.0 to capture all traces during debugging.
+# obot_otel_sample_prob: 0.1
+
+# -- OTEL Collector resource requests.
+#    (OPTIONAL) / (DEFAULTs shown)
+# obot_otel_cpu_request: "50m"
+# obot_otel_memory_request: "64Mi"
+
+# -- OTEL Collector resource limits.
+#    (OPTIONAL) / (DEFAULTs shown)
+# obot_otel_cpu_limit: "200m"
+# obot_otel_memory_limit: "256Mi"
+
+# ==============================================================================
 # MINIO CONFIGURATION (Optional - S3-compatible Object Storage)
 # ==============================================================================
 # MinIO provides S3-compatible object storage for services like obot.

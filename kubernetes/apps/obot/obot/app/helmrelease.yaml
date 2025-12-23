@@ -15,7 +15,7 @@ spec:
     # ============================================================
     image:
       repository: ghcr.io/jrmatherly/obot-entraid
-      tag: v0.2.22
+      tag: v0.2.23
 
     # ============================================================
     # Replicas - Limited to 1 with RWO storage, multiple with S3
@@ -115,6 +115,13 @@ spec:
       # Use path-style URLs for S3-compatible storage (MinIO without wildcard DNS)
       # Format: https://my-s3-endpoint.domain.com/bucket instead of https://bucket.s3.domain.com
       WORKSPACE_PROVIDER_S3_USE_PATH_STYLE: "true"
+
+      # ============================================================
+      # OpenTelemetry Configuration
+      # Exports traces, metrics, and logs to the OTEL Collector Gateway
+      # ============================================================
+      OBOT_SERVER_OTEL_BASE_EXPORT_ENDPOINT: "obot-otel-gateway-collector.obot.svc.cluster.local:4317"
+      OBOT_SERVER_OTEL_SAMPLE_PROB: "0.1"
 
     # ============================================================
     # Storage Configuration
