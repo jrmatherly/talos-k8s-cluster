@@ -310,6 +310,7 @@ When adding new application templates to this project, multiple files must be up
 24. **VictoriaMetrics ports** - VMSingle uses port **8428**, VMAgent uses port **8429**. Don't confuse them! Service names: `vmsingle-vmstack:8428` (storage), `vmagent-vmstack:8429` (collection)
 25. **Vector Helm chart hostNetwork** - Use `podHostNetwork: true` (NOT `hostNetwork: true`); required for Talos syslog collection on host UDP ports 6050/6051
 26. **Talos kernel logging requires upgrade** - `machine.install.extraKernelArgs` changes require `task talos:upgrade-node` (not just apply); service logs (`machine.logging.destinations`) work with apply only
+27. **Talos can't resolve K8s DNS** - Talos uses host DNS servers, not CoreDNS; for logging endpoints, use `127.0.0.1` (localhost) when Vector runs as DaemonSet with hostNetwork, NOT `service.namespace.svc.cluster.local`
 
 ## Extended Documentation
 
