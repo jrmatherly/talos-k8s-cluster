@@ -41,6 +41,19 @@ spec:
         - protocol: TCP
           port: 4317
 #% endif %#
+    #| OTLP gRPC from obot OTEL collector #|
+#% if obot_enabled and obot_otel_enabled %#
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: obot-otel-gateway
+      ports:
+        - protocol: TCP
+          port: 4317
+#% endif %#
     #| Query API from Grafana #|
     - from:
         - podSelector:

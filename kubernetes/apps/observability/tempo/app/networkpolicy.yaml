@@ -12,6 +12,16 @@ spec:
     - Egress
   ingress:
     - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obot
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: obot-otel-gateway
+      ports:
+        - protocol: TCP
+          port: 4317
+    - from:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: grafana
