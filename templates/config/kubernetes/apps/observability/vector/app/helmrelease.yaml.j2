@@ -20,7 +20,8 @@ spec:
     role: Agent
 #% if talos_system_logs_enabled %#
     #| Enable host network for receiving Talos syslog via UDP #|
-    hostNetwork: true
+    #| NOTE: Vector chart uses 'podHostNetwork' not 'hostNetwork' #|
+    podHostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
 #% endif %#
     #| Network policy labels for CCNP tiered policies (kubernetes_logs source) #|

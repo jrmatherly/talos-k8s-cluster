@@ -14,7 +14,7 @@ spec:
   interval: 1h
   values:
     role: Agent
-    hostNetwork: true
+    podHostNetwork: true
     dnsPolicy: ClusterFirstWithHostNet
     podLabels:
       network.cilium.io/api-access: "true"
