@@ -1,0 +1,934 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: obot-apm-dashboard
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "AI"
+data:
+  obot-apm.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Obot Application Performance Monitoring using Tempo span metrics",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "id": 100,
+          "panels": [],
+          "title": "Overview",
+          "type": "row"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Total requests per second across all operations",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null }
+                ]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
+          "id": 1,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum(rate(traces_spanmetrics_calls_total{service=\"obot\"}[$__rate_interval]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Request Rate",
+          "type": "stat"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Percentage of requests with error status",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 1 },
+                  { "color": "red", "value": 5 }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
+          "id": 2,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "100 * sum(rate(traces_spanmetrics_calls_total{service=\"obot\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval])) / sum(rate(traces_spanmetrics_calls_total{service=\"obot\"}[$__rate_interval]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Error Rate",
+          "type": "stat"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Average latency across all operations",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 100 },
+                  { "color": "red", "value": 500 }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum(rate(traces_spanmetrics_latency_sum{service=\"obot\"}[$__rate_interval])) / sum(rate(traces_spanmetrics_latency_count{service=\"obot\"}[$__rate_interval]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Avg Latency",
+          "type": "stat"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "95th percentile latency",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 200 },
+                  { "color": "red", "value": 1000 }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
+          "id": 4,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{service=\"obot\"}[$__rate_interval])) by (le))",
+              "refId": "A"
+            }
+          ],
+          "title": "P95 Latency",
+          "type": "stat"
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+          "id": 101,
+          "panels": [],
+          "title": "Operations",
+          "type": "row"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Request rate over time by operation",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"obot\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Request Rate by Operation",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Top operations by total request count",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "custom": {
+                "align": "auto",
+                "cellOptions": { "type": "auto" },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": { "id": "byName", "options": "Rate" },
+                "properties": [
+                  { "id": "unit", "value": "reqps" },
+                  { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Avg Latency" },
+                "properties": [
+                  { "id": "unit", "value": "ms" },
+                  { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "P95 Latency" },
+                "properties": [
+                  { "id": "unit", "value": "ms" },
+                  { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }
+                ]
+              },
+              {
+                "matcher": { "id": "byName", "options": "Error %" },
+                "properties": [
+                  { "id": "unit", "value": "percent" },
+                  { "id": "thresholds", "value": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] } },
+                  { "id": "custom.cellOptions", "value": { "mode": "gradient", "type": "gauge" } }
+                ]
+              }
+            ]
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+          "id": 6,
+          "options": {
+            "cellHeight": "sm",
+            "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false },
+            "showHeader": true,
+            "sortBy": [{ "desc": true, "displayName": "Rate" }]
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"obot\"}[$__rate_interval]))",
+              "format": "table",
+              "instant": true,
+              "refId": "rate"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_latency_sum{service=\"obot\"}[$__rate_interval])) / sum by (span_name) (rate(traces_spanmetrics_latency_count{service=\"obot\"}[$__rate_interval]))",
+              "format": "table",
+              "instant": true,
+              "refId": "avg_latency"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "histogram_quantile(0.95, sum by (span_name, le) (rate(traces_spanmetrics_latency_bucket{service=\"obot\"}[$__rate_interval])))",
+              "format": "table",
+              "instant": true,
+              "refId": "p95_latency"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "100 * sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"obot\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval])) / sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"obot\"}[$__rate_interval]))",
+              "format": "table",
+              "instant": true,
+              "refId": "error_rate"
+            }
+          ],
+          "title": "Operations Summary",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": { "Time": true },
+                "renameByName": {
+                  "span_name": "Operation",
+                  "Value #rate": "Rate",
+                  "Value #avg_latency": "Avg Latency",
+                  "Value #p95_latency": "P95 Latency",
+                  "Value #error_rate": "Error %"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+          "id": 102,
+          "panels": [],
+          "title": "Latency",
+          "type": "row"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Latency percentiles over time",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+          "id": 7,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket{service=\"obot\"}[$__rate_interval])) by (le))",
+              "legendFormat": "P50",
+              "refId": "A"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "histogram_quantile(0.90, sum(rate(traces_spanmetrics_latency_bucket{service=\"obot\"}[$__rate_interval])) by (le))",
+              "legendFormat": "P90",
+              "refId": "B"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{service=\"obot\"}[$__rate_interval])) by (le))",
+              "legendFormat": "P95",
+              "refId": "C"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{service=\"obot\"}[$__rate_interval])) by (le))",
+              "legendFormat": "P99",
+              "refId": "D"
+            }
+          ],
+          "title": "Latency Percentiles",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Average latency by operation over time",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+          "id": 8,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_latency_sum{service=\"obot\"}[$__rate_interval])) / sum by (span_name) (rate(traces_spanmetrics_latency_count{service=\"obot\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Latency by Operation",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+          "id": 103,
+          "panels": [],
+          "title": "Errors",
+          "type": "row"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Error rate over time",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+          "id": 9,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "100 * sum(rate(traces_spanmetrics_calls_total{service=\"obot\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval])) / sum(rate(traces_spanmetrics_calls_total{service=\"obot\"}[$__rate_interval]))",
+              "legendFormat": "Overall Error Rate",
+              "refId": "A"
+            }
+          ],
+          "title": "Error Rate Over Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Error count by operation",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 100,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "normal" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "red", "value": null }]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": ["sum"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (increase(traces_spanmetrics_calls_total{service=\"obot\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Errors by Operation",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+          "id": 104,
+          "panels": [],
+          "title": "Database Operations",
+          "type": "row"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Database operation rate",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
+          "id": 11,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"obot\", span_name=~\"db.*\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Database Operation Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "Database operation latency",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 33 },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_latency_sum{service=\"obot\", span_name=~\"db.*\"}[$__rate_interval])) / sum by (span_name) (rate(traces_spanmetrics_latency_count{service=\"obot\", span_name=~\"db.*\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Database Latency",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
+          "id": 105,
+          "panels": [],
+          "title": "HTTP Operations",
+          "type": "row"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "HTTP request rate by method",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+          "id": 13,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_calls_total{service=\"obot\", span_name=~\"HTTP.*\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP Request Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+          "description": "HTTP request latency by method",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": { "type": "linear" },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": { "group": "A", "mode": "none" },
+                "thresholdsStyle": { "mode": "off" }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+          "id": 14,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "pluginVersion": "11.0.0",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "victoriametrics" },
+              "expr": "sum by (span_name) (rate(traces_spanmetrics_latency_sum{service=\"obot\", span_name=~\"HTTP.*\"}[$__rate_interval])) / sum by (span_name) (rate(traces_spanmetrics_latency_count{service=\"obot\", span_name=~\"HTTP.*\"}[$__rate_interval]))",
+              "legendFormat": "{{span_name}}",
+              "refId": "A"
+            }
+          ],
+          "title": "HTTP Latency",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 39,
+      "tags": ["obot", "apm", "traces"],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Obot APM",
+      "uid": "obot-apm",
+      "version": 1,
+      "weekStart": ""
+    }

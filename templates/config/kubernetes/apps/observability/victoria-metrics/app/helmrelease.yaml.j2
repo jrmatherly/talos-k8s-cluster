@@ -203,10 +203,16 @@ spec:
     grafana:
       enabled: true
       adminPassword: "#{ grafana_admin_password }#"
-      #| Disable sidecar to use static dashboard definitions below #|
+      #| Enable sidecar to load dashboards from ConfigMaps with label grafana_dashboard: "1" #|
+      #| Custom dashboards (MinIO, obot, etc.) use ConfigMaps with grafana_folder annotation #|
       sidecar:
         dashboards:
-          enabled: false
+          enabled: true
+          label: grafana_dashboard
+          labelValue: "1"
+          folderAnnotation: grafana_folder
+          provider:
+            foldersFromFilesStructure: false
       persistence:
         enabled: true
         storageClassName: "#{ vm_storage_class }#"

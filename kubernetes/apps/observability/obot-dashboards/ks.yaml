@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: obot-dashboards
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: victoria-metrics
+    - name: tempo
+    - name: obot
+      namespace: obot
+  interval: 1h
+  timeout: 5m
+  path: ./kubernetes/apps/observability/obot-dashboards/app
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: observability
+  wait: false

@@ -30,6 +30,9 @@ resources:
 #% if minio_enabled %#
   - ./minio-dashboards/ks.yaml
 #% endif %#
+#% if obot_enabled and tempo_enabled %#
+  - ./obot-dashboards/ks.yaml
+#% endif %#
 #% if unifi_enabled %#
   - ./unpoller/ks.yaml
 #% endif %#

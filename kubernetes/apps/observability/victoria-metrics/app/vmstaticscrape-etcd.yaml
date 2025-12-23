@@ -16,6 +16,6 @@ spec:
         - "192.168.22.103:2381"
       scheme: http
       path: /metrics
-      scrapeInterval: 30s
+      interval: 30s
       labels:
         job: kube-etcd
