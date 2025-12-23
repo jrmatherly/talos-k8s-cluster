@@ -231,6 +231,31 @@ data:
                 "access.token.claim": "true",
                 "userinfo.token.claim": "true"
               }
+            },
+            {
+              "name": "picture",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-usermodel-attribute-mapper",
+              "consentRequired": false,
+              "config": {
+                "user.attribute": "picture",
+                "claim.name": "picture",
+                "jsonType.label": "String",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "userinfo.token.claim": "true"
+              }
+            },
+            {
+              "name": "full-name",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-full-name-mapper",
+              "consentRequired": false,
+              "config": {
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "userinfo.token.claim": "true"
+              }
             }
           ],
           "attributes": {
@@ -478,6 +503,16 @@ data:
           }
         },
         {
+          "name": "google-picture",
+          "identityProviderAlias": "google",
+          "identityProviderMapper": "oidc-user-attribute-idp-mapper",
+          "config": {
+            "syncMode": "INHERIT",
+            "claim": "picture",
+            "user.attribute": "picture"
+          }
+        },
+        {
           "name": "google-manage-account-role",
           "identityProviderAlias": "google",
           "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
@@ -555,7 +590,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v23
+  name: keycloak-realm-import-v24
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
     config-version: "23"

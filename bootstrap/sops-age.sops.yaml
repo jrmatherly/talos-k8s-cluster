@@ -4,20 +4,20 @@ metadata:
   name: sops-age
   namespace: flux-system
 stringData:
-  age.agekey: ENC[AES256_GCM,data:gaB7vm+HU5ymx+TuD0o2hVH9FabgR0m1rgx1kXbr1v+4500z0VyPupWmU6YcQ2T5M3m7BmhJzMmKjbPLNOs/vdPi2+f6KIyXRkE=,iv:Xji1vGgWuOMeRXsRROMIeGw7JS+9yn6EUt8cvhkNVgs=,tag:hsB1h/mBVYnqz9symb58Ow==,type:str]
+  age.agekey: ENC[AES256_GCM,data:F97RDzD/xcZp113Z1hxY6AEGohXsH/0wc+tfhZ5iKcJY1E5nYxJP4B+YAK4jAm7QQvKW0tA7JIHHm9PWhOaJ7t315QJfMGLbDr0=,iv:C9gy1HmrnlWRbjWiy6c8te8Ky7fmU6rV65GnTsrZE5w=,tag:4No4zuzdD18uTpIqj7z1uQ==,type:str]
 sops:
   age:
     - recipient: age1a6vaxeffux27rpgc4pdhgteuap85gn47320dhevgnmcxh3qkc5jqazwwqq
       enc: |
         -----BEGIN AGE ENCRYPTED FILE-----
-        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSB0bmdwNklPV2ZaSEdsb3o3
-        N1l1bzlrdSsrYy8ybVRVdDZKMEF6V3JmODFzCjExWUxYckprSmFNMVZPeGpNUkdr
-        RHJHNGNhUEh5M3NXbklxMFFiK251SnMKLS0tIGVpc25lUjNiQkdpdEFEY3pPN1Fw
-        ZzlXYnVRQWRGaWhBZXZZeEw1eG5ic1EKxorXZ6EUvI2HvpM7EYKdvLd2/bSmAy+1
-        vtB93B0IajapzOd6Nbz34VO//mOGLA16UTrEd2QqHA2nLwY4jg1lmQ==
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBwc0ovTzU3cHpkZ3ZTWnR6
+        MTVIMFV3MUdrOFNycmdGUVRHT0tPMWhyTndBCnRpTXZkek5aRjhEMXNnc2FlaFph
+        ZmtyYWNvYUFPWDBVY3RCdzZNcDZuRG8KLS0tIGlsMDQ4bkc0WjV6UldmTXFGL3VR
+        dFVvWGFVZS9MVUJwMGx6UUxqZDVlc1kKfHvdr63TzTESz/EAZjWFvk5Yd2fMgB3N
+        9YwsTy/+Pke9+KmS6PUzZDy5hBG7arjTFhk7f+ib7OtW/heGoqYhuw==
         -----END AGE ENCRYPTED FILE-----
-  lastmodified: "2025-12-23T00:35:04Z"
-  mac: ENC[AES256_GCM,data:GDIpszkYLTLhgD+Q1tzP4eCc8CWsI4EySwjulCQjh1Ou2wSPeKVlwu6AwpU6YnHszkjSqHfw4URT7k2Wg8fHKEqqXkPnbwKnV1JGVg3IkGiyHdSNcguyk6zXTfoFN2cIJS6/dlcRcD7RWT8hcez2vyvNEzZkg+lkW2tuPo3+hB4=,iv:KK8ueaILPyfFDwfTCg+l6ckxRfOsO+xE8vJosvxJ/io=,tag:GmhfHzzFq8ZyuBj+uejjWg==,type:str]
+  lastmodified: "2025-12-23T01:24:14Z"
+  mac: ENC[AES256_GCM,data:KF6Js2xTHo2BPKUGRd00o7i9mxhQ8ll4l7ldLaIWMtjRj4X+NOEvzeUv2Khd11NsL+zEnHCWPSZPGyyMwUlTMcVO6OHkbkbPcM2loZNxwkQ10553bOcYATeRsqgOhKnRZH0aDFyhFBl6LvW239miLGITzOH+Ao3K62Lb0FN1Gsk=,iv:10Xo/UL12fpnUy0c3cwXh56Gsqv2liggbQoXqCNi/e8=,tag:tcNoYuFZHftNnzn2dIan+Q==,type:str]
   encrypted_regex: ^(data|stringData)$
   mac_only_encrypted: true
   version: 3.11.0
