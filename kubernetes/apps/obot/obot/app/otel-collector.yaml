@@ -64,7 +64,7 @@ spec:
       # Metrics → VictoriaMetrics via HTTP
       # VictoriaMetrics OTLP endpoint: /opentelemetry/v1/metrics
       otlphttp/victoriametrics:
-        endpoint: http://vmsingle-vmstack.observability.svc.cluster.local:8429/opentelemetry
+        endpoint: http://vmsingle-vmstack.observability.svc.cluster.local:8428/opentelemetry
         tls:
           insecure: true
 
