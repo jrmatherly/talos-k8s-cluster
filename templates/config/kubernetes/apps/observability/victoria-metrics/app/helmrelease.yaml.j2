@@ -203,16 +203,12 @@ spec:
     grafana:
       enabled: true
       adminPassword: "#{ grafana_admin_password }#"
-      #| Enable sidecar to load dashboards from ConfigMaps with label grafana_dashboard: "1" #|
-      #| Custom dashboards (MinIO, obot, etc.) use ConfigMaps with grafana_folder annotation #|
+      #| Sidecar disabled - using grafana.dashboards for gnetId-based dashboards #|
+      #| Custom dashboards (MinIO, obot) added via dashboardsConfigMaps reference #|
+      #| REF: https://docs.victoriametrics.com/helm/victoria-metrics-k8s-stack/#adding-external-dashboards #|
       sidecar:
         dashboards:
-          enabled: true
-          label: grafana_dashboard
-          labelValue: "1"
-          folderAnnotation: grafana_folder
-          provider:
-            foldersFromFilesStructure: false
+          enabled: false
       persistence:
         enabled: true
         storageClassName: "#{ vm_storage_class }#"
@@ -288,15 +284,46 @@ spec:
               options:
                 path: /var/lib/grafana/dashboards/unifi
 #% endif %#
-#% if obot_otel_enabled | default(false) %#
-            - name: "obot"
+#% if minio_enabled %#
+            - name: "storage"
               orgId: 1
-              folder: "Obot"
+              folder: "Storage"
               type: file
               disableDeletion: false
               editable: true
               options:
-                path: /var/lib/grafana/dashboards/obot
+                path: /var/lib/grafana/dashboards/storage
+#% endif %#
+#% if obot_enabled and tempo_enabled %#
+            - name: "ai"
+              orgId: 1
+              folder: "AI"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/ai
+#% endif %#
+#% if kgateway_enabled %#
+            - name: "agentgateway"
+              orgId: 1
+              folder: "AgentGateway"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/agentgateway
+#% endif %#
+      #| External ConfigMap-based dashboards #|
+      dashboardsConfigMaps:
+#% if minio_enabled %#
+        storage: minio-dashboard
+#% endif %#
+#% if obot_enabled and tempo_enabled %#
+        ai: obot-apm-dashboard
+#% endif %#
+#% if kgateway_enabled %#
+        agentgateway: kgateway-dashboard
 #% endif %#
       dashboards:
         kubernetes:

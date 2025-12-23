@@ -164,12 +164,7 @@ spec:
       adminPassword: "Uj2PpuJyUJMJiD"
       sidecar:
         dashboards:
-          enabled: true
-          label: grafana_dashboard
-          labelValue: "1"
-          folderAnnotation: grafana_folder
-          provider:
-            foldersFromFilesStructure: false
+          enabled: false
       persistence:
         enabled: true
         storageClassName: "proxmox-csi"
@@ -223,14 +218,34 @@ spec:
               editable: true
               options:
                 path: /var/lib/grafana/dashboards/unifi
-            - name: "obot"
+            - name: "storage"
               orgId: 1
-              folder: "Obot"
+              folder: "Storage"
               type: file
               disableDeletion: false
               editable: true
               options:
-                path: /var/lib/grafana/dashboards/obot
+                path: /var/lib/grafana/dashboards/storage
+            - name: "ai"
+              orgId: 1
+              folder: "AI"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/ai
+            - name: "agentgateway"
+              orgId: 1
+              folder: "AgentGateway"
+              type: file
+              disableDeletion: false
+              editable: true
+              options:
+                path: /var/lib/grafana/dashboards/agentgateway
+      dashboardsConfigMaps:
+        storage: minio-dashboard
+        ai: obot-apm-dashboard
+        agentgateway: kgateway-dashboard
       dashboards:
         kubernetes:
           kubernetes-api-server:
