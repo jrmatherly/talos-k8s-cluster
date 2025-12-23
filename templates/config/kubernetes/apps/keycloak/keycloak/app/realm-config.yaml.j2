@@ -199,12 +199,11 @@ data:
             "profile",
             "roles",
             "email",
-            "openid"
+            "offline_access"
           ],
           "optionalClientScopes": [
             "address",
-            "phone",
-            "offline_access"
+            "phone"
           ],
           "protocolMappers": [
             {
@@ -590,10 +589,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v24
+  name: keycloak-realm-import-v25
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "23"
+    config-version: "24"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3

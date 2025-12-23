@@ -145,11 +145,11 @@ spec:
                   value: span_kind
               queries:
                 - name: Request Rate
-                  query: sum(rate(traces_spanmetrics_calls_total{$$__tags}[5m]))
+                  query: sum(rate(traces_spanmetrics_calls_total{$__tags}[5m]))
                 - name: Error Rate
-                  query: sum(rate(traces_spanmetrics_calls_total{$$__tags, status_code="STATUS_CODE_ERROR"}[5m]))
+                  query: sum(rate(traces_spanmetrics_calls_total{$__tags, status_code="STATUS_CODE_ERROR"}[5m]))
                 - name: Duration p95
-                  query: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m])) by (le))
+                  query: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{$__tags}[5m])) by (le))
             serviceMap:
               datasourceUid: victoriametrics
             nodeGraph:
