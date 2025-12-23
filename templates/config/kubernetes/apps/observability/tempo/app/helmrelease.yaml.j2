@@ -59,6 +59,14 @@ spec:
       metricsGenerator:
         enabled: true
         remoteWriteUrl: "http://vmsingle-vmstack.observability.svc.cluster.local:8428/api/v1/write"
+        #| Local-blocks processor config for Grafana Traces Drilldown #|
+        #| REF: https://grafana.com/docs/tempo/latest/operations/traceql-metrics/ #|
+        processor:
+          local_blocks:
+            #| Flush blocks to storage for historical TraceQL metrics queries #|
+            flush_to_storage: true
+            #| Process all spans, not just server spans #|
+            filter_server_spans: false
       #| Enable metrics generator processors via overrides #|
       overrides:
         defaults:
@@ -66,6 +74,7 @@ spec:
             processors:
               - service-graphs
               - span-metrics
+              - local-blocks
     #| Service configuration #|
     service:
       type: ClusterIP

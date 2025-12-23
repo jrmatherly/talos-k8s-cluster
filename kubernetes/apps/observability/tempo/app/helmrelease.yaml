@@ -42,12 +42,17 @@ spec:
       metricsGenerator:
         enabled: true
         remoteWriteUrl: "http://vmsingle-vmstack.observability.svc.cluster.local:8428/api/v1/write"
+        processor:
+          local_blocks:
+            flush_to_storage: true
+            filter_server_spans: false
       overrides:
         defaults:
           metrics_generator:
             processors:
               - service-graphs
               - span-metrics
+              - local-blocks
     service:
       type: ClusterIP
     persistence:
