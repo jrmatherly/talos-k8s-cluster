@@ -62,14 +62,14 @@ spec:
             - "**/vector*/**"
 #% if talos_system_logs_enabled %#
         #| Talos kernel logs via UDP socket #|
-        #| Requires extraKernelArgs in Talos schematic: talos.logging.kernel=udp://vector.observability.svc.cluster.local:6050 #|
+        #| Logs are JSON with fields: msg, facility, priority, seq, talos-time #|
         talos_kernel_logs:
           type: socket
           address: 0.0.0.0:6050
           mode: udp
           max_length: 102400
           decoding:
-            codec: bytes
+            codec: json
         #| Talos service logs via UDP socket #|
         #| Configured via machine.logging.destinations in Talos config #|
         talos_service_logs:
@@ -111,16 +111,22 @@ spec:
             # Add stream type (stdout/stderr)
             .stream = .stream
 #% if talos_system_logs_enabled %#
-        #| Parse Talos kernel logs #|
+        #| Parse Talos kernel logs (JSON decoded) #|
         talos_kernel_transform:
           type: remap
           inputs:
             - talos_kernel_logs
           source: |
             .source_type = "talos_kernel"
-            .facility = "kern"
-            .log = string!(.message)
+            # Extract structured fields from JSON
+            .facility = .facility ?? "kern"
+            .priority = .priority ?? "info"
+            .log = .msg ?? .message ?? ""
             .node = get_env_var!("VECTOR_SELF_NODE_NAME")
+            # Use Talos timestamp if available for better accuracy
+            if exists(."talos-time") {
+              .timestamp = ."talos-time"
+            }
         #| Parse Talos service logs #|
         talos_service_transform:
           type: remap
@@ -183,7 +189,7 @@ spec:
           query:
             _msg_field: log
             _time_field: timestamp
-            _stream_fields: source_type,namespace,pod,container,node,stream,facility,service
+            _stream_fields: source_type,namespace,pod,container,node,stream,facility,service,priority
           request:
             headers:
               AccountID: "0"

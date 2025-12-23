@@ -50,7 +50,7 @@ spec:
           mode: udp
           max_length: 102400
           decoding:
-            codec: bytes
+            codec: json
         talos_service_logs:
           type: socket
           address: 0.0.0.0:6051
@@ -89,9 +89,15 @@ spec:
             - talos_kernel_logs
           source: |
             .source_type = "talos_kernel"
-            .facility = "kern"
-            .log = string!(.message)
+            # Extract structured fields from JSON
+            .facility = .facility ?? "kern"
+            .priority = .priority ?? "info"
+            .log = .msg ?? .message ?? ""
             .node = get_env_var!("VECTOR_SELF_NODE_NAME")
+            # Use Talos timestamp if available for better accuracy
+            if exists(."talos-time") {
+              .timestamp = ."talos-time"
+            }
         talos_service_transform:
           type: remap
           inputs:
@@ -143,7 +149,7 @@ spec:
           query:
             _msg_field: log
             _time_field: timestamp
-            _stream_fields: source_type,namespace,pod,container,node,stream,facility,service
+            _stream_fields: source_type,namespace,pod,container,node,stream,facility,service,priority
           request:
             headers:
               AccountID: "0"
