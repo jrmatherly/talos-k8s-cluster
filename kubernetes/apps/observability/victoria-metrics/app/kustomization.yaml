@@ -7,4 +7,5 @@ resources:
   - helmrelease.yaml
   - httproute.yaml
   - trafficpolicy.yaml
+  - vmstaticscrape-etcd.yaml
   - vmsingle-lb-service.yaml

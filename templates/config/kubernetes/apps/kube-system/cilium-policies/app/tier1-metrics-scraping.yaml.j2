@@ -26,6 +26,9 @@ spec:
             #| Kubelet read-only port (if enabled) #|
             - port: "10255"
               protocol: TCP
+            #| etcd metrics (Talos exposes on port 2381) #|
+            - port: "2381"
+              protocol: TCP
             #| kube-controller-manager metrics #|
             - port: "10257"
               protocol: TCP

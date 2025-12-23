@@ -1,0 +1,21 @@
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: etcd-metrics
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: etcd
+    app.kubernetes.io/component: metrics
+spec:
+  jobName: kube-etcd
+  targetEndpoints:
+    - targets:
+        - "192.168.22.101:2381"
+        - "192.168.22.102:2381"
+        - "192.168.22.103:2381"
+      scheme: http
+      path: /metrics
+      scrapeInterval: 30s
+      labels:
+        job: kube-etcd

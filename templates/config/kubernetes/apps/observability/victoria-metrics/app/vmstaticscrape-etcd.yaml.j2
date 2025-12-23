@@ -1,0 +1,29 @@
+#% if victoria_metrics_enabled %#
+---
+#| VMStaticScrape for etcd metrics on Talos Linux control plane nodes #|
+#| REF: https://docs.siderolabs.com/kubernetes-guides/monitoring-and-observability/etcd-metrics #|
+#| NOTE: Talos runs etcd as a system service (not a pod), so we use static endpoints #|
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMStaticScrape
+metadata:
+  name: etcd-metrics
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: etcd
+    app.kubernetes.io/component: metrics
+spec:
+  jobName: kube-etcd
+  targetEndpoints:
+    - targets:
+        #% for item in nodes %#
+        #% if item.controller %#
+        - "#{ item.address }#:2381"
+        #% endif %#
+        #% endfor %#
+      scheme: http
+      path: /metrics
+      scrapeInterval: 30s
+      #| Add labels to identify metrics source #|
+      labels:
+        job: kube-etcd
+#% endif %#
