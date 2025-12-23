@@ -168,3 +168,71 @@ tasks:
         echo "Local state cleaned. Ready for fresh bootstrap with: task bootstrap:talos"
     preconditions:
       - which talhelper
+
+  # =============================================================================
+  # etcd Maintenance Tasks
+  # REF: https://docs.siderolabs.com/talos/v1.11/build-and-extend-talos/cluster-operations-and-maintenance/etcd-maintenance
+  # =============================================================================
+
+  etcd-status:
+    desc: Check etcd cluster health and status
+    cmds:
+      - |
+        echo ""
+        echo "=== etcd Cluster Status ==="
+        echo ""
+      - talosctl -n {{.CONTROL_PLANE_NODES}} etcd status
+      - |
+        echo ""
+        echo "=== etcd Alarms ==="
+        echo ""
+      - talosctl -n {{.FIRST_CP_NODE}} etcd alarm list || echo "No alarms"
+      - |
+        echo ""
+        echo "=== etcd Members ==="
+        echo ""
+      - talosctl -n {{.FIRST_CP_NODE}} etcd members
+    vars:
+      CONTROL_PLANE_NODES:
+        sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
+      FIRST_CP_NODE:
+        sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | head -1
+    preconditions:
+      - test -f {{.TALOSCONFIG}}
+      - which talosctl yq
+
+  etcd-backup:
+    desc: Create etcd backup snapshot [IP=control-plane-ip]
+    cmd: ./scripts/etcd-backup.sh {{.IP}}
+    vars:
+      IP: '{{.IP | default "192.168.22.101"}}'
+    preconditions:
+      - test -f {{.TALOSCONFIG}}
+      - test -x ./scripts/etcd-backup.sh
+      - which talosctl
+
+  etcd-defrag:
+    desc: Defragment etcd on a single node [IP=required]
+    prompt: This will defragment etcd on node {{.IP}}. Only run on one node at a time... continue?
+    cmds:
+      - |
+        echo ""
+        echo "=== Defragmenting etcd on {{.IP}} ==="
+        echo ""
+        echo "WARNING: Only defrag one node at a time!"
+        echo "Verify cluster health after each node before continuing."
+        echo ""
+      - talosctl -n {{.IP}} etcd defrag
+      - |
+        echo ""
+        echo "Defragmentation complete. Checking cluster status..."
+        echo ""
+      - talosctl -n {{.CONTROL_PLANE_NODES}} etcd status
+    vars:
+      CONTROL_PLANE_NODES:
+        sh: yq -r '.nodes[] | select(.controlPlane == true) | .ipAddress' {{.TALOS_DIR}}/talconfig.yaml | tr '\n' ',' | sed 's/,$//'
+    requires:
+      vars: [IP]
+    preconditions:
+      - test -f {{.TALOSCONFIG}}
+      - which talosctl yq
