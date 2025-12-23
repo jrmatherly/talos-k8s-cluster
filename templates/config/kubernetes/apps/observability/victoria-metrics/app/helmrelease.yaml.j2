@@ -363,21 +363,28 @@ spec:
 #% if obot_otel_enabled | default(false) %#
         obot:
           #| obot OpenTelemetry dashboards #|
+          #| Note: gnetId dashboards use DS_PROMETHEUS variable that must be mapped #|
           #| OTEL Collector - monitors the obot OTEL gateway collector #|
           otel-collector:
             gnetId: 15983
             revision: 1
-            datasource: VictoriaMetrics
+            datasource:
+              - name: DS_PROMETHEUS
+                value: VictoriaMetrics
           #| OTEL Data Flow - visualizes data flowing through the collector #|
           otel-data-flow:
             gnetId: 18309
             revision: 1
-            datasource: VictoriaMetrics
+            datasource:
+              - name: DS_PROMETHEUS
+                value: VictoriaMetrics
           #| OTEL APM - application performance monitoring with traces/spans #|
           otel-apm:
             gnetId: 19419
             revision: 1
-            datasource: VictoriaMetrics
+            datasource:
+              - name: DS_PROMETHEUS
+                value: VictoriaMetrics
 #% endif %#
 
     #| ServiceMonitor/PodMonitor auto-discovery #|

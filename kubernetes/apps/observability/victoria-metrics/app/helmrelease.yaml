@@ -296,15 +296,21 @@ spec:
           otel-collector:
             gnetId: 15983
             revision: 1
-            datasource: VictoriaMetrics
+            datasource:
+              - name: DS_PROMETHEUS
+                value: VictoriaMetrics
           otel-data-flow:
             gnetId: 18309
             revision: 1
-            datasource: VictoriaMetrics
+            datasource:
+              - name: DS_PROMETHEUS
+                value: VictoriaMetrics
           otel-apm:
             gnetId: 19419
             revision: 1
-            datasource: VictoriaMetrics
+            datasource:
+              - name: DS_PROMETHEUS
+                value: VictoriaMetrics
 
     crds:
       enabled: true
