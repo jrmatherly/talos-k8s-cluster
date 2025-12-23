@@ -18,6 +18,8 @@ spec:
     matchLabels:
       app: minio
       release: minio
+      #| Only select the main minio service (port 9000), not minio-console (port 9001) #|
+      monitoring: "true"
   endpoints:
     # System process metrics (uptime, memory, CPU, goroutines)
     - path: /minio/metrics/v3/system/process

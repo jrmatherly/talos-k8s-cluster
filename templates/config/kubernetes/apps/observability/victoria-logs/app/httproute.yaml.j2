@@ -1,0 +1,23 @@
+#% if victoria_logs_enabled %#
+---
+#| HTTPRoute for VictoriaLogs Web UI #|
+#| Provides access to the built-in LogsQL query interface #|
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: victorialogs
+spec:
+  parentRefs:
+    - name: internal
+      namespace: network
+  hostnames:
+    - "logs.#{ primary_domain }#"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: victoria-logs-server
+          port: 9428
+#% endif %#

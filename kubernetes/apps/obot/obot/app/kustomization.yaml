@@ -12,3 +12,4 @@ resources:
   - ./db-secret.sops.yaml
   - ./postgresql.yaml
   - ./otel-collector.yaml
+  - ./vmservicescrape.yaml

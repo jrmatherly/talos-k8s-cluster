@@ -17,6 +17,7 @@ spec:
     matchLabels:
       app: minio
       release: minio
+      monitoring: "true"
   endpoints:
     # System process metrics (uptime, memory, CPU, goroutines)
     - path: /minio/metrics/v3/system/process

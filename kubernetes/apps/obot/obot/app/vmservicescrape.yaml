@@ -1,0 +1,18 @@
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: obot-otel-gateway
+  labels:
+    app.kubernetes.io/name: obot-otel-gateway
+spec:
+  namespaceSelector:
+    matchNames:
+      - obot
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: obot-otel-gateway
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
