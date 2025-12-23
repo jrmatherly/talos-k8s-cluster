@@ -9,8 +9,9 @@ metadata:
   name: minio-dashboards
   namespace: flux-system
 spec:
+  #| NOTE: ConfigMaps must exist before victoria-metrics HelmRelease #|
+  #| because Grafana mounts them via dashboardsConfigMaps #|
   dependsOn:
-    - name: victoria-metrics
     - name: minio
       namespace: storage
   interval: 1h

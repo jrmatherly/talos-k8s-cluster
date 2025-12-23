@@ -22,3 +22,5 @@ spec:
   dependsOn:
     - name: cilium
       namespace: kube-system
+    - name: minio-dashboards
+    - name: obot-dashboards

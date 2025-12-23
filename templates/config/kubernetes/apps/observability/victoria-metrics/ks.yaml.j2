@@ -23,4 +23,11 @@ spec:
   dependsOn:
     - name: cilium
       namespace: kube-system
+#% if minio_enabled %#
+    #| Grafana dashboardsConfigMaps requires ConfigMaps to exist before pod starts #|
+    - name: minio-dashboards
+#% endif %#
+#% if obot_enabled and tempo_enabled %#
+    - name: obot-dashboards
+#% endif %#
 #% endif %#

@@ -6,7 +6,6 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: victoria-metrics
     - name: minio
       namespace: storage
   interval: 1h
