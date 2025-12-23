@@ -1,0 +1,17 @@
+#% if victoria_metrics_enabled %#
+---
+#| TrafficPolicy to disable OAuth2/extAuth for VictoriaMetrics #|
+#| Allows Proxmox to push metrics via InfluxDB protocol without authentication #|
+#| REF: https://kgateway.dev/docs/envoy/main/security/external-auth/ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: victoriametrics-no-auth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: victoriametrics
+  extAuth:
+    disable: {}
+#% endif %#
