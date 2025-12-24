@@ -312,6 +312,7 @@ When adding new application templates to this project, multiple files must be up
 26. **Talos kernel logging requires upgrade** - `machine.install.extraKernelArgs` changes require `task talos:upgrade-node` (not just apply); service logs (`machine.logging.destinations`) work with apply only
 27. **Talos can't resolve K8s DNS** - Talos uses host DNS servers, not CoreDNS; for logging endpoints, use `127.0.0.1` (localhost) when Vector runs as DaemonSet with hostNetwork, NOT `service.namespace.svc.cluster.local`
 28. **Tempo local-blocks processor for Grafana Drilldown** - Grafana Traces Drilldown requires `local-blocks` processor in `metricsGenerator.processor` AND in `overrides.defaults.metrics_generator.processors` list; without it, TraceQL metrics queries (rate, count) fail with "localblocks processor not found"
+29. **Grafana custom dashboards use dashboardsConfigMaps** - Can't use sidecar (`grafana.sidecar.dashboards.enabled: true`) together with `grafana.dashboards` (gnetId); deploy custom dashboards as ConfigMaps and reference via `dashboardsConfigMaps`; dashboard Kustomizations must NOT depend on victoria-metrics (circular dependency)
 
 ## Extended Documentation
 
