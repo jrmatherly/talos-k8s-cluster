@@ -6,6 +6,7 @@ namespace: observability
 resources:
   - helmrepository.yaml
   - helmrelease.yaml
+  - service-headless.yaml
   - networkpolicy.yaml
 #% if kgateway_tracing_enabled %#
   - referencegrant.yaml
