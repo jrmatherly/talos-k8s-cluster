@@ -18,8 +18,8 @@ spec:
       valuesKey: client-secret
       targetPath: web.config.authentication.oauth2.clientSecret
   values:
-    # Network policy labels for CCNP tiered policies
-    podLabels:
+    # Network policy labels for CCNP tiered policies (commonLabels applies to all resources including pods)
+    commonLabels:
       network.cilium.io/api-access: "true"
     serviceMonitor:
       create: true
