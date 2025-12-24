@@ -1,29 +1,26 @@
 #% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
 ---
-#| NetworkPolicy for flux-operator egress to Keycloak for OIDC token validation #|
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+#| CiliumNetworkPolicy for flux-operator egress to Keycloak for OIDC token validation #|
+#| Uses Cilium CNP to be additive (not block other egress like K8s NetworkPolicy does) #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
   name: flux-operator-keycloak-egress
   namespace: flux-system
 spec:
-  podSelector:
+  endpointSelector:
     matchLabels:
       app.kubernetes.io/name: flux-operator
-  policyTypes:
-    - Egress
   egress:
     #| Allow OIDC token validation to Keycloak #|
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: keycloak
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: keycloak
-      ports:
-        - protocol: TCP
-          port: 8080
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: keycloak
+            k8s:io.kubernetes.pod.namespace: keycloak
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
 ---
 #| NetworkPolicy for flux-operator ingress from network namespace (kgateway) #|
 apiVersion: networking.k8s.io/v1
