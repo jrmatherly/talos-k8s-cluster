@@ -56,9 +56,10 @@ spec:
               - email
               - groups
             # CEL-based claims mapping for Kubernetes RBAC
+            # Use has() to safely handle optional claims
             impersonation:
               username: "claims.email"
-              groups: "claims.groups"
+              groups: "has(claims.groups) ? claims.groups : []"
 #%   else %#
       # Web Config API specification for Anonymous access (read-only)
       config:
