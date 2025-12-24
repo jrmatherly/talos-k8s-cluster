@@ -313,11 +313,16 @@ When adding new application templates to this project, multiple files must be up
 27. **Talos can't resolve K8s DNS** - Talos uses host DNS servers, not CoreDNS; for logging endpoints, use `127.0.0.1` (localhost) when Vector runs as DaemonSet with hostNetwork, NOT `service.namespace.svc.cluster.local`
 28. **Tempo local-blocks processor for Grafana Drilldown** - Grafana Traces Drilldown requires `local-blocks` processor in `metricsGenerator.processor` AND in `overrides.defaults.metrics_generator.processors` list; without it, TraceQL metrics queries (rate, count) fail with "localblocks processor not found"
 29. **Grafana custom dashboards use dashboardsConfigMaps** - Can't use sidecar (`grafana.sidecar.dashboards.enabled: true`) together with `grafana.dashboards` (gnetId); deploy custom dashboards as ConfigMaps and reference via `dashboardsConfigMaps`; dashboard Kustomizations must NOT depend on victoria-metrics (circular dependency)
+30. **K8s NetworkPolicy policyTypes: [Egress] blocks ALL egress** - Kubernetes NetworkPolicy with `policyTypes: [Egress]` blocks ALL egress except what's explicitly allowed; use CiliumNetworkPolicy instead for additive egress rules that work alongside CCNP tiered policies
+31. **flux-operator Helm chart uses commonLabels** - The flux-operator chart doesn't support `podLabels`; use `commonLabels` to add labels like `network.cilium.io/api-access: "true"` to pods for CCNP policy matching
+32. **OAuth flows route through gateway proxies** - OIDC token validation (e.g., `auth.domain`) resolves to external/internal gateway LoadBalancer IPs, not directly to Keycloak pods; CiliumNetworkPolicy egress must target gateway-proxy pods in network namespace, not Keycloak pods
+33. **CEL expressions need has() for optional claims** - OIDC impersonation CEL expressions like `claims.groups` fail if the claim doesn't exist; use `has(claims.groups) ? claims.groups : []` for safe handling of optional JWT claims
 
 ## Extended Documentation
 
 For detailed component documentation, see:
 - `docs/ai-context/flux-gitops.md` - Flux GitOps architecture (Flux Operator, dependencies, SOPS, MCP tools)
+- `docs/ai-context/flux-web-ui.md` - Flux Web UI with OAuth2/OIDC (CEL impersonation, gateway routing, NetworkPolicy patterns)
 - `docs/ai-context/kgateway.md` - kgateway controller (Gateway API, Envoy data plane, OIDC, traffic policies)
 - `docs/ai-context/agentgateway-mcp.md` - agentgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)

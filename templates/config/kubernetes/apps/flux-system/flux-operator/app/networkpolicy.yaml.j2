@@ -1,19 +1,19 @@
 #% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
 ---
-#| CiliumNetworkPolicy for flux-operator egress to external gateway for OIDC token validation #|
-#| OAuth2 flow: flux-operator → external gateway (auth.domain) → Keycloak #|
-#| Uses Cilium CNP to be additive (not block other egress like K8s NetworkPolicy does) #|
+#| CiliumNetworkPolicy for flux-operator egress permissions #|
+#| IMPORTANT: CNP with egress rules creates implicit default-deny for other egress! #|
+#| Must include ALL required egress destinations when using CNP egress rules. #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: flux-operator-oidc-egress
+  name: flux-operator-egress
   namespace: flux-system
 spec:
   endpointSelector:
     matchLabels:
       app.kubernetes.io/name: flux-operator
   egress:
-    #| Allow OIDC token validation via external gateway (auth.matherly.net resolves to external LB) #|
+    #| Allow OIDC token validation via external gateway (auth.domain resolves to external LB) #|
     - toEndpoints:
         - matchLabels:
             network.cilium.io/gateway-proxy: "true"
@@ -22,6 +22,36 @@ spec:
       toPorts:
         - ports:
             - port: "443"
+              protocol: TCP
+    #| Allow communication with other Flux controllers in same namespace #|
+    #| (notification-controller:9090, source-controller, helm-controller, etc.) #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: flux-system
+    #| Allow DNS resolution #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    #| Allow egress to external registries (ghcr.io, etc.) for OCI artifacts #|
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    #| Allow egress to Kubernetes API server (required for controller operations) #|
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
               protocol: TCP
 ---
 #| NetworkPolicy for flux-operator ingress from network namespace (kgateway) #|
