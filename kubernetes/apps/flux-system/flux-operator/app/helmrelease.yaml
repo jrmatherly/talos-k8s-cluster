@@ -8,6 +8,15 @@ spec:
     kind: OCIRepository
     name: flux-operator
   interval: 1h
+  valuesFrom:
+    - kind: Secret
+      name: flux-web-oidc-credentials
+      valuesKey: client-id
+      targetPath: web.config.authentication.oauth2.clientID
+    - kind: Secret
+      name: flux-web-oidc-credentials
+      valuesKey: client-secret
+      targetPath: web.config.authentication.oauth2.clientSecret
   values:
     # Network policy labels for CCNP tiered policies
     podLabels:
@@ -19,3 +28,28 @@ spec:
     statusPage:
       networkPolicy:
         create: false
+    # ============================================================
+    # Web UI Configuration
+    # REF: https://fluxoperator.dev/docs/web-ui/
+    # ============================================================
+    web:
+      enabled: true
+      # Web Config API specification for OAuth2/OIDC authentication
+      config:
+        baseURL: "https://flux.matherly.net"
+        sessionDuration: "168h"
+        userCacheSize: 100
+        authentication:
+          type: OAuth2
+          oauth2:
+            provider: OIDC
+            issuerURL: "https://auth.matherly.net/realms/k8s-cluster"
+            scopes:
+              - openid
+              - profile
+              - email
+              - groups
+            # CEL-based claims mapping for Kubernetes RBAC
+            impersonation:
+              username: "claims.email"
+              groups: "claims.groups"

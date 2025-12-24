@@ -4,3 +4,11 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
+#% if flux_web_enabled | default(false) %#
+  - ./httproute.yaml
+  - ./networkpolicy.yaml
+  - ./rbac.yaml
+#%   if flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
+  - ./secret.sops.yaml
+#%   endif %#
+#% endif %#

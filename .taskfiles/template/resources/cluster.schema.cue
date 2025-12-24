@@ -422,6 +422,16 @@ import (
 	cognee_oidc_group_claim?: string & !=""               // OIDC claim for group membership (default: groups)
 	cognee_oidc_default_role?: string & !=""              // Default role for new users (default: viewer)
 	cognee_oidc_auto_provision_users?: bool               // Auto-provision new OIDC users (default: true)
+
+	// Flux Web UI Configuration (optional - GitOps dashboard)
+	flux_web_enabled?: bool                               // Enable Flux Web UI (default: false)
+	flux_web_hostname?: string & !=""                     // Hostname subdomain (default: flux)
+	flux_web_oauth2_enabled?: bool                        // Enable OAuth2 authentication (default: true when keycloak_enabled)
+	flux_web_anonymous_username?: string & !=""           // Anonymous username when OAuth2 disabled (default: flux-viewer)
+	flux_web_anonymous_groups?: [...string]               // Anonymous groups when OAuth2 disabled (default: ["flux-readonly"])
+	flux_web_session_duration?: string & !=""             // Session timeout (default: 168h)
+	flux_web_user_cache_size?: int & >=1                  // User cache size (default: 100)
+	keycloak_flux_web_client_secret?: string & !=""       // Keycloak client secret for flux-web (defaults to keycloak_oidc_client_secret)
 }
 
 #Config

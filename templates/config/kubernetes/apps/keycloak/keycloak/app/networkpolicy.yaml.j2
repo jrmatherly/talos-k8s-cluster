@@ -61,6 +61,19 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+#% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) %#
+    # Allow from flux-operator for OIDC token validation (Flux Web UI)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: flux-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: flux-operator
+      ports:
+        - protocol: TCP
+          port: 8080
+#% endif %#
     # Allow Prometheus scraping (metrics on port 8080, health on 9000)
 #% if observability_enabled %#
     - from:

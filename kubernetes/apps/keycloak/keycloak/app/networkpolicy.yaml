@@ -60,6 +60,17 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+    # Allow from flux-operator for OIDC token validation (Flux Web UI)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: flux-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: flux-operator
+      ports:
+        - protocol: TCP
+          port: 8080
     # Allow Prometheus scraping (metrics on port 8080, health on 9000)
     - from:
         - namespaceSelector:

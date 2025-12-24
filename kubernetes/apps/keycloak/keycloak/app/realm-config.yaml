@@ -262,6 +262,61 @@ data:
             "backchannel.logout.session.required": "true",
             "display.on.consent.screen": "false"
           }
+        },
+        {
+          "clientId": "flux-web",
+          "name": "Flux Web UI",
+          "description": "OIDC client for Flux Web UI dashboard authentication",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "l02wW88gwvdUdDcDRe0",
+          "redirectUris": [
+            "https://flux.matherly.net/*"
+          ],
+          "webOrigins": [
+            "https://flux.matherly.net"
+          ],
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": false,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email",
+            "groups"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access"
+          ],
+          "protocolMappers": [
+            {
+              "name": "groups",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-group-membership-mapper",
+              "consentRequired": false,
+              "config": {
+                "full.path": "false",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "groups",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://flux.matherly.net/*"
+          }
         }      ],
       "roles": {
         "realm": [
@@ -303,6 +358,30 @@ data:
       "clientScopeMappings": {},
       "clientScopes": [
         {
+          "name": "groups",
+          "description": "Group membership for RBAC",
+          "protocol": "openid-connect",
+          "attributes": {
+            "include.in.token.scope": "true",
+            "display.on.consent.screen": "true",
+            "consent.screen.text": "Group membership information"
+          },
+          "protocolMappers": [
+            {
+              "name": "groups-mapper",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-group-membership-mapper",
+              "consentRequired": false,
+              "config": {
+                "full.path": "false",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "groups",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ]
+        },        {
           "name": "mcp:tools",
           "description": "MCP Tool Server Access - Enables RFC 8707 audience restriction for MCP clients",
           "protocol": "openid-connect",

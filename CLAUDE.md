@@ -317,6 +317,7 @@ When adding new application templates to this project, multiple files must be up
 ## Extended Documentation
 
 For detailed component documentation, see:
+- `docs/ai-context/flux-gitops.md` - Flux GitOps architecture (Flux Operator, dependencies, SOPS, MCP tools)
 - `docs/ai-context/kgateway.md` - kgateway controller (Gateway API, Envoy data plane, OIDC, traffic policies)
 - `docs/ai-context/agentgateway-mcp.md` - agentgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)

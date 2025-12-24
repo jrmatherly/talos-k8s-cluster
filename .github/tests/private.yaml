@@ -112,6 +112,11 @@ proxmox_csi_token_secret: "fake-secret"
 # keycloak_enabled: false
 # keycloak_admin_password: ""
 # keycloak_db_password: ""
+# Flux Web UI (disabled for private repo testing)
+# flux_web_enabled: false
+# flux_web_hostname: ""
+# flux_web_oauth2_enabled: false
+# keycloak_flux_web_client_secret: ""
 # Keycloak Entra ID (disabled for private repo testing)
 # keycloak_entra_id_enabled: false
 # keycloak_entra_id_tenant_id: ""

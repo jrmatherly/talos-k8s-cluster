@@ -8,6 +8,18 @@ spec:
     kind: OCIRepository
     name: flux-operator
   interval: 1h
+#% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
+  #| Inject OIDC credentials from Secret via valuesFrom (Flux pattern) #|
+  valuesFrom:
+    - kind: Secret
+      name: flux-web-oidc-credentials
+      valuesKey: client-id
+      targetPath: web.config.authentication.oauth2.clientID
+    - kind: Secret
+      name: flux-web-oidc-credentials
+      valuesKey: client-secret
+      targetPath: web.config.authentication.oauth2.clientSecret
+#% endif %#
   values:
     # Network policy labels for CCNP tiered policies
     podLabels:
@@ -19,3 +31,44 @@ spec:
     statusPage:
       networkPolicy:
         create: false
+#% if flux_web_enabled | default(false) %#
+    # ============================================================
+    # Web UI Configuration
+    # REF: https://fluxoperator.dev/docs/web-ui/
+    # ============================================================
+    web:
+      enabled: true
+#%   if flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
+      # Web Config API specification for OAuth2/OIDC authentication
+      config:
+        baseURL: "https://#{ flux_web_hostname | default('flux') }#.#{ primary_domain }#"
+        sessionDuration: "#{ flux_web_session_duration | default('168h') }#"
+        userCacheSize: #{ flux_web_user_cache_size | default(100) }#
+        authentication:
+          type: OAuth2
+          oauth2:
+            provider: OIDC
+            issuerURL: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+            #| clientID and clientSecret injected via valuesFrom above #|
+            scopes:
+              - openid
+              - profile
+              - email
+              - groups
+            # CEL-based claims mapping for Kubernetes RBAC
+            impersonation:
+              username: "claims.email"
+              groups: "claims.groups"
+#%   else %#
+      # Web Config API specification for Anonymous access (read-only)
+      config:
+        authentication:
+          type: Anonymous
+          anonymous:
+            username: "#{ flux_web_anonymous_username | default('flux-viewer') }#"
+            groups:
+#%     for group in flux_web_anonymous_groups | default(['flux-readonly']) %#
+              - "#{ group }#"
+#%     endfor %#
+#%   endif %#
+#% endif %#

@@ -742,6 +742,52 @@ cloudflare_token: ""
 # kgateway_oauth2_enabled: false
 
 # ==============================================================================
+# FLUX WEB UI CONFIGURATION (Optional - GitOps Dashboard)
+# ==============================================================================
+# Flux Web UI provides a web-based dashboard for viewing Flux GitOps resources.
+# Supports OAuth2/OIDC authentication via Keycloak for secure access.
+# REF: https://fluxoperator.dev/docs/web-ui/
+
+# -- Enable Flux Web UI.
+#    (OPTIONAL) / (DEFAULT: false)
+#    When enabled, deploys the Flux Web UI at flux.<primary_domain>
+# flux_web_enabled: true
+
+# -- Flux Web UI hostname (subdomain).
+#    (OPTIONAL) / (DEFAULT: "flux")
+#    Results in flux.<primary_domain>
+# flux_web_hostname: "flux"
+
+# -- Enable OAuth2/OIDC authentication for Flux Web UI.
+#    (OPTIONAL) / (DEFAULT: true when keycloak_enabled)
+#    When disabled, uses anonymous read-only access.
+# flux_web_oauth2_enabled: true
+
+# -- Anonymous username (when OAuth2 disabled).
+#    (OPTIONAL) / (DEFAULT: "flux-viewer")
+#    Used for impersonation when OAuth2 is disabled.
+# flux_web_anonymous_username: "flux-viewer"
+
+# -- Anonymous groups (when OAuth2 disabled).
+#    (OPTIONAL) / (DEFAULT: ["flux-readonly"])
+#    Used for impersonation when OAuth2 is disabled.
+# flux_web_anonymous_groups:
+#   - flux-readonly
+
+# -- Session duration for authenticated users.
+#    (OPTIONAL) / (DEFAULT: "168h" - 7 days)
+# flux_web_session_duration: "168h"
+
+# -- User cache size for token validation.
+#    (OPTIONAL) / (DEFAULT: 100)
+# flux_web_user_cache_size: 100
+
+# -- Keycloak OIDC client secret for Flux Web UI.
+#    (REQUIRED if flux_web_oauth2_enabled) - Will be encrypted with SOPS
+#    Generate with: openssl rand -base64 32 | tr -d '/+=' | cut -c1-32
+# keycloak_flux_web_client_secret: ""
+
+# ==============================================================================
 # KEYCLOAK POSTGRESQL CONFIGURATION
 # ==============================================================================
 

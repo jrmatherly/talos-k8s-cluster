@@ -263,6 +263,61 @@ data:
             "backchannel.logout.session.required": "true",
             "display.on.consent.screen": "false"
           }
+        }#% endif %##% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) %#,
+        {
+          "clientId": "flux-web",
+          "name": "Flux Web UI",
+          "description": "OIDC client for Flux Web UI dashboard authentication",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "#{keycloak_flux_web_client_secret | default(keycloak_oidc_client_secret)}#",
+          "redirectUris": [
+            "https://#{flux_web_hostname | default('flux')}#.#{primary_domain}#/*"
+          ],
+          "webOrigins": [
+            "https://#{flux_web_hostname | default('flux')}#.#{primary_domain}#"
+          ],
+          "protocol": "openid-connect",
+          "publicClient": false,
+          "bearerOnly": false,
+          "consentRequired": false,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "directAccessGrantsEnabled": false,
+          "serviceAccountsEnabled": false,
+          "authorizationServicesEnabled": false,
+          "fullScopeAllowed": true,
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email",
+            "groups"
+          ],
+          "optionalClientScopes": [
+            "address",
+            "phone",
+            "offline_access"
+          ],
+          "protocolMappers": [
+            {
+              "name": "groups",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-group-membership-mapper",
+              "consentRequired": false,
+              "config": {
+                "full.path": "false",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "groups",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ],
+          "attributes": {
+            "pkce.code.challenge.method": "S256",
+            "post.logout.redirect.uris": "https://#{flux_web_hostname | default('flux')}#.#{primary_domain}#/*"
+          }
         }#% endif %#
       ],
       "roles": {
@@ -304,6 +359,33 @@ data:
       "scopeMappings": [],
       "clientScopeMappings": {},
       "clientScopes": [
+#% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) %#
+        {
+          "name": "groups",
+          "description": "Group membership for RBAC",
+          "protocol": "openid-connect",
+          "attributes": {
+            "include.in.token.scope": "true",
+            "display.on.consent.screen": "true",
+            "consent.screen.text": "Group membership information"
+          },
+          "protocolMappers": [
+            {
+              "name": "groups-mapper",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-group-membership-mapper",
+              "consentRequired": false,
+              "config": {
+                "full.path": "false",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "groups",
+                "userinfo.token.claim": "true"
+              }
+            }
+          ]
+        }#% if agentgateway_enabled %#,#% endif %#
+#% endif %#
 #% if agentgateway_enabled %#
         {
           "name": "mcp:tools",

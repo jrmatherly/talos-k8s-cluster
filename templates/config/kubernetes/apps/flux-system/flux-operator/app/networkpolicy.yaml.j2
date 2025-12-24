@@ -1,0 +1,56 @@
+#% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
+---
+#| NetworkPolicy for flux-operator egress to Keycloak for OIDC token validation #|
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flux-operator-keycloak-egress
+  namespace: flux-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: flux-operator
+  policyTypes:
+    - Egress
+  egress:
+    #| Allow OIDC token validation to Keycloak #|
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: keycloak
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: keycloak
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+#| NetworkPolicy for flux-operator ingress from network namespace (kgateway) #|
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flux-operator-web-ingress
+  namespace: flux-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: flux-operator
+  policyTypes:
+    - Ingress
+  ingress:
+    #| Allow from Envoy Gateway proxies (web UI access via internal gateway) #|
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: 9080
+    #| Allow kubelet health probes from node network #|
+    - from:
+        - ipBlock:
+            cidr: #{ node_cidr }#
+      ports:
+        - protocol: TCP
+          port: 9080
+#% endif %#

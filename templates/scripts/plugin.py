@@ -592,6 +592,23 @@ class Plugin(makejinja.plugin.Plugin):
         data.setdefault("cognee_oidc_default_role", "viewer")
         data.setdefault("cognee_oidc_auto_provision_users", True)
 
+        # Flux Web UI defaults (GitOps dashboard)
+        data.setdefault("flux_web_enabled", False)
+        data.setdefault("flux_web_hostname", "flux")
+        # OAuth2 defaults to True when Keycloak is enabled
+        data.setdefault(
+            "flux_web_oauth2_enabled", data.get("keycloak_enabled", False)
+        )
+        data.setdefault("flux_web_anonymous_username", "flux-viewer")
+        data.setdefault("flux_web_anonymous_groups", ["flux-readonly"])
+        data.setdefault("flux_web_session_duration", "168h")
+        data.setdefault("flux_web_user_cache_size", 100)
+        # Client secret defaults to keycloak_oidc_client_secret if not set
+        data.setdefault(
+            "keycloak_flux_web_client_secret",
+            data.get("keycloak_oidc_client_secret", ""),
+        )
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:
