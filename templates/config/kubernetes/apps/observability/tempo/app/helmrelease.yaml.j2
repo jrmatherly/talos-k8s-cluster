@@ -19,6 +19,8 @@ spec:
     #| Single binary mode for simplicity #|
     tempo:
       repository: grafana/tempo
+      #| Disable usage telemetry to stats.grafana.org #|
+      reportingEnabled: false
       #| OTLP receivers #|
       receivers:
         otlp:

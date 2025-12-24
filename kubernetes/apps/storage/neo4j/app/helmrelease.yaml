@@ -7,7 +7,7 @@ spec:
   chart:
     spec:
       chart: neo4j
-      version: "5.26.18"
+      version: "5.26.0"
       sourceRef:
         kind: HelmRepository
         name: neo4j

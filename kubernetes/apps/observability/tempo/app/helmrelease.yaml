@@ -15,6 +15,7 @@ spec:
   values:
     tempo:
       repository: grafana/tempo
+      reportingEnabled: false
       receivers:
         otlp:
           protocols:
