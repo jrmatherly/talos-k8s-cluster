@@ -1,39 +1,4 @@
 #% if agentgateway_enabled | default(true) %#
----
-#| ============================================================ #|
-#| AgentgatewayPolicy - JWT Authentication Enforcement           #|
-#| MUST target Gateway to enforce authentication on all routes   #|
-#| Ref: https://kgateway.dev/docs/agentgateway/main/mcp/mcp-access/ #|
-#| ============================================================ #|
-apiVersion: agentgateway.dev/v1alpha1
-kind: AgentgatewayPolicy
-metadata:
-  name: mcp-jwt-auth
-spec:
-  targetRefs:
-    #| Target Gateway (not HTTPRoute) for auth enforcement #|
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      name: ai-gateway
-  traffic:
-    jwtAuthentication:
-      #| Strict mode rejects requests without valid JWT #|
-      mode: Strict
-      providers:
-        - issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
-          audiences:
-            - "https://mcp-gw.#{ primary_domain }#/mcp"
-            - "https://ai-gw.#{ primary_domain }#/mcp"
-          jwks:
-            #| Fetch JWKS from Keycloak service #|
-            remote:
-              backendRef:
-                name: keycloak-http
-                namespace: keycloak
-                port: 8080
-              jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
-              cacheDuration: 5m
----
 #| ============================================================ #|
 #| AgentgatewayPolicy - MCP OAuth Discovery Metadata             #|
 #| Provides .well-known/oauth-protected-resource for MCP clients #|
