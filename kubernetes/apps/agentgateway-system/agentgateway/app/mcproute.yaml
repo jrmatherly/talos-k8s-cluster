@@ -2,7 +2,33 @@
 apiVersion: agentgateway.dev/v1alpha1
 kind: AgentgatewayPolicy
 metadata:
-  name: mcp-oauth-authentication
+  name: mcp-jwt-auth
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: ai-gateway
+  traffic:
+    jwtAuthentication:
+      mode: Strict
+      providers:
+        - issuer: "https://auth.matherly.net/realms/k8s-cluster"
+          audiences:
+            - "https://mcp-gw.matherly.net/mcp"
+            - "https://ai-gw.matherly.net/mcp"
+          jwks:
+            remote:
+              backendRef:
+                name: keycloak-http
+                namespace: keycloak
+                port: 8080
+              jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+              cacheDuration: 5m
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayPolicy
+metadata:
+  name: mcp-oauth-metadata
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
@@ -11,7 +37,6 @@ spec:
   backend:
     mcp:
       authentication:
-        mode: Strict
         issuer: "https://auth.matherly.net/realms/k8s-cluster"
         audiences:
           - "https://mcp-gw.matherly.net/mcp"
