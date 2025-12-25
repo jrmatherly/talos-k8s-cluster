@@ -109,7 +109,7 @@ spec:
             type: PathPrefix
             value: /mcp/flux
       backendRefs:
-        - name: flux-mcp
+        - name: flux-mcp-flux-operator-mcp
           namespace: flux-system
           kind: Service
           port: 9090

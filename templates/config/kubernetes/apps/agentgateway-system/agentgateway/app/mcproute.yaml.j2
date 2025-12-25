@@ -130,7 +130,8 @@ spec:
             type: PathPrefix
             value: /mcp/flux
       backendRefs:
-        - name: flux-mcp
+        #| Service name from flux-operator-mcp Helm chart: <release>-flux-operator-mcp #|
+        - name: flux-mcp-flux-operator-mcp
           namespace: flux-system
           kind: Service
           port: #{ flux_mcp_port | default(9090) }#
