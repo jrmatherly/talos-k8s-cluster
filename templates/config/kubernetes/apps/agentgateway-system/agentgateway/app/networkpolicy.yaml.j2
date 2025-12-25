@@ -132,4 +132,15 @@ spec:
         - ports:
             - port: "8080"
               protocol: TCP
+#% if flux_mcp_enabled | default(false) %#
+    #| Egress to Flux MCP server for GitOps tool access #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: flux-system
+            app.kubernetes.io/name: flux-operator-mcp
+      toPorts:
+        - ports:
+            - port: "9090"
+              protocol: TCP
+#% endif %#
 #% endif %#
