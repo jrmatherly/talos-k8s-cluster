@@ -17,6 +17,8 @@ spec:
   backend:
     mcp:
       authentication:
+        #| mode: Strict enforces JWT validation - requests without valid token are rejected #|
+        mode: Strict
         issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
         audiences:
           - "https://mcp-gw.#{ primary_domain }#/mcp"

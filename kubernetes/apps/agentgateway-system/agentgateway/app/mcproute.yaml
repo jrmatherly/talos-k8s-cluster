@@ -11,6 +11,7 @@ spec:
   backend:
     mcp:
       authentication:
+        mode: Strict
         issuer: "https://auth.matherly.net/realms/k8s-cluster"
         audiences:
           - "https://mcp-gw.matherly.net/mcp"
