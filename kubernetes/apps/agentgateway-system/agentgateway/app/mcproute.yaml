@@ -108,6 +108,12 @@ spec:
         - path:
             type: PathPrefix
             value: /mcp/flux
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /mcp
       backendRefs:
         - name: flux-mcp-flux-operator-mcp
           namespace: flux-system

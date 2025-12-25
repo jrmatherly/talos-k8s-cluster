@@ -131,6 +131,13 @@ spec:
         - path:
             type: PathPrefix
             value: /mcp/flux
+      filters:
+        #| Rewrite /mcp/flux to /mcp - Flux MCP server expects /mcp endpoint #|
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /mcp
       backendRefs:
         #| Service name from flux-operator-mcp Helm chart: <release>-flux-operator-mcp #|
         - name: flux-mcp-flux-operator-mcp
