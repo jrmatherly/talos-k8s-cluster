@@ -1624,8 +1624,8 @@ kagent_kmcp_enabled: true
 # cognee_neo4j_password: ""
 
 # -- Neo4j Community Edition version.
-#    (OPTIONAL) / (DEFAULT: "5.26.0")
-# cognee_neo4j_version: "5.26.0"
+#    (OPTIONAL) / (DEFAULT: "5.26.18")
+# cognee_neo4j_version: "5.26.18"
 
 # -- Neo4j PVC storage size.
 #    (OPTIONAL) / (DEFAULT: "10Gi")

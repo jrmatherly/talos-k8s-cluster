@@ -348,7 +348,7 @@ import (
 	cognee_db_name?: string & !=""              // Database name (default: cognee)
 	cognee_db_password?: string & !=""          // PostgreSQL password for Cognee database
 	cognee_neo4j_password?: string & !=""       // Neo4j password (required if cognee_enabled)
-	cognee_neo4j_version?: string & !=""        // Neo4j CE version (default: 5.26.0)
+	cognee_neo4j_version?: string & !=""        // Neo4j CE version (default: 5.26.18)
 	cognee_neo4j_storage_size?: string & !=""   // Neo4j PVC size (default: 10Gi)
 	cognee_llm_base_url?: string & !=""         // LLM endpoint (default: https://llms.${SECRET_DOMAIN}/v1)
 	cognee_litellm_api_key?: string & !=""     // LiteLLM API key for LLM/embedding access (required if cognee_enabled)
