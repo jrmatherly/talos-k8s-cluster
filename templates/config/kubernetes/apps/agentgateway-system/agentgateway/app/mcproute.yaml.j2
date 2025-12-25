@@ -118,7 +118,10 @@ spec:
 ---
 #| ============================================================ #|
 #| HTTPRoute for MCP Tool Servers                                #|
-#| Routes /mcp/* to backend MCP servers (obot, kagent, etc.)     #|
+#| Routes /mcp/* through AgentgatewayBackend for MCP OAuth       #|
+#| This enables RFC 9728 Protected Resource Metadata:            #|
+#| - .well-known/oauth-protected-resource endpoint               #|
+#| - WWW-Authenticate header with resource_metadata parameter    #|
 #| ============================================================ #|
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -133,20 +136,17 @@ spec:
     - "mcp-gw.#{ primary_domain }#"
     - "ai-gw.#{ primary_domain }#"
   rules:
-    #| Protected Resource Metadata endpoint (RFC 9728) #|
-    #| NOTE: This is handled automatically by agentgateway when mcp authentication is enabled #|
-    #| MCP Tool routes - add backends as needed #|
+    #| MCP Tool routes - routed through AgentgatewayBackend for OAuth #|
     #% if obot_enabled | default(false) %#
     - matches:
         - path:
             type: PathPrefix
             value: /mcp/obot
       backendRefs:
-        #| Service name from obot Helm chart: <release>-obot #|
-        - name: obot-obot
-          namespace: obot
-          kind: Service
-          port: 80
+        #| Route through AgentgatewayBackend for MCP OAuth authentication #|
+        - name: obot-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
     #% endif %#
     #% if kagent_enabled | default(false) %#
     - matches:
@@ -154,11 +154,10 @@ spec:
             type: PathPrefix
             value: /mcp/kagent
       backendRefs:
-        #| Service name from kagent Helm chart: kagent-ui #|
-        - name: kagent-ui
-          namespace: kagent
-          kind: Service
-          port: 8080
+        #| Route through AgentgatewayBackend for MCP OAuth authentication #|
+        - name: kagent-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
     #% endif %#
     #% if flux_mcp_enabled | default(false) %#
     - matches:
@@ -173,10 +172,9 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /mcp
       backendRefs:
-        #| Service name from flux-operator-mcp Helm chart: <release>-flux-operator-mcp #|
-        - name: flux-mcp-flux-operator-mcp
-          namespace: flux-system
-          kind: Service
-          port: #{ flux_mcp_port | default(9090) }#
+        #| Route through AgentgatewayBackend for MCP OAuth authentication #|
+        - name: flux-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
     #% endif %#
 #% endif %#

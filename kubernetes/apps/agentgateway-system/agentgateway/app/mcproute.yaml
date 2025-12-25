@@ -117,19 +117,17 @@ spec:
             type: PathPrefix
             value: /mcp/obot
       backendRefs:
-        - name: obot-obot
-          namespace: obot
-          kind: Service
-          port: 80
+        - name: obot-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
     - matches:
         - path:
             type: PathPrefix
             value: /mcp/kagent
       backendRefs:
-        - name: kagent-ui
-          namespace: kagent
-          kind: Service
-          port: 8080
+        - name: kagent-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
     - matches:
         - path:
             type: PathPrefix
@@ -141,7 +139,6 @@ spec:
               type: ReplacePrefixMatch
               replacePrefixMatch: /mcp
       backendRefs:
-        - name: flux-mcp-flux-operator-mcp
-          namespace: flux-system
-          kind: Service
-          port: 9090
+        - name: flux-mcp
+          group: agentgateway.dev
+          kind: AgentgatewayBackend
