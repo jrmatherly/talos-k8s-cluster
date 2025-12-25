@@ -1,0 +1,25 @@
+#% if flux_web_enabled | default(false) %#
+#% if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
+---
+#| ============================================================ #|
+#| TrafficPolicy - Disable gateway-level OAuth2 for Flux Web UI #|
+#| Flux Web UI has its own built-in OAuth2 authentication that  #|
+#| conflicts with gateway-level OAuth2. This policy overrides   #|
+#| the gateway-wide kgateway-internal-oauth2 policy.            #|
+#| Ref: https://kgateway.dev/docs/latest/traffic-management/route-delegation/inheritance/ #|
+#| ============================================================ #|
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: flux-web-no-gateway-oauth2
+  namespace: flux-system
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: flux-web
+  #| Empty oauth2 config overrides gateway-level OAuth2 policy #|
+  #| Route-level policies take precedence over gateway-level   #|
+  oauth2: {}
+#% endif %#
+#% endif %#

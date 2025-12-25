@@ -11,4 +11,7 @@ resources:
 #%   if flux_web_oauth2_enabled | default(true) and keycloak_enabled %#
   - ./secret.sops.yaml
 #%   endif %#
+#%   if kgateway_oauth2_enabled | default(false) and keycloak_enabled %#
+  - ./trafficpolicy.yaml
+#%   endif %#
 #% endif %#
