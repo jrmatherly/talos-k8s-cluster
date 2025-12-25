@@ -52,4 +52,6 @@ spec:
       - matchLabels:
           kubernetes.io/metadata.name: network
       - matchLabels:
+          kubernetes.io/metadata.name: kagent
+      - matchLabels:
           kubernetes.io/metadata.name: flux-system

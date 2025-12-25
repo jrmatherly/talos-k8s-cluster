@@ -71,6 +71,10 @@ spec:
           kubernetes.io/metadata.name: obot
       - matchLabels:
           kubernetes.io/metadata.name: network
+#% if kagent_enabled | default(false) %#
+      - matchLabels:
+          kubernetes.io/metadata.name: kagent
+#% endif %#
 #% if flux_mcp_enabled | default(false) %#
       - matchLabels:
           kubernetes.io/metadata.name: flux-system
