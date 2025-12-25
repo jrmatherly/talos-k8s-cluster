@@ -77,12 +77,12 @@ spec:
                 originRequest:
                   http2Origin: true
                   originServerName: mcp-gw.matherly.net
-                service: https://agentgateway.agentgateway.svc.cluster.local:443
+                service: https://192.168.22.147:443
               - hostname: "ai-gw.matherly.net"
                 originRequest:
                   http2Origin: true
                   originServerName: ai-gw.matherly.net
-                service: https://agentgateway.agentgateway.svc.cluster.local:443
+                service: https://192.168.22.147:443
               - hostname: "*.matherly.net"
                 originRequest:
                   http2Origin: true

@@ -74,19 +74,20 @@ spec:
           config.yaml: |-
             ingress:
 #% if agentgateway_enabled | default(false) %#
-              #| Route mcp-gw (admin UI) specifically to agentgateway before wildcard match #|
+              #| Route mcp-gw specifically to ai-gateway before wildcard match #|
+              #| Uses LoadBalancer IP for consistency with NetworkPolicy patterns #|
               - hostname: "mcp-gw.#{ primary_domain }#"
                 originRequest:
                   http2Origin: true
                   originServerName: mcp-gw.#{ primary_domain }#
-                service: https://agentgateway.agentgateway.svc.cluster.local:443
+                service: https://#{ agentgateway_addr }#:443
 #% if azure_openai_us_east_api_key or azure_openai_us_east2_api_key %#
-              #| Route ai-gw (AI gateway) to agentgateway before wildcard match #|
+              #| Route ai-gw (AI gateway) to ai-gateway before wildcard match #|
               - hostname: "ai-gw.#{ primary_domain }#"
                 originRequest:
                   http2Origin: true
                   originServerName: ai-gw.#{ primary_domain }#
-                service: https://agentgateway.agentgateway.svc.cluster.local:443
+                service: https://#{ agentgateway_addr }#:443
 #% endif %#
 #% endif %#
 #% for domain in cloudflare_domains %#
