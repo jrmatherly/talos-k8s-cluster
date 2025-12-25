@@ -37,6 +37,9 @@ data:
       "accessCodeLifespanLogin": 1800,
       "actionTokenGeneratedByAdminLifespan": 43200,
       "actionTokenGeneratedByUserLifespan": 300,
+      "defaultGroups": [
+        "/viewers"
+      ],
       "clients": [
         {
           "clientId": "account",
@@ -671,10 +674,10 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: keycloak-realm-import-v25
+  name: keycloak-realm-import-v26
   annotations:
     # Re-create job with new name when config changes (jobs are immutable)
-    config-version: "24"
+    config-version: "26"
 spec:
   ttlSecondsAfterFinished: 300
   backoffLimit: 3
