@@ -321,6 +321,8 @@ When adding new application templates to this project, multiple files must be up
 35. **Flux Web UI has built-in OAuth2** - DON'T use gateway-level OAuth2; it conflicts with Flux's internal OAuth (PKCE state mismatch). Create TrafficPolicy with `extAuth.disable: {}` targeting flux-web HTTPRoute to disable gateway OAuth (NOT `oauth2: {}` which requires extensionRef)
 36. **Flux Web UI RBAC needs ALL resources** - ClusterRole with only Flux apiGroups shows dashboard counts but "No resources found" when drilling down; use `apiGroups: ["*"], resources: ["*"]` for read-only access to all cluster resources
 37. **Keycloak defaultGroups for auto-assignment** - Use realm-level `defaultGroups: ["/viewers"]` to auto-assign groups to new users; DON'T use oidc-hardcoded-group-idp-mapper (causes issues)
+38. **agentgateway MCP server integration requires THREE components** - (1) ReferenceGrant in target namespace allowing HTTPRoutes from agentgateway-system, (2) discoveryNamespaceSelectors entry in agentgateway helmrelease.yaml.j2, (3) HTTPRoute rule in mcproute.yaml.j2. Missing any causes `RefNotPermitted` or `BackendNotFound` errors
+39. **Helm chart service names include release prefix** - flux-operator-mcp chart creates service `flux-mcp-flux-operator-mcp` (not `flux-mcp`); always verify with `kubectl get svc -n <namespace>` before configuring ReferenceGrants and HTTPRoutes
 
 ## Extended Documentation
 

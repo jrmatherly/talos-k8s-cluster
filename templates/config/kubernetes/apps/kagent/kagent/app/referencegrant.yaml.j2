@@ -16,8 +16,8 @@ spec:
       kind: HTTPRoute
       namespace: agentgateway-system
   to:
-    #| Grant access to kagent service #|
+    #| Grant access to kagent-ui service (Helm chart creates kagent-ui) #|
     - group: ""
       kind: Service
-      name: kagent
+      name: kagent-ui
 #% endif %#

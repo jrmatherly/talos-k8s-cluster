@@ -108,7 +108,8 @@ spec:
             type: PathPrefix
             value: /mcp/obot
       backendRefs:
-        - name: obot
+        #| Service name from obot Helm chart: <release>-obot #|
+        - name: obot-obot
           namespace: obot
           kind: Service
           port: 80
@@ -119,7 +120,8 @@ spec:
             type: PathPrefix
             value: /mcp/kagent
       backendRefs:
-        - name: kagent
+        #| Service name from kagent Helm chart: kagent-ui #|
+        - name: kagent-ui
           namespace: kagent
           kind: Service
           port: 8080

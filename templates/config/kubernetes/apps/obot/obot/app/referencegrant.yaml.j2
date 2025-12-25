@@ -16,8 +16,8 @@ spec:
       kind: HTTPRoute
       namespace: agentgateway-system
   to:
-    #| Grant access to obot service #|
+    #| Grant access to obot service (Helm chart creates <release>-obot) #|
     - group: ""
       kind: Service
-      name: obot
+      name: obot-obot
 #% endif %#
