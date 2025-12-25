@@ -1,0 +1,23 @@
+#% if flux_mcp_enabled | default(false) and agentgateway_enabled | default(false) %#
+---
+#| ============================================================ #|
+#| ReferenceGrant: Allow agentgateway to access flux-mcp        #|
+#| Required for HTTPRoutes in agentgateway-system to reference  #|
+#| the flux-mcp service in flux-system namespace                #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: agentgateway-flux-mcp-access
+spec:
+  from:
+    #| Allow HTTPRoute from agentgateway-system namespace #|
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: agentgateway-system
+  to:
+    #| Grant access to flux-mcp service #|
+    - group: ""
+      kind: Service
+      name: flux-mcp-flux-operator-mcp
+#% endif %#

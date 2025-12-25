@@ -12,3 +12,4 @@ resources:
   - ./postgresql.yaml
   - ./otel-collector.yaml
   - ./vmservicescrape.yaml
+  - ./referencegrant.yaml

@@ -20,4 +20,7 @@ resources:
 #% if observability_enabled %#
   - podmonitor.yaml
 #% endif %#
+#% if agentgateway_enabled | default(false) %#
+  - referencegrant.yaml
+#% endif %#
 #% endif %#

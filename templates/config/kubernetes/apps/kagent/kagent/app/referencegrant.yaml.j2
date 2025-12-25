@@ -1,0 +1,23 @@
+#% if kagent_enabled | default(false) and agentgateway_enabled | default(false) %#
+---
+#| ============================================================ #|
+#| ReferenceGrant: Allow agentgateway to access kagent          #|
+#| Required for HTTPRoutes in agentgateway-system to reference  #|
+#| the kagent service in kagent namespace                       #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: agentgateway-kagent-access
+spec:
+  from:
+    #| Allow HTTPRoute from agentgateway-system namespace #|
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: agentgateway-system
+  to:
+    #| Grant access to kagent service #|
+    - group: ""
+      kind: Service
+      name: kagent
+#% endif %#

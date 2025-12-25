@@ -1,0 +1,23 @@
+#% if obot_enabled | default(false) and agentgateway_enabled | default(false) %#
+---
+#| ============================================================ #|
+#| ReferenceGrant: Allow agentgateway to access obot            #|
+#| Required for HTTPRoutes in agentgateway-system to reference  #|
+#| the obot service in obot namespace                           #|
+#| ============================================================ #|
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: agentgateway-obot-access
+spec:
+  from:
+    #| Allow HTTPRoute from agentgateway-system namespace #|
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: agentgateway-system
+  to:
+    #| Grant access to obot service #|
+    - group: ""
+      kind: Service
+      name: obot
+#% endif %#

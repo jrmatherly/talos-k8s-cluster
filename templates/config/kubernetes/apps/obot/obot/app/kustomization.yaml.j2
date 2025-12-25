@@ -15,4 +15,7 @@ resources:
   - ./otel-collector.yaml
   - ./vmservicescrape.yaml
 #% endif %#
+#% if agentgateway_enabled | default(false) %#
+  - ./referencegrant.yaml
+#% endif %#
 #% endif %#

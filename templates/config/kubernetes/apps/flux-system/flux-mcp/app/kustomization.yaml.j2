@@ -6,4 +6,7 @@ resources:
   - ./ocirepository.yaml
   - ./helmrelease.yaml
   - ./networkpolicy.yaml
+#% if agentgateway_enabled | default(false) %#
+  - ./referencegrant.yaml
+#% endif %#
 #% endif %#
