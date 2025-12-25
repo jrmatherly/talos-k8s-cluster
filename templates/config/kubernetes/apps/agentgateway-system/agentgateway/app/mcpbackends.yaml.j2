@@ -1,0 +1,140 @@
+#% if agentgateway_enabled | default(true) %#
+#| ============================================================ #|
+#| AgentgatewayBackend Resources with Inline MCP Authentication  #|
+#| Enables full MCP OAuth flow (RFC 9728):                       #|
+#| - WWW-Authenticate header with resource_metadata              #|
+#| - .well-known/oauth-protected-resource endpoint               #|
+#| ============================================================ #|
+#% if flux_mcp_enabled | default(false) %#
+---
+#| Flux MCP Backend - Uses Streamable HTTP (modern MCP transport) #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: flux-mcp
+spec:
+  mcp:
+    targets:
+      - name: flux
+        static:
+          host: flux-mcp-flux-operator-mcp.flux-system.svc.cluster.local
+          port: #{ flux_mcp_port | default(9090) }#
+          path: /mcp
+          protocol: StreamableHTTP
+          policies:
+            mcp:
+              authentication:
+                issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+                audiences:
+                  - "https://mcp-gw.#{ primary_domain }#/mcp"
+                  - "https://ai-gw.#{ primary_domain }#/mcp"
+                provider: Keycloak
+                mode: Strict
+                jwks:
+                  backendRef:
+                    name: keycloak-http
+                    namespace: keycloak
+                    port: 8080
+                  jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+                  cacheDuration: 5m
+                resourceMetadata:
+                  default:
+                    resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+                    authorizationServers:
+                      - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+                    scopesSupported:
+                      #% for scope in agentgateway_scopes | default(['openid', 'profile', 'email', 'mcp:tools', 'offline_access']) %#
+                      - "#{ scope }#"
+                      #% endfor %#
+                    bearerMethodsSupported:
+                      - header
+#% endif %#
+#% if obot_enabled | default(false) %#
+---
+#| Obot MCP Backend - Uses SSE protocol #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: obot-mcp
+spec:
+  mcp:
+    targets:
+      - name: obot
+        static:
+          host: obot-obot.obot.svc.cluster.local
+          port: 80
+          path: /mcp/obot
+          protocol: SSE
+          policies:
+            mcp:
+              authentication:
+                issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+                audiences:
+                  - "https://mcp-gw.#{ primary_domain }#/mcp"
+                  - "https://ai-gw.#{ primary_domain }#/mcp"
+                provider: Keycloak
+                mode: Strict
+                jwks:
+                  backendRef:
+                    name: keycloak-http
+                    namespace: keycloak
+                    port: 8080
+                  jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+                  cacheDuration: 5m
+                resourceMetadata:
+                  default:
+                    resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+                    authorizationServers:
+                      - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+                    scopesSupported:
+                      #% for scope in agentgateway_scopes | default(['openid', 'profile', 'email', 'mcp:tools', 'offline_access']) %#
+                      - "#{ scope }#"
+                      #% endfor %#
+                    bearerMethodsSupported:
+                      - header
+#% endif %#
+#% if kagent_enabled | default(false) %#
+---
+#| Kagent MCP Backend - Uses SSE protocol #|
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: kagent-mcp
+spec:
+  mcp:
+    targets:
+      - name: kagent
+        static:
+          host: kagent-ui.kagent.svc.cluster.local
+          port: 8080
+          path: /mcp/kagent
+          protocol: SSE
+          policies:
+            mcp:
+              authentication:
+                issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+                audiences:
+                  - "https://mcp-gw.#{ primary_domain }#/mcp"
+                  - "https://ai-gw.#{ primary_domain }#/mcp"
+                provider: Keycloak
+                mode: Strict
+                jwks:
+                  backendRef:
+                    name: keycloak-http
+                    namespace: keycloak
+                    port: 8080
+                  jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+                  cacheDuration: 5m
+                resourceMetadata:
+                  default:
+                    resource: "https://mcp-gw.#{ primary_domain }#/mcp"
+                    authorizationServers:
+                      - "https://auth.#{ primary_domain }#/realms/k8s-cluster"
+                    scopesSupported:
+                      #% for scope in agentgateway_scopes | default(['openid', 'profile', 'email', 'mcp:tools', 'offline_access']) %#
+                      - "#{ scope }#"
+                      #% endfor %#
+                    bearerMethodsSupported:
+                      - header
+#% endif %#
+#% endif %#

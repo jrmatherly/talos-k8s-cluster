@@ -1,0 +1,126 @@
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: flux-mcp
+spec:
+  mcp:
+    targets:
+      - name: flux
+        static:
+          host: flux-mcp-flux-operator-mcp.flux-system.svc.cluster.local
+          port: 9090
+          path: /mcp
+          protocol: StreamableHTTP
+          policies:
+            mcp:
+              authentication:
+                issuer: "https://auth.matherly.net/realms/k8s-cluster"
+                audiences:
+                  - "https://mcp-gw.matherly.net/mcp"
+                  - "https://ai-gw.matherly.net/mcp"
+                provider: Keycloak
+                mode: Strict
+                jwks:
+                  backendRef:
+                    name: keycloak-http
+                    namespace: keycloak
+                    port: 8080
+                  jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+                  cacheDuration: 5m
+                resourceMetadata:
+                  default:
+                    resource: "https://mcp-gw.matherly.net/mcp"
+                    authorizationServers:
+                      - "https://auth.matherly.net/realms/k8s-cluster"
+                    scopesSupported:
+                      - "openid"
+                      - "profile"
+                      - "email"
+                      - "offline_access"
+                    bearerMethodsSupported:
+                      - header
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: obot-mcp
+spec:
+  mcp:
+    targets:
+      - name: obot
+        static:
+          host: obot-obot.obot.svc.cluster.local
+          port: 80
+          path: /mcp/obot
+          protocol: SSE
+          policies:
+            mcp:
+              authentication:
+                issuer: "https://auth.matherly.net/realms/k8s-cluster"
+                audiences:
+                  - "https://mcp-gw.matherly.net/mcp"
+                  - "https://ai-gw.matherly.net/mcp"
+                provider: Keycloak
+                mode: Strict
+                jwks:
+                  backendRef:
+                    name: keycloak-http
+                    namespace: keycloak
+                    port: 8080
+                  jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+                  cacheDuration: 5m
+                resourceMetadata:
+                  default:
+                    resource: "https://mcp-gw.matherly.net/mcp"
+                    authorizationServers:
+                      - "https://auth.matherly.net/realms/k8s-cluster"
+                    scopesSupported:
+                      - "openid"
+                      - "profile"
+                      - "email"
+                      - "offline_access"
+                    bearerMethodsSupported:
+                      - header
+---
+apiVersion: agentgateway.dev/v1alpha1
+kind: AgentgatewayBackend
+metadata:
+  name: kagent-mcp
+spec:
+  mcp:
+    targets:
+      - name: kagent
+        static:
+          host: kagent-ui.kagent.svc.cluster.local
+          port: 8080
+          path: /mcp/kagent
+          protocol: SSE
+          policies:
+            mcp:
+              authentication:
+                issuer: "https://auth.matherly.net/realms/k8s-cluster"
+                audiences:
+                  - "https://mcp-gw.matherly.net/mcp"
+                  - "https://ai-gw.matherly.net/mcp"
+                provider: Keycloak
+                mode: Strict
+                jwks:
+                  backendRef:
+                    name: keycloak-http
+                    namespace: keycloak
+                    port: 8080
+                  jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+                  cacheDuration: 5m
+                resourceMetadata:
+                  default:
+                    resource: "https://mcp-gw.matherly.net/mcp"
+                    authorizationServers:
+                      - "https://auth.matherly.net/realms/k8s-cluster"
+                    scopesSupported:
+                      - "openid"
+                      - "profile"
+                      - "email"
+                      - "offline_access"
+                    bearerMethodsSupported:
+                      - header

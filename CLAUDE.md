@@ -331,6 +331,7 @@ For detailed component documentation, see:
 - `docs/ai-context/flux-web-ui.md` - Flux Web UI with OAuth2/OIDC (CEL impersonation, gateway routing, NetworkPolicy patterns)
 - `docs/ai-context/kgateway.md` - kgateway controller (Gateway API, Envoy data plane, OIDC, traffic policies)
 - `docs/ai-context/agentgateway-mcp.md` - agentgateway unified AI Gateway (LLM routing, MCP OAuth, RBAC, FinOps)
+- `docs/ai-context/mcp-oauth-implementation.md` - MCP OAuth implementation guide (AgentgatewayBackend, RFC 9728, WWW-Authenticate)
 - `docs/ai-context/litellm.md` - LiteLLM proxy (multi-provider routing, credential management, Prometheus metrics)
 - `docs/ai-context/cognee-deployment.md` - Cognee Graph RAG deployment (Neo4j + pgvector, migration workarounds, known issues)
 - `docs/ai-context/cilium-networkpolicy.md` - CiliumNetworkPolicy patterns for K8s API access

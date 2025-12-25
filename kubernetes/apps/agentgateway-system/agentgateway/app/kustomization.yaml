@@ -7,3 +7,4 @@ resources:
   - gateway.yaml
   - networkpolicy.yaml
   - mcproute.yaml
+  - mcpbackends.yaml

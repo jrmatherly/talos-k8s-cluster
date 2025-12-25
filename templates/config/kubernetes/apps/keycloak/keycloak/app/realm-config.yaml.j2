@@ -162,6 +162,18 @@ data:
                 "id.token.claim": "true",
                 "access.token.claim": "true"
               }
+            },
+            {
+              "name": "ai-gateway-audience",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-audience-mapper",
+              "consentRequired": false,
+              "config": {
+                "included.client.audience": "",
+                "included.custom.audience": "https://ai-gw.#{primary_domain}#/mcp",
+                "id.token.claim": "true",
+                "access.token.claim": "true"
+              }
             }
           ],
           "attributes": {
@@ -408,6 +420,18 @@ data:
               "config": {
                 "included.client.audience": "",
                 "included.custom.audience": "https://mcp-gw.#{primary_domain}#/mcp",
+                "id.token.claim": "true",
+                "access.token.claim": "true"
+              }
+            },
+            {
+              "name": "ai-gateway-audience",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-audience-mapper",
+              "consentRequired": false,
+              "config": {
+                "included.client.audience": "",
+                "included.custom.audience": "https://ai-gw.#{primary_domain}#/mcp",
                 "id.token.claim": "true",
                 "access.token.claim": "true"
               }

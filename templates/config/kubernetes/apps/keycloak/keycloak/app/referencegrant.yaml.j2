@@ -19,6 +19,10 @@ spec:
     - group: agentgateway.dev
       kind: AgentgatewayPolicy
       namespace: network
+    #| Allow AgentgatewayBackend from agentgateway-system for JWKS backendRef #|
+    - group: agentgateway.dev
+      kind: AgentgatewayBackend
+      namespace: agentgateway-system
     #| Allow HTTPRoute from agentgateway-system namespace #|
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
