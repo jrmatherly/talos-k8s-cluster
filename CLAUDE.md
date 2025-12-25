@@ -318,6 +318,9 @@ When adding new application templates to this project, multiple files must be up
 32. **flux-operator Helm chart uses commonLabels** - The flux-operator chart doesn't support `podLabels`; use `commonLabels` to add labels like `network.cilium.io/api-access: "true"` to pods for CCNP policy matching
 33. **OAuth flows route through gateway proxies** - OIDC token validation (e.g., `auth.domain`) resolves to external/internal gateway LoadBalancer IPs, not directly to Keycloak pods; CiliumNetworkPolicy egress must target gateway-proxy pods in network namespace, not Keycloak pods
 34. **CEL expressions need has() for optional claims** - OIDC impersonation CEL expressions like `claims.groups` fail if the claim doesn't exist; use `has(claims.groups) ? claims.groups : []` for safe handling of optional JWT claims
+35. **Flux Web UI has built-in OAuth2** - DON'T use gateway-level OAuth2; it conflicts with Flux's internal OAuth (PKCE state mismatch). Create TrafficPolicy with `extAuth.disable: {}` targeting flux-web HTTPRoute to disable gateway OAuth (NOT `oauth2: {}` which requires extensionRef)
+36. **Flux Web UI RBAC needs ALL resources** - ClusterRole with only Flux apiGroups shows dashboard counts but "No resources found" when drilling down; use `apiGroups: ["*"], resources: ["*"]` for read-only access to all cluster resources
+37. **Keycloak defaultGroups for auto-assignment** - Use realm-level `defaultGroups: ["/viewers"]` to auto-assign groups to new users; DON'T use oidc-hardcoded-group-idp-mapper (causes issues)
 
 ## Extended Documentation
 
