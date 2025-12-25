@@ -51,3 +51,5 @@ spec:
           kubernetes.io/metadata.name: obot
       - matchLabels:
           kubernetes.io/metadata.name: network
+      - matchLabels:
+          kubernetes.io/metadata.name: flux-system
