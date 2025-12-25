@@ -4,36 +4,46 @@ kind: HelmRelease
 metadata:
   name: flux-mcp
 spec:
+  serviceAccountName: flux-operator
   chartRef:
     kind: OCIRepository
     name: flux-mcp
-  interval: 1h
+  interval: 30m
   timeout: 10m
   values:
     # ============================================================
-    # Server Configuration
+    # Server Configuration (top-level per chart schema)
     # ============================================================
-    server:
-      # Transport mode: sse (Server-Sent Events) or http (Streamable HTTP)
-      transport: sse
-      # Port for the MCP server
-      port: 9090
-      # Read-only mode disables modification operations (reconcile, suspend, resume, apply, delete)
-      readOnly: True
-      # Mask sensitive values in Kubernetes Secrets
-      maskSecrets: True
+    # Transport mode: sse (Server-Sent Events) or http (Streamable HTTP)
+    transport: http
+    # Read-only mode disables modification operations
+    readonly: True
 
     # ============================================================
-    # Replicas
+    # NetworkPolicy (built-in chart feature)
     # ============================================================
-    replicaCount: 1
+    networkPolicy:
+      ingress:
+        namespaces:
+          - flux-system
+          - agentgateway-system
+          - network
+
+    # ============================================================
+    # Pod Labels for CiliumNetworkPolicy matching
+    # ============================================================
+    podLabels:
+      app.kubernetes.io/name: flux-mcp
+      app.kubernetes.io/component: mcp-server
+      # Label for AgentGateway dynamic MCP backend discovery
+      agentgateway.dev/mcp: "true"
+      # Label for CiliumClusterwideNetworkPolicy tiered policy matching
+      network.cilium.io/api-access: "true"
 
     # ============================================================
     # Service Configuration
     # ============================================================
     service:
-      type: ClusterIP
-      port: 9090
       # Labels for AgentGateway dynamic MCP backend discovery
       labels:
         agentgateway.dev/mcp: "true"
@@ -48,61 +58,3 @@ spec:
       limits:
         cpu: 500m
         memory: 256Mi
-
-    # ============================================================
-    # Security Context
-    # ============================================================
-    securityContext:
-      allowPrivilegeEscalation: false
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 65534
-      capabilities:
-        drop:
-          - ALL
-      seccompProfile:
-        type: RuntimeDefault
-
-    podSecurityContext:
-      fsGroup: 65534
-
-    # ============================================================
-    # Service Account and RBAC
-    # The Helm chart creates its own ServiceAccount and RBAC
-    # ============================================================
-    serviceAccount:
-      create: true
-      name: flux-mcp
-
-    # Use cluster-reader role for read-only access
-    # If readOnly is false, the chart uses cluster-admin equivalent
-    rbac:
-      create: true
-
-    # ============================================================
-    # Pod Labels for NetworkPolicy
-    # ============================================================
-    podLabels:
-      app.kubernetes.io/name: flux-mcp
-      app.kubernetes.io/component: mcp-server
-      # Label for CiliumClusterwideNetworkPolicy tiered policy matching
-      network.cilium.io/api-access: "true"
-
-    # ============================================================
-    # Health Probes
-    # ============================================================
-    livenessProbe:
-      httpGet:
-        path: /healthz
-        port: 9090
-      initialDelaySeconds: 10
-      periodSeconds: 15
-      failureThreshold: 3
-
-    readinessProbe:
-      httpGet:
-        path: /healthz
-        port: 9090
-      initialDelaySeconds: 5
-      periodSeconds: 10
-      failureThreshold: 3

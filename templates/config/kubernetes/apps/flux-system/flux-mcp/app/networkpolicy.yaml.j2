@@ -3,6 +3,7 @@
 #| CiliumNetworkPolicy for flux-mcp egress permissions #|
 #| IMPORTANT: CNP with egress rules creates implicit default-deny for other egress! #|
 #| Must include ALL required egress destinations when using CNP egress rules. #|
+#| NOTE: Ingress is handled by the chart's built-in networkPolicy values. #|
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -11,7 +12,7 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: flux-mcp
+      app.kubernetes.io/name: flux-operator-mcp
   egress:
     #| Allow egress to Kubernetes API server (required for MCP operations) #|
     - toEntities:
@@ -31,41 +32,4 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
----
-#| NetworkPolicy for flux-mcp ingress #|
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: flux-mcp-ingress
-  namespace: flux-system
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: flux-mcp
-  policyTypes:
-    - Ingress
-  ingress:
-    #| Allow from AgentGateway namespace (MCP requests via agentgateway) #|
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agentgateway-system
-      ports:
-        - protocol: TCP
-          port: #{ flux_mcp_port | default(9090) }#
-    #| Allow from network namespace (if routing through kgateway) #|
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: network
-      ports:
-        - protocol: TCP
-          port: #{ flux_mcp_port | default(9090) }#
-    #| Allow kubelet health probes from node network #|
-    - from:
-        - ipBlock:
-            cidr: #{ node_cidr }#
-      ports:
-        - protocol: TCP
-          port: #{ flux_mcp_port | default(9090) }#
 #% endif %#

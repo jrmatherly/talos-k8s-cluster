@@ -611,8 +611,8 @@ class Plugin(makejinja.plugin.Plugin):
 
         # Flux MCP Server defaults
         data.setdefault("flux_mcp_enabled", False)
-        data.setdefault("flux_mcp_version", "v0.17.0")
-        data.setdefault("flux_mcp_transport", "sse")
+        data.setdefault("flux_mcp_version", "*")
+        data.setdefault("flux_mcp_transport", "http")
         data.setdefault("flux_mcp_port", 9090)
         data.setdefault("flux_mcp_read_only", True)
         data.setdefault("flux_mcp_mask_secrets", True)

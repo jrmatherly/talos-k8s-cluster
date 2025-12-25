@@ -7,7 +7,7 @@ metadata:
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/name: flux-mcp
+      app.kubernetes.io/name: flux-operator-mcp
   egress:
     - toEntities:
         - kube-apiserver
@@ -25,36 +25,3 @@ spec:
               protocol: UDP
             - port: "53"
               protocol: TCP
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: flux-mcp-ingress
-  namespace: flux-system
-spec:
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: flux-mcp
-  policyTypes:
-    - Ingress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agentgateway-system
-      ports:
-        - protocol: TCP
-          port: 9090
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: network
-      ports:
-        - protocol: TCP
-          port: 9090
-    - from:
-        - ipBlock:
-            cidr: 192.168.20.0/22
-      ports:
-        - protocol: TCP
-          port: 9090

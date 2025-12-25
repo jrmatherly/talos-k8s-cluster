@@ -435,8 +435,8 @@ import (
 
 	// Flux MCP Server Configuration (optional - Model Context Protocol server for Flux operations)
 	flux_mcp_enabled?: bool                               // Enable Flux MCP Server (default: false)
-	flux_mcp_version?: string & !=""                      // Helm chart version (default: v0.17.0)
-	flux_mcp_transport?: "sse" | "http"                   // Transport mode: sse or http (default: sse)
+	flux_mcp_version?: string & !=""                      // Helm chart semver (default: * = latest)
+	flux_mcp_transport?: "sse" | "http"                   // Transport mode: http or sse (default: http)
 	flux_mcp_port?: int & >=1 & <=65535                   // Server port (default: 9090)
 	flux_mcp_read_only?: bool                             // Read-only mode (default: true)
 	flux_mcp_mask_secrets?: bool                          // Mask sensitive values in Secrets (default: true)

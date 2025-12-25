@@ -802,14 +802,15 @@ cloudflare_token: ""
 #    Deploys the flux-operator-mcp Helm chart in flux-system namespace.
 # flux_mcp_enabled: true
 
-# -- Flux MCP Helm chart version.
-#    (OPTIONAL) / (DEFAULT: "v0.17.0")
-# flux_mcp_version: "v0.17.0"
+# -- Flux MCP Helm chart version (semver selector).
+#    (OPTIONAL) / (DEFAULT: "*" - latest)
+#    Uses semver selector, not tag. Examples: "*", ">=0.15.0", "0.16.x"
+# flux_mcp_version: "*"
 
 # -- Transport mode for MCP protocol.
-#    (OPTIONAL) / (DEFAULT: "sse")
-#    Options: "sse" (Server-Sent Events) or "http" (Streamable HTTP)
-# flux_mcp_transport: "sse"
+#    (OPTIONAL) / (DEFAULT: "http")
+#    Options: "http" (Streamable HTTP) or "sse" (legacy Server-Sent Events)
+# flux_mcp_transport: "http"
 
 # -- MCP server port.
 #    (OPTIONAL) / (DEFAULT: 9090)
