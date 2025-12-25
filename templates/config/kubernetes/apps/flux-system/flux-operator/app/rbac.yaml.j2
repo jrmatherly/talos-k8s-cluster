@@ -1,66 +1,28 @@
 #% if flux_web_enabled | default(false) and flux_web_oauth2_enabled | default(true) %#
 ---
-#| ClusterRole for Flux administrators (full read access to all Flux resources) #|
+#| ClusterRole for Flux Web UI - read-only access to all cluster resources #|
+#| Per docs: https://fluxoperator.dev/docs/web-ui/user-management/ #|
+#| The Web UI is strictly read-only and needs access to all resources #|
+#| to display workloads, events, and related Kubernetes objects #|
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: flux-admin
+  name: flux-web-view
 rules:
-  - apiGroups: ["source.toolkit.fluxcd.io"]
-    resources: ["*"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
-    resources: ["*"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["helm.toolkit.fluxcd.io"]
-    resources: ["*"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["notification.toolkit.fluxcd.io"]
-    resources: ["*"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["image.toolkit.fluxcd.io"]
-    resources: ["*"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["fluxcd.controlplane.io"]
+  - apiGroups: ["*"]
     resources: ["*"]
     verbs: ["get", "list", "watch"]
 ---
-#| ClusterRole for read-only viewers (limited Flux resources) #|
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: flux-viewer
-rules:
-  - apiGroups: ["source.toolkit.fluxcd.io"]
-    resources: ["gitrepositories", "ocirepositories", "helmrepositories", "helmcharts", "buckets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["kustomize.toolkit.fluxcd.io"]
-    resources: ["kustomizations"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["helm.toolkit.fluxcd.io"]
-    resources: ["helmreleases"]
-    verbs: ["get", "list", "watch"]
----
-#| ClusterRoleBinding for Keycloak cluster-admins group #|
+#| ClusterRoleBinding for all authenticated Flux Web UI users #|
+#| cluster-admins, developers, and viewers all get read-only access #|
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: flux-admin-binding
+  name: flux-web-view-binding
 subjects:
   - kind: Group
     name: cluster-admins
     apiGroup: rbac.authorization.k8s.io
-roleRef:
-  kind: ClusterRole
-  name: flux-admin
-  apiGroup: rbac.authorization.k8s.io
----
-#| ClusterRoleBinding for Keycloak developers and viewers groups #|
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: flux-viewer-binding
-subjects:
   - kind: Group
     name: developers
     apiGroup: rbac.authorization.k8s.io
@@ -69,6 +31,6 @@ subjects:
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: flux-viewer
+  name: flux-web-view
   apiGroup: rbac.authorization.k8s.io
 #% endif %#
