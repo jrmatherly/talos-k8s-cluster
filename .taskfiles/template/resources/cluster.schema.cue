@@ -432,6 +432,20 @@ import (
 	flux_web_session_duration?: string & !=""             // Session timeout (default: 168h)
 	flux_web_user_cache_size?: int & >=1                  // User cache size (default: 100)
 	keycloak_flux_web_client_secret?: string & !=""       // Keycloak client secret for flux-web (defaults to keycloak_oidc_client_secret)
+
+	// Flux MCP Server Configuration (optional - Model Context Protocol server for Flux operations)
+	flux_mcp_enabled?: bool                               // Enable Flux MCP Server (default: false)
+	flux_mcp_version?: string & !=""                      // Helm chart version (default: v0.17.0)
+	flux_mcp_transport?: "sse" | "http"                   // Transport mode: sse or http (default: sse)
+	flux_mcp_port?: int & >=1 & <=65535                   // Server port (default: 9090)
+	flux_mcp_read_only?: bool                             // Read-only mode (default: true)
+	flux_mcp_mask_secrets?: bool                          // Mask sensitive values in Secrets (default: true)
+	flux_mcp_impersonate_sa?: string & !=""               // Service account for impersonation (optional)
+	flux_mcp_replicas?: int & >=1                         // Number of replicas (default: 1)
+	flux_mcp_cpu_request?: string & !=""                  // CPU request (default: 50m)
+	flux_mcp_memory_request?: string & !=""               // Memory request (default: 128Mi)
+	flux_mcp_cpu_limit?: string & !=""                    // CPU limit (default: 500m)
+	flux_mcp_memory_limit?: string & !=""                 // Memory limit (default: 256Mi)
 }
 
 #Config

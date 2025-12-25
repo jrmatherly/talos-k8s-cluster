@@ -104,3 +104,12 @@ spec:
           namespace: kagent
           kind: Service
           port: 8080
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/flux
+      backendRefs:
+        - name: flux-mcp
+          namespace: flux-system
+          kind: Service
+          port: 9090

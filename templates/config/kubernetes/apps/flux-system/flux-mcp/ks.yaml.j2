@@ -1,0 +1,23 @@
+#% if flux_mcp_enabled | default(false) %#
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: flux-mcp
+spec:
+  interval: 1h
+  path: ./kubernetes/apps/flux-system/flux-mcp/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: flux-system
+  dependsOn:
+    - name: flux-operator
+  wait: true
+#% endif %#

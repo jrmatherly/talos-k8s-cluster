@@ -1,0 +1,71 @@
+#% if flux_mcp_enabled | default(false) %#
+---
+#| CiliumNetworkPolicy for flux-mcp egress permissions #|
+#| IMPORTANT: CNP with egress rules creates implicit default-deny for other egress! #|
+#| Must include ALL required egress destinations when using CNP egress rules. #|
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: flux-mcp-egress
+  namespace: flux-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: flux-mcp
+  egress:
+    #| Allow egress to Kubernetes API server (required for MCP operations) #|
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+    #| Allow DNS resolution #|
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+---
+#| NetworkPolicy for flux-mcp ingress #|
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flux-mcp-ingress
+  namespace: flux-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: flux-mcp
+  policyTypes:
+    - Ingress
+  ingress:
+    #| Allow from AgentGateway namespace (MCP requests via agentgateway) #|
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agentgateway-system
+      ports:
+        - protocol: TCP
+          port: #{ flux_mcp_port | default(9090) }#
+    #| Allow from network namespace (if routing through kgateway) #|
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+      ports:
+        - protocol: TCP
+          port: #{ flux_mcp_port | default(9090) }#
+    #| Allow kubelet health probes from node network #|
+    - from:
+        - ipBlock:
+            cidr: #{ node_cidr }#
+      ports:
+        - protocol: TCP
+          port: #{ flux_mcp_port | default(9090) }#
+#% endif %#

@@ -609,6 +609,19 @@ class Plugin(makejinja.plugin.Plugin):
             data.get("keycloak_oidc_client_secret", ""),
         )
 
+        # Flux MCP Server defaults
+        data.setdefault("flux_mcp_enabled", False)
+        data.setdefault("flux_mcp_version", "v0.17.0")
+        data.setdefault("flux_mcp_transport", "sse")
+        data.setdefault("flux_mcp_port", 9090)
+        data.setdefault("flux_mcp_read_only", True)
+        data.setdefault("flux_mcp_mask_secrets", True)
+        data.setdefault("flux_mcp_replicas", 1)
+        data.setdefault("flux_mcp_cpu_request", "50m")
+        data.setdefault("flux_mcp_memory_request", "128Mi")
+        data.setdefault("flux_mcp_cpu_limit", "500m")
+        data.setdefault("flux_mcp_memory_limit", "256Mi")
+
         return data
 
     def filters(self) -> makejinja.plugin.Filters:

@@ -149,6 +149,13 @@ flux_web_enabled: true
 flux_web_hostname: "flux"
 flux_web_oauth2_enabled: true
 keycloak_flux_web_client_secret: "test-flux-web-client-secret"
+# Flux MCP Server Configuration (Model Context Protocol for Flux operations)
+flux_mcp_enabled: true
+flux_mcp_version: "v0.17.0"
+flux_mcp_transport: "sse"
+flux_mcp_port: 9090
+flux_mcp_read_only: true
+flux_mcp_mask_secrets: true
 # agentgateway Configuration (MCP 2025-11-25 OAuth Proxy)
 agentgateway_enabled: true
 agentgateway_addr: "10.10.10.147"

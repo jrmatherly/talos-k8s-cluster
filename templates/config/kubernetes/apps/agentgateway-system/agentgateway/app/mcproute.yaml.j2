@@ -124,4 +124,15 @@ spec:
           kind: Service
           port: 8080
     #% endif %#
+    #% if flux_mcp_enabled | default(false) %#
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /mcp/flux
+      backendRefs:
+        - name: flux-mcp
+          namespace: flux-system
+          kind: Service
+          port: #{ flux_mcp_port | default(9090) }#
+    #% endif %#
 #% endif %#

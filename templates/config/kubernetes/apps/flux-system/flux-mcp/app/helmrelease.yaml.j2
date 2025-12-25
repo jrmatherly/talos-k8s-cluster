@@ -1,0 +1,114 @@
+#% if flux_mcp_enabled | default(false) %#
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flux-mcp
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: flux-mcp
+  interval: 1h
+  timeout: 10m
+  values:
+    # ============================================================
+    # Server Configuration
+    # ============================================================
+    server:
+      # Transport mode: sse (Server-Sent Events) or http (Streamable HTTP)
+      transport: #{ flux_mcp_transport | default('sse') }#
+      # Port for the MCP server
+      port: #{ flux_mcp_port | default(9090) }#
+      # Read-only mode disables modification operations (reconcile, suspend, resume, apply, delete)
+      readOnly: #{ flux_mcp_read_only | default(true) }#
+      # Mask sensitive values in Kubernetes Secrets
+      maskSecrets: #{ flux_mcp_mask_secrets | default(true) }#
+#% if flux_mcp_impersonate_sa | default('') %#
+      # Service account impersonation for restricted permissions
+      kubeAs: "#{ flux_mcp_impersonate_sa }#"
+#% endif %#
+
+    # ============================================================
+    # Replicas
+    # ============================================================
+    replicaCount: #{ flux_mcp_replicas | default(1) }#
+
+    # ============================================================
+    # Service Configuration
+    # ============================================================
+    service:
+      type: ClusterIP
+      port: #{ flux_mcp_port | default(9090) }#
+      # Labels for AgentGateway dynamic MCP backend discovery
+      labels:
+        agentgateway.dev/mcp: "true"
+
+    # ============================================================
+    # Resource Limits
+    # ============================================================
+    resources:
+      requests:
+        cpu: #{ flux_mcp_cpu_request | default('50m') }#
+        memory: #{ flux_mcp_memory_request | default('128Mi') }#
+      limits:
+        cpu: #{ flux_mcp_cpu_limit | default('500m') }#
+        memory: #{ flux_mcp_memory_limit | default('256Mi') }#
+
+    # ============================================================
+    # Security Context
+    # ============================================================
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 65534
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+    podSecurityContext:
+      fsGroup: 65534
+
+    # ============================================================
+    # Service Account and RBAC
+    # The Helm chart creates its own ServiceAccount and RBAC
+    # ============================================================
+    serviceAccount:
+      create: true
+      name: flux-mcp
+
+    # Use cluster-reader role for read-only access
+    # If readOnly is false, the chart uses cluster-admin equivalent
+    rbac:
+      create: true
+
+    # ============================================================
+    # Pod Labels for NetworkPolicy
+    # ============================================================
+    podLabels:
+      app.kubernetes.io/name: flux-mcp
+      app.kubernetes.io/component: mcp-server
+      # Label for CiliumClusterwideNetworkPolicy tiered policy matching
+      network.cilium.io/api-access: "true"
+
+    # ============================================================
+    # Health Probes
+    # ============================================================
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: #{ flux_mcp_port | default(9090) }#
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 3
+
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: #{ flux_mcp_port | default(9090) }#
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 3
+#% endif %#

@@ -10,3 +10,6 @@ resources:
   - ./namespace.yaml
   - ./flux-instance/ks.yaml
   - ./flux-operator/ks.yaml
+#% if flux_mcp_enabled | default(false) %#
+  - ./flux-mcp/ks.yaml
+#% endif %#
