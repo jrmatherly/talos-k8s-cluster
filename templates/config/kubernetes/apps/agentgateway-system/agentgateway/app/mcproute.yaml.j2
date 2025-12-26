@@ -16,6 +16,8 @@ spec:
   backend:
     mcp:
       authentication:
+        #| Mode: Strict enforces JWT auth, returns 401 with WWW-Authenticate for unauthenticated requests #|
+        mode: Strict
         issuer: "https://auth.#{ primary_domain }#/realms/k8s-cluster"
         audiences:
           - "https://mcp-gw.#{ primary_domain }#/mcp"
@@ -27,6 +29,7 @@ spec:
             namespace: keycloak
             port: 8080
           jwksPath: "realms/k8s-cluster/protocol/openid-connect/certs"
+          cacheDuration: 5m
         resourceMetadata:
           default:
             resource: "https://mcp-gw.#{ primary_domain }#/mcp"
