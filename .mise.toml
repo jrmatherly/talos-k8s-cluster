@@ -7,7 +7,7 @@ helm = "3.19.4"  # Helm 4.x has breaking changes with helmfile post-renderer
 kubeconform = "0.7.0"
 
 # Talos tools
-talhelper = "3.0.43"
+talhelper = "3.0.44"
 
 # Secret management (for CI ephemeral test keys only - real keys are gitignored)
 age = "1.2.1"
