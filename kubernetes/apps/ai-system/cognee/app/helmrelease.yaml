@@ -353,7 +353,7 @@ spec:
           mcp-sidecar:
             image:
               repository: ghcr.io/jrmatherly/cognee-mcp
-              tag: "0.5.9"
+              tag: "0.5.12"
               pullPolicy: Always
 
             env:
@@ -450,7 +450,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee-mcp
-              tag: "0.5.9"
+              tag: "0.5.12"
               pullPolicy: Always
 
             env:
