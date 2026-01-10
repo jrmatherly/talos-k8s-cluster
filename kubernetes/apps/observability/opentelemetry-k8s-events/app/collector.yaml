@@ -6,7 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: opentelemetry-k8s-events
 spec:
-  image: otel/opentelemetry-collector-contrib:0.142.0
+  image: otel/opentelemetry-collector-contrib:0.143.1
   mode: deployment
   replicas: 1
   resources:
