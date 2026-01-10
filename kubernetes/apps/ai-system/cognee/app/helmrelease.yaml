@@ -289,7 +289,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jrmatherly/cognee-frontend
-              tag: "0.5.9"
+              tag: "0.5.12"
               pullPolicy: Always
 
             env:
